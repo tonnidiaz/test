@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Candlestick Chart with Chart.js</title>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.min.js"></script>
+   
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    </head>
+    <body>
+        <canvas id="candlestickChart" width="800" height="400"></canvas>
+        <script>
+            // Example data: array of objects with open, high, low, and close prices
+            const data = [
+                { t: "2023-01-01", o: 100, h: 105, l: 95, c: 102 },
+                { t: "2023-01-02", o: 102, h: 110, l: 101, c: 108 },
+                { t: "2023-01-03", o: 108, h: 115, l: 107, c: 113 },
+                // ... more data
+            ];
+
+            // Convert data to required format for Chart.js
+            const chartData = data.map((point) => ({
+                x: new Date(point.t),
+                o: point.o,
+                h: point.h,
+                l: point.l,
+                c: point.c,
+            }));
+
+            // Create the candlestick chart
+            const ctx = document
+                .getElementById("candlestickChart")
+                .getContext("2d");
+            new Chart(ctx, {
+                type: "candlestick",
+                data: {
+                    datasets: [
+                        {
+                            label: "Candlestick Chart",
+                            data: chartData,
+                        },
+                    ],
+                },
+                options: {
+                    scales: {
+                        x: {
+                            type: "time",
+                            time: {
+                                unit: "day",
+                            },
+                        },
+                    },
+                    plugins: {
+                        legend: {
+                            display: false,
+                        },
+                    },
+                },
+            });
+        </script>
+    </body>
+</html>
