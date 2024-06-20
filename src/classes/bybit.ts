@@ -73,7 +73,7 @@ export class Bybit {
                 side: capitalizeFirstLetter(side),
                 qty: amt.toString(),
                 price: price.toString(),
-                triggerPrice: price.toString(),
+                //triggerPrice: price.toString(),
                 category: this.bot.category as any,
                 timeInForce: 'GTC'
             });

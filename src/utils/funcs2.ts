@@ -103,7 +103,7 @@ export const chandelierExit = (df: IObj[], mult = .5, atrLen = 1) => {
     const rsiLen = 10;
 
     const sma20 = ema(closings, { period: 1 });
-    const sma50 = ema(closings, { period: 4 }); /* TODO: 4 */
+    const sma50 = ema(closings, { period: 3 }); /* TODO: 4 */
     const _rsi = rsi(closings, { period: rsiLen });
     let sir = 1;
 
