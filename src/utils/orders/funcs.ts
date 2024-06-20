@@ -8,7 +8,12 @@ import fs from "fs";
 import { IOrder } from "@/models/order";
 import { OKX } from "@/classes/okx";
 import { Document } from "mongoose";
-import { botLog, getCoinPrecision, getPricePrecision, toFixed } from "../functions";
+import {
+    botLog,
+    getCoinPrecision,
+    getPricePrecision,
+    toFixed,
+} from "../functions";
 import { Bybit } from "@/classes/bybit";
 import { AccountOrderV5 } from "bybit-api";
 import { OrderDetails } from "okx-api";
@@ -44,12 +49,16 @@ export const ensureDirExists = (filePath: string) => {
 
 export const updateOrder = async (bot: IBot, orders: IOrder[]) => {
     try {
-       let lastOrder: IOrder | null = orders[orders.length - 1];
-       let isClosed = lastOrder?.is_closed == true
-        const plat = bot.platform == "bybit" ? new Bybit(bot) : new OKX(bot)
+        let lastOrder: IOrder | null = orders[orders.length - 1];
+        let isClosed = lastOrder?.is_closed == true;
+        const plat = bot.platform == "bybit" ? new Bybit(bot) : new OKX(bot);
         console.log(orders.length);
 
-        if (orders.length && ( lastOrder.side == 'buy' || lastOrder.order_id.length) && !lastOrder.is_closed ) {
+        if (
+            orders.length &&
+            (lastOrder.side == "buy" || lastOrder.order_id.length) &&
+            !lastOrder.is_closed
+        ) {
             /* If last order [ currentOrder ] is not yet closed */
             isClosed = lastOrder.is_closed;
             let isSellOrder = lastOrder.order_id.length > 0;
@@ -139,7 +148,7 @@ export const updateOrder = async (bot: IBot, orders: IOrder[]) => {
                         lastOrder.buy_price = res.fillPx;
                         lastOrder.buy_fee = Math.abs(fee);
                         lastOrder.base_amt = base_amt;
-                        lastOrder.ccy_amt = res.fillSz * res.fillPx
+                        lastOrder.ccy_amt = res.fillSz * res.fillPx;
                         lastOrder.side = "sell";
                         lastOrder.buy_timestamp = ts;
                     } else {
@@ -198,7 +207,7 @@ export const updateOrder = async (bot: IBot, orders: IOrder[]) => {
             jobs[jobIndex] = {...jobs[jobIndex], active : false}
             botLog(bot, `JOB CANCELLED ${jobIndex}\t ${jobs}`) */
         }
-        return {isClosed, lastOrder};
+        return { isClosed, lastOrder };
     } catch (e) {
         console.log(e);
     }
@@ -211,7 +220,7 @@ export const placeTrade = async ({
     side,
     price,
     sl,
-    plat
+    plat,
 }: {
     bot: IBot;
     ts: string;
@@ -219,7 +228,7 @@ export const placeTrade = async ({
     side: "buy" | "sell";
     price: number;
     sl?: number;
-    plat: Bybit | OKX
+    plat: Bybit | OKX;
 }) => {
     try {
         const orders = await Order.find({
@@ -227,7 +236,6 @@ export const placeTrade = async ({
             base: bot.base,
             ccy: bot.ccy,
         }).exec();
-   
 
         if (!amt) {
             /// GET THE QUOTE BALANCE AND USE 75 IF THIS IS FIRST ORDER
@@ -252,14 +260,32 @@ export const placeTrade = async ({
             }
         }
         console.log(`[ ${bot.name} ]\tAvail amt: ${amt}\n`);
-        
+        const { order_type } = bot;
         //botLog(bot, `Placing a ${side =='sell' ? amt : amt / price} ${side} order at ${price}...`);
-        botLog(bot, `Placing a ${ amt } ${side}  order at ${price}...`);
-        price = toFixed(price, getPricePrecision([bot.base, bot.ccy], bot.platform))
-        amt = bot.order_type == 'Market' ?  amt : side == 'sell' ? amt : amt / price
-        amt = toFixed(amt, getCoinPrecision([bot.base, bot.ccy], side, bot.platform))
-        botLog(bot, `Placing a ${amt} ${side} ${bot.order_type} order at ${price}...`);
-        const orderId = await plat.placeOrder(amt, price, side, sl)
+        botLog(bot, `Placing a ${amt} ${side}  order at ${price}...`);
+        price = toFixed(
+            price,
+            getPricePrecision([bot.base, bot.ccy], bot.platform)
+        );
+        amt =
+            bot.order_type == "Market"
+                ? amt
+                : side == "sell"
+                ? amt
+                : amt / price;
+        amt = toFixed(
+            amt,
+            getCoinPrecision(
+                [bot.base, bot.ccy],
+                order_type == "Limit" ? "sell" : side,
+                bot.platform
+            )
+        );
+        botLog(
+            bot,
+            `Placing a ${amt} ${side} ${bot.order_type} order at ${price}...`
+        );
+        const orderId = await plat.placeOrder(amt, price, side, sl);
 
         if (!orderId) {
             botLog(bot, "Failed to place order");
