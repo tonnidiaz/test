@@ -5,6 +5,7 @@ import {
     TAKER_FEE_RATE,
     slPercent,
     P_DIFF,
+    minDiff,
 } from "@/utils/constants";
 import { calcEntryPrice } from "@/utils/funcs2";
 import {
@@ -115,8 +116,10 @@ export const strategy = ({
             console.log(
                 `[${row.ts} \t H: ${prevRow.h} \t E: ${entryLimit} \t L: ${prevRow.l}\n]`
             );
+
+            const delta = (entryLimit - prevRow.o)/(prevRow.c - prevRow.o)*100
             
-            if ( prevRow.l < entryLimit && entryLimit < prevRow.h) {
+            if (( prevRow.l <= entryLimit && entryLimit <= prevRow.h)) {
                 /* Fill buy order */
                 
                 entry = prevRow.h < entryLimit ? prevRow.c : entryLimit;
@@ -151,8 +154,11 @@ export const strategy = ({
                 pos = false;
             }
         } else if (exitLimit) {
-            if ((prevRow.l < exitLimit && exitLimit < prevRow.h)){// || prevRow.l > exitLimit)   {
+            const delta = 100 - ((exitLimit - prevRow.c)/(prevRow.o - prevRow.c)*100)
+            
+            if ((prevRow.l <= exitLimit && exitLimit <= prevRow.h )){// || prevRow.l > exitLimit)   {
                 /* Fill sell order */
+                console.log(`\nDELTA: ${delta}\n{o: ${prevRow.o}, c: ${prevRow.c}, p: ${exitLimit}}`);
                 exit = exitLimit//prevRow.l > exitLimit ? prevRow.c :  exitLimit;
                 console.log("FILLING SELL ORDER");
                 [balance, profit, _data] = balProfitCalc({

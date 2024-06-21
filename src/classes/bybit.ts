@@ -62,8 +62,9 @@ export class Bybit {
         amt: number,
         price: number,
         side: "buy" | "sell" = "buy",
-        sl?: number
+        sl: number
     ) {
+        
         const od = { price, sl, amt, side };
         botLog(this.bot, `PLACING ORDER: ${JSON.stringify(od)}`);
         try {
@@ -73,9 +74,10 @@ export class Bybit {
                 side: capitalizeFirstLetter(side),
                 qty: amt.toString(),
                 price: price.toString(),
-                triggerPrice: price.toString(),
                 category: this.bot.category as any,
-                timeInForce: 'GTC'
+                timeInForce: 'GTC',
+                triggerPrice: sl.toString(), orderFilter: 'StopOrder'
+                
             });
             if (res.retCode != 0) {
                 console.log(res);

@@ -219,7 +219,6 @@ export const placeTrade = async ({
     amt,
     side,
     price,
-    sl,
     plat,
 }: {
     bot: IBot;
@@ -227,7 +226,6 @@ export const placeTrade = async ({
     amt?: number;
     side: "buy" | "sell";
     price: number;
-    sl?: number;
     plat: Bybit | OKX;
 }) => {
     try {
@@ -259,13 +257,15 @@ export const placeTrade = async ({
                 amt = lastOrder.base_amt - lastOrder.buy_fee;
             }
         }
+        const pxPr = getPricePrecision([bot.base, bot.ccy], bot.platform) /* Price precision */
         console.log(`[ ${bot.name} ]\tAvail amt: ${amt}\n`);
         const { order_type } = bot;
         //botLog(bot, `Placing a ${side =='sell' ? amt : amt / price} ${side} order at ${price}...`);
         botLog(bot, `Placing a ${amt} ${side}  order at ${price}...`);
+        const sl = toFixed(price * (1 + ((side == 'sell' ? -.05/100 : .05/100))), pxPr)
         price = toFixed(
             price,
-            getPricePrecision([bot.base, bot.ccy], bot.platform)
+            pxPr
         );
         amt =
             bot.order_type == "Market"
