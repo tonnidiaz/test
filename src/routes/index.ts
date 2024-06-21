@@ -59,7 +59,7 @@ router.get("/test", async (req, res) => {
 
     const r =
         q == "place"
-            ? await plat.placeOrder(sz, px, side, sl)
+            ? await plat.placeOrder(sz, px, side as any, sl)
             : await plat.getOrderbyId((id as any) ?? oid, false); //placeOrder(43.415972599999996, undefined, "sell")
     console.log(r);
     res.json({});
