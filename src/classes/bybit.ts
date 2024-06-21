@@ -64,20 +64,21 @@ export class Bybit {
         side: "buy" | "sell" = "buy",
         sl: number
     ) {
-        
         const od = { price, sl, amt, side };
         botLog(this.bot, `PLACING ORDER: ${JSON.stringify(od)}`);
         try {
+            const { order_type } = this.bot;
             const res = await this.client.submitOrder({
                 symbol: this.getSymbol(),
-                orderType: this.bot.order_type,
+                orderType: order_type,
                 side: capitalizeFirstLetter(side),
                 qty: amt.toString(),
                 price: price.toString(),
                 category: this.bot.category as any,
-                timeInForce: 'GTC',
-                triggerPrice: sl.toString(), orderFilter: 'StopOrder'
-                
+                timeInForce: "GTC",
+                triggerPrice:
+                    order_type == "Market" ? undefined : sl.toString(),
+                orderFilter: order_type == "Market" ? undefined : "StopOrder",
             });
             if (res.retCode != 0) {
                 console.log(res);
@@ -99,8 +100,8 @@ export class Bybit {
                 fillSz: number;
                 fillPx: number;
                 fee: number;
-            } | null = null
-            botLog(this.bot, 'GETTING ORDER...')
+            } | null = null;
+            botLog(this.bot, "GETTING ORDER...");
             const res = await this.client.getActiveOrders({
                 symbol: this.getSymbol(),
                 category: this.bot.category as any,
@@ -111,34 +112,34 @@ export class Bybit {
                 console.log(res);
                 return;
             }
-            const {list } = res.result
-            
-            if (!list[0]){
+            const { list } = res.result;
+
+            if (!list[0]) {
                 console.log(res);
-                botLog(this.bot, 'ORDER NOT FOUND')
-                return
+                botLog(this.bot, "ORDER NOT FOUND");
+                return;
             }
-             const d = list[0]
-          
+            const d = list[0];
+
             if (DEV) console.log(d);
-            if (list[0].orderStatus != 'Filled') {
-                botLog(this.bot, '[Bybit class] Order not yet filled')
-                return 'live'
+            if (list[0].orderStatus != "Filled") {
+                botLog(this.bot, "[Bybit class] Order not yet filled");
+                return "live";
             }
-           
+
             data = {
                 id: d.orderId,
                 fillTime: Number(d.updatedTime),
                 fillSz: Number(d.cumExecQty),
                 fillPx: Number(d.avgPrice),
                 fee: Number(d.cumExecFee),
-            }
-            return  data
+            };
+            return data;
         } catch (error) {
             console.log(error);
         }
     }
-    
+
     async getKlines({
         start,
         end,
@@ -209,7 +210,7 @@ export class Bybit {
             const res = await this.client.cancelOrder({
                 orderId: ordId,
                 symbol: this.getSymbol(),
-                category: this.bot.category as any
+                category: this.bot.category as any,
             });
             if (res.retCode != 0) {
                 botLog(this.bot, "FAILED TO CANCEL ORDER");
