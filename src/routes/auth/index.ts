@@ -93,13 +93,9 @@ router.post("/signup", async (req, res) => {
             user.email
         );
 
-
-        // const smsRes = await sendSMS(number, `Tukoffee - your code is: ${otp}`)
-        //console.log(smsRes.data)
         if (importantEmails.indexOf(user.email) != -1)
             user.permissions = UserPermissions.delete;
 
-        console.log(user.password);
         await user.save();
         res.json({ msg: "OTP Generated" });
     } catch (e) {
@@ -112,9 +108,7 @@ router.post("/login", lightAuthMid, async (req: Request, res, next) => {
     try {
         const { username, password } = req.body;
         if (req.user && !password) {
-            //Loging in with token
-
-            res.json({ user: { ...(await req.user).toJSON() } });
+            res.json({ user: { ...(req.user).toJSON() } });
             return;
         } else if (username && password) {
             const q = isEmail(username) ? { email: username } : { username };

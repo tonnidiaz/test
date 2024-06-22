@@ -143,7 +143,7 @@ export const strategy = ({
                 //entryLimit = null;
                 pos = true;
                 entryLimit = null;
-            } else if (sellCond(prevRow, entryLimit, df, i - 1)) {
+            } else{//} if (sellCond(prevRow, entryLimit, df, i - 1)) {
                 console.log(`${row.ts} \t CANCELLING BUY ORDER`);
                 mData["data"][prevRow.ts] = {
                     side: `buy \t {h:${prevRow.h}, l: ${prevRow.l}}`,
@@ -179,7 +179,7 @@ export const strategy = ({
                 pos = false;
                 cnt += 1;
                 exitLimit = null;
-            } else if (buyCond(prevRow, df, i - 1)) {
+            } else{//} if (buyCond(prevRow, df, i - 1)) {
                 console.log(`${row.ts} \t CANCELLING SELL ORDER`);
                 mData["data"][prevRow.ts] = {
                     side: `sell \t {h:${prevRow.h}, l: ${prevRow.l}}`,

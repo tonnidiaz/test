@@ -21,7 +21,7 @@ router.get("/", async (req, res) => {
         const bots = user
             ? await Bot.find({ user: user.id }).exec()
             : await Bot.find().exec();
-        res.json(bots.map((e) => e.toJSON()));
+        res.json(bots.map((e) => e.toJSON()).reverse());
     } catch (error) {
         return tunedErr(res, 500, "Failed to get bots");
     }
@@ -41,8 +41,6 @@ router.post("/create", authMid, async (req, res) => {
         await bot.save();
         user.bots.push(bot.id);
         await user.save();
-
-        // TODO: Schedule a job
         res.json(bot.toJSON());
     } catch (error) {
         console.log(error);

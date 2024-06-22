@@ -64,9 +64,9 @@ export const heikinAshi = (df: IObj[], pair: string[]) => {
 
 export const tuMacd = (df: IObj[]) => {
     const closings = df.map((el) => el.c);
-    const fastLen = 1, //2,//5, //26
-        slowLen = 3, //7//13,//100
-        signalLen = 2; //6
+    const fastLen = 2, //2,//5, //26
+        slowLen = 58, //7//13,//100
+        signalLen = 4; //6
     const smaSrc: string = "ema";
     const smaSignal: string = "ema";
 
@@ -91,7 +91,7 @@ export const tuMacd = (df: IObj[]) => {
     return df;
 };
 //export const chandelierExit = (df: IObj[], mult = 1.8, atrLen = 1) => {
-export const chandelierExit = (df: IObj[], mult = .5, atrLen = 1) => {
+export const chandelierExit = (df: IObj[], mult = .2, atrLen = 1) => {
     const highs = df.map((e) => e.h);
     const lows = df.map((e) => e.l);
     const closings = df.map((e) => e.c);
@@ -103,7 +103,7 @@ export const chandelierExit = (df: IObj[], mult = .5, atrLen = 1) => {
     const rsiLen = 10;
 
     const sma20 = ema(closings, { period: 1 });
-    const sma50 = ema(closings, { period: 3 }); /* TODO: 4 */
+    const sma50 = ema(closings, { period: 3}); /* TODO: 4 */
     const _rsi = rsi(closings, { period: rsiLen });
     let sir = 1;
 
@@ -145,6 +145,7 @@ export const chandelierExit = (df: IObj[], mult = .5, atrLen = 1) => {
 };
 
 export const calcEntryPrice= (row:IObj, side: 'buy' | 'sell')=>{
-    const val = row.c
+    const p = .0/100
+    const val = row.c * ( 1 + (side == 'buy' ? p : -p))
     return val
 }

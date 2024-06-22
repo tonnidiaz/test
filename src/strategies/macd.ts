@@ -48,20 +48,41 @@ class SMA_EXT extends Strategy{
     desc: string = `Enter: sma20 >  sma50 && low is < 5% from o, Exit: oposite `
 
     buyCond(row: IObj): boolean {
-        return  row.sma_20 > row.sma_50 && (row.o - row.l)/row.l*100 < 5//cond && smaDiff > diff
+        return   row.sma_20 >= row.sma_50 && (row.o - row.l)/row.l*100 <=5//cond && smaDiff > diff
     }
 
     sellCond(row: IObj): boolean {
-        return  row.sma_20 < row.sma_50 && (row.h - row.o ) / row.o * 100 < 5
+        return   row.sma_20 <= row.sma_50 && (row.h - row.o ) / row.o * 100 <=5
 
     }
 } 
 
 
+class CE_ONLY extends Strategy{
+    name: string = "CE_ONLY"
+    desc: string = "JUST A CE"
+    buyCond(row: IObj): boolean {
+        return row.buy_signal == 1
+    }
 
+    sellCond(row: IObj): boolean {
+        return row.sell_signal == 1 
+    }
+}
+class CE extends Strategy{
+    name: string = "CE"
+    desc: string = "JUST A CE"
+    buyCond(row: IObj): boolean {
+        return row.buy_signal == 1 || MACD_SMA.prototype.buyCond(row)
+    }
+
+    sellCond(row: IObj): boolean {
+        return row.sell_signal == 1 || MACD_SMA.prototype.sellCond(row)
+    }
+}
 
 export const strategies = [
     new MACDONLY(),
     new MACD_CE3(),
-    new MACD_SMA(), new SMA_EXT()
+    new MACD_SMA(), new SMA_EXT(), new CE_ONLY(), new CE()
 ]
