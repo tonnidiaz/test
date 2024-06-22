@@ -185,7 +185,7 @@ export const updateOrder = async (bot: IBot, orders: IOrder[]) => {
                             botLog(bot, "DELETING ORDER...");
                             botLog(bot, `Orders: ${bot.orders.length}`);
                             bot.orders = bot.orders.filter(
-                                (el) => el != lastOrder!._id
+                                (el) => el.toString() != lastOrder!._id.toString()
                             );
                             botLog(bot, `Orders: ${bot.orders.length}`);
                             await Order.findByIdAndDelete(lastOrder!._id);
@@ -262,7 +262,8 @@ export const placeTrade = async ({
         const { order_type } = bot;
         //botLog(bot, `Placing a ${side =='sell' ? amt : amt / price} ${side} order at ${price}...`);
         botLog(bot, `Placing a ${amt} ${side}  order at ${price}...`);
-        const sl = toFixed(price * (1 + ((side == 'sell' ? -.1/100 : .1/100))), pxPr)
+        const p = .0/100
+        const sl = toFixed(price * (1 + ((side == 'sell' ? -p : p))), pxPr)
         price = toFixed(
             price,
             pxPr
