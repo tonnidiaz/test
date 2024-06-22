@@ -262,7 +262,7 @@ export const placeTrade = async ({
         const { order_type } = bot;
         //botLog(bot, `Placing a ${side =='sell' ? amt : amt / price} ${side} order at ${price}...`);
         botLog(bot, `Placing a ${amt} ${side}  order at ${price}...`);
-        const sl = toFixed(price/*  * (1 + ((side == 'sell' ? -.05/100 : .05/100))) */, pxPr)
+        const sl = toFixed(price * (1 + ((side == 'sell' ? -.1/100 : .1/100))), pxPr)
         price = toFixed(
             price,
             pxPr
