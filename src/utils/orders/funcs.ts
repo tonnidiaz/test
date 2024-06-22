@@ -98,9 +98,9 @@ export const updateOrder = async (bot: IBot, orders: IOrder[]) => {
                         /* Cancel if there's buyCondition  */
                         botLog(
                             bot,
-                            "SELL ORDER NOT FILLED \nCHECKING FOR BUY_SIGNAL..."
+                            "SELL ORDER NOT FILLED"
                         );
-                        const klines = await plat.getKlines({
+                        /* const klines = await plat.getKlines({
                             end: Date.now() - bot.interval * 60 * 1000,
                         });
 
@@ -115,10 +115,10 @@ export const updateOrder = async (bot: IBot, orders: IOrder[]) => {
                         const strategy = objStrategies[bot.strategy - 1];
 
                         console.log(currentCandle);
-                        if (strategy.buyCond(currentCandle)) {
+                        if (strategy.buyCond(currentCandle)) { */
                             botLog(
                                 bot,
-                                "HAS BUY SIGNAL > CANCELLING SELL ORDER..."
+                                "CANCELLING SELL ORDER..."
                             );
                             const res = await plat.cancelOrder({ ordId: oid });
                             if (!res) {
@@ -132,7 +132,7 @@ export const updateOrder = async (bot: IBot, orders: IOrder[]) => {
                             await lastOrder.save();
                             botLog(bot, "ORDER_ID CLEARED");
                             return "ok";
-                        }
+                        /* } */
                     }
                 } else {
                     if (_isClosed && res != "live") {
@@ -155,9 +155,9 @@ export const updateOrder = async (bot: IBot, orders: IOrder[]) => {
                         /* Cancel if there's sellCondition  */
                         botLog(
                             bot,
-                            "BUY ORDER NOT FILLED \nCHECKING FOR SELL_SIGNAL..."
+                            "BUY ORDER NOT FILLED..."
                         );
-                        const klines = await plat.getKlines({
+                        /* const klines = await plat.getKlines({
                             end: Date.now() - bot.interval * 60 * 1000,
                         });
 
@@ -172,10 +172,10 @@ export const updateOrder = async (bot: IBot, orders: IOrder[]) => {
                         const strategy = objStrategies[bot.strategy - 1];
 
                         console.log(currentCandle);
-                        if (strategy.sellCond(currentCandle)) {
+                        if (strategy.sellCond(currentCandle)) { */
                             botLog(
                                 bot,
-                                "HAS SELL SIGNAL > CANCELLING BUY ORDER..."
+                                "CANCELLING BUY ORDER..."
                             );
                             const res = await plat.cancelOrder({ ordId: oid });
                             if (!res) {
@@ -193,7 +193,7 @@ export const updateOrder = async (bot: IBot, orders: IOrder[]) => {
                             botLog(bot, "ORDER DELETED");
                             return "ok";
                         }
-                    }
+                   /*  } */
                 }
             } else {
                 botLog(bot, "Order check error");
