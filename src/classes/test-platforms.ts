@@ -51,6 +51,7 @@ export class TestOKX extends Platform {
         savePath?: string | undefined;
         isBybit?: boolean;
     }) {
+        const rootURL = `https://okx.com/api/v5/market/candles`
         const client = new RestClientV5()
             end = end ?? Date.now();
             let klines: any[] = [];
@@ -70,7 +71,7 @@ export class TestOKX extends Platform {
                         )} \t After: ${parseDate(new Date(after))}`
                     );
                     const url =  //`https://api.bybit.com/v5/market/kline?category=spot&symbol=${symbol}&interval=${interval}&start=${firstTs}`
-                     `https://okx.com/api/v5/market/history-mark-price-candles?instId=${symbol}&bar=${interval}m&before=${firstTs}&after=${after}&limit=${limit}`;
+                     `${rootURL}?instId=${symbol}&bar=${interval}m&before=${firstTs}&after=${after}&limit=${limit}`;
                     console.log('GETTING MARK PRICE');
                     const res = isBybit ? await client.getKline({category: 'spot', symbol,interval: interval as any, start: firstTs}): await axios.get(url);
                     const data = isBybit ? (res as any ).result.list: (res as AxiosResponse).data.data;
@@ -89,7 +90,7 @@ export class TestOKX extends Platform {
             } else {
                 const url = isBybit
                     ? `https://api.bybit.com/v5/market/kline?category=spot&symbol=${symbol}&interval=${interval}&start=${start}&end=${end}`
-                    : `https://okx.com/api/v5/market/history-mark-price-candles?instId=${symbol}&bar=${interval}m&after=${
+                    : `${rootURL}?instId=${symbol}&bar=${interval}m&after=${
                           end ?? ""
                       }&before=${start ?? ""}`;
 

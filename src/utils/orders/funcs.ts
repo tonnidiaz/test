@@ -2,7 +2,7 @@ import { OrderPlacer } from "@/classes";
 import { Bot, Order, TBot } from "@/models";
 import { IBot } from "@/models/bot";
 import { cancelJob, scheduleJob } from "node-schedule";
-import { botJobSpecs, jobs } from "../constants";
+import { botJobSpecs, isStopOrder, jobs } from "../constants";
 import path from "path";
 import fs from "fs";
 import { IOrder } from "@/models/order";
@@ -67,7 +67,7 @@ export const updateOrder = async (bot: IBot, orders: IOrder[]) => {
                 ? lastOrder.order_id
                 : lastOrder.buy_order_id;
             botLog(bot, "Checking order...");
-            const res = await plat.getOrderbyId(oid);
+            const res = await plat.getOrderbyId(oid, isSellOrder);
             if (res) {
                 let _isClosed = res != "live";
 
@@ -116,7 +116,8 @@ export const updateOrder = async (bot: IBot, orders: IOrder[]) => {
 
                         console.log(currentCandle);
                         if (strategy.buyCond(currentCandle)) { */
-                            botLog(
+                        if (!isStopOrder){
+                           botLog(
                                 bot,
                                 "CANCELLING SELL ORDER..."
                             );
@@ -131,10 +132,14 @@ export const updateOrder = async (bot: IBot, orders: IOrder[]) => {
                             lastOrder.sell_price = 0;
                             await lastOrder.save();
                             botLog(bot, "ORDER_ID CLEARED");
-                            return "ok";
+                            return "ok"; 
+                        }
+                        
+                            
                         /* } */
                     }
                 } else {
+                    /* BUY ORDER SECTIONS */
                     if (_isClosed && res != "live") {
                         console.log(`\n[${bot.name}] : Updating buy order\n`);
                         const ts = {
@@ -153,45 +158,48 @@ export const updateOrder = async (bot: IBot, orders: IOrder[]) => {
                         lastOrder.buy_timestamp = ts;
                     } else {
                         /* Cancel if there's sellCondition  */
-                        botLog(
-                            bot,
-                            "BUY ORDER NOT FILLED..."
-                        );
-                        /* const klines = await plat.getKlines({
-                            end: Date.now() - bot.interval * 60 * 1000,
-                        });
-
-                        if (!klines) return console.log("FAILED TO GET KLINES");
-
-                        const df = chandelierExit(
-                            heikinAshi(parseKlines(klines), [bot.base, bot.ccy])
-                        );
-
-                        botLog(bot, "CHECKING SELL_SIGNAL...");
-                        const currentCandle = df[df.length - 1];
-                        const strategy = objStrategies[bot.strategy - 1];
-
-                        console.log(currentCandle);
-                        if (strategy.sellCond(currentCandle)) { */
+                        if (!isStopOrder){
                             botLog(
                                 bot,
-                                "CANCELLING BUY ORDER..."
+                                "BUY ORDER NOT FILLED..."
                             );
-                            const res = await plat.cancelOrder({ ordId: oid });
-                            if (!res) {
-                                botLog(bot, "FAILED TO CANCEL BUY ORDER");
-                                return;
-                            }
-                            botLog(bot, "DELETING ORDER...");
-                            botLog(bot, `Orders: ${bot.orders.length}`);
-                            bot.orders = bot.orders.filter(
-                                (el) => el.toString() != lastOrder!._id.toString()
+                            const klines = await plat.getKlines({
+                                end: Date.now() - bot.interval * 60 * 1000,
+                            });
+    
+                            if (!klines) return console.log("FAILED TO GET KLINES");
+    
+                            const df = chandelierExit(
+                                heikinAshi(parseKlines(klines), [bot.base, bot.ccy])
                             );
-                            botLog(bot, `Orders: ${bot.orders.length}`);
-                            await Order.findByIdAndDelete(lastOrder!._id);
-                            await bot.save();
-                            botLog(bot, "ORDER DELETED");
-                            return "ok";
+    
+                            botLog(bot, "CHECKING SELL_SIGNAL...");
+                            const currentCandle = df[df.length - 1];
+                            const strategy = objStrategies[bot.strategy - 1];
+    
+                            console.log(currentCandle);
+                            if (strategy.sellCond(currentCandle)) {
+                                botLog(
+                                    bot,
+                                    "CANCELLING BUY ORDER..."
+                                );
+                                const res = await plat.cancelOrder({ ordId: oid });
+                                if (!res) {
+                                    botLog(bot, "FAILED TO CANCEL BUY ORDER");
+                                    return;
+                                }
+                                botLog(bot, "DELETING ORDER...");
+                                botLog(bot, `Orders: ${bot.orders.length}`);
+                                bot.orders = bot.orders.filter(
+                                    (el) => el.toString() != lastOrder!._id.toString()
+                                );
+                                botLog(bot, `Orders: ${bot.orders.length}`);
+                                await Order.findByIdAndDelete(lastOrder!._id);
+                                await bot.save();
+                                botLog(bot, "ORDER DELETED");
+                                return "ok";}
+                        }
+                        
                         }
                    /*  } */
                 }
@@ -202,10 +210,6 @@ export const updateOrder = async (bot: IBot, orders: IOrder[]) => {
 
             botLog(bot, "SAVING ORDER...");
             await lastOrder?.save();
-            /*  
-            const jobIndex = jobs.findIndex(el=> el.id == bot.id)
-            jobs[jobIndex] = {...jobs[jobIndex], active : false}
-            botLog(bot, `JOB CANCELLED ${jobIndex}\t ${jobs}`) */
         }
         return { isClosed, lastOrder };
     } catch (e) {
@@ -220,10 +224,12 @@ export const placeTrade = async ({
     side,
     price,
     plat,
+    sl,
 }: {
     bot: IBot;
     ts: string;
     amt?: number;
+    sl?: number;
     side: "buy" | "sell";
     price: number;
     plat: Bybit | OKX;
@@ -262,8 +268,7 @@ export const placeTrade = async ({
         const { order_type } = bot;
         //botLog(bot, `Placing a ${side =='sell' ? amt : amt / price} ${side} order at ${price}...`);
         botLog(bot, `Placing a ${amt} ${side}  order at ${price}...`);
-        const p = .0/100
-        const sl = toFixed(price * (1 + ((side == 'sell' ? -p : p))), pxPr)
+        sl = toFixed(sl ?? 0, pxPr)
         price = toFixed(
             price,
             pxPr
@@ -284,7 +289,7 @@ export const placeTrade = async ({
         );
         botLog(
             bot,
-            `Placing a ${amt} ${side} ${bot.order_type} order at ${price}...`
+            `Placing a ${amt} ${side} ${bot.order_type} SL: ${sl} order at ${price}...`
         );
         const orderId = await plat.placeOrder(amt, price, side, sl);
 

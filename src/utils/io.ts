@@ -142,7 +142,7 @@ console.log('ON BACKTEST');
                 df,
                 balance: bal,
                 lev,
-                pair: baseCcy,
+                pair: baseCcy, 
                 pGain,
                 maker: plat.maker,
                 taker: plat.taker,
@@ -251,7 +251,7 @@ console.log('ON BACKTEST');
                     : klines;
             klines = parseKlines(klines);
 
-            let df = chandelierExit(heikinAshi(klines, baseCcy));
+            let df =chandelierExit(heikinAshi(klines, baseCcy));
             if (offline && !useFile) {
                 // Return oly df from startTs to endTs
                 console.log(df[0]);
@@ -265,21 +265,15 @@ console.log('ON BACKTEST');
             }
             const retData = df.map((el, i) => {
                 const ts = el.ts;
-                const realI = klines.findIndex((e) => e.ts == ts);
-                const stdRow = klines[realI],
-                    haRow = el;
-                if (stdRow) {
-                    delete stdRow["ts"];
-                }
-
-                delete haRow["ts"];
                 return {
                     ts: ts,
-                    std: { o: stdRow.o, h: stdRow.h, l: stdRow.l, c: stdRow.c },
-                    ha: { o: haRow.o, h: haRow.h, l: haRow.l, c: haRow.c },
+                    sma_20: el.sma_20,
+                    sma_50: el.sma_50,
+                    std: { o: el.o, h: el.h, l: el.l, c: el.c },
+                    ha: { o: el.ha_o, h: el.ha_h, l: el.ha_l, c: el.ha_c },
                 };
             });
-            client.emit("test-candles", { data: retData });
+            client.emit("test-candles", { data: retData, symbol: baseCcy, interval });
             return retData;
         } catch (e: any) {
             console.log(e.response?.data ?? e);

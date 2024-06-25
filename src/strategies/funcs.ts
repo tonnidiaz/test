@@ -6,6 +6,8 @@ import {
     slPercent,
     P_DIFF,
     minDiff,
+    isMarket,
+    cancelOnCond,
 } from "@/utils/constants";
 import { calcEntryPrice } from "@/utils/funcs2";
 import {
@@ -23,6 +25,8 @@ interface IBalProfitCalc {
     data: IObj;
     ccy: string;
     row: IObj;
+    prevCandle: IObj;
+    prevRow: IObj;
     maker: number;
     pricePrecision: number;
 }
@@ -34,25 +38,27 @@ export const balProfitCalc: (props: IBalProfitCalc) => any[] = ({
     row,
     maker,
     pricePrecision,
+    prevCandle,
+    prevRow,
 }) => {
     /**
      * We are selling
      * Returns balance, profit, data
      *  */
-    console.log('LOG');
+    console.log("LOG");
     console.log(base, exit);
     let newBalance = toFixed(base * exit, pricePrecision);
     //newBalance -= newBalance * maker;
     //newBalance = toFixed(newBalance, pricePrecision);
-    const fee= newBalance * maker
-    let profit = (newBalance - fee) - balance;
+    const fee = newBalance * maker;
+    let profit = newBalance - fee - balance;
     let profitPercentage = (profit / balance) * 100; //(exit - entry) / entry * 100
     profitPercentage = Number(profitPercentage.toFixed(4));
-    balance = newBalance - fee//+= profit;
+    balance = newBalance - fee; //+= profit;
     profit = toFixed(profit, pricePrecision);
 
     data["data"][row["ts"]] = {
-        side: `sell \t {h:${row.h}, l: ${row.l}}`,
+        side: `sell \t {h:${prevCandle.h} -> ${prevRow.h}, l: ${prevCandle.l} -> ${prevRow.l}}`,
         enterTs,
         fill: exit,
         c: exit,
@@ -62,24 +68,25 @@ export const balProfitCalc: (props: IBalProfitCalc) => any[] = ({
     //for (let k of Object.keys(data.data))
     return [balance, profit, data];
 };
-
 export const strategy = ({
     df,
+    candles,
     balance,
     buyCond,
     sellCond,
     lev = 1,
     pair,
-    maker,
-    taker,
+    maker = MAKER_FEE_RATE,
+    taker = TAKER_FEE_RATE,
 }: {
     df: IObj[];
+    candles: IObj[];
     balance: number;
     buyCond: (row: IObj, df?: IObj[], i?: number) => boolean;
     sellCond: (row: IObj, entry: number, df?: IObj[], i?: number) => boolean;
     pair: string[];
-    maker?: number;
-    taker?: number;
+    maker: number;
+    taker: number;
     lev?: number;
 }) => {
     let pos = false;
@@ -94,95 +101,85 @@ export const strategy = ({
         entryLimit: number | null = null,
         exitLimit: number | null = null,
         base: number = 0,
+        sl: number = 0,
         exit: number = 0,
         profit: number = 0;
 
-    const pricePrecision = getPricePrecision(pair, 'bybit');
-    const basePrecision = getCoinPrecision(pair, "sell", 'bybit');
-    console.log(`\n BASE PREC: ${basePrecision}`);
+    const pricePrecision = getPricePrecision(pair, "bybit");
+    const basePrecision = getCoinPrecision(pair, "sell", "bybit");
     balance = toFixed(balance, pricePrecision);
-    console.log(df[0].ts);
-    df = df.slice(20)
-    console.log(df[0].ts);
-    console.log('\n');
+    df = df.slice(20);
+    candles = candles.slice(20);
+
     for (let i = 1; i < df.length; i++) {
-        const row = df[i];
-        const prevRow = df[i - 1];
-        console.log(`\n[${i - 1}]\t[${prevRow.ts}]  \t [${balance}\n`);
-        /* CHECK AND UPDATE OPEN POSITION FIRST */
-        if (entryLimit) {
-            // Fill buy pos
-            /* TEST PREVIOUS CANDLE */
+        const prevRow = df[i - 1],
+            prevCandle = candles[i - 1],
+            row = candles[i];
+        console.log(`\n${prevRow.ts}\n`);
+        if (entryLimit && !pos) {
             console.log(
-                `[${row.ts} \t H: ${prevRow.h} \t E: ${entryLimit} \t L: ${prevRow.l}\n]`
+                `[${prevCandle.ts} \t H: ${prevCandle.h} \t E: ${entryLimit} \t L: ${prevCandle.l}\n]`
             );
 
-            const delta = (entryLimit - prevRow.o)/(prevRow.c - prevRow.o)*100
-            
-            if (( prevRow.l <= entryLimit && entryLimit <= prevRow.h)) {
+            const cond = prevCandle.l <= entryLimit; // && entryLimit < prevCandle.h
+            if (cond) {
                 /* Fill buy order */
-                
-                entry = prevRow.h < entryLimit ? prevRow.c : entryLimit;
-                console.log(
-                    `\nFILLING BUY ORDER at ${entryLimit} => ${entry}\n`
-                );
-                balance *= lev;
-                
-                base = toFixed(balance / entry, basePrecision); /* FIXED IT WHEN PLACING THE ORDER */
-                balance = base * entry
-                //base -= base * taker!;
+                entry = entryLimit;
+                base = (balance / entry) * (1 - taker);
                 base = toFixed(base, basePrecision);
-                
-                mData["data"][prevRow["ts"]] = {
-                    side: `buy \t {h:${prevRow.h}, l: ${prevRow.l}}`,
+
+                mData["data"][prevCandle["ts"]] = {
+                    side: `buy \t {h:${prevCandle.h}, l: ${prevCandle.l}}`,
                     fill: entryLimit,
                     enterTs,
                     c: entry,
                     balance: `[${balance}] \t ${base} \t -${base * taker!}`,
                 };
-                //entryLimit = null;
+
                 pos = true;
-                entryLimit = null;
-            } else{//} if (sellCond(prevRow, entryLimit, df, i - 1)) {
+            } else if (sellCond(prevRow, entry)){
+                /* Cancel buy order If price goes down 2% */
                 console.log(`${row.ts} \t CANCELLING BUY ORDER`);
-                mData["data"][prevRow.ts] = {
-                    side: `buy \t {h:${prevRow.h}, l: ${prevRow.l}}`,
-                    c: entryLimit, pricePrecision,
+                mData["data"][prevCandle.ts] = {
+                    side: `buy \t {h:${prevCandle.h}, l: ${prevCandle.l}}`,
+                    c: entryLimit,
+                    pricePrecision,
                     cancel: true,
                 };
                 entryLimit = null;
-                pos = false;
             }
         } else if (exitLimit) {
-            const delta = 100 - ((exitLimit - prevRow.c)/(prevRow.o - prevRow.c)*100)
-            
-            if ((prevRow.l <= exitLimit && exitLimit <= prevRow.h )){// || prevRow.l > exitLimit)   {
+            const cond =
+                /* prevCandle.l < exitLimit && exitLimit < prevCandle.h || */ prevCandle.h >=
+                exitLimit;
+                const isLoss = prevCandle.l <= sl
+
+            if (cond || isLoss) {
                 /* Fill sell order */
-                console.log(`\nDELTA: ${delta}\n{o: ${prevRow.o}, c: ${prevRow.c}, p: ${exitLimit}}`);
-                exit = exitLimit//prevRow.l > exitLimit ? prevRow.c :  exitLimit;
-                console.log("FILLING SELL ORDER");
-                [balance, profit, _data] = balProfitCalc({
-                    base: toFixed(base  * (1 - taker!), basePrecision),
-                    balance,
-                    exit,
-                    data: mData,
-                    row: prevRow,
-                    ccy: pair[1],
-                    maker: maker!,
-                    pricePrecision,
-                });
+                exit = isLoss && !cond ? sl : exitLimit;
+                balance = base * exit * (1 - maker);
+                balance = toFixed(balance, pricePrecision);
 
-                if (profit < 0) loss += 1;
-                else gain += 1;
-
-                mData = _data;
+                mData["data"][prevCandle["ts"]] = {
+                    side: `sell \t {h:${prevCandle.h}, l: ${prevCandle.l}}`,
+                    fill: exitLimit,
+                    enterTs,
+                    c: exit,
+                    balance: `[${balance}] \t ${base}`,
+                };
+                /* Position now filled */
+                entryLimit = 0;
+                base = 0;
+                exitLimit = 0;
                 pos = false;
+
+                if (exit > entry) gain += 1;
+                else loss += 1;
                 cnt += 1;
-                exitLimit = null;
-            } else{//} if (buyCond(prevRow, df, i - 1)) {
+            } else {
                 console.log(`${row.ts} \t CANCELLING SELL ORDER`);
-                mData["data"][prevRow.ts] = {
-                    side: `sell \t {h:${prevRow.h}, l: ${prevRow.l}}`,
+                mData["data"][prevCandle.ts] = {
+                    side: `sell \t {h:${prevCandle.h}, l: ${prevCandle.l}}`,
                     c: exitLimit,
                     cancel: true,
                 };
@@ -191,35 +188,30 @@ export const strategy = ({
             }
         }
 
-        let p = P_DIFF
-        const candleBody = Math.abs((prevRow.o - prevRow.c)/prevRow.c*100) /* Change close value */
-        /* CHECK FOR SIGNALS */
-        if (!pos && !entryLimit && buyCond(prevRow, df, i - 1)) {
-            // Place limit buy order
-            const val = calcEntryPrice(prevRow, 'buy')
-            entryLimit = toFixed(val, pricePrecision)//toFixed((prevRow.c * (1 + P_DIFF)), pricePrecision);
+        if (!entryLimit && buyCond(prevRow)) {
+            /* Place buy order */
+            entryLimit = calcEntryPrice(prevCandle, "buy");
+            entryLimit = toFixed(entryLimit, pricePrecision);
             enterTs = row.ts;
             console.log(`[ ${row.ts} ] \t Limit buy order at ${entryLimit}`);
-        } else if (pos && !exitLimit && sellCond(prevRow, entry, df, i -1)) {
-            // Place limit sell order
-            const val = calcEntryPrice(prevRow, 'sell')
-            exitLimit = toFixed(val, pricePrecision)//toFixed((prevRow.c * (1 - P_DIFF)), pricePrecision);
+        } else if (
+            !exitLimit &&
+            entryLimit &&
+            pos /* &&
+            sellCond(prevRow, entry) */
+        ) {
+            /* Place sell order */
+            exitLimit = entry * (1 + 5/100) //prevCandle.c * (1 + 3 / 100);
+            exitLimit = toFixed(exitLimit, pricePrecision);
+            sl = entry * (1 - .5/100) //prevCandle.c * (1 + 3 / 100);
+            sl = toFixed(sl, pricePrecision);
             enterTs = row.ts;
             console.log(`[ ${row.ts} ] \t Limit sell order at ${exitLimit}`);
         }
     }
 
-    console.log(`TOTAL TRADES: ${cnt}`);
-
-    cnt = cnt > 0 ? cnt : 1;
-    gain = Number(((gain * 100) / cnt).toFixed(4));
-    loss = Number(((loss * 100) / cnt).toFixed(4));
-    mData = {
-        ...mData,
-        balance: toFixed(balance / lev, pricePrecision),
-        trades: cnt,
-        gain: gain,
-        loss: loss,
-    };
-    return mData;
+    gain = Number((gain / cnt * 100).toFixed(2))
+    loss = Number((loss / cnt * 100).toFixed(2))
+    _data = { ...mData, balance, trades: cnt, gain, loss };
+    return _data;
 };

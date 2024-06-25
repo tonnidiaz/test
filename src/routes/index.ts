@@ -50,10 +50,10 @@ router.get("/test", async (req, res) => {
     const side: string = "sell";
     const pxPr = getPricePrecision([bot.base, bot.ccy], bot.platform);
     const szPr = getCoinPrecision([bot.base, bot.ccy], "sell", bot.platform);
-    let px = side == 'sell' ? 0.07581 : 0.08100; //0.07961
+    let px = side == 'sell' ? 0.08973 : 0.08100; //0.07961
     let sz = side == "buy" ? 15 / px : 60;
     const oid = "1709493118698786048";
-    const sl = toFixed(px * (1 + ((side == 'sell' ? -.05/100 : .05/100))), pxPr)
+    const sl = toFixed(0.08759, pxPr)//toFixed(px * (1 + ((side == 'sell' ? -.05/100 : .05/100))), pxPr)
     px = toFixed(px, pxPr);
     sz = toFixed(sz, szPr);
 

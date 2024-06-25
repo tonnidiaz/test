@@ -1,5 +1,5 @@
 import { data } from "@/data/data";
-import { strategy } from "@/strategies/funcs";
+import { strategy } from "@/strategies/funcs-test";
 import { IObj } from "@/utils/interfaces";
 
 export class Strategy {
@@ -33,7 +33,6 @@ export class Strategy {
         );
         const mData = strategy({
             df,
-            //stdDf,
             balance,
             buyCond: this.buyCond,
             sellCond: this.sellCond,

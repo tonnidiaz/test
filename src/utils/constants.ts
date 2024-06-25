@@ -9133,6 +9133,12 @@ export const dfsDir = "src/data/dfs/binance",
 export const dfsRootDir = "src/data/dfs",
     klinesRootDir = "src/data/klines";
 export const MAKER_FEE_RATE = 0.1 / 100;
-export const TAKER_FEE_RATE = 0.1 / 100, P_DIFF = .0/100;
-export const slPercent = 0.5 / 100, minDiff = 0;
-export const platforms = ['bybit', 'okx']
+export const TAKER_FEE_RATE = 0.1 / 100,
+    P_DIFF = 0.0 / 100;
+export const slPercent = 0.5 / 100,
+    minDiff = 0;
+export const platforms = ["bybit", "okx"];
+export const isMarket = true,
+    cancelOnCond = true,
+    useHaClose = false,
+    isStopOrder = true;

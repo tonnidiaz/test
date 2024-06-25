@@ -9,7 +9,7 @@ import {
 } from "@/utils/functions";
 import { RestClientV5 } from "bybit-api";
 import { writeFileSync } from "fs";
-import { DEV } from "@/utils/constants";
+import { DEV, isStopOrder } from "@/utils/constants";
 
 export class Bybit {
     bot: IBot;
@@ -68,17 +68,21 @@ export class Bybit {
         botLog(this.bot, `PLACING ORDER: ${JSON.stringify(od)}`);
         try {
             const { order_type } = this.bot;
+            console.log(!isStopOrder && side == 'buy' ? undefined : sl.toString(),);
             const res = await this.client.submitOrder({
                 symbol: this.getSymbol(),
-                orderType: order_type,
+                orderType: side == 'buy' ? 'Market' : 'Limit',
                 side: capitalizeFirstLetter(side),
                 qty: amt.toString(),
                 price: price.toString(),
                 category: this.bot.category as any,
                 timeInForce: "GTC",
-                triggerPrice:
-                    order_type == "Market" ? undefined : sl.toString(),
-                orderFilter: order_type == "Market" ? undefined : "StopOrder",
+                tpLimitPrice: !isStopOrder && side == 'buy' ? undefined : price.toString(),
+                slLimitPrice: !isStopOrder && side == 'buy' ? undefined : sl.toString(),
+                closeOnTrigger: false, reduceOnly: false,
+               /*  triggerPrice:
+                    order_type == "Market" ? undefined : sl.toString(),*/
+                orderFilter: order_type == "Market" && side == 'buy' ? undefined : 'tpslOrder', 
             });
             if (res.retCode != 0) {
                 console.log(res);

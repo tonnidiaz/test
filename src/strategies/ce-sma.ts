@@ -1,19 +1,16 @@
 import { Strategy } from "@/classes/strategy";
 import { IObj } from "@/utils/interfaces";
-
-class CE_ONLY extends Strategy {
+const fastRSI = 50
+export class RSI_ONLY extends Strategy {
     name: string = "RSI ONLY";
     desc: string = `Enter: macd > 0 && sma20 >  sma50, Exit: oposite`;
 
     buyCond(row: IObj): boolean {
-        const smaCond = row.sma_20 > row.sma_50 && row.macd > 0;
-        return (row.rsi <= 45 && smaCond) || smaCond;
+        return (row.rsi < fastRSI)
     }
 
     sellCond(row: IObj): boolean {
-        const smaCond = row.sma_20 < row.sma_50 && row.macd < 0;
-        const cond = (row.rsi >= 55 && smaCond) || smaCond;
-        return cond; //&& row.macd < 0
+        return row.rsi > 100 - fastRSI
     }
 }
 class BB_SMA extends Strategy {
@@ -47,4 +44,4 @@ class ThreeSum extends Strategy {
     }
 }
 
-export const strategies = [new CE_ONLY(), new BB_SMA(), new ThreeSum()];
+export const strategies = [new RSI_ONLY(),]// [ new BB_SMA(), new ThreeSum()];

@@ -11,6 +11,7 @@ import type {
     AlgoOrderResult,
     OrderDetails,
 } from "okx-api";
+import { DEV } from "@/utils/constants";
 export class OKX {
     bot: IBot;
     flag: "1" | "0";
@@ -74,28 +75,42 @@ export class OKX {
         amt: number,
         price: number,
         side: "buy" | "sell" = "buy",
-        sl?: number
+        sl: number
     ) {
         /* Place limit order at previous close */
         const od = { price, sl, amt, side };
         botLog(this.bot, `PLACING ORDER: ${JSON.stringify(od)}`);
         try {
-            const res = await this.client.submitOrder({
-                instId: this.getSymbol(),
-                tdMode: "cash",
-                ordType: "market",
-                side,
-                sz: amt.toString(),
-                //px: price.toString(),
-                
-            });
+            const res =
+                side == "buy"
+                    ? await this.client.submitOrder({
+                          instId: this.getSymbol(),
+                          tdMode: "cash",
+                          ordType: "market",
+                          side,
+                          sz: amt.toString(),
+                          //px: price.toString(),
+                      })
+                    : await this.client.placeAlgoOrder({
+                          instId: this.getSymbol(),
+                          tdMode: "cash",
+                          ordType: "oco",
+                          tpTriggerPx: price.toString(),
+                          slTriggerPx: sl.toString(),
+                          side,
+                          sz: amt.toString(),
+                          tpOrdPx: "-1",
+                          slOrdPx: "-1",
+                      });
 
             if (res[0].sCode != "0") {
                 console.log(res[0]);
                 return;
             }
             console.log(`\ORDER PLACED FOR BOT=${this.bot.name}\n`);
-            return res[0].ordId;
+            const d : any = res[0]
+            const id: string = side == 'buy' ? d.ordId : d.algoId
+            return id;
         } catch (error) {
             console.log(error);
         }
@@ -111,13 +126,16 @@ export class OKX {
                 fee: number;
             } | null = null;
             let finalRes: OrderDetails | null = null;
-
-            const res = false
+            botLog(this.bot, `IS_ALGO: ${isAlgo}`)
+            const res = isAlgo
                 ? await this.client.getAlgoOrderDetails({ algoId: orderId })
                 : await this.client.getOrderDetails({
                       ordId: orderId!,
                       instId: this.getSymbol(),
                   });
+                  if (DEV){
+                    console.log(res);
+                  }
             if (isAlgo && res[0].state == "effective") {
                 const res2 = (
                     await this.client.getOrderDetails({
@@ -125,7 +143,7 @@ export class OKX {
                         ordId: res[0].ordId,
                     })
                 )[0];
-                finalRes = res2[0];
+                finalRes = res2;
             } else if (!isAlgo && res[0].state == "filled") {
                 finalRes = res[0];
             }
@@ -145,7 +163,6 @@ export class OKX {
             return data;
         } catch (error) {
             console.log(error);
-            return null;
         }
     }
 
@@ -178,6 +195,7 @@ export class OKX {
         symbol = symbol ?? this.getSymbol();
         botLog(this.bot, "GETTING KLINES.. FOR " + symbol);
 
+        const rootURL = "https://okx.com/api/v5/market/candles";
         if (start) {
             let firstTs = start;
             while (firstTs <= end) {
@@ -190,7 +208,7 @@ export class OKX {
                     )} \t After: ${parseDate(new Date(after))}`
                 );
                 const res = await axios.get(
-                    `https://okx.com/api/v5/market/index-candles?instId=${symbol}&bar=${interval}m&before=${firstTs}&after=${after}`
+                    `${rootURL}?instId=${symbol}&bar=${interval}m&before=${firstTs}&after=${after}`
                 );
                 let data = res.data.data;
                 if (!data.length) break;
@@ -207,7 +225,7 @@ export class OKX {
             }
         } else {
             const res = await axios.get(
-                `https://okx.com/api/v5/market/index-candles?instId=${symbol}&bar=${interval}m&after=${
+                `${rootURL}?instId=${symbol}&bar=${interval}m&after=${
                     end ?? ""
                 }&before=${start ?? ""}`
             ); //this.client.getIndexCandles(this.getSymbol(),`${this.bot.interval}m`, {after: `${end}`})

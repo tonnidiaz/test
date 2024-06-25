@@ -5,14 +5,23 @@ import { cancelJob, rescheduleJob } from "node-schedule";
 import { getJob, placeTrade, updateOrder } from "@/utils/orders/funcs";
 import {
     calcEntryPrice,
+    calcSL,
+    calcTP,
     chandelierExit,
     heikinAshi,
     parseDate,
     parseKlines,
 } from "@/utils/funcs2";
+
 import { objStrategies, strategies } from "@/strategies";
 import { IOrder } from "@/models/order";
-import { P_DIFF, botJobSpecs, slPercent, test } from "@/utils/constants";
+import {
+    P_DIFF,
+    botJobSpecs,
+    isStopOrder,
+    slPercent,
+    test,
+} from "@/utils/constants";
 import { botLog, getCoinPrecision } from "@/utils/functions";
 import { Bybit } from "./bybit";
 import { OKX } from "./okx";
@@ -25,12 +34,11 @@ export class OrderPlacer {
 
     constructor(bot: IBot) {
         this.bot = bot;
-       this.plat = bot.platform == 'bybit' ? new Bybit(bot)  : new OKX(bot)
+        this.plat = bot.platform == "bybit" ? new Bybit(bot) : new OKX(bot);
     }
 
     async checkPlaceOrder() {
         try {
-            const bin = new TestBinance();
             const now = new Date();
             const currMin = now.getMinutes();
 
@@ -68,17 +76,21 @@ export class OrderPlacer {
                 }).exec();
                 const res = await updateOrder(this.bot, botOrders);
                 const job = getJob(`${this.bot._id}`)!;
-                if (res && res != 'ok' && job.active) {
-                    const {isClosed, lastOrder} = res;
+                if (res && res != "ok" && job.active) {
+                    const { isClosed, lastOrder } = res;
 
-                    const klines =  await this.plat.getKlines({
-                              end: Date.now() - this.bot.interval * 60 * 1000,
-                          })
-                     
+                    const klines = await this.plat.getKlines({
+                        end: Date.now() - this.bot.interval * 60 * 1000,
+                    });
 
                     if (!klines) return console.log("FAILED TO GET KLINES");
 
-                    const df = chandelierExit(heikinAshi(parseKlines(klines), [this.bot.base, this.bot.ccy]));
+                    const df = chandelierExit(
+                        heikinAshi(parseKlines(klines), [
+                            this.bot.base,
+                            this.bot.ccy,
+                        ])
+                    );
 
                     console.log(`\n[${this.bot.name}]\tCHECKING SIGNALS...\n`);
                     const currentCandle = df[df.length - 1];
@@ -86,14 +98,17 @@ export class OrderPlacer {
                         Date.parse(currentCandle.ts) +
                             this.bot.interval * 60 * 1000
                     ).toISOString();
-                    botLog(this.bot, `this.bot.strategy = ${this.bot.strategy}, isClosed: ${isClosed} `)
+                    botLog(
+                        this.bot,
+                        `this.bot.strategy = ${this.bot.strategy}, isClosed: ${isClosed} `
+                    );
                     const strategy = objStrategies[this.bot.strategy - 1];
                     botLog(this.bot, "STRATEGY:");
                     console.log(strategy);
                     console.log(currentCandle);
 
                     if (
-                        (isClosed || !lastOrder)  &&
+                        (isClosed || !lastOrder) &&
                         (strategy.buyCond(currentCandle) || mTest)
                     ) {
                         // Place buy order
@@ -101,48 +116,67 @@ export class OrderPlacer {
                             `[ ${this.bot.name} ]\tHAS BUY SIGNAL > GOING IN`
                         );
                         /* Same as new balance */
-                        const orders = await Order.find({bot: this.bot._id,
+                        const orders = await Order.find({
+                            bot: this.bot._id,
                             base: this.bot.base,
-                            ccy: this.bot.ccy,}).exec();
+                            ccy: this.bot.ccy,
+                        }).exec();
                         const _lastOrder = orders.length
                             ? orders[orders.length - 1]
                             : null;
                         const amt = _lastOrder
-                            ? _lastOrder.new_ccy_amt - Math.abs( _lastOrder.sell_fee)
+                            ? _lastOrder.new_ccy_amt -
+                              Math.abs(_lastOrder.sell_fee)
                             : this.bot.start_amt;
 
-                        const entryLimit =  calcEntryPrice(currentCandle, 'buy');
-                        console.log({c: currentCandle.c, o: currentCandle.o, P_DIFF, entryLimit});
+                        const entryLimit = calcEntryPrice(currentCandle, "buy");
+                        console.log({
+                            c: currentCandle.c,
+                            o: currentCandle.o,
+                            P_DIFF,
+                            entryLimit,
+                        });
                         const res = await placeTrade({
                             bot: this.bot,
                             ts: parseDate(ts),
                             amt,
                             side: "buy",
                             price: entryLimit,
-                            plat: this.plat
+                            plat: this.plat,
                         });
                     } else if (
-                         !isClosed &&
-                        lastOrder?.side == "sell" && 
+                        !isClosed &&
+                        lastOrder?.side == "sell" &&
                         lastOrder?.order_id == ""
                     ) {
-                        
-                        if (strategy.sellCond(currentCandle, undefined,df) || mTest) {
+                        if (isStopOrder || strategy.sellCond(currentCandle)) {
                             /**
                              * Place sell order
                              */
-                            const exitLimit =  calcEntryPrice(currentCandle, 'sell');
-                            console.log({c: currentCandle.c, o: currentCandle.o, P_DIFF, exitLimit});
-                            const orders = await Order.find({bot: this.bot._id,
+                            const exitLimit = calcTP(
+                                currentCandle,
+                                lastOrder.buy_price
+                            );
+                            const sl = calcSL(lastOrder.buy_price);
+                            console.log({
+                                c: currentCandle.c,
+                                o: currentCandle.o,
+                                exitLimit,
+                                sl,
+                            });
+
+                            const orders = await Order.find({
+                                bot: this.bot._id,
                                 base: this.bot.base,
-                                ccy: this.bot.ccy,}).exec();
+                                ccy: this.bot.ccy,
+                            }).exec();
                             const _lastOrder = orders.length
                                 ? orders[orders.length - 1]
                                 : null;
                             if (_lastOrder) {
-                                   console.log(
-                                `[ ${this.bot.name} ]\tHAS SELL SIGNAL > GOING OUT`
-                            );
+                                console.log(
+                                    `[ ${this.bot.name} ]\tHAS SELL SIGNAL > GOING OUT`
+                                );
                                 const amt =
                                     _lastOrder.base_amt - _lastOrder.buy_fee;
                                 const res = await placeTrade({
@@ -151,18 +185,15 @@ export class OrderPlacer {
                                     amt: Number(amt),
                                     side: "sell",
                                     price: exitLimit,
-                                    plat: this.plat
+                                    plat: this.plat,
+                                    sl
                                 });
                             }
                         }
                     }
-
-                    
-                }
-                else if (res == "ok"){
-                    botLog(this.bot, "Order cancelled")
-                } 
-                else {
+                } else if (res == "ok") {
+                    botLog(this.bot, "Order cancelled");
+                } else {
                     botLog(this.bot, "Failed to update order");
                     return;
                 }
@@ -170,7 +201,7 @@ export class OrderPlacer {
                     rescheduleJob(job.job, botJobSpecs);
                     botLog(this.bot, "JOB RESUMED");
                 }
-            } 
+            }
         } catch (err) {
             console.log(err);
         }

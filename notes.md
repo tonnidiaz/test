@@ -18,6 +18,8 @@
     - **PROS**
         - Can demo trade
         - $.12 XRP Withdrawal fee
+        - $.11 ETHW Withdrawal fee
+        - FLR .1 (R .0407) Withdrawal fee
  
     - **CONS**
         - Cannot withdraw ZAR
