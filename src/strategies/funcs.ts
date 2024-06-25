@@ -191,7 +191,7 @@ export const strategy = ({
         if (!entryLimit && buyCond(prevRow)) {
             /* Place buy order */
             entryLimit = calcEntryPrice(prevCandle, "buy");
-            entryLimit = toFixed(entryLimit, pricePrecision);
+            entryLimit = toFixed(entryLimit ?? 0, pricePrecision);
             enterTs = row.ts;
             console.log(`[ ${row.ts} ] \t Limit buy order at ${entryLimit}`);
         } else if (
