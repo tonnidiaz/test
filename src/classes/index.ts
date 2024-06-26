@@ -161,6 +161,7 @@ export class OrderPlacer {
                             console.log({
                                 c: currentCandle.c,
                                 o: currentCandle.o,
+                                entry: lastOrder.buy_price,
                                 exitLimit,
                                 sl,
                             });

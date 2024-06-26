@@ -3,7 +3,7 @@ import { Bot, Order, User } from "@/models";
 import { IBot } from "@/models/bot";
 import { botJobSpecs, jobs } from "@/utils/constants";
 import { addBotJob } from "@/utils/orders/funcs";
-import { tunedErr } from "@/utils/functions";
+import { botLog, tunedErr } from "@/utils/functions";
 import { IObj } from "@/utils/interfaces";
 import express from "express";
 import schedule from "node-schedule";
@@ -114,7 +114,8 @@ router.post("/:id/edit", authMid, async (req, res) => {
                 console.log("Resuming JOB...");
                 if (!bool) addBotJob(bot as any);
                 else {
-                    schedule.rescheduleJob(bool.job, botJobSpecs);
+                    const r = schedule.rescheduleJob(bool.job, botJobSpecs);
+                    if (!r){botLog(bot, 'FAILED TO RESUME JOB')}
                     const jobIndex = jobs.findIndex((el) => el.id == jobId);
                     jobs[jobIndex] = { ...bool, active: true };
                 }

@@ -1,13 +1,12 @@
 import { OrderPlacer } from "@/classes";
-import { Bot, Order, TBot } from "@/models";
+import { Order } from "@/models";
 import { IBot } from "@/models/bot";
-import { cancelJob, scheduleJob } from "node-schedule";
+import { scheduleJob } from "node-schedule";
 import { botJobSpecs, isStopOrder, jobs } from "../constants";
 import path from "path";
 import fs from "fs";
 import { IOrder } from "@/models/order";
 import { OKX } from "@/classes/okx";
-import { Document } from "mongoose";
 import {
     botLog,
     getCoinPrecision,
@@ -15,8 +14,6 @@ import {
     toFixed,
 } from "../functions";
 import { Bybit } from "@/classes/bybit";
-import { AccountOrderV5 } from "bybit-api";
-import { OrderDetails } from "okx-api";
 import { chandelierExit, heikinAshi, parseDate, parseKlines } from "../funcs2";
 import { objStrategies } from "@/strategies";
 
@@ -34,6 +31,7 @@ export const addBotJob = (bot: IBot) => {
     const job = scheduleJob(id, botJobSpecs, () => {
         tuJob(op, bot);
     });
+    botLog(bot, 'JOB SCHEDULED')
     jobs.push({ job, id, active: true });
 };
 
