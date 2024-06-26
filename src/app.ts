@@ -12,7 +12,7 @@ import botsRouter from './routes/bots';
 const app = express();
 import { default as mongoose } from 'mongoose';
 import cors from 'cors';
-import { DEV } from './utils/constants';
+import { DEV, jobs, setJobs } from './utils/constants';
 import dotenv from "dotenv"
 import { strategies } from './strategies';
 import { Bot } from './models';
@@ -94,7 +94,7 @@ jobs.push({job, id: "1"}) */
 
 const main = async ()=>{
     const activeBots = await Bot.find({active: true}).exec()
-
+    setJobs([])
     for (let bot of activeBots){
         addBotJob(bot)
     }

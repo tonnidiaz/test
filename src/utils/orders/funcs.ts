@@ -28,7 +28,7 @@ export const addBotJob = (bot: IBot) => {
     const op = new OrderPlacer(bot as any);
     const id = `${bot._id}`;
     console.log(`\nAdding job for bot: ${bot.name}\n`);
-    const job = scheduleJob(id, botJobSpecs, () => {
+    const job = scheduleJob(id, botJobSpecs(bot.interval), () => {
         tuJob(op, bot);
     });
     botLog(bot, 'JOB SCHEDULED')

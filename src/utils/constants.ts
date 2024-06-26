@@ -9125,9 +9125,10 @@ export const instruments = [
         innovation: "0",
     },
 ];
-export const jobs: { job: Job; id: string; active: boolean }[] = [];
+export let jobs: { job: Job; id: string; active: boolean }[] = [];
+export const setJobs = (val: typeof jobs)=> jobs = val;
 export const test = false;
-export const botJobSpecs = test ? "*/10 * * * * *" : "* * * * * *";
+export const botJobSpecs = (min: number)=> `*/${min} * * * *`// = test ? "*/10 * * * * *" : "* * * * * *";
 export const dfsDir = "src/data/dfs/binance",
     klinesDir = "src/data/klines/binance";
 export const dfsRootDir = "src/data/dfs",

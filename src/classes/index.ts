@@ -52,7 +52,7 @@ export class OrderPlacer {
                     }).exec()
                 ).length <= 4;
 
-            if (test)
+            if (test || true)
                 console.log(
                     `[ ${this.bot.name} ]\tCURR_MIN: [${currMin}]\tTEST: ${mTest}\n`
                 );
@@ -199,7 +199,7 @@ export class OrderPlacer {
                     return;
                 }
                 if (job.active) {
-                    rescheduleJob(job.job, botJobSpecs);
+                    rescheduleJob(job.job, botJobSpecs(this.bot.interval));
                     botLog(this.bot, "JOB RESUMED");
                 }
             }
