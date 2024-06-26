@@ -52,7 +52,7 @@ export class OrderPlacer {
                     }).exec()
                 ).length <= 4;
 
-            if (test)
+            if (test || true)
                 console.log(
                     `[ ${this.bot.name} ]\tCURR_MIN: [${currMin}]\tTEST: ${mTest}\n`
                 );
