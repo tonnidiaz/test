@@ -106,7 +106,8 @@ router.post("/:id/edit", authMid, async (req, res) => {
 
             if (bool && !val) {
                 // Deactivate JOB
-                schedule.cancelJob(bool.job);
+                //schedule.cancelJob(bool.job);
+                bool.job.cancel()
                 const jobIndex = jobs.findIndex((el) => el.id == jobId);
                 jobs[jobIndex] = { ...bool, active: false };
                 console.log(`Job ${bool.id} cancelled`);
@@ -114,7 +115,7 @@ router.post("/:id/edit", authMid, async (req, res) => {
                 console.log("Resuming JOB...");
                 if (!bool) addBotJob(bot as any);
                 else {
-                    const r = schedule.rescheduleJob(bool.job, botJobSpecs);
+                    const r = bool.job.reschedule(botJobSpecs)//schedule.rescheduleJob(bool.job, botJobSpecs);
                     if (!r){botLog(bot, 'FAILED TO RESUME JOB')}
                     const jobIndex = jobs.findIndex((el) => el.id == jobId);
                     jobs[jobIndex] = { ...bool, active: true };
