@@ -1,6 +1,6 @@
 import { IBot } from "@/models/bot";
 import { ensureDirExists } from "@/utils/orders/funcs";
-import { parseDate } from "@/utils/funcs2";
+import { getInterval, parseDate } from "@/utils/funcs2";
 import { botLog, getCoinPrecision, getPricePrecision } from "@/utils/functions";
 import axios from "axios";
 import { writeFileSync } from "fs";
@@ -208,7 +208,7 @@ export class OKX {
                     )} \t After: ${parseDate(new Date(after))}`
                 );
                 const res = await axios.get(
-                    `${rootURL}?instId=${symbol}&bar=${interval}m&before=${firstTs}&after=${after}`
+                    `${rootURL}?instId=${symbol}&bar=${getInterval(interval, 'okx')}&before=${firstTs}&after=${after}`
                 );
                 let data = res.data.data;
                 if (!data.length) break;
@@ -223,12 +223,12 @@ export class OKX {
                 }
                 cnt += 1;
             }
-        } else {
+        } else { 
             const res = await axios.get(
-                `${rootURL}?instId=${symbol}&bar=${interval}m&after=${
+                `${rootURL}?instId=${symbol}&bar=${getInterval(interval, 'okx')}&after=${
                     end ?? ""
                 }&before=${start ?? ""}`
-            ); //this.client.getIndexCandles(this.getSymbol(),`${this.bot.interval}m`, {after: `${end}`})
+            ); 
             let data = res.data.data;
             klines = [...data].reverse();
         }

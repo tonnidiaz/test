@@ -1,6 +1,6 @@
 import { MAKER_FEE_RATE, TAKER_FEE_RATE } from "@/utils/constants";
 import { ensureDirExists } from "@/utils/orders/funcs";
-import { parseDate } from "@/utils/funcs2";
+import { getInterval, parseDate } from "@/utils/funcs2";
 import { botLog } from "@/utils/functions";
 import axios, { AxiosResponse } from "axios";
 import { writeFileSync } from "fs";
@@ -51,7 +51,7 @@ export class TestOKX extends Platform {
         savePath?: string | undefined;
         isBybit?: boolean;
     }) {
-        const rootURL = `https://okx.com/api/v5/market/candles`
+        const rootURL = `https://okx.com/api/v5/market/history-candles`
         const client = new RestClientV5()
             end = end ?? Date.now();
             let klines: any[] = [];
@@ -71,7 +71,7 @@ export class TestOKX extends Platform {
                         )} \t After: ${parseDate(new Date(after))}`
                     );
                     const url =  //`https://api.bybit.com/v5/market/kline?category=spot&symbol=${symbol}&interval=${interval}&start=${firstTs}`
-                     `${rootURL}?instId=${symbol}&bar=${interval}m&before=${firstTs}&after=${after}&limit=${limit}`;
+                     `${rootURL}?instId=${symbol}&bar=${getInterval(interval, 'okx')}&before=${firstTs}&after=${after}&limit=${limit}`;
                     console.log('GETTING MARK PRICE');
                     const res = isBybit ? await client.getKline({category: 'spot', symbol,interval: interval as any, start: firstTs}): await axios.get(url);
                     const data = isBybit ? (res as any ).result.list: (res as AxiosResponse).data.data;
@@ -90,7 +90,7 @@ export class TestOKX extends Platform {
             } else {
                 const url = isBybit
                     ? `https://api.bybit.com/v5/market/kline?category=spot&symbol=${symbol}&interval=${interval}&start=${start}&end=${end}`
-                    : `${rootURL}?instId=${symbol}&bar=${interval}m&after=${
+                    : `${rootURL}?instId=${symbol}&bar=${getInterval(interval, 'okx')}&after=${
                           end ?? ""
                       }&before=${start ?? ""}`;
 

@@ -161,3 +161,6 @@ export const calcEntryPrice = (row: IObj, side: "buy" | "sell") => {
 
 export const calcSL = ( entry: number)=>entry * (1 - .1 / 100);
 export const calcTP = ( row: any, entry: number)=>isStopOrder ? entry * (1 + 3.5/100)  : row[useHaClose ? 'ha_c' : 'c'] * (1 - 0.0 / 100);
+export const getInterval = (m: number, plt: 'bybit' |'okx' | 'binance')=>{
+    return plt == 'okx' ? (m >= 60 ? `${Math.floor(m / 60)}H` : `${m}m`) : `${m}m`
+}
