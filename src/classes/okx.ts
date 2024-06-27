@@ -84,7 +84,8 @@ export class OKX {
         amt: number,
         price: number,
         side: "buy" | "sell" = "buy",
-        sl: number
+        sl: number,
+        clOrderId: string
     ) {
         /* Place limit order at previous close */
         const od = { price, sl, amt, side };
@@ -98,6 +99,7 @@ export class OKX {
                           ordType: "market",
                           side,
                           sz: amt.toString(),
+                          clOrdId: clOrderId,
                           //px: price.toString(),
                       })
                     : await this.client.placeAlgoOrder({
@@ -110,6 +112,7 @@ export class OKX {
                           sz: amt.toString(),
                           tpOrdPx: "-1",
                           slOrdPx: "-1",
+                          algoClOrdId: clOrderId,
                       });
 
             if (res[0].sCode != "0") {
@@ -302,7 +305,7 @@ export class MainOKX {
     async initWs() {
         for (let ws of this.wsList) {
             ws.connectPrivate();
-             ws.on("open", (e) => {
+            ws.on("open", (e) => {
                 console.log("WEB SOCKET CONNECTED");
             });
             ws.on("error", (e) => {
@@ -324,7 +327,7 @@ export class MainOKX {
                     /* SUBSCRIBE TO ORDERS CHANNEL */
                     console.log(`SUBED: ${isSubed}`);
                     if (true) {
-                        console.log('SUBSCRIBING...');
+                        console.log("SUBSCRIBING...");
                         ws.subscribe({ channel: "orders", instType: "ANY" });
                         ws.subscribe({
                             channel: "orders-algo",
@@ -349,9 +352,7 @@ export class MainOKX {
                         };
 
                         const isBuyOrder = ord.side == "buy";
-                        const filt = isBuyOrder
-                            ? { buy_order_id: ord.ordId }
-                            : { order_id: ord.ordId };
+                        const filt = { cl_order_id: ord.clOrdId };
                         console.log(filt);
                         const order = await Order.findOne(filt).exec();
 
@@ -389,7 +390,7 @@ export class MainOKX {
                                     botLog(bot, "ORDER DELETED");
                                 } else {
                                     /* CLEAR SELL ORDER ID */
-                                    
+
                                     botLog(bot, "CLEARING SELL ORDER_ID...");
                                     order.order_id = "";
                                     order.sell_timestamp = undefined;
@@ -408,13 +409,14 @@ export class MainOKX {
                     /* HANDLE ALGO ORDERS */
                     for (let ord of data as AlgoOrderDetailsResult[]) {
                         const ordLog = (arg: any) => {
-                            console.log(`\nALGO: [ORDER: ${ord.algoId} ]\t${arg}\n`);
+                            console.log(
+                                `\nALGO: [ORDER: ${ord.algoId} ]\t${arg}\n`
+                            );
                         };
 
                         const isBuyOrder = ord.side == "buy";
-                        const filt = isBuyOrder
-                            ? { buy_order_id: ord.algoId }
-                            : { order_id: ord.algoId };
+                        const filt = { cl_order_id: ord.algoClOrdId };
+                        console.log(filt);
                         const order = await Order.findOne(filt).exec();
 
                         if (order) {
@@ -427,7 +429,7 @@ export class MainOKX {
                             }
                             /* GET REAL ORDER DETAILS */
                             if (ord.state == "effective") {
-                                ordLog('STATE == effective')
+                                ordLog("STATE == effective");
                                 const plat =
                                     bot.platform == "okx"
                                         ? new OKX(bot)
@@ -480,13 +482,13 @@ const updateOrder = async ({
         const fee = orderDetails.fee;
         let base_amt = orderDetails.fillSz;
         order.buy_order_id = orderDetails.id;
-        order.buy_price = orderDetails.fillPx; 
+        order.buy_price = orderDetails.fillPx;
         order.buy_fee = Math.abs(fee);
         order.base_amt = base_amt;
         order.ccy_amt = orderDetails.fillSz * orderDetails.fillPx;
         order.side = "sell";
         order.buy_timestamp = ts;
-        await order.save()
+        await order.save();
 
         /* CALL TO PLACE SELL ORDER IF IS_STOP_ORDER */
         await afterOrderUpdate({ bot });
@@ -510,6 +512,6 @@ const updateOrder = async ({
         const profit = ((bal - order.ccy_amt) / order.ccy_amt) * 100;
         order.profit = profit;
         order.order_id = orderDetails.id;
-        await order.save()
+        await order.save();
     }
 };

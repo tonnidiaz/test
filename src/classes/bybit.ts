@@ -62,7 +62,8 @@ export class Bybit {
         amt: number,
         price: number,
         side: "buy" | "sell" = "buy",
-        sl: number
+        sl: number,
+        clOrderId: string
     ) {
         const od = { price, sl, amt, side };
         botLog(this.bot, `PLACING ORDER: ${JSON.stringify(od)}`);

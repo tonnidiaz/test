@@ -3,6 +3,7 @@ import { HydratedDocumentFromSchema, InferSchemaType, Schema } from "mongoose";
 export const OrderSchema = new Schema(
     {
         order_id: { type: String, default: "" },
+        cl_order_id: { type: String, default: "" },
         buy_order_id: { type: String, default: "" },
         side: { type: String, default: "buy" },
         buy_timestamp: { type: Object},

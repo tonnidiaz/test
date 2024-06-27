@@ -25,7 +25,6 @@ export const tuJob = async (op: OrderPlacer, bot: IBot) => {
 };
 
 export const addBotJob = async (bot: IBot) => {
-    
     const op = new OrderPlacer(bot as any);
     const id = `${bot._id}`;
     console.log(`\nAdding job for bot: ${bot.name}\n`);
@@ -285,31 +284,39 @@ export const placeTrade = async ({
             bot,
             `Placing a ${amt} ${side} ${bot.order_type} SL: ${sl} order at ${price}...`
         );
-        const orderId = await plat.placeOrder(amt, price, side, sl);
+
+        const clOrderId = Date.now().toString();
+
+        const order =
+            side == "buy"
+                ? new Order({
+                      buy_price: price,
+                      buy_timestamp: { i: ts },
+                      side: side,
+                      bot: bot.id,
+                      base: bot.base,
+                      ccy: bot.ccy,
+                  })
+                : orders[orders.length - 1];
+
+        order.cl_order_id = clOrderId;
+        await order.save();
+        if (side == "buy") bot.orders.push(order._id);
+
+        const orderId = await plat.placeOrder(amt, price, side, sl, clOrderId);
 
         if (!orderId) {
             botLog(bot, "Failed to place order");
             return;
         }
 
-        let order: IOrder;
         /// Save order
         if (side == "buy") {
             /* CRAETING A NEW BUY ORDER */
-            order = new Order({
-                buy_order_id: orderId,
-                buy_price: price,
-                buy_timestamp: { i: ts },
-                //buy_fee: Number(useBybit ? (mOrder as AccountOrderV5).cumExecFee : (mOrder as any).fee),
-                //ccy_amt: amt,
-                side: side,
-                bot: bot.id,
-                base: bot.base,
-                ccy: bot.ccy,
-            });
+            order.buy_order_id = orderId;
         } else {
             /* CREATING A SELL ORDER */
-            order = orders[orders.length - 1];
+
             order.order_id = orderId;
             order.sell_timestamp = { i: ts };
             //order.sell_fee = Number(useBybit ? (mOrder as AccountOrderV5).cumExecFee : (mOrder as any).fee);
@@ -318,7 +325,6 @@ export const placeTrade = async ({
             order.side = side;
         }
 
-        if (side == "buy") bot.orders.push(order._id);
         await order.save();
         await bot.save();
         botLog(bot, `${side} order placed, Bot updated`);
