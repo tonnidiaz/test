@@ -1,5 +1,5 @@
 import { OrderPlacer } from "@/classes";
-import { Order } from "@/models";
+import { Bot, Order } from "@/models";
 import { IBot } from "@/models/bot";
 import { scheduleJob } from "node-schedule";
 import { botJobSpecs, isStopOrder, jobs } from "../constants";
@@ -24,14 +24,15 @@ export const tuJob = async (op: OrderPlacer, bot: IBot) => {
     op.cnt += 1;
 };
 
-export const addBotJob = (bot: IBot) => {
+export const addBotJob = async (bot: IBot) => {
+    
     const op = new OrderPlacer(bot as any);
     const id = `${bot._id}`;
     console.log(`\nAdding job for bot: ${bot.name}\n`);
     const job = scheduleJob(id, botJobSpecs(bot.interval), () => {
         tuJob(op, bot);
     });
-    botLog(bot, 'JOB SCHEDULED')
+    botLog(bot, "JOB SCHEDULED");
     jobs.push({ job, id, active: true });
 };
 
@@ -94,10 +95,7 @@ export const updateOrder = async (bot: IBot, orders: IOrder[]) => {
                         lastOrder.order_id = res.id;
                     } else {
                         /* Cancel if there's buyCondition  */
-                        botLog(
-                            bot,
-                            "SELL ORDER NOT FILLED"
-                        );
+                        botLog(bot, "SELL ORDER NOT FILLED");
                         /* const klines = await plat.getKlines({
                             end: Date.now() - bot.interval * 60 * 1000,
                         });
@@ -114,11 +112,8 @@ export const updateOrder = async (bot: IBot, orders: IOrder[]) => {
 
                         console.log(currentCandle);
                         if (strategy.buyCond(currentCandle)) { */
-                        if (!isStopOrder){
-                           botLog(
-                                bot,
-                                "CANCELLING SELL ORDER..."
-                            );
+                        if (!isStopOrder) {
+                            botLog(bot, "CANCELLING SELL ORDER...");
                             const res = await plat.cancelOrder({ ordId: oid });
                             if (!res) {
                                 botLog(bot, "FAILED TO CANCEL SELL ORDER");
@@ -130,10 +125,9 @@ export const updateOrder = async (bot: IBot, orders: IOrder[]) => {
                             lastOrder.sell_price = 0;
                             await lastOrder.save();
                             botLog(bot, "ORDER_ID CLEARED");
-                            return "ok"; 
+                            return "ok";
                         }
-                        
-                            
+
                         /* } */
                     }
                 } else {
@@ -156,32 +150,32 @@ export const updateOrder = async (bot: IBot, orders: IOrder[]) => {
                         lastOrder.buy_timestamp = ts;
                     } else {
                         /* Cancel if there's sellCondition  */
-                        if (!isStopOrder){
-                            botLog(
-                                bot,
-                                "BUY ORDER NOT FILLED..."
-                            );
+                        if (!isStopOrder) {
+                            botLog(bot, "BUY ORDER NOT FILLED...");
                             const klines = await plat.getKlines({
                                 end: Date.now() - bot.interval * 60 * 1000,
                             });
-    
-                            if (!klines) return console.log("FAILED TO GET KLINES");
-    
+
+                            if (!klines)
+                                return console.log("FAILED TO GET KLINES");
+
                             const df = chandelierExit(
-                                heikinAshi(parseKlines(klines), [bot.base, bot.ccy])
+                                heikinAshi(parseKlines(klines), [
+                                    bot.base,
+                                    bot.ccy,
+                                ])
                             );
-    
+
                             botLog(bot, "CHECKING SELL_SIGNAL...");
                             const currentCandle = df[df.length - 1];
                             const strategy = objStrategies[bot.strategy - 1];
-    
+
                             console.log(currentCandle);
                             if (strategy.sellCond(currentCandle)) {
-                                botLog(
-                                    bot,
-                                    "CANCELLING BUY ORDER..."
-                                );
-                                const res = await plat.cancelOrder({ ordId: oid });
+                                botLog(bot, "CANCELLING BUY ORDER...");
+                                const res = await plat.cancelOrder({
+                                    ordId: oid,
+                                });
                                 if (!res) {
                                     botLog(bot, "FAILED TO CANCEL BUY ORDER");
                                     return;
@@ -189,17 +183,19 @@ export const updateOrder = async (bot: IBot, orders: IOrder[]) => {
                                 botLog(bot, "DELETING ORDER...");
                                 botLog(bot, `Orders: ${bot.orders.length}`);
                                 bot.orders = bot.orders.filter(
-                                    (el) => el.toString() != lastOrder!._id.toString()
+                                    (el) =>
+                                        el.toString() !=
+                                        lastOrder!._id.toString()
                                 );
                                 botLog(bot, `Orders: ${bot.orders.length}`);
                                 await Order.findByIdAndDelete(lastOrder!._id);
                                 await bot.save();
                                 botLog(bot, "ORDER DELETED");
-                                return "ok";}
+                                return "ok";
+                            }
                         }
-                        
-                        }
-                   /*  } */
+                    }
+                    /*  } */
                 }
             } else {
                 botLog(bot, "Order check error");
@@ -261,16 +257,16 @@ export const placeTrade = async ({
                 amt = lastOrder.base_amt - lastOrder.buy_fee;
             }
         }
-        const pxPr = getPricePrecision([bot.base, bot.ccy], bot.platform) /* Price precision */
+        const pxPr = getPricePrecision(
+            [bot.base, bot.ccy],
+            bot.platform
+        ); /* Price precision */
         console.log(`[ ${bot.name} ]\tAvail amt: ${amt}\n`);
         const { order_type } = bot;
         //botLog(bot, `Placing a ${side =='sell' ? amt : amt / price} ${side} order at ${price}...`);
         botLog(bot, `Placing a ${amt} ${side}  order at ${price}...`);
-        sl = toFixed(sl ?? 0, pxPr)
-        price = toFixed(
-            price,
-            pxPr
-        );
+        sl = toFixed(sl ?? 0, pxPr);
+        price = toFixed(price, pxPr);
         amt =
             bot.order_type == "Market"
                 ? amt

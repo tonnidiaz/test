@@ -17,6 +17,7 @@ import dotenv from "dotenv"
 import { strategies } from './strategies';
 import { Bot } from './models';
 import { addBotJob } from './utils/orders/funcs';
+import { MainOKX } from './classes/okx';
 
 
 dotenv.config()
@@ -96,8 +97,9 @@ const main = async ()=>{
     const activeBots = await Bot.find({active: true}).exec()
     setJobs([])
     for (let bot of activeBots){
-        addBotJob(bot)
+        await addBotJob(bot)
     }
+    new MainOKX()
 }
 
 main()

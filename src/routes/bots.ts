@@ -9,11 +9,11 @@ import express from "express";
 import schedule from "node-schedule";
 
 const router = express.Router();
- 
+
 router.get("/", async (req, res) => {
     try {
         const { query } = req;
-        const username= query.user; 
+        const username = query.user;
 
         const user = username ? await User.findOne({ username }).exec() : null;
         console.log(user);
@@ -99,35 +99,35 @@ router.post("/:id/edit", authMid, async (req, res) => {
 
         const fd = req.body;
         const { key, val } = fd;
-
+        const jobId = `${bot._id}`;
+        const bool = jobs.find((el) => el.id == jobId);
         if (key == "active") {
-            const jobId = `${bot._id}`;
-            const bool = jobs.find((el) => el.id == jobId);
-
             if (bool && !val) {
                 // Deactivate JOB
                 //schedule.cancelJob(bool.job);
-                bool.job.cancel()
+                bool.job.cancel();
                 const jobIndex = jobs.findIndex((el) => el.id == jobId);
                 jobs[jobIndex] = { ...bool, active: false };
-                botLog(bot,`Job ${bool.id} cancelled`);
+                botLog(bot, `Job ${bool.id} cancelled`);
             } else if (val) {
                 console.log("Resuming JOB...");
-                if (!bool) addBotJob(bot as any);
+                if (!bool) await addBotJob(bot as any);
                 else {
-                    const r = bool.job.reschedule(botJobSpecs(bot.interval))//schedule.rescheduleJob(bool.job, botJobSpecs);
-                    if (!r){botLog(bot, 'FAILED TO RESUME JOB')}
+                    const r = bool.job.reschedule(botJobSpecs(bot.interval)); //schedule.rescheduleJob(bool.job, botJobSpecs);
+                    if (!r) {
+                        botLog(bot, "FAILED TO RESUME JOB");
+                    }
                     const jobIndex = jobs.findIndex((el) => el.id == jobId);
                     jobs[jobIndex] = { ...bool, active: true };
                 }
             }
             bot.set(key, val);
 
-            botLog(bot,"DONE ADDING/PAUSING JOB");
+            botLog(bot, "DONE ADDING/PAUSING JOB");
         } else if (key == "multi") {
             for (let k of Object.keys(val)) {
                 const v = val[k];
-                if (k == "pair" || k == 'symbol') {
+                if (k == "pair" || k == "symbol") {
                     bot.set("base", v[0]);
                     bot.set("ccy", v[1]);
                 }
@@ -135,6 +135,17 @@ router.post("/:id/edit", authMid, async (req, res) => {
             }
         }
         await bot.save();
+        if (key == "multi" && bot.active) {
+            /* RESCADULE IN CASE INTERVAL CHANGED */
+            if (bool) {
+                const r = bool.job.reschedule(botJobSpecs(bot.interval)); //schedule.rescheduleJob(bool.job, botJobSpecs);
+                if (!r) {
+                    botLog(bot, "FAILED TO RESUME JOB");
+                }
+                const jobIndex = jobs.findIndex((el) => el.id == jobId);
+                jobs[jobIndex] = { ...bool, active: true };
+            }
+        }
         res.json((await bot.populate("orders")).toJSON());
     } catch (error) {
         console.log(error);

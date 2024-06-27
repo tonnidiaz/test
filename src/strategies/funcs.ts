@@ -197,7 +197,7 @@ export const strategy = ({
         } else if (
             !exitLimit &&
             entryLimit &&
-            pos /* &&
+            pos && !buyCond(prevCandle) /* &&
             sellCond(prevRow, entry) */
         ) {
             /* Place sell order */
