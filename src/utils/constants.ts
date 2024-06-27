@@ -9141,5 +9141,5 @@ export const slPercent = 0.5 / 100,
 export const platforms = ["bybit", "okx"];
 export const isMarket = true,
     cancelOnCond = true,
-    useHaClose = false,
+    useHaClose = false, demo = true,
     isStopOrder = true;

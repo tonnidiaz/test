@@ -108,8 +108,8 @@ export class OKX {
                 return;
             }
             console.log(`\ORDER PLACED FOR BOT=${this.bot.name}\n`);
-            const d : any = res[0]
-            const id: string = side == 'buy' ? d.ordId : d.algoId
+            const d: any = res[0];
+            const id: string = side == "buy" ? d.ordId : d.algoId;
             return id;
         } catch (error) {
             console.log(error);
@@ -126,16 +126,16 @@ export class OKX {
                 fee: number;
             } | null = null;
             let finalRes: OrderDetails | null = null;
-            botLog(this.bot, `IS_ALGO: ${isAlgo}`)
+            botLog(this.bot, `IS_ALGO: ${isAlgo}`);
             const res = isAlgo
                 ? await this.client.getAlgoOrderDetails({ algoId: orderId })
                 : await this.client.getOrderDetails({
                       ordId: orderId!,
                       instId: this.getSymbol(),
                   });
-                  if (DEV){
-                    console.log(res);
-                  }
+            if (DEV) {
+                console.log(res);
+            }
             if (isAlgo && res[0].state == "effective") {
                 const res2 = (
                     await this.client.getOrderDetails({
@@ -195,7 +195,6 @@ export class OKX {
         symbol = symbol ?? this.getSymbol();
         botLog(this.bot, "GETTING KLINES.. FOR " + symbol);
 
-        const rootURL = "https://okx.com/api/v5/market/candles";
         if (start) {
             let firstTs = start;
             while (firstTs <= end) {
@@ -207,10 +206,16 @@ export class OKX {
                         new Date(firstTs)
                     )} \t After: ${parseDate(new Date(after))}`
                 );
-                const res = await axios.get(
-                    `${rootURL}?instId=${symbol}&bar=${getInterval(interval, 'okx')}&before=${firstTs}&after=${after}`
+                const res = await this.client.getCandles(
+                    symbol,
+                    getInterval(interval, "okx"),
+                    {
+                        before: `${firstTs}`,
+                        after: `${after}`,
+                        limit: `${limit}`,
+                    }
                 );
-                let data = res.data.data;
+                let data = res;
                 if (!data.length) break;
                 klines.push(...[...data].reverse());
 
@@ -223,13 +228,16 @@ export class OKX {
                 }
                 cnt += 1;
             }
-        } else { 
-            const res = await axios.get(
-                `${rootURL}?instId=${symbol}&bar=${getInterval(interval, 'okx')}&after=${
-                    end ?? ""
-                }&before=${start ?? ""}`
-            ); 
-            let data = res.data.data;
+        } else {
+            const res = await this.client.getCandles(
+                symbol,
+                getInterval(interval, "okx"),
+                {
+                    before: start ? `${start}` : undefined,
+                    after: end ? `${end}` : undefined,
+                }
+            );
+            let data = res;
             klines = [...data].reverse();
         }
 
