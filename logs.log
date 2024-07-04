@@ -1,0 +1,205 @@
+GETTING OKX KLINES...
+header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+domain: https://www.okx.com
+url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716276747254&bar=15m
+BEGIN CE: 1.8
+CE COMPLETE
+DF SAVED TO CSV FILE
+CHECKING SIGNALS...
+
+HAS BUY SIGNAL > GOING IN: None
+
+FIRST ORDER
+
+GETTING BALANCE...
+body:  
+header:  {'Content-Type': 'application/json', 'OK-ACCESS-KEY': '0189aae2-49ea-45ad-9852-88c9dffeecc4', 'OK-ACCESS-SIGN': b'bB2g49hEBT+sGf0qmNn/ZL36nvXEGQ0OVvwcHBb1WvM=', 'OK-ACCESS-TIMESTAMP': '2024-05-21T07:32:31.486Z', 'OK-ACCESS-PASSPHRASE': 'Baseline@072', 'x-simulated-trading': '1'}
+domain: https://www.okx.com
+url: /api/v5/account/balance?ccy=USDT
+Avail amt: 29667.596291847574
+
+PLACING A buy order FOR [75]
+
+PLACING ORDER...
+body:  {"instId": "ETH-USDT", "tdMode": "cash", "side": "buy", "ordType": "market", "sz": 75, "ccy": "", "clOrdId": "", "tag": "", "posSide": "", "px": 3672.1858, "reduceOnly": "", "tgtCcy": "", "tpTriggerPx": "", "tpOrdPx": "", "slTriggerPx": "", "slOrdPx": "", "tpTriggerPxType": "", "slTriggerPxType": "", "quickMgnType": "", "stpId": "", "stpMode": "", "attachAlgoOrds": null}
+header:  {'Content-Type': 'application/json', 'OK-ACCESS-KEY': '0189aae2-49ea-45ad-9852-88c9dffeecc4', 'OK-ACCESS-SIGN': b'yEiByaebcLhn7VQGEd5N1FvtsGmp6aEFXUGn/FNGojo=', 'OK-ACCESS-TIMESTAMP': '2024-05-21T07:32:32.105Z', 'OK-ACCESS-PASSPHRASE': 'Baseline@072', 'x-simulated-trading': '1'}
+domain: https://www.okx.com
+url: /api/v5/trade/order
+ ORDER PLACED SUCCESSFULLY!
+
+GETTING ORDER 1468823532183490563
+body:  
+header:  {'Content-Type': 'application/json', 'OK-ACCESS-KEY': '0189aae2-49ea-45ad-9852-88c9dffeecc4', 'OK-ACCESS-SIGN': b'bUEH63bpVg85pHISMQxYQEIjbBCmKMbuBIAxqRYj/rI=', 'OK-ACCESS-TIMESTAMP': '2024-05-21T07:32:32.699Z', 'OK-ACCESS-PASSPHRASE': 'Baseline@072', 'x-simulated-trading': '1'}
+domain: https://www.okx.com
+url: /api/v5/trade/order?instId=ETH-USDT&ordId=1468823532183490563
+DB UPDATED
+
+RESUME JOB
+CURR_MIN: [32]  TEST: True
+
+LAST_ORDER: {'order_id': '', 'is_closed': False, 'side': 'buy'}
+
+GETTING ORDER 1468823532183490563
+body:  
+header:  {'Content-Type': 'application/json', 'OK-ACCESS-KEY': '0189aae2-49ea-45ad-9852-88c9dffeecc4', 'OK-ACCESS-SIGN': b'T5NHx4fWFL5HUqoyysLB9LR0Oa87/U07pVFmBFemhFM=', 'OK-ACCESS-TIMESTAMP': '2024-05-21T07:32:33.692Z', 'OK-ACCESS-PASSPHRASE': 'Baseline@072', 'x-simulated-trading': '1'}
+domain: https://www.okx.com
+url: /api/v5/trade/order?instId=ETH-USDT&ordId=1468823532183490563
+IS BUY ORDER
+
+GETTING OKX KLINES...
+header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+domain: https://www.okx.com
+url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716276747254&bar=15m
+BEGIN CE: 1.8
+CE COMPLETE
+DF SAVED TO CSV FILE
+CHECKING SIGNALS...
+
+HAS SELL SIGNAL > GOING OUT
+Avail amt: 0.020414
+
+PLACING A sell order FOR [0.020414]
+
+PLACING ORDER...
+body:  {"instId": "ETH-USDT", "tdMode": "cash", "side": "sell", "ordType": "market", "sz": 0.020414, "ccy": "", "clOrdId": "", "tag": "", "posSide": "", "px": 3672.1858, "reduceOnly": "", "tgtCcy": "", "tpTriggerPx": "", "tpOrdPx": "", "slTriggerPx": "", "slOrdPx": "", "tpTriggerPxType": "", "slTriggerPxType": "", "quickMgnType": "", "stpId": "", "stpMode": "", "attachAlgoOrds": null}
+header:  {'Content-Type': 'application/json', 'OK-ACCESS-KEY': '0189aae2-49ea-45ad-9852-88c9dffeecc4', 'OK-ACCESS-SIGN': b'9w3ivmYPB861pgflXrueVkgTyB4VaVTSTZzq+glLML8=', 'OK-ACCESS-TIMESTAMP': '2024-05-21T07:32:34.831Z', 'OK-ACCESS-PASSPHRASE': 'Baseline@072', 'x-simulated-trading': '1'}
+domain: https://www.okx.com
+url: /api/v5/trade/order
+OCO ORDER PLACED SUCCESSFULLY!
+
+GETTING ORDER 1468823619492122625
+body:  
+header:  {'Content-Type': 'application/json', 'OK-ACCESS-KEY': '0189aae2-49ea-45ad-9852-88c9dffeecc4', 'OK-ACCESS-SIGN': b'nY7VSW6ndgAzrvhaZLrvOLsJ/jOhYJp4nJeku0PKFpM=', 'OK-ACCESS-TIMESTAMP': '2024-05-21T07:32:35.298Z', 'OK-ACCESS-PASSPHRASE': 'Baseline@072', 'x-simulated-trading': '1'}
+domain: https://www.okx.com
+url: /api/v5/trade/order?instId=ETH-USDT&ordId=1468823619492122625
+DB UPDATED
+
+RESUME JOB
+CURR_MIN: [32]  TEST: True
+
+LAST_ORDER: {'order_id': '1468823619492122625', 'is_closed': False, 'side': 'sell'}
+
+GETTING ORDER 1468823619492122625
+body:  
+header:  {'Content-Type': 'application/json', 'OK-ACCESS-KEY': '0189aae2-49ea-45ad-9852-88c9dffeecc4', 'OK-ACCESS-SIGN': b'A3adUikG4+uyYC7922hk/bikHn3DsJ2Zx6JBuS1dco0=', 'OK-ACCESS-TIMESTAMP': '2024-05-21T07:32:36.692Z', 'OK-ACCESS-PASSPHRASE': 'Baseline@072', 'x-simulated-trading': '1'}
+domain: https://www.okx.com
+url: /api/v5/trade/order?instId=ETH-USDT&ordId=1468823619492122625
+IS SELL ORDER
+
+
+NEW_BALANCE: 74.9857255
+
+
+GETTING OKX KLINES...
+header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+domain: https://www.okx.com
+url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716276747254&bar=15m
+BEGIN CE: 1.8
+CE COMPLETE
+DF SAVED TO CSV FILE
+CHECKING SIGNALS...
+
+HAS BUY SIGNAL > GOING IN: {'order_id': '1468823619492122625', 'is_closed': True, 'side': 'sell'}
+Avail amt: 73.92941250000007
+
+PLACING A buy order FOR [74.9857255]
+
+PLACING ORDER...
+body:  {"instId": "ETH-USDT", "tdMode": "cash", "side": "buy", "ordType": "market", "sz": 74.9857255, "ccy": "", "clOrdId": "", "tag": "", "posSide": "", "px": 3671.4530250000003, "reduceOnly": "", "tgtCcy": "", "tpTriggerPx": "", "tpOrdPx": "", "slTriggerPx": "", "slOrdPx": "", "tpTriggerPxType": "", "slTriggerPxType": "", "quickMgnType": "", "stpId": "", "stpMode": "", "attachAlgoOrds": null}
+header:  {'Content-Type': 'application/json', 'OK-ACCESS-KEY': '0189aae2-49ea-45ad-9852-88c9dffeecc4', 'OK-ACCESS-SIGN': b'oxmdeGMEMIXtMlpmf0UrlFDixwphCnEMeXCasxKG9nk=', 'OK-ACCESS-TIMESTAMP': '2024-05-21T07:32:37.823Z', 'OK-ACCESS-PASSPHRASE': 'Baseline@072', 'x-simulated-trading': '1'}
+domain: https://www.okx.com
+url: /api/v5/trade/order
+ ORDER PLACED SUCCESSFULLY!
+
+GETTING ORDER 1468823720121864192
+body:  
+header:  {'Content-Type': 'application/json', 'OK-ACCESS-KEY': '0189aae2-49ea-45ad-9852-88c9dffeecc4', 'OK-ACCESS-SIGN': b'hfFVBRZ70ftdxy/bIXfYoo3LTBPXU1tgWp/6goLoIjY=', 'OK-ACCESS-TIMESTAMP': '2024-05-21T07:32:38.296Z', 'OK-ACCESS-PASSPHRASE': 'Baseline@072', 'x-simulated-trading': '1'}
+domain: https://www.okx.com
+url: /api/v5/trade/order?instId=ETH-USDT&ordId=1468823720121864192
+DB UPDATED
+
+RESUME JOB
+CURR_MIN: [32]  TEST: True
+
+LAST_ORDER: {'order_id': '', 'is_closed': False, 'side': 'buy'}
+
+GETTING ORDER 1468823720121864192
+body:  
+header:  {'Content-Type': 'application/json', 'OK-ACCESS-KEY': '0189aae2-49ea-45ad-9852-88c9dffeecc4', 'OK-ACCESS-SIGN': b'j+PcNV6UeV2CsjrTBcun4xlfWVRQNqlgAIsPK5Uo3vA=', 'OK-ACCESS-TIMESTAMP': '2024-05-21T07:32:39.692Z', 'OK-ACCESS-PASSPHRASE': 'Baseline@072', 'x-simulated-trading': '1'}
+domain: https://www.okx.com
+url: /api/v5/trade/order?instId=ETH-USDT&ordId=1468823720121864192
+IS BUY ORDER
+
+GETTING OKX KLINES...
+header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+domain: https://www.okx.com
+url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716276747254&bar=15m
+BEGIN CE: 1.8
+CE COMPLETE
+DF SAVED TO CSV FILE
+CHECKING SIGNALS...
+
+HAS SELL SIGNAL > GOING OUT
+Avail amt: 0.020412
+
+PLACING A sell order FOR [0.020412]
+
+PLACING ORDER...
+body:  {"instId": "ETH-USDT", "tdMode": "cash", "side": "sell", "ordType": "market", "sz": 0.020412, "ccy": "", "clOrdId": "", "tag": "", "posSide": "", "px": 3672.1410750000005, "reduceOnly": "", "tgtCcy": "", "tpTriggerPx": "", "tpOrdPx": "", "slTriggerPx": "", "slOrdPx": "", "tpTriggerPxType": "", "slTriggerPxType": "", "quickMgnType": "", "stpId": "", "stpMode": "", "attachAlgoOrds": null}
+header:  {'Content-Type': 'application/json', 'OK-ACCESS-KEY': '0189aae2-49ea-45ad-9852-88c9dffeecc4', 'OK-ACCESS-SIGN': b'faB08yDkD495Z/iFmbjn8MoNOs3oiXu967dLZZpvDf8=', 'OK-ACCESS-TIMESTAMP': '2024-05-21T07:32:40.823Z', 'OK-ACCESS-PASSPHRASE': 'Baseline@072', 'x-simulated-trading': '1'}
+domain: https://www.okx.com
+url: /api/v5/trade/order
+OCO ORDER PLACED SUCCESSFULLY!
+
+GETTING ORDER 1468823820281843712
+body:  
+header:  {'Content-Type': 'application/json', 'OK-ACCESS-KEY': '0189aae2-49ea-45ad-9852-88c9dffeecc4', 'OK-ACCESS-SIGN': b'jyNhg5AgJIna1hngemUIiA2V7ppC1wys1Is2E0Fd7w4=', 'OK-ACCESS-TIMESTAMP': '2024-05-21T07:32:41.285Z', 'OK-ACCESS-PASSPHRASE': 'Baseline@072', 'x-simulated-trading': '1'}
+domain: https://www.okx.com
+url: /api/v5/trade/order?instId=ETH-USDT&ordId=1468823820281843712
+DB UPDATED
+
+RESUME JOB
+CURR_MIN: [32]  TEST: True
+
+LAST_ORDER: {'order_id': '1468823820281843712', 'is_closed': False, 'side': 'sell'}
+
+GETTING ORDER 1468823820281843712
+body:  
+header:  {'Content-Type': 'application/json', 'OK-ACCESS-KEY': '0189aae2-49ea-45ad-9852-88c9dffeecc4', 'OK-ACCESS-SIGN': b'k7+oPpG7dAMBt+w/u/1Hxg1pAnNfKdIvpBn6Yt9fiTM=', 'OK-ACCESS-TIMESTAMP': '2024-05-21T07:32:42.692Z', 'OK-ACCESS-PASSPHRASE': 'Baseline@072', 'x-simulated-trading': '1'}
+domain: https://www.okx.com
+url: /api/v5/trade/order?instId=ETH-USDT&ordId=1468823820281843712
+IS SELL ORDER
+
+
+NEW_BALANCE: 74.97878724
+
+
+GETTING OKX KLINES...
+header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+domain: https://www.okx.com
+url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716276747254&bar=15m
+BEGIN CE: 1.8
+CE COMPLETE
+DF SAVED TO CSV FILE
+CHECKING SIGNALS...
+
+HAS BUY SIGNAL > GOING IN: {'order_id': '1468823820281843712', 'is_closed': True, 'side': 'sell'}
+Avail amt: 74.4654550401925
+
+PLACING A buy order FOR [74.97878724]
+
+PLACING ORDER...
+body:  {"instId": "ETH-USDT", "tdMode": "cash", "side": "buy", "ordType": "market", "sz": 74.97878724, "ccy": "", "clOrdId": "", "tag": "", "posSide": "", "px": 3672.1262, "reduceOnly": "", "tgtCcy": "", "tpTriggerPx": "", "tpOrdPx": "", "slTriggerPx": "", "slOrdPx": "", "tpTriggerPxType": "", "slTriggerPxType": "", "quickMgnType": "", "stpId": "", "stpMode": "", "attachAlgoOrds": null}
+header:  {'Content-Type': 'application/json', 'OK-ACCESS-KEY': '0189aae2-49ea-45ad-9852-88c9dffeecc4', 'OK-ACCESS-SIGN': b'aNaJz0S64mURvMqOffiRi6QSvMFxuXhrSSgFl98Ctew=', 'OK-ACCESS-TIMESTAMP': '2024-05-21T07:32:43.798Z', 'OK-ACCESS-PASSPHRASE': 'Baseline@072', 'x-simulated-trading': '1'}
+domain: https://www.okx.com
+url: /api/v5/trade/order
+ ORDER PLACED SUCCESSFULLY!
+
+GETTING ORDER 1468823920609595393
+body:  
+header:  {'Content-Type': 'application/json', 'OK-ACCESS-KEY': '0189aae2-49ea-45ad-9852-88c9dffeecc4', 'OK-ACCESS-SIGN': b'LJuENWVUg4XjD7dhNwX1NexTgXZkswQAHwL68ASlU9k=', 'OK-ACCESS-TIMESTAMP': '2024-05-21T07:32:44.270Z', 'OK-ACCESS-PASSPHRASE': 'Baseline@072', 'x-simulated-trading': '1'}
+domain: https://www.okx.com
+url: /api/v5/trade/order?instId=ETH-USDT&ordId=1468823920609595393
+DB UPDATED
+
+RESUME JOB

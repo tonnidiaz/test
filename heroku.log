@@ -1,0 +1,1500 @@
+2024-05-20T22:12:08.826506+00:00 app[api]: Deploy 94c7c929 by user obediencekoza@gmail.com
+2024-05-20T22:12:08.826506+00:00 app[api]: Release v57 created by user obediencekoza@gmail.com
+2024-05-20T22:12:22.000000+00:00 app[api]: Build succeeded
+2024-05-20T22:12:40.900134+00:00 heroku[router]: at=error code=H14 desc="No web processes running" method=GET path="/orders" host=tu-trader-3996d65ded90.herokuapp.com request_id=df4352ea-ba08-49cb-b95c-3aa4c5d309d1 fwd="105.245.105.185" dyno= connect= service= status=503 bytes= protocol=https
+2024-05-20T22:12:56.273243+00:00 heroku[router]: at=error code=H14 desc="No web processes running" method=GET path="/orders" host=tu-trader-3996d65ded90.herokuapp.com request_id=fe5328bb-95e3-4f6a-82bd-57c0b68be597 fwd="105.245.105.185" dyno= connect= service= status=503 bytes= protocol=https
+2024-05-20T22:15:07.000000+00:00 app[api]: Build started by user obediencekoza@gmail.com
+2024-05-20T22:15:36.268750+00:00 app[api]: Release v58 created by user obediencekoza@gmail.com
+2024-05-20T22:15:36.268750+00:00 app[api]: Deploy 94c7c929 by user obediencekoza@gmail.com
+2024-05-20T22:15:49.000000+00:00 app[api]: Build succeeded
+2024-05-20T22:15:53.555958+00:00 heroku[router]: at=error code=H14 desc="No web processes running" method=GET path="/orders" host=tu-trader-3996d65ded90.herokuapp.com request_id=c38e3c63-65ec-4921-bfcb-734840d682d9 fwd="105.245.105.185" dyno= connect= service= status=503 bytes= protocol=https
+2024-05-20T22:17:15.000000+00:00 app[api]: Build started by user obediencekoza@gmail.com
+2024-05-20T22:17:24.000000+00:00 app[api]: Build started by user obediencekoza@gmail.com
+2024-05-20T22:17:43.421593+00:00 app[api]: Deploy b2c75620 by user obediencekoza@gmail.com
+2024-05-20T22:17:43.421593+00:00 app[api]: Release v59 created by user obediencekoza@gmail.com
+2024-05-20T22:17:43.438117+00:00 app[api]: Scaled to web@1:Basic by user obediencekoza@gmail.com
+2024-05-20T22:17:50.990746+00:00 heroku[web.1]: Starting process with command `gunicorn --worker-class eventlet -w 1 app:app --preload`
+2024-05-20T22:17:51.888224+00:00 app[web.1]: Python buildpack: Detected 512 MB available memory and 8 CPU cores.
+2024-05-20T22:17:51.888243+00:00 app[web.1]: Python buildpack: Defaulting WEB_CONCURRENCY to 2 based on the available memory.
+2024-05-20T22:17:53.034920+00:00 app[api]: Deploy b2c75620 by user obediencekoza@gmail.com
+2024-05-20T22:17:53.034920+00:00 app[api]: Release v60 created by user obediencekoza@gmail.com
+2024-05-20T22:17:53.361415+00:00 heroku[web.1]: Restarting
+2024-05-20T22:17:56.000000+00:00 app[api]: Build succeeded
+2024-05-20T22:17:56.494889+00:00 app[web.1]: /app/.heroku/python/lib/python3.12/site-packages/pandas_ta/utils/_core.py:14: SyntaxWarning: invalid escape sequence '\g'
+2024-05-20T22:17:56.494898+00:00 app[web.1]: return re_.sub("([a-z])([A-Z])","\g<1> \g<2>", x).title()
+2024-05-20T22:17:57.808827+00:00 app[web.1]: mongodb+srv://clickbait4587:baseline072@cluster0.qwyyk.mongodb.net/?retryWrites=true&w=majority
+2024-05-20T22:17:58.221249+00:00 app[web.1]: MONGO INITIALIZED
+2024-05-20T22:17:58.274051+00:00 app[web.1]: id=ObjectId('6644740c7af0ca0697c66a06') revision_id=None can_trade=True use_swing_low=True base='ETH' ccy='USDT' p_gain=0.01 sl_const=30.0 strict=False demo=True interval=15 category='spot' mult=1.8 ce_length=1
+2024-05-20T22:17:58.274062+00:00 app[web.1]: INITIALIZE OKX
+2024-05-20T22:17:58.274062+00:00 app[web.1]: Baseline@072
+2024-05-20T22:17:58.446930+00:00 app[web.1]: INIT BINANCE...
+2024-05-20T22:17:58.741013+00:00 app[web.1]: [2024-05-20 22:17:58 +0000] [2] [INFO] Starting gunicorn 22.0.0
+2024-05-20T22:17:58.741515+00:00 app[web.1]: [2024-05-20 22:17:58 +0000] [2] [INFO] Listening at: http://0.0.0.0:39507 (2)
+2024-05-20T22:17:58.741589+00:00 app[web.1]: [2024-05-20 22:17:58 +0000] [2] [INFO] Using worker: eventlet
+2024-05-20T22:17:58.752040+00:00 app[web.1]: [2024-05-20 22:17:58 +0000] [25] [INFO] Booting worker with pid: 25
+2024-05-20T22:17:58.938275+00:00 app[web.1]: An exception was thrown while monkey_patching for eventlet. to fix this error make sure you run eventlet.monkey_patch() before importing any other modules.
+2024-05-20T22:17:58.938277+00:00 app[web.1]: Traceback (most recent call last):
+2024-05-20T22:17:58.938288+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 473, in _upgrade_instances
+2024-05-20T22:17:58.938289+00:00 app[web.1]: new = upgrade_or_traverse(v)
+2024-05-20T22:17:58.938289+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:17:58.938289+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 450, in upgrade_or_traverse
+2024-05-20T22:17:58.938290+00:00 app[web.1]: _upgrade_instances(obj, klass, upgrade, visited, old_to_new)
+2024-05-20T22:17:58.938290+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 464, in _upgrade_instances
+2024-05-20T22:17:58.938290+00:00 app[web.1]: container_vars = vars(container)
+2024-05-20T22:17:58.938291+00:00 app[web.1]: ^^^^^^^^^^^^^^^
+2024-05-20T22:17:58.938291+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/werkzeug/local.py", line 318, in __get__
+2024-05-20T22:17:58.938291+00:00 app[web.1]: obj = instance._get_current_object()
+2024-05-20T22:17:58.938291+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:17:58.938292+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/werkzeug/local.py", line 519, in _get_current_object
+2024-05-20T22:17:58.938292+00:00 app[web.1]: raise RuntimeError(unbound_message) from None
+2024-05-20T22:17:58.938293+00:00 app[web.1]: RuntimeError: Working outside of application context.
+2024-05-20T22:17:58.938293+00:00 app[web.1]: 
+2024-05-20T22:17:58.938294+00:00 app[web.1]: This typically means that you attempted to use functionality that needed
+2024-05-20T22:17:58.938294+00:00 app[web.1]: the current application. To solve this, set up an application context
+2024-05-20T22:17:58.938294+00:00 app[web.1]: with app.app_context(). See the documentation for more information.
+2024-05-20T22:17:58.939372+00:00 app[web.1]: An exception was thrown while monkey_patching for eventlet. to fix this error make sure you run eventlet.monkey_patch() before importing any other modules.
+2024-05-20T22:17:58.939373+00:00 app[web.1]: Traceback (most recent call last):
+2024-05-20T22:17:58.939373+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 473, in _upgrade_instances
+2024-05-20T22:17:58.939374+00:00 app[web.1]: new = upgrade_or_traverse(v)
+2024-05-20T22:17:58.939374+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:17:58.939374+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 450, in upgrade_or_traverse
+2024-05-20T22:17:58.939375+00:00 app[web.1]: _upgrade_instances(obj, klass, upgrade, visited, old_to_new)
+2024-05-20T22:17:58.939375+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 464, in _upgrade_instances
+2024-05-20T22:17:58.939375+00:00 app[web.1]: container_vars = vars(container)
+2024-05-20T22:17:58.939375+00:00 app[web.1]: ^^^^^^^^^^^^^^^
+2024-05-20T22:17:58.939375+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/werkzeug/local.py", line 318, in __get__
+2024-05-20T22:17:58.939376+00:00 app[web.1]: obj = instance._get_current_object()
+2024-05-20T22:17:58.939376+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:17:58.939376+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/werkzeug/local.py", line 519, in _get_current_object
+2024-05-20T22:17:58.939377+00:00 app[web.1]: raise RuntimeError(unbound_message) from None
+2024-05-20T22:17:58.939377+00:00 app[web.1]: RuntimeError: Working outside of application context.
+2024-05-20T22:17:58.939377+00:00 app[web.1]: 
+2024-05-20T22:17:58.939378+00:00 app[web.1]: This typically means that you attempted to use functionality that needed
+2024-05-20T22:17:58.939385+00:00 app[web.1]: the current application. To solve this, set up an application context
+2024-05-20T22:17:58.939385+00:00 app[web.1]: with app.app_context(). See the documentation for more information.
+2024-05-20T22:17:58.940950+00:00 app[web.1]: An exception was thrown while monkey_patching for eventlet. to fix this error make sure you run eventlet.monkey_patch() before importing any other modules.
+2024-05-20T22:17:58.940950+00:00 app[web.1]: Traceback (most recent call last):
+2024-05-20T22:17:58.940951+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 473, in _upgrade_instances
+2024-05-20T22:17:58.940951+00:00 app[web.1]: new = upgrade_or_traverse(v)
+2024-05-20T22:17:58.940951+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:17:58.940951+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 450, in upgrade_or_traverse
+2024-05-20T22:17:58.940952+00:00 app[web.1]: _upgrade_instances(obj, klass, upgrade, visited, old_to_new)
+2024-05-20T22:17:58.940952+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 464, in _upgrade_instances
+2024-05-20T22:17:58.940952+00:00 app[web.1]: container_vars = vars(container)
+2024-05-20T22:17:58.940952+00:00 app[web.1]: ^^^^^^^^^^^^^^^
+2024-05-20T22:17:58.940953+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/werkzeug/local.py", line 318, in __get__
+2024-05-20T22:17:58.940953+00:00 app[web.1]: obj = instance._get_current_object()
+2024-05-20T22:17:58.940953+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:17:58.940953+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/werkzeug/local.py", line 519, in _get_current_object
+2024-05-20T22:17:58.940954+00:00 app[web.1]: raise RuntimeError(unbound_message) from None
+2024-05-20T22:17:58.940954+00:00 app[web.1]: RuntimeError: Working outside of request context.
+2024-05-20T22:17:58.940954+00:00 app[web.1]: 
+2024-05-20T22:17:58.940954+00:00 app[web.1]: This typically means that you attempted to use functionality that needed
+2024-05-20T22:17:58.940955+00:00 app[web.1]: an active HTTP request. Consult the documentation on testing for
+2024-05-20T22:17:58.940955+00:00 app[web.1]: information about how to avoid this problem.
+2024-05-20T22:17:58.951107+00:00 app[web.1]: An exception was thrown while monkey_patching for eventlet. to fix this error make sure you run eventlet.monkey_patch() before importing any other modules.
+2024-05-20T22:17:58.951108+00:00 app[web.1]: Traceback (most recent call last):
+2024-05-20T22:17:58.951109+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 473, in _upgrade_instances
+2024-05-20T22:17:58.951109+00:00 app[web.1]: new = upgrade_or_traverse(v)
+2024-05-20T22:17:58.951109+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:17:58.951110+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 450, in upgrade_or_traverse
+2024-05-20T22:17:58.951110+00:00 app[web.1]: _upgrade_instances(obj, klass, upgrade, visited, old_to_new)
+2024-05-20T22:17:58.951111+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 464, in _upgrade_instances
+2024-05-20T22:17:58.951111+00:00 app[web.1]: container_vars = vars(container)
+2024-05-20T22:17:58.951111+00:00 app[web.1]: ^^^^^^^^^^^^^^^
+2024-05-20T22:17:58.951112+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/werkzeug/local.py", line 318, in __get__
+2024-05-20T22:17:58.951112+00:00 app[web.1]: obj = instance._get_current_object()
+2024-05-20T22:17:58.951112+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:17:58.951113+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/werkzeug/local.py", line 519, in _get_current_object
+2024-05-20T22:17:58.951113+00:00 app[web.1]: raise RuntimeError(unbound_message) from None
+2024-05-20T22:17:58.951113+00:00 app[web.1]: RuntimeError: Working outside of application context.
+2024-05-20T22:17:58.951114+00:00 app[web.1]: 
+2024-05-20T22:17:58.951114+00:00 app[web.1]: This typically means that you attempted to use functionality that needed
+2024-05-20T22:17:58.951114+00:00 app[web.1]: the current application. To solve this, set up an application context
+2024-05-20T22:17:58.951115+00:00 app[web.1]: with app.app_context(). See the documentation for more information.
+2024-05-20T22:17:58.951760+00:00 app[web.1]: An exception was thrown while monkey_patching for eventlet. to fix this error make sure you run eventlet.monkey_patch() before importing any other modules.
+2024-05-20T22:17:58.951761+00:00 app[web.1]: Traceback (most recent call last):
+2024-05-20T22:17:58.951761+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 473, in _upgrade_instances
+2024-05-20T22:17:58.951761+00:00 app[web.1]: new = upgrade_or_traverse(v)
+2024-05-20T22:17:58.951762+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:17:58.951762+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 450, in upgrade_or_traverse
+2024-05-20T22:17:58.951762+00:00 app[web.1]: _upgrade_instances(obj, klass, upgrade, visited, old_to_new)
+2024-05-20T22:17:58.951762+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 464, in _upgrade_instances
+2024-05-20T22:17:58.951763+00:00 app[web.1]: container_vars = vars(container)
+2024-05-20T22:17:58.951763+00:00 app[web.1]: ^^^^^^^^^^^^^^^
+2024-05-20T22:17:58.951763+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/werkzeug/local.py", line 318, in __get__
+2024-05-20T22:17:58.951764+00:00 app[web.1]: obj = instance._get_current_object()
+2024-05-20T22:17:58.951764+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:17:58.951764+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/werkzeug/local.py", line 519, in _get_current_object
+2024-05-20T22:17:58.951765+00:00 app[web.1]: raise RuntimeError(unbound_message) from None
+2024-05-20T22:17:58.951765+00:00 app[web.1]: RuntimeError: Working outside of request context.
+2024-05-20T22:17:58.951765+00:00 app[web.1]: 
+2024-05-20T22:17:58.951765+00:00 app[web.1]: This typically means that you attempted to use functionality that needed
+2024-05-20T22:17:58.951766+00:00 app[web.1]: an active HTTP request. Consult the documentation on testing for
+2024-05-20T22:17:58.951766+00:00 app[web.1]: information about how to avoid this problem.
+2024-05-20T22:17:59.122956+00:00 heroku[web.1]: Starting process with command `gunicorn --worker-class eventlet -w 1 app:app --preload`
+2024-05-20T22:17:59.360330+00:00 app[web.1]: [2024-05-20 22:17:59 +0000] [25] [ERROR] Exception in worker process
+2024-05-20T22:17:59.360361+00:00 app[web.1]: Traceback (most recent call last):
+2024-05-20T22:17:59.360362+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/gunicorn/arbiter.py", line 609, in spawn_worker
+2024-05-20T22:17:59.360362+00:00 app[web.1]: worker.init_process()
+2024-05-20T22:17:59.360362+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/gunicorn/workers/geventlet.py", line 142, in init_process
+2024-05-20T22:17:59.360363+00:00 app[web.1]: self.patch()
+2024-05-20T22:17:59.360363+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/gunicorn/workers/geventlet.py", line 129, in patch
+2024-05-20T22:17:59.360363+00:00 app[web.1]: eventlet.monkey_patch()
+2024-05-20T22:17:59.360363+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 278, in monkey_patch
+2024-05-20T22:17:59.360364+00:00 app[web.1]: _green_existing_locks()
+2024-05-20T22:17:59.360364+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 411, in _green_existing_locks
+2024-05-20T22:17:59.360364+00:00 app[web.1]: remaining_rlocks = len({o for o in gc.get_objects() if isinstance(o, rlock_type)})
+2024-05-20T22:17:59.360364+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:17:59.360365+00:00 app[web.1]: ReferenceError: weakly-referenced object no longer exists
+2024-05-20T22:17:59.360409+00:00 app[web.1]: [2024-05-20 22:17:59 +0000] [25] [INFO] Worker exiting (pid: 25)
+2024-05-20T22:17:59.573152+00:00 heroku[web.1]: Stopping all processes with SIGTERM
+2024-05-20T22:17:59.593841+00:00 app[web.1]: [2024-05-20 22:17:59 +0000] [2] [INFO] Handling signal: term
+2024-05-20T22:17:59.600844+00:00 app[web.1]: [2024-05-20 22:17:59 +0000] [2] [ERROR] Worker (pid:25) exited with code 3
+2024-05-20T22:17:59.600903+00:00 app[web.1]: Traceback (most recent call last):
+2024-05-20T22:17:59.600921+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/gunicorn/arbiter.py", line 224, in run
+2024-05-20T22:17:59.601142+00:00 app[web.1]: handler()
+2024-05-20T22:17:59.601181+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/gunicorn/arbiter.py", line 257, in handle_term
+2024-05-20T22:17:59.601285+00:00 app[web.1]: raise StopIteration
+2024-05-20T22:17:59.601318+00:00 app[web.1]: StopIteration
+2024-05-20T22:17:59.601328+00:00 app[web.1]: 
+2024-05-20T22:17:59.601339+00:00 app[web.1]: During handling of the above exception, another exception occurred:
+2024-05-20T22:17:59.601349+00:00 app[web.1]: 
+2024-05-20T22:17:59.601361+00:00 app[web.1]: Traceback (most recent call last):
+2024-05-20T22:17:59.601374+00:00 app[web.1]: File "/app/.heroku/python/bin/gunicorn", line 8, in <module>
+2024-05-20T22:17:59.601463+00:00 app[web.1]: sys.exit(run())
+2024-05-20T22:17:59.601514+00:00 app[web.1]: ^^^^^
+2024-05-20T22:17:59.601526+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/gunicorn/app/wsgiapp.py", line 67, in run
+2024-05-20T22:17:59.601630+00:00 app[web.1]: WSGIApplication("%(prog)s [OPTIONS] [APP_MODULE]", prog=prog).run()
+2024-05-20T22:17:59.601671+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/gunicorn/app/base.py", line 236, in run
+2024-05-20T22:17:59.601830+00:00 app[web.1]: super().run()
+2024-05-20T22:17:59.601865+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/gunicorn/app/base.py", line 72, in run
+2024-05-20T22:17:59.601957+00:00 app[web.1]: Arbiter(self).run()
+2024-05-20T22:17:59.601990+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/gunicorn/arbiter.py", line 227, in run
+2024-05-20T22:17:59.602123+00:00 app[web.1]: self.halt()
+2024-05-20T22:17:59.602147+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/gunicorn/arbiter.py", line 342, in halt
+2024-05-20T22:17:59.602297+00:00 app[web.1]: self.stop()
+2024-05-20T22:17:59.602427+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/gunicorn/arbiter.py", line 396, in stop
+2024-05-20T22:17:59.602479+00:00 app[web.1]: time.sleep(0.1)
+2024-05-20T22:17:59.602505+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/gunicorn/arbiter.py", line 242, in handle_chld
+2024-05-20T22:17:59.602599+00:00 app[web.1]: self.reap_workers()
+2024-05-20T22:17:59.602619+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/gunicorn/arbiter.py", line 530, in reap_workers
+2024-05-20T22:17:59.602745+00:00 app[web.1]: raise HaltServer(reason, self.WORKER_BOOT_ERROR)
+2024-05-20T22:17:59.602803+00:00 app[web.1]: gunicorn.errors.HaltServer: <HaltServer 'Worker failed to boot.' 3>
+2024-05-20T22:17:59.734911+00:00 app[web.1]: Error submitting job "tc_job (trigger: interval[0:00:01], next run at: 2024-05-20 22:17:59 UTC)" to executor "default"
+2024-05-20T22:17:59.734942+00:00 app[web.1]: Traceback (most recent call last):
+2024-05-20T22:17:59.734942+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/apscheduler/schedulers/base.py", line 988, in _process_jobs
+2024-05-20T22:17:59.734942+00:00 app[web.1]: executor.submit_job(job, run_times)
+2024-05-20T22:17:59.734943+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/apscheduler/executors/base.py", line 71, in submit_job
+2024-05-20T22:17:59.734943+00:00 app[web.1]: self._do_submit_job(job, run_times)
+2024-05-20T22:17:59.734943+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/apscheduler/executors/pool.py", line 28, in _do_submit_job
+2024-05-20T22:17:59.734943+00:00 app[web.1]: f = self._pool.submit(run_job, job, job._jobstore_alias, run_times, self._logger.name)
+2024-05-20T22:17:59.734944+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:17:59.734944+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/concurrent/futures/thread.py", line 172, in submit
+2024-05-20T22:17:59.734944+00:00 app[web.1]: raise RuntimeError('cannot schedule new futures after '
+2024-05-20T22:17:59.734945+00:00 app[web.1]: RuntimeError: cannot schedule new futures after interpreter shutdown
+2024-05-20T22:17:59.753281+00:00 app[web.1]: Python buildpack: Detected 512 MB available memory and 8 CPU cores.
+2024-05-20T22:17:59.753420+00:00 app[web.1]: Python buildpack: Defaulting WEB_CONCURRENCY to 2 based on the available memory.
+2024-05-20T22:18:00.361614+00:00 heroku[web.1]: Process exited with status 1
+2024-05-20T22:18:03.581578+00:00 app[web.1]: /app/.heroku/python/lib/python3.12/site-packages/pandas_ta/utils/_core.py:14: SyntaxWarning: invalid escape sequence '\g'
+2024-05-20T22:18:03.581625+00:00 app[web.1]: return re_.sub("([a-z])([A-Z])","\g<1> \g<2>", x).title()
+2024-05-20T22:18:04.771045+00:00 app[web.1]: mongodb+srv://clickbait4587:baseline072@cluster0.qwyyk.mongodb.net/?retryWrites=true&w=majority
+2024-05-20T22:18:05.178986+00:00 app[web.1]: MONGO INITIALIZED
+2024-05-20T22:18:05.222719+00:00 app[web.1]: id=ObjectId('6644740c7af0ca0697c66a06') revision_id=None can_trade=True use_swing_low=True base='ETH' ccy='USDT' p_gain=0.01 sl_const=30.0 strict=False demo=True interval=15 category='spot' mult=1.8 ce_length=1
+2024-05-20T22:18:05.222721+00:00 app[web.1]: INITIALIZE OKX
+2024-05-20T22:18:05.222728+00:00 app[web.1]: Baseline@072
+2024-05-20T22:18:05.403739+00:00 app[web.1]: INIT BINANCE...
+2024-05-20T22:18:05.674722+00:00 app[web.1]: [2024-05-20 22:18:05 +0000] [2] [INFO] Starting gunicorn 22.0.0
+2024-05-20T22:18:05.675169+00:00 app[web.1]: [2024-05-20 22:18:05 +0000] [2] [INFO] Listening at: http://0.0.0.0:52668 (2)
+2024-05-20T22:18:05.675220+00:00 app[web.1]: [2024-05-20 22:18:05 +0000] [2] [INFO] Using worker: eventlet
+2024-05-20T22:18:05.684568+00:00 app[web.1]: [2024-05-20 22:18:05 +0000] [25] [INFO] Booting worker with pid: 25
+2024-05-20T22:18:05.853736+00:00 app[web.1]: An exception was thrown while monkey_patching for eventlet. to fix this error make sure you run eventlet.monkey_patch() before importing any other modules.
+2024-05-20T22:18:05.853738+00:00 app[web.1]: Traceback (most recent call last):
+2024-05-20T22:18:05.853739+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 473, in _upgrade_instances
+2024-05-20T22:18:05.853739+00:00 app[web.1]: new = upgrade_or_traverse(v)
+2024-05-20T22:18:05.853740+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:18:05.853740+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 450, in upgrade_or_traverse
+2024-05-20T22:18:05.853740+00:00 app[web.1]: _upgrade_instances(obj, klass, upgrade, visited, old_to_new)
+2024-05-20T22:18:05.853741+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 464, in _upgrade_instances
+2024-05-20T22:18:05.853741+00:00 app[web.1]: container_vars = vars(container)
+2024-05-20T22:18:05.853741+00:00 app[web.1]: ^^^^^^^^^^^^^^^
+2024-05-20T22:18:05.853741+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/werkzeug/local.py", line 318, in __get__
+2024-05-20T22:18:05.853742+00:00 app[web.1]: obj = instance._get_current_object()
+2024-05-20T22:18:05.853742+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:18:05.853743+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/werkzeug/local.py", line 519, in _get_current_object
+2024-05-20T22:18:05.853743+00:00 app[web.1]: raise RuntimeError(unbound_message) from None
+2024-05-20T22:18:05.853744+00:00 app[web.1]: RuntimeError: Working outside of application context.
+2024-05-20T22:18:05.853744+00:00 app[web.1]: 
+2024-05-20T22:18:05.853744+00:00 app[web.1]: This typically means that you attempted to use functionality that needed
+2024-05-20T22:18:05.853744+00:00 app[web.1]: the current application. To solve this, set up an application context
+2024-05-20T22:18:05.853745+00:00 app[web.1]: with app.app_context(). See the documentation for more information.
+2024-05-20T22:18:05.855259+00:00 app[web.1]: An exception was thrown while monkey_patching for eventlet. to fix this error make sure you run eventlet.monkey_patch() before importing any other modules.
+2024-05-20T22:18:05.855259+00:00 app[web.1]: Traceback (most recent call last):
+2024-05-20T22:18:05.855260+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 473, in _upgrade_instances
+2024-05-20T22:18:05.855260+00:00 app[web.1]: new = upgrade_or_traverse(v)
+2024-05-20T22:18:05.855260+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:18:05.855260+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 450, in upgrade_or_traverse
+2024-05-20T22:18:05.855261+00:00 app[web.1]: _upgrade_instances(obj, klass, upgrade, visited, old_to_new)
+2024-05-20T22:18:05.855261+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 464, in _upgrade_instances
+2024-05-20T22:18:05.855261+00:00 app[web.1]: container_vars = vars(container)
+2024-05-20T22:18:05.855261+00:00 app[web.1]: ^^^^^^^^^^^^^^^
+2024-05-20T22:18:05.855262+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/werkzeug/local.py", line 318, in __get__
+2024-05-20T22:18:05.855262+00:00 app[web.1]: obj = instance._get_current_object()
+2024-05-20T22:18:05.855262+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:18:05.855262+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/werkzeug/local.py", line 519, in _get_current_object
+2024-05-20T22:18:05.855262+00:00 app[web.1]: raise RuntimeError(unbound_message) from None
+2024-05-20T22:18:05.855262+00:00 app[web.1]: RuntimeError: Working outside of application context.
+2024-05-20T22:18:05.855263+00:00 app[web.1]: 
+2024-05-20T22:18:05.855263+00:00 app[web.1]: This typically means that you attempted to use functionality that needed
+2024-05-20T22:18:05.855263+00:00 app[web.1]: the current application. To solve this, set up an application context
+2024-05-20T22:18:05.855263+00:00 app[web.1]: with app.app_context(). See the documentation for more information.
+2024-05-20T22:18:05.856338+00:00 app[web.1]: An exception was thrown while monkey_patching for eventlet. to fix this error make sure you run eventlet.monkey_patch() before importing any other modules.
+2024-05-20T22:18:05.856338+00:00 app[web.1]: Traceback (most recent call last):
+2024-05-20T22:18:05.856338+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 473, in _upgrade_instances
+2024-05-20T22:18:05.856338+00:00 app[web.1]: new = upgrade_or_traverse(v)
+2024-05-20T22:18:05.856338+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:18:05.856338+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 450, in upgrade_or_traverse
+2024-05-20T22:18:05.856339+00:00 app[web.1]: _upgrade_instances(obj, klass, upgrade, visited, old_to_new)
+2024-05-20T22:18:05.856339+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 464, in _upgrade_instances
+2024-05-20T22:18:05.856339+00:00 app[web.1]: container_vars = vars(container)
+2024-05-20T22:18:05.856339+00:00 app[web.1]: ^^^^^^^^^^^^^^^
+2024-05-20T22:18:05.856340+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/werkzeug/local.py", line 318, in __get__
+2024-05-20T22:18:05.856340+00:00 app[web.1]: obj = instance._get_current_object()
+2024-05-20T22:18:05.856340+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:18:05.856340+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/werkzeug/local.py", line 519, in _get_current_object
+2024-05-20T22:18:05.856340+00:00 app[web.1]: raise RuntimeError(unbound_message) from None
+2024-05-20T22:18:05.856340+00:00 app[web.1]: RuntimeError: Working outside of request context.
+2024-05-20T22:18:05.856341+00:00 app[web.1]: 
+2024-05-20T22:18:05.856341+00:00 app[web.1]: This typically means that you attempted to use functionality that needed
+2024-05-20T22:18:05.856341+00:00 app[web.1]: an active HTTP request. Consult the documentation on testing for
+2024-05-20T22:18:05.856341+00:00 app[web.1]: information about how to avoid this problem.
+2024-05-20T22:18:05.863902+00:00 app[web.1]: An exception was thrown while monkey_patching for eventlet. to fix this error make sure you run eventlet.monkey_patch() before importing any other modules.
+2024-05-20T22:18:05.863902+00:00 app[web.1]: Traceback (most recent call last):
+2024-05-20T22:18:05.863903+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 473, in _upgrade_instances
+2024-05-20T22:18:05.863904+00:00 app[web.1]: new = upgrade_or_traverse(v)
+2024-05-20T22:18:05.863904+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:18:05.863904+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 450, in upgrade_or_traverse
+2024-05-20T22:18:05.863904+00:00 app[web.1]: _upgrade_instances(obj, klass, upgrade, visited, old_to_new)
+2024-05-20T22:18:05.863905+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 464, in _upgrade_instances
+2024-05-20T22:18:05.863905+00:00 app[web.1]: container_vars = vars(container)
+2024-05-20T22:18:05.863905+00:00 app[web.1]: ^^^^^^^^^^^^^^^
+2024-05-20T22:18:05.863906+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/werkzeug/local.py", line 318, in __get__
+2024-05-20T22:18:05.863906+00:00 app[web.1]: obj = instance._get_current_object()
+2024-05-20T22:18:05.863906+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:18:05.863909+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/werkzeug/local.py", line 519, in _get_current_object
+2024-05-20T22:18:05.863910+00:00 app[web.1]: raise RuntimeError(unbound_message) from None
+2024-05-20T22:18:05.863910+00:00 app[web.1]: RuntimeError: Working outside of application context.
+2024-05-20T22:18:05.863911+00:00 app[web.1]: 
+2024-05-20T22:18:05.863911+00:00 app[web.1]: This typically means that you attempted to use functionality that needed
+2024-05-20T22:18:05.863911+00:00 app[web.1]: the current application. To solve this, set up an application context
+2024-05-20T22:18:05.863911+00:00 app[web.1]: with app.app_context(). See the documentation for more information.
+2024-05-20T22:18:05.864546+00:00 app[web.1]: An exception was thrown while monkey_patching for eventlet. to fix this error make sure you run eventlet.monkey_patch() before importing any other modules.
+2024-05-20T22:18:05.864547+00:00 app[web.1]: Traceback (most recent call last):
+2024-05-20T22:18:05.864548+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 473, in _upgrade_instances
+2024-05-20T22:18:05.864548+00:00 app[web.1]: new = upgrade_or_traverse(v)
+2024-05-20T22:18:05.864549+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:18:05.864549+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 450, in upgrade_or_traverse
+2024-05-20T22:18:05.864549+00:00 app[web.1]: _upgrade_instances(obj, klass, upgrade, visited, old_to_new)
+2024-05-20T22:18:05.864550+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 464, in _upgrade_instances
+2024-05-20T22:18:05.864550+00:00 app[web.1]: container_vars = vars(container)
+2024-05-20T22:18:05.864550+00:00 app[web.1]: ^^^^^^^^^^^^^^^
+2024-05-20T22:18:05.864551+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/werkzeug/local.py", line 318, in __get__
+2024-05-20T22:18:05.864551+00:00 app[web.1]: obj = instance._get_current_object()
+2024-05-20T22:18:05.864551+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:18:05.864552+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/werkzeug/local.py", line 519, in _get_current_object
+2024-05-20T22:18:05.864552+00:00 app[web.1]: raise RuntimeError(unbound_message) from None
+2024-05-20T22:18:05.864552+00:00 app[web.1]: RuntimeError: Working outside of request context.
+2024-05-20T22:18:05.864553+00:00 app[web.1]: 
+2024-05-20T22:18:05.864553+00:00 app[web.1]: This typically means that you attempted to use functionality that needed
+2024-05-20T22:18:05.864553+00:00 app[web.1]: an active HTTP request. Consult the documentation on testing for
+2024-05-20T22:18:05.864554+00:00 app[web.1]: information about how to avoid this problem.
+2024-05-20T22:18:05.888407+00:00 heroku[web.1]: State changed from starting to up
+2024-05-20T22:18:06.000000+00:00 app[api]: Build succeeded
+2024-05-20T22:18:06.202304+00:00 app[web.1]: [2024-05-20 22:18:06 +0000] [25] [ERROR] Exception in worker process
+2024-05-20T22:18:06.202351+00:00 app[web.1]: Traceback (most recent call last):
+2024-05-20T22:18:06.202352+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/gunicorn/arbiter.py", line 609, in spawn_worker
+2024-05-20T22:18:06.202353+00:00 app[web.1]: worker.init_process()
+2024-05-20T22:18:06.202353+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/gunicorn/workers/geventlet.py", line 142, in init_process
+2024-05-20T22:18:06.202353+00:00 app[web.1]: self.patch()
+2024-05-20T22:18:06.202354+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/gunicorn/workers/geventlet.py", line 129, in patch
+2024-05-20T22:18:06.202354+00:00 app[web.1]: eventlet.monkey_patch()
+2024-05-20T22:18:06.202354+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 278, in monkey_patch
+2024-05-20T22:18:06.202354+00:00 app[web.1]: _green_existing_locks()
+2024-05-20T22:18:06.202354+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 411, in _green_existing_locks
+2024-05-20T22:18:06.202355+00:00 app[web.1]: remaining_rlocks = len({o for o in gc.get_objects() if isinstance(o, rlock_type)})
+2024-05-20T22:18:06.202355+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:18:06.202356+00:00 app[web.1]: ReferenceError: weakly-referenced object no longer exists
+2024-05-20T22:18:06.202366+00:00 app[web.1]: [2024-05-20 22:18:06 +0000] [25] [INFO] Worker exiting (pid: 25)
+2024-05-20T22:18:06.450367+00:00 app[web.1]: [2024-05-20 22:18:06 +0000] [2] [ERROR] Worker (pid:25) exited with code 3
+2024-05-20T22:18:06.450864+00:00 app[web.1]: [2024-05-20 22:18:06 +0000] [2] [ERROR] Shutting down: Master
+2024-05-20T22:18:06.450914+00:00 app[web.1]: [2024-05-20 22:18:06 +0000] [2] [ERROR] Reason: Worker failed to boot.
+2024-05-20T22:18:06.668783+00:00 app[web.1]: Error submitting job "tc_job (trigger: interval[0:00:01], next run at: 2024-05-20 22:18:06 UTC)" to executor "default"
+2024-05-20T22:18:06.668832+00:00 app[web.1]: Traceback (most recent call last):
+2024-05-20T22:18:06.668832+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/apscheduler/schedulers/base.py", line 988, in _process_jobs
+2024-05-20T22:18:06.668833+00:00 app[web.1]: executor.submit_job(job, run_times)
+2024-05-20T22:18:06.668833+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/apscheduler/executors/base.py", line 71, in submit_job
+2024-05-20T22:18:06.668834+00:00 app[web.1]: self._do_submit_job(job, run_times)
+2024-05-20T22:18:06.668834+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/apscheduler/executors/pool.py", line 28, in _do_submit_job
+2024-05-20T22:18:06.668834+00:00 app[web.1]: f = self._pool.submit(run_job, job, job._jobstore_alias, run_times, self._logger.name)
+2024-05-20T22:18:06.668835+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:18:06.668835+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/concurrent/futures/thread.py", line 172, in submit
+2024-05-20T22:18:06.668836+00:00 app[web.1]: raise RuntimeError('cannot schedule new futures after '
+2024-05-20T22:18:06.668836+00:00 app[web.1]: RuntimeError: cannot schedule new futures after interpreter shutdown
+2024-05-20T22:18:07.172970+00:00 heroku[web.1]: Process exited with status 3
+2024-05-20T22:18:07.193298+00:00 heroku[web.1]: State changed from up to crashed
+2024-05-20T22:18:07.196365+00:00 heroku[web.1]: State changed from crashed to starting
+2024-05-20T22:18:13.310541+00:00 heroku[web.1]: Starting process with command `gunicorn --worker-class eventlet -w 1 app:app --preload`
+2024-05-20T22:18:13.901569+00:00 app[web.1]: Python buildpack: Detected 512 MB available memory and 8 CPU cores.
+2024-05-20T22:18:13.901684+00:00 app[web.1]: Python buildpack: Defaulting WEB_CONCURRENCY to 2 based on the available memory.
+2024-05-20T22:18:17.581169+00:00 app[web.1]: /app/.heroku/python/lib/python3.12/site-packages/pandas_ta/utils/_core.py:14: SyntaxWarning: invalid escape sequence '\g'
+2024-05-20T22:18:17.581213+00:00 app[web.1]: return re_.sub("([a-z])([A-Z])","\g<1> \g<2>", x).title()
+2024-05-20T22:18:18.803861+00:00 app[web.1]: mongodb+srv://clickbait4587:baseline072@cluster0.qwyyk.mongodb.net/?retryWrites=true&w=majority
+2024-05-20T22:18:19.200117+00:00 app[web.1]: MONGO INITIALIZED
+2024-05-20T22:18:19.248421+00:00 app[web.1]: id=ObjectId('6644740c7af0ca0697c66a06') revision_id=None can_trade=True use_swing_low=True base='ETH' ccy='USDT' p_gain=0.01 sl_const=30.0 strict=False demo=True interval=15 category='spot' mult=1.8 ce_length=1
+2024-05-20T22:18:19.248423+00:00 app[web.1]: INITIALIZE OKX
+2024-05-20T22:18:19.248426+00:00 app[web.1]: Baseline@072
+2024-05-20T22:18:19.411700+00:00 app[web.1]: INIT BINANCE...
+2024-05-20T22:18:19.689905+00:00 app[web.1]: [2024-05-20 22:18:19 +0000] [2] [INFO] Starting gunicorn 22.0.0
+2024-05-20T22:18:19.690338+00:00 app[web.1]: [2024-05-20 22:18:19 +0000] [2] [INFO] Listening at: http://0.0.0.0:20203 (2)
+2024-05-20T22:18:19.690387+00:00 app[web.1]: [2024-05-20 22:18:19 +0000] [2] [INFO] Using worker: eventlet
+2024-05-20T22:18:19.698223+00:00 app[web.1]: [2024-05-20 22:18:19 +0000] [25] [INFO] Booting worker with pid: 25
+2024-05-20T22:18:19.883222+00:00 app[web.1]: An exception was thrown while monkey_patching for eventlet. to fix this error make sure you run eventlet.monkey_patch() before importing any other modules.
+2024-05-20T22:18:19.883228+00:00 app[web.1]: Traceback (most recent call last):
+2024-05-20T22:18:19.883229+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 473, in _upgrade_instances
+2024-05-20T22:18:19.883229+00:00 app[web.1]: new = upgrade_or_traverse(v)
+2024-05-20T22:18:19.883229+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:18:19.883230+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 450, in upgrade_or_traverse
+2024-05-20T22:18:19.883231+00:00 app[web.1]: _upgrade_instances(obj, klass, upgrade, visited, old_to_new)
+2024-05-20T22:18:19.883231+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 464, in _upgrade_instances
+2024-05-20T22:18:19.883231+00:00 app[web.1]: container_vars = vars(container)
+2024-05-20T22:18:19.883232+00:00 app[web.1]: ^^^^^^^^^^^^^^^
+2024-05-20T22:18:19.883232+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/werkzeug/local.py", line 318, in __get__
+2024-05-20T22:18:19.883233+00:00 app[web.1]: obj = instance._get_current_object()
+2024-05-20T22:18:19.883233+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:18:19.883233+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/werkzeug/local.py", line 519, in _get_current_object
+2024-05-20T22:18:19.883234+00:00 app[web.1]: raise RuntimeError(unbound_message) from None
+2024-05-20T22:18:19.883234+00:00 app[web.1]: RuntimeError: Working outside of application context.
+2024-05-20T22:18:19.883234+00:00 app[web.1]: 
+2024-05-20T22:18:19.883234+00:00 app[web.1]: This typically means that you attempted to use functionality that needed
+2024-05-20T22:18:19.883235+00:00 app[web.1]: the current application. To solve this, set up an application context
+2024-05-20T22:18:19.883235+00:00 app[web.1]: with app.app_context(). See the documentation for more information.
+2024-05-20T22:18:19.885565+00:00 app[web.1]: An exception was thrown while monkey_patching for eventlet. to fix this error make sure you run eventlet.monkey_patch() before importing any other modules.
+2024-05-20T22:18:19.885566+00:00 app[web.1]: Traceback (most recent call last):
+2024-05-20T22:18:19.885567+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 473, in _upgrade_instances
+2024-05-20T22:18:19.885567+00:00 app[web.1]: new = upgrade_or_traverse(v)
+2024-05-20T22:18:19.885567+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:18:19.885568+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 450, in upgrade_or_traverse
+2024-05-20T22:18:19.885568+00:00 app[web.1]: _upgrade_instances(obj, klass, upgrade, visited, old_to_new)
+2024-05-20T22:18:19.885568+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 464, in _upgrade_instances
+2024-05-20T22:18:19.885569+00:00 app[web.1]: container_vars = vars(container)
+2024-05-20T22:18:19.885569+00:00 app[web.1]: ^^^^^^^^^^^^^^^
+2024-05-20T22:18:19.885569+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/werkzeug/local.py", line 318, in __get__
+2024-05-20T22:18:19.885569+00:00 app[web.1]: obj = instance._get_current_object()
+2024-05-20T22:18:19.885570+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:18:19.885570+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/werkzeug/local.py", line 519, in _get_current_object
+2024-05-20T22:18:19.885571+00:00 app[web.1]: raise RuntimeError(unbound_message) from None
+2024-05-20T22:18:19.885571+00:00 app[web.1]: RuntimeError: Working outside of application context.
+2024-05-20T22:18:19.885571+00:00 app[web.1]: 
+2024-05-20T22:18:19.885571+00:00 app[web.1]: This typically means that you attempted to use functionality that needed
+2024-05-20T22:18:19.885572+00:00 app[web.1]: the current application. To solve this, set up an application context
+2024-05-20T22:18:19.885572+00:00 app[web.1]: with app.app_context(). See the documentation for more information.
+2024-05-20T22:18:19.887229+00:00 app[web.1]: An exception was thrown while monkey_patching for eventlet. to fix this error make sure you run eventlet.monkey_patch() before importing any other modules.
+2024-05-20T22:18:19.887230+00:00 app[web.1]: Traceback (most recent call last):
+2024-05-20T22:18:19.887231+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 473, in _upgrade_instances
+2024-05-20T22:18:19.887231+00:00 app[web.1]: new = upgrade_or_traverse(v)
+2024-05-20T22:18:19.887231+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:18:19.887231+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 450, in upgrade_or_traverse
+2024-05-20T22:18:19.887232+00:00 app[web.1]: _upgrade_instances(obj, klass, upgrade, visited, old_to_new)
+2024-05-20T22:18:19.887233+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 464, in _upgrade_instances
+2024-05-20T22:18:19.887233+00:00 app[web.1]: container_vars = vars(container)
+2024-05-20T22:18:19.887233+00:00 app[web.1]: ^^^^^^^^^^^^^^^
+2024-05-20T22:18:19.887233+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/werkzeug/local.py", line 318, in __get__
+2024-05-20T22:18:19.887233+00:00 app[web.1]: obj = instance._get_current_object()
+2024-05-20T22:18:19.887234+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:18:19.887234+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/werkzeug/local.py", line 519, in _get_current_object
+2024-05-20T22:18:19.887234+00:00 app[web.1]: raise RuntimeError(unbound_message) from None
+2024-05-20T22:18:19.887235+00:00 app[web.1]: RuntimeError: Working outside of request context.
+2024-05-20T22:18:19.887235+00:00 app[web.1]: 
+2024-05-20T22:18:19.887235+00:00 app[web.1]: This typically means that you attempted to use functionality that needed
+2024-05-20T22:18:19.887235+00:00 app[web.1]: an active HTTP request. Consult the documentation on testing for
+2024-05-20T22:18:19.887236+00:00 app[web.1]: information about how to avoid this problem.
+2024-05-20T22:18:19.899049+00:00 app[web.1]: An exception was thrown while monkey_patching for eventlet. to fix this error make sure you run eventlet.monkey_patch() before importing any other modules.
+2024-05-20T22:18:19.899051+00:00 app[web.1]: Traceback (most recent call last):
+2024-05-20T22:18:19.899051+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 473, in _upgrade_instances
+2024-05-20T22:18:19.899051+00:00 app[web.1]: new = upgrade_or_traverse(v)
+2024-05-20T22:18:19.899052+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:18:19.899052+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 450, in upgrade_or_traverse
+2024-05-20T22:18:19.899052+00:00 app[web.1]: _upgrade_instances(obj, klass, upgrade, visited, old_to_new)
+2024-05-20T22:18:19.899053+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 464, in _upgrade_instances
+2024-05-20T22:18:19.899053+00:00 app[web.1]: container_vars = vars(container)
+2024-05-20T22:18:19.899053+00:00 app[web.1]: ^^^^^^^^^^^^^^^
+2024-05-20T22:18:19.899054+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/werkzeug/local.py", line 318, in __get__
+2024-05-20T22:18:19.899054+00:00 app[web.1]: obj = instance._get_current_object()
+2024-05-20T22:18:19.899054+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:18:19.899055+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/werkzeug/local.py", line 519, in _get_current_object
+2024-05-20T22:18:19.899055+00:00 app[web.1]: raise RuntimeError(unbound_message) from None
+2024-05-20T22:18:19.899055+00:00 app[web.1]: RuntimeError: Working outside of application context.
+2024-05-20T22:18:19.899055+00:00 app[web.1]: 
+2024-05-20T22:18:19.899056+00:00 app[web.1]: This typically means that you attempted to use functionality that needed
+2024-05-20T22:18:19.899056+00:00 app[web.1]: the current application. To solve this, set up an application context
+2024-05-20T22:18:19.899056+00:00 app[web.1]: with app.app_context(). See the documentation for more information.
+2024-05-20T22:18:19.900122+00:00 app[web.1]: An exception was thrown while monkey_patching for eventlet. to fix this error make sure you run eventlet.monkey_patch() before importing any other modules.
+2024-05-20T22:18:19.900122+00:00 app[web.1]: Traceback (most recent call last):
+2024-05-20T22:18:19.900123+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 473, in _upgrade_instances
+2024-05-20T22:18:19.900123+00:00 app[web.1]: new = upgrade_or_traverse(v)
+2024-05-20T22:18:19.900126+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:18:19.900127+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 450, in upgrade_or_traverse
+2024-05-20T22:18:19.900127+00:00 app[web.1]: _upgrade_instances(obj, klass, upgrade, visited, old_to_new)
+2024-05-20T22:18:19.900127+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 464, in _upgrade_instances
+2024-05-20T22:18:19.900128+00:00 app[web.1]: container_vars = vars(container)
+2024-05-20T22:18:19.900128+00:00 app[web.1]: ^^^^^^^^^^^^^^^
+2024-05-20T22:18:19.900128+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/werkzeug/local.py", line 318, in __get__
+2024-05-20T22:18:19.900129+00:00 app[web.1]: obj = instance._get_current_object()
+2024-05-20T22:18:19.900129+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:18:19.900129+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/werkzeug/local.py", line 519, in _get_current_object
+2024-05-20T22:18:19.900130+00:00 app[web.1]: raise RuntimeError(unbound_message) from None
+2024-05-20T22:18:19.900130+00:00 app[web.1]: RuntimeError: Working outside of request context.
+2024-05-20T22:18:19.900130+00:00 app[web.1]: 
+2024-05-20T22:18:19.900130+00:00 app[web.1]: This typically means that you attempted to use functionality that needed
+2024-05-20T22:18:19.900131+00:00 app[web.1]: an active HTTP request. Consult the documentation on testing for
+2024-05-20T22:18:19.900131+00:00 app[web.1]: information about how to avoid this problem.
+2024-05-20T22:18:20.023061+00:00 heroku[web.1]: State changed from starting to up
+2024-05-20T22:18:20.251820+00:00 app[web.1]: [2024-05-20 22:18:20 +0000] [25] [ERROR] Exception in worker process
+2024-05-20T22:18:20.251873+00:00 app[web.1]: Traceback (most recent call last):
+2024-05-20T22:18:20.251874+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/gunicorn/arbiter.py", line 609, in spawn_worker
+2024-05-20T22:18:20.251874+00:00 app[web.1]: worker.init_process()
+2024-05-20T22:18:20.251874+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/gunicorn/workers/geventlet.py", line 142, in init_process
+2024-05-20T22:18:20.251875+00:00 app[web.1]: self.patch()
+2024-05-20T22:18:20.251875+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/gunicorn/workers/geventlet.py", line 129, in patch
+2024-05-20T22:18:20.251875+00:00 app[web.1]: eventlet.monkey_patch()
+2024-05-20T22:18:20.251876+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 278, in monkey_patch
+2024-05-20T22:18:20.251876+00:00 app[web.1]: _green_existing_locks()
+2024-05-20T22:18:20.251876+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/eventlet/patcher.py", line 411, in _green_existing_locks
+2024-05-20T22:18:20.251877+00:00 app[web.1]: remaining_rlocks = len({o for o in gc.get_objects() if isinstance(o, rlock_type)})
+2024-05-20T22:18:20.251877+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:18:20.251877+00:00 app[web.1]: ReferenceError: weakly-referenced object no longer exists
+2024-05-20T22:18:20.251913+00:00 app[web.1]: [2024-05-20 22:18:20 +0000] [25] [INFO] Worker exiting (pid: 25)
+2024-05-20T22:18:20.512075+00:00 app[web.1]: [2024-05-20 22:18:20 +0000] [2] [ERROR] Worker (pid:25) exited with code 3
+2024-05-20T22:18:20.512458+00:00 app[web.1]: [2024-05-20 22:18:20 +0000] [2] [ERROR] Shutting down: Master
+2024-05-20T22:18:20.512487+00:00 app[web.1]: [2024-05-20 22:18:20 +0000] [2] [ERROR] Reason: Worker failed to boot.
+2024-05-20T22:18:20.683374+00:00 app[web.1]: Error submitting job "tc_job (trigger: interval[0:00:01], next run at: 2024-05-20 22:18:20 UTC)" to executor "default"
+2024-05-20T22:18:20.683376+00:00 app[web.1]: Traceback (most recent call last):
+2024-05-20T22:18:20.683376+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/apscheduler/schedulers/base.py", line 988, in _process_jobs
+2024-05-20T22:18:20.683377+00:00 app[web.1]: executor.submit_job(job, run_times)
+2024-05-20T22:18:20.683377+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/apscheduler/executors/base.py", line 71, in submit_job
+2024-05-20T22:18:20.683378+00:00 app[web.1]: self._do_submit_job(job, run_times)
+2024-05-20T22:18:20.683378+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/site-packages/apscheduler/executors/pool.py", line 28, in _do_submit_job
+2024-05-20T22:18:20.683379+00:00 app[web.1]: f = self._pool.submit(run_job, job, job._jobstore_alias, run_times, self._logger.name)
+2024-05-20T22:18:20.683379+00:00 app[web.1]: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2024-05-20T22:18:20.683379+00:00 app[web.1]: File "/app/.heroku/python/lib/python3.12/concurrent/futures/thread.py", line 172, in submit
+2024-05-20T22:18:20.683380+00:00 app[web.1]: raise RuntimeError('cannot schedule new futures after '
+2024-05-20T22:18:20.683381+00:00 app[web.1]: RuntimeError: cannot schedule new futures after interpreter shutdown
+2024-05-20T22:18:21.215665+00:00 heroku[web.1]: Process exited with status 3
+2024-05-20T22:18:21.235603+00:00 heroku[web.1]: State changed from up to crashed
+2024-05-20T22:18:57.297403+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/orders" host=tu-trader-3996d65ded90.herokuapp.com request_id=02887bcf-9c51-48bb-95f6-7b90947955e6 fwd="105.245.105.185" dyno= connect= service= status=503 bytes= protocol=https
+2024-05-20T22:21:59.000000+00:00 app[api]: Build started by user obediencekoza@gmail.com
+2024-05-20T22:22:10.000000+00:00 app[api]: Build started by user obediencekoza@gmail.com
+2024-05-20T22:22:27.446724+00:00 app[api]: Deploy f46b8b5f by user obediencekoza@gmail.com
+2024-05-20T22:22:27.446724+00:00 app[api]: Release v61 created by user obediencekoza@gmail.com
+2024-05-20T22:22:27.694455+00:00 heroku[web.1]: State changed from crashed to starting
+2024-05-20T22:22:33.280818+00:00 heroku[web.1]: Starting process with command `gunicorn --worker-class eventlet -w 1 app:app`
+2024-05-20T22:22:33.858334+00:00 app[web.1]: Python buildpack: Detected 512 MB available memory and 8 CPU cores.
+2024-05-20T22:22:33.858451+00:00 app[web.1]: Python buildpack: Defaulting WEB_CONCURRENCY to 2 based on the available memory.
+2024-05-20T22:22:34.843443+00:00 app[web.1]: [2024-05-20 22:22:34 +0000] [2] [INFO] Starting gunicorn 22.0.0
+2024-05-20T22:22:34.843745+00:00 app[web.1]: [2024-05-20 22:22:34 +0000] [2] [INFO] Listening at: http://0.0.0.0:32178 (2)
+2024-05-20T22:22:34.843768+00:00 app[web.1]: [2024-05-20 22:22:34 +0000] [2] [INFO] Using worker: eventlet
+2024-05-20T22:22:34.846696+00:00 app[web.1]: [2024-05-20 22:22:34 +0000] [9] [INFO] Booting worker with pid: 9
+2024-05-20T22:22:35.257958+00:00 heroku[web.1]: State changed from starting to up
+2024-05-20T22:22:37.856680+00:00 app[web.1]: /app/.heroku/python/lib/python3.12/site-packages/pandas_ta/utils/_core.py:14: SyntaxWarning: invalid escape sequence '\g'
+2024-05-20T22:22:37.856740+00:00 app[web.1]: return re_.sub("([a-z])([A-Z])","\g<1> \g<2>", x).title()
+2024-05-20T22:22:39.168279+00:00 app[web.1]: mongodb+srv://clickbait4587:baseline072@cluster0.qwyyk.mongodb.net/?retryWrites=true&w=majority
+2024-05-20T22:22:39.610425+00:00 app[web.1]: MONGO INITIALIZED
+2024-05-20T22:22:39.657347+00:00 app[web.1]: id=ObjectId('6644740c7af0ca0697c66a06') revision_id=None can_trade=True use_swing_low=True base='ETH' ccy='USDT' p_gain=0.01 sl_const=30.0 strict=False demo=True interval=15 category='spot' mult=1.8 ce_length=1
+2024-05-20T22:22:39.657354+00:00 app[web.1]: INITIALIZE OKX
+2024-05-20T22:22:39.657354+00:00 app[web.1]: Baseline@072
+2024-05-20T22:22:39.846521+00:00 app[web.1]: INIT BINANCE...
+2024-05-20T22:22:40.000000+00:00 app[api]: Build succeeded
+2024-05-20T22:22:42.250364+00:00 app[api]: Release v62 created by user obediencekoza@gmail.com
+2024-05-20T22:22:42.250364+00:00 app[api]: Deploy f46b8b5f by user obediencekoza@gmail.com
+2024-05-20T22:22:42.533978+00:00 heroku[web.1]: Restarting
+2024-05-20T22:22:42.583857+00:00 heroku[web.1]: State changed from up to starting
+2024-05-20T22:22:43.322329+00:00 heroku[web.1]: Stopping all processes with SIGTERM
+2024-05-20T22:22:43.338560+00:00 app[web.1]: [2024-05-20 22:22:43 +0000] [2] [INFO] Handling signal: term
+2024-05-20T22:22:44.121664+00:00 app[web.1]: [2024-05-20 22:22:44 +0000] [9] [INFO] Worker exiting (pid: 9)
+2024-05-20T22:22:44.740656+00:00 app[web.1]: [2024-05-20 22:22:44 +0000] [2] [INFO] Shutting down: Master
+2024-05-20T22:22:44.845108+00:00 heroku[web.1]: Process exited with status 0
+2024-05-20T22:22:48.484330+00:00 heroku[web.1]: Starting process with command `gunicorn --worker-class eventlet -w 1 app:app`
+2024-05-20T22:22:49.124260+00:00 app[web.1]: Python buildpack: Detected 512 MB available memory and 8 CPU cores.
+2024-05-20T22:22:49.124309+00:00 app[web.1]: Python buildpack: Defaulting WEB_CONCURRENCY to 2 based on the available memory.
+2024-05-20T22:22:50.999925+00:00 app[web.1]: [2024-05-20 22:22:50 +0000] [2] [INFO] Starting gunicorn 22.0.0
+2024-05-20T22:22:51.000238+00:00 app[web.1]: [2024-05-20 22:22:51 +0000] [2] [INFO] Listening at: http://0.0.0.0:53885 (2)
+2024-05-20T22:22:51.000277+00:00 app[web.1]: [2024-05-20 22:22:51 +0000] [2] [INFO] Using worker: eventlet
+2024-05-20T22:22:51.003746+00:00 app[web.1]: [2024-05-20 22:22:51 +0000] [9] [INFO] Booting worker with pid: 9
+2024-05-20T22:22:51.294250+00:00 heroku[web.1]: State changed from starting to up
+2024-05-20T22:22:54.631296+00:00 app[web.1]: /app/.heroku/python/lib/python3.12/site-packages/pandas_ta/utils/_core.py:14: SyntaxWarning: invalid escape sequence '\g'
+2024-05-20T22:22:54.631358+00:00 app[web.1]: return re_.sub("([a-z])([A-Z])","\g<1> \g<2>", x).title()
+2024-05-20T22:22:55.000000+00:00 app[api]: Build succeeded
+2024-05-20T22:22:55.994547+00:00 app[web.1]: mongodb+srv://clickbait4587:baseline072@cluster0.qwyyk.mongodb.net/?retryWrites=true&w=majority
+2024-05-20T22:22:56.396738+00:00 app[web.1]: MONGO INITIALIZED
+2024-05-20T22:22:56.443495+00:00 app[web.1]: id=ObjectId('6644740c7af0ca0697c66a06') revision_id=None can_trade=True use_swing_low=True base='ETH' ccy='USDT' p_gain=0.01 sl_const=30.0 strict=False demo=True interval=15 category='spot' mult=1.8 ce_length=1
+2024-05-20T22:22:56.443501+00:00 app[web.1]: INITIALIZE OKX
+2024-05-20T22:22:56.443502+00:00 app[web.1]: Baseline@072
+2024-05-20T22:22:56.649980+00:00 app[web.1]: INIT BINANCE...
+2024-05-20T22:23:38.194241+00:00 app[web.1]: 10.1.29.191 - - [20/May/2024:22:23:38 +0000] "GET /orders HTTP/1.1" 200 3 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-20T22:23:38.194430+00:00 heroku[router]: at=info method=GET path="/orders" host=tu-trader-3996d65ded90.herokuapp.com request_id=a7a30da1-bfaa-4312-a833-cfb24cb0e1c8 fwd="105.245.105.185" dyno=web.1 connect=0ms service=32ms status=200 bytes=179 protocol=https
+2024-05-20T22:30:00.313746+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-20T22:30:00.316290+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-20T22:30:00.316291+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-20T22:30:00.316292+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716243774853&bar=15m
+2024-05-20T22:30:00.585324+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-20T22:30:00.806300+00:00 app[web.1]: CE COMPLETE
+2024-05-20T22:30:00.806439+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-20T22:30:00.806440+00:00 app[web.1]: 
+2024-05-20T22:30:00.806996+00:00 app[web.1]: RESUME JOB
+2024-05-20T22:30:18.747054+00:00 app[web.1]: 10.1.55.136 - - [20/May/2024:22:30:18 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-O88CB&b64=1 HTTP/1.1" 200 97 "-" "node-XMLHttpRequest"
+2024-05-20T22:30:18.747121+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-O88CB&b64=1" host=tu-trader-3996d65ded90.herokuapp.com request_id=b5439586-29e2-4dba-b297-cf7cdbfdb1ff fwd="3.238.200.79" dyno=web.1 connect=0ms service=1ms status=200 bytes=310 protocol=https
+2024-05-20T22:30:18.804112+00:00 app[web.1]: Connected: None
+2024-05-20T22:30:18.804123+00:00 app[web.1]: 10.1.59.52 - - [20/May/2024:22:30:18 +0000] "POST /socket.io/?EIO=4&transport=polling&t=O-O88Dp&b64=1&sid=ZFR2r684qgTCkiDeAAAA HTTP/1.1" 200 2 "-" "node-XMLHttpRequest"
+2024-05-20T22:30:18.804483+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=O-O88Dp&b64=1&sid=ZFR2r684qgTCkiDeAAAA" host=tu-trader-3996d65ded90.herokuapp.com request_id=3be67361-6b75-4400-87c2-112622db5e68 fwd="3.238.200.79" dyno=web.1 connect=1ms service=2ms status=200 bytes=199 protocol=https
+2024-05-20T22:30:18.808665+00:00 app[web.1]: 10.1.48.146 - - [20/May/2024:22:30:18 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-O88EA&b64=1&sid=ZFR2r684qgTCkiDeAAAA HTTP/1.1" 200 1 "-" "node-XMLHttpRequest"
+2024-05-20T22:30:18.808846+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-O88EA&b64=1&sid=ZFR2r684qgTCkiDeAAAA" host=tu-trader-3996d65ded90.herokuapp.com request_id=e9ebefae-7929-4576-882c-087278e20a73 fwd="3.238.200.79" dyno=web.1 connect=0ms service=0ms status=200 bytes=213 protocol=https
+2024-05-20T22:30:18.841774+00:00 app[web.1]: 10.1.20.196 - - [20/May/2024:22:30:18 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-O88Eu&b64=1&sid=ZFR2r684qgTCkiDeAAAA HTTP/1.1" 200 1 "-" "node-XMLHttpRequest"
+2024-05-20T22:30:18.842135+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-O88Eu&b64=1&sid=ZFR2r684qgTCkiDeAAAA" host=tu-trader-3996d65ded90.herokuapp.com request_id=7f6755a5-5797-478a-ba7d-c75831288352 fwd="3.238.200.79" dyno=web.1 connect=0ms service=1ms status=200 bytes=213 protocol=https
+2024-05-20T22:30:19.377241+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=ZFR2r684qgTCkiDeAAAA" host=tu-trader-3996d65ded90.herokuapp.com request_id=32a9b3af-1fdb-4a82-bd87-330335ec38b2 fwd="3.238.200.79" dyno=web.1 connect=0ms service=572ms status=101 bytes=253 protocol=https
+2024-05-20T22:30:19.379167+00:00 app[web.1]: Client disconnected
+2024-05-20T22:30:38.247633+00:00 heroku[router]: at=info method=GET path="/" host=tu-trader-3996d65ded90.herokuapp.com request_id=1a8a7895-e1a4-4111-bf78-9524a86ace83 fwd="64.23.201.165" dyno=web.1 connect=1ms service=2ms status=200 bytes=259 protocol=https
+2024-05-20T22:30:38.250376+00:00 app[web.1]: 10.1.21.0 - - [20/May/2024:22:30:38 +0000] "GET / HTTP/1.1" 200 3 "https://tu-trader-3ehljskj4-tonni-diazs-projects.vercel.app/" "vercel-screenshot/1.0"
+2024-05-20T22:30:38.647552+00:00 app[web.1]: 10.1.20.196 - - [20/May/2024:22:30:38 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-O8Cri HTTP/1.1" 200 97 "https://tu-trader-3ehljskj4-tonni-diazs-projects.vercel.app/" "vercel-screenshot/1.0"
+2024-05-20T22:30:38.647767+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-O8Cri" host=tu-trader-3996d65ded90.herokuapp.com request_id=bf57069c-548a-41b5-a6a6-aefaa83280e0 fwd="64.23.201.165" dyno=web.1 connect=1ms service=9ms status=200 bytes=400 protocol=https
+2024-05-20T22:31:26.783951+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-O8ObU" host=tu-trader-3996d65ded90.herokuapp.com request_id=5dec9da8-5772-4f36-ab09-a6d6f921a435 fwd="105.245.105.185" dyno=web.1 connect=2ms service=2ms status=200 bytes=369 protocol=https
+2024-05-20T22:31:26.784096+00:00 app[web.1]: 10.1.55.174 - - [20/May/2024:22:31:26 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-O8ObU HTTP/1.1" 200 97 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-20T22:31:27.135337+00:00 app[web.1]: Connected: None
+2024-05-20T22:31:27.135967+00:00 app[web.1]: 10.1.55.174 - - [20/May/2024:22:31:27 +0000] "POST /socket.io/?EIO=4&transport=polling&t=O-O8OuP&sid=_xvSLH5pQLBft4qOAAAD HTTP/1.1" 200 2 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-20T22:31:27.136068+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=O-O8OuP&sid=_xvSLH5pQLBft4qOAAAD" host=tu-trader-3996d65ded90.herokuapp.com request_id=3735b00d-283e-40de-a0cf-ca3e6f378130 fwd="105.245.105.185" dyno=web.1 connect=0ms service=4ms status=200 bytes=258 protocol=https
+2024-05-20T22:31:27.137159+00:00 app[web.1]: 10.1.16.220 - - [20/May/2024:22:31:27 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-O8OuR&sid=_xvSLH5pQLBft4qOAAAD HTTP/1.1" 200 32 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-20T22:31:27.137491+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-O8OuR&sid=_xvSLH5pQLBft4qOAAAD" host=tu-trader-3996d65ded90.herokuapp.com request_id=1749a263-483c-473d-b1e8-17cc30b68ec1 fwd="105.245.105.185" dyno=web.1 connect=1ms service=3ms status=200 bytes=304 protocol=https
+2024-05-20T22:31:28.191879+00:00 app[web.1]: 10.1.16.220 - - [20/May/2024:22:31:28 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-O8Ozw&sid=_xvSLH5pQLBft4qOAAAD HTTP/1.1" 200 1 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-20T22:31:28.193999+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-O8Ozw&sid=_xvSLH5pQLBft4qOAAAD" host=tu-trader-3996d65ded90.herokuapp.com request_id=2c852712-8634-4b2d-b042-ac959383d47d fwd="105.245.105.185" dyno=web.1 connect=1ms service=765ms status=200 bytes=272 protocol=https
+2024-05-20T22:31:41.539164+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=_xvSLH5pQLBft4qOAAAD" host=tu-trader-3996d65ded90.herokuapp.com request_id=b1ee0782-3dc6-4b79-a6a0-39231591db7b fwd="105.245.105.185" dyno=web.1 connect=0ms service=13609ms status=101 bytes=202 protocol=https
+2024-05-20T22:31:41.539268+00:00 app[web.1]: server=tu-trader-3996d65ded90.herokuapp.com//socket.io/ client=10.1.37.252:11963 socket shutdown error: [Errno 9] Bad file descriptorClient disconnected
+2024-05-20T22:31:41.583295+00:00 app[web.1]: 10.1.16.220 - - [20/May/2024:22:31:41 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-O8SRC HTTP/1.1" 200 97 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-20T22:31:41.583617+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-O8SRC" host=tu-trader-3996d65ded90.herokuapp.com request_id=081a79c7-7a54-479d-8b8f-eefe39e43493 fwd="105.245.105.185" dyno=web.1 connect=2ms service=1ms status=200 bytes=369 protocol=https
+2024-05-20T22:31:41.901389+00:00 app[web.1]: Connected: None
+2024-05-20T22:31:41.901861+00:00 app[web.1]: 10.1.16.220 - - [20/May/2024:22:31:41 +0000] "POST /socket.io/?EIO=4&transport=polling&t=O-O8SVc&sid=C_oJFUCwRUY2rk7gAAAF HTTP/1.1" 200 2 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-20T22:31:41.902234+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=O-O8SVc&sid=C_oJFUCwRUY2rk7gAAAF" host=tu-trader-3996d65ded90.herokuapp.com request_id=eafc1361-5960-45ce-b03b-04959a653453 fwd="105.245.105.185" dyno=web.1 connect=1ms service=2ms status=200 bytes=258 protocol=https
+2024-05-20T22:31:41.917153+00:00 app[web.1]: 10.1.55.174 - - [20/May/2024:22:31:41 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-O8SVe&sid=C_oJFUCwRUY2rk7gAAAF HTTP/1.1" 200 32 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-20T22:31:41.917232+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-O8SVe&sid=C_oJFUCwRUY2rk7gAAAF" host=tu-trader-3996d65ded90.herokuapp.com request_id=60173c7b-fa7c-4f4c-968b-eb746d377588 fwd="105.245.105.185" dyno=web.1 connect=0ms service=1ms status=200 bytes=304 protocol=https
+2024-05-20T22:31:42.721606+00:00 app[web.1]: 10.1.55.174 - - [20/May/2024:22:31:42 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-O8Sam&sid=C_oJFUCwRUY2rk7gAAAF HTTP/1.1" 200 1 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-20T22:31:42.721877+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-O8Sam&sid=C_oJFUCwRUY2rk7gAAAF" host=tu-trader-3996d65ded90.herokuapp.com request_id=16a87e0a-ed84-4fc6-873e-fdeedde72bf7 fwd="105.245.105.185" dyno=web.1 connect=0ms service=530ms status=200 bytes=272 protocol=https
+2024-05-20T22:32:26.227820+00:00 app[web.1]: 
+2024-05-20T22:32:26.227866+00:00 app[web.1]: ON BACKTEST
+2024-05-20T22:32:26.227866+00:00 app[web.1]: 
+2024-05-20T22:32:26.227867+00:00 app[web.1]: 1716163200000 None
+2024-05-20T22:32:26.227867+00:00 app[web.1]: 1716244346225
+2024-05-20T22:32:26.227867+00:00 app[web.1]: GETTING 1 klines...
+2024-05-20T22:32:26.227867+00:00 app[web.1]: 1716163200000
+2024-05-20T22:32:26.227868+00:00 app[web.1]: 2024-05-20 00:00:00
+2024-05-20T22:32:26.962658+00:00 app[web.1]: 91
+2024-05-20T22:32:26.962722+00:00 app[web.1]: Done fetching klines
+2024-05-20T22:32:26.968047+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-20T22:32:27.098203+00:00 app[web.1]: CE COMPLETE
+2024-05-20T22:32:27.102147+00:00 app[web.1]: Cannot save file into a non-existent directory: 'data/dfs/binance'
+2024-05-20T22:32:27.105629+00:00 app[web.1]: Exception occurred in file: /app/.heroku/python/lib/python3.12/site-packages/pandas/io/common.py line 616
+2024-05-20T22:34:40.783250+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=C_oJFUCwRUY2rk7gAAAF" host=tu-trader-3996d65ded90.herokuapp.com request_id=36c3cac8-86bb-404d-a53f-20936f2a31f4 fwd="105.245.105.185" dyno=web.1 connect=0ms service=178325ms status=101 bytes=202 protocol=https
+2024-05-20T22:34:40.783997+00:00 app[web.1]: server=tu-trader-3996d65ded90.herokuapp.com//socket.io/ client=10.1.29.27:32835 socket shutdown error: [Errno 9] Bad file descriptorClient disconnected
+2024-05-20T22:34:52.488323+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-O98fZ" host=tu-trader-3996d65ded90.herokuapp.com request_id=d5b96cc2-a615-4188-a855-0f898f2a1fea fwd="105.245.105.185" dyno=web.1 connect=0ms service=1ms status=200 bytes=369 protocol=https
+2024-05-20T22:34:52.488702+00:00 app[web.1]: 10.1.45.164 - - [20/May/2024:22:34:52 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-O98fZ HTTP/1.1" 200 97 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-20T22:34:53.008702+00:00 app[web.1]: Connected: None
+2024-05-20T22:34:53.008740+00:00 app[web.1]: 10.1.45.164 - - [20/May/2024:22:34:53 +0000] "POST /socket.io/?EIO=4&transport=polling&t=O-O9B5_&sid=lUgyu4wGxErwmbHuAAAH HTTP/1.1" 200 2 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-20T22:34:53.009087+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=O-O9B5_&sid=lUgyu4wGxErwmbHuAAAH" host=tu-trader-3996d65ded90.herokuapp.com request_id=b2d23327-c128-4a7f-8d5b-ddc043ceb653 fwd="105.245.105.185" dyno=web.1 connect=0ms service=4ms status=200 bytes=258 protocol=https
+2024-05-20T22:34:53.025120+00:00 app[web.1]: 10.1.31.168 - - [20/May/2024:22:34:53 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-O9B61&sid=lUgyu4wGxErwmbHuAAAH HTTP/1.1" 200 32 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-20T22:34:53.025344+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-O9B61&sid=lUgyu4wGxErwmbHuAAAH" host=tu-trader-3996d65ded90.herokuapp.com request_id=1a178b5c-054e-47be-90dc-1522da42bd65 fwd="105.245.105.185" dyno=web.1 connect=0ms service=1ms status=200 bytes=304 protocol=https
+2024-05-20T22:34:53.836692+00:00 app[web.1]: 10.1.31.168 - - [20/May/2024:22:34:53 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-O9BEP&sid=lUgyu4wGxErwmbHuAAAH HTTP/1.1" 200 1 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-20T22:34:53.837249+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-O9BEP&sid=lUgyu4wGxErwmbHuAAAH" host=tu-trader-3996d65ded90.herokuapp.com request_id=2f245a6f-a41b-413d-9ce6-00d8346d7d62 fwd="105.245.105.185" dyno=web.1 connect=0ms service=534ms status=200 bytes=272 protocol=https
+2024-05-20T22:41:05.000000+00:00 app[api]: Build started by user obediencekoza@gmail.com
+2024-05-20T22:41:32.505050+00:00 app[api]: Deploy 49989f6f by user obediencekoza@gmail.com
+2024-05-20T22:41:32.505050+00:00 app[api]: Release v63 created by user obediencekoza@gmail.com
+2024-05-20T22:41:32.747102+00:00 heroku[web.1]: Restarting
+2024-05-20T22:41:32.799104+00:00 heroku[web.1]: State changed from up to starting
+2024-05-20T22:41:33.734113+00:00 heroku[web.1]: Stopping all processes with SIGTERM
+2024-05-20T22:41:33.758394+00:00 app[web.1]: [2024-05-20 22:41:33 +0000] [2] [INFO] Handling signal: term
+2024-05-20T22:41:38.863354+00:00 heroku[web.1]: Starting process with command `gunicorn --worker-class eventlet -w 1 app:app`
+2024-05-20T22:41:39.432232+00:00 app[web.1]: Python buildpack: Detected 512 MB available memory and 8 CPU cores.
+2024-05-20T22:41:39.432349+00:00 app[web.1]: Python buildpack: Defaulting WEB_CONCURRENCY to 2 based on the available memory.
+2024-05-20T22:41:41.445624+00:00 app[web.1]: [2024-05-20 22:41:41 +0000] [2] [INFO] Starting gunicorn 22.0.0
+2024-05-20T22:41:41.445989+00:00 app[web.1]: [2024-05-20 22:41:41 +0000] [2] [INFO] Listening at: http://0.0.0.0:23221 (2)
+2024-05-20T22:41:41.446006+00:00 app[web.1]: [2024-05-20 22:41:41 +0000] [2] [INFO] Using worker: eventlet
+2024-05-20T22:41:41.449183+00:00 app[web.1]: [2024-05-20 22:41:41 +0000] [9] [INFO] Booting worker with pid: 9
+2024-05-20T22:41:41.603381+00:00 heroku[web.1]: State changed from starting to up
+2024-05-20T22:41:45.000000+00:00 app[api]: Build succeeded
+2024-05-20T22:41:45.011957+00:00 app[web.1]: /app/.heroku/python/lib/python3.12/site-packages/pandas_ta/utils/_core.py:14: SyntaxWarning: invalid escape sequence '\g'
+2024-05-20T22:41:45.011985+00:00 app[web.1]: return re_.sub("([a-z])([A-Z])","\g<1> \g<2>", x).title()
+2024-05-20T22:41:46.338338+00:00 app[web.1]: mongodb+srv://clickbait4587:baseline072@cluster0.qwyyk.mongodb.net/?retryWrites=true&w=majority
+2024-05-20T22:41:46.753520+00:00 app[web.1]: MONGO INITIALIZED
+2024-05-20T22:41:46.798270+00:00 app[web.1]: id=ObjectId('6644740c7af0ca0697c66a06') revision_id=None can_trade=True use_swing_low=True base='ETH' ccy='USDT' p_gain=0.01 sl_const=30.0 strict=False demo=True interval=15 category='spot' mult=1.8 ce_length=1
+2024-05-20T22:41:46.798288+00:00 app[web.1]: INITIALIZE OKX
+2024-05-20T22:41:46.798288+00:00 app[web.1]: Baseline@072
+2024-05-20T22:41:46.957034+00:00 app[web.1]: INIT BINANCE...
+2024-05-20T22:41:51.028072+00:00 app[web.1]: 10.1.32.31 - - [20/May/2024:22:41:51 +0000] "GET /orders HTTP/1.1" 200 3 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-20T22:41:51.028260+00:00 heroku[router]: at=info method=GET path="/orders" host=tu-trader-3996d65ded90.herokuapp.com request_id=e4875d9f-b812-4653-8ba6-bde2129f2adf fwd="105.245.105.185" dyno=web.1 connect=0ms service=32ms status=200 bytes=179 protocol=https
+2024-05-20T22:42:03.793368+00:00 heroku[web.1]: Error R12 (Exit timeout) -> At least one process failed to exit within 30 seconds of SIGTERM
+2024-05-20T22:42:03.795247+00:00 heroku[web.1]: Stopping remaining processes with SIGKILL
+2024-05-20T22:42:03.820895+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=lUgyu4wGxErwmbHuAAAH" host=tu-trader-3996d65ded90.herokuapp.com request_id=29ca1d02-3067-4c84-b414-671729c66952 fwd="105.245.105.185" dyno=web.1 connect=0ms service=430269ms status=101 bytes=202 protocol=https
+2024-05-20T22:42:03.882968+00:00 heroku[web.1]: Process exited with status 137
+2024-05-20T22:42:06.002176+00:00 app[web.1]: 10.1.16.220 - - [20/May/2024:22:42:05 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-OAqiz HTTP/1.1" 200 97 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-20T22:42:06.002388+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-OAqiz" host=tu-trader-3996d65ded90.herokuapp.com request_id=dc2dd42c-014b-48bf-9c35-6fa83185f071 fwd="105.245.105.185" dyno=web.1 connect=1ms service=1ms status=200 bytes=369 protocol=https
+2024-05-20T22:42:06.322359+00:00 app[web.1]: Connected: None
+2024-05-20T22:42:06.322879+00:00 app[web.1]: 10.1.16.220 - - [20/May/2024:22:42:06 +0000] "POST /socket.io/?EIO=4&transport=polling&t=O-OAqw-&sid=6BZuRwpgQ2FmYTZeAAAA HTTP/1.1" 200 2 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-20T22:42:06.323246+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=O-OAqw-&sid=6BZuRwpgQ2FmYTZeAAAA" host=tu-trader-3996d65ded90.herokuapp.com request_id=3c347f2b-b6b2-4e32-8a04-384c4dd4e161 fwd="105.245.105.185" dyno=web.1 connect=1ms service=2ms status=200 bytes=258 protocol=https
+2024-05-20T22:42:06.330387+00:00 app[web.1]: 10.1.21.0 - - [20/May/2024:22:42:06 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-OAqx0&sid=6BZuRwpgQ2FmYTZeAAAA HTTP/1.1" 200 32 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-20T22:42:06.330717+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-OAqx0&sid=6BZuRwpgQ2FmYTZeAAAA" host=tu-trader-3996d65ded90.herokuapp.com request_id=9b8a7513-3499-4443-bad5-af9fcd1cdb40 fwd="105.245.105.185" dyno=web.1 connect=0ms service=1ms status=200 bytes=304 protocol=https
+2024-05-20T22:42:07.132137+00:00 app[web.1]: 10.1.21.0 - - [20/May/2024:22:42:07 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-OAr04&sid=6BZuRwpgQ2FmYTZeAAAA HTTP/1.1" 200 1 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-20T22:42:07.132446+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-OAr04&sid=6BZuRwpgQ2FmYTZeAAAA" host=tu-trader-3996d65ded90.herokuapp.com request_id=623e3a5f-5e5f-4b2a-888c-3b03cd783169 fwd="105.245.105.185" dyno=web.1 connect=0ms service=503ms status=200 bytes=272 protocol=https
+2024-05-20T22:45:00.287051+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-20T22:45:00.287139+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-20T22:45:00.287150+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-20T22:45:00.287159+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716244905188&bar=15m
+2024-05-20T22:45:00.549362+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-20T22:45:00.686749+00:00 app[web.1]: CE COMPLETE
+2024-05-20T22:45:00.686801+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-20T22:45:00.686801+00:00 app[web.1]: 
+2024-05-20T22:45:00.687165+00:00 app[web.1]: RESUME JOB
+2024-05-20T22:45:16.552448+00:00 app[web.1]: 10.1.92.227 - - [20/May/2024:22:45:16 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-OBZL1&b64=1 HTTP/1.1" 200 97 "-" "node-XMLHttpRequest"
+2024-05-20T22:45:16.552780+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-OBZL1&b64=1" host=tu-trader-3996d65ded90.herokuapp.com request_id=b2ebd507-bc57-4d75-8e84-2c690339d3ee fwd="107.21.195.19" dyno=web.1 connect=0ms service=1ms status=200 bytes=310 protocol=https
+2024-05-20T22:45:16.616702+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-OBZQA&b64=1&sid=83OvlaM9JJvpLCyYAAAC" host=tu-trader-3996d65ded90.herokuapp.com request_id=f69b3aa1-8f8e-4890-9582-a0d7e0ce600e fwd="107.21.195.19" dyno=web.1 connect=0ms service=1ms status=200 bytes=213 protocol=https
+2024-05-20T22:45:16.616767+00:00 app[web.1]: 10.1.31.168 - - [20/May/2024:22:45:16 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-OBZQA&b64=1&sid=83OvlaM9JJvpLCyYAAAC HTTP/1.1" 200 1 "-" "node-XMLHttpRequest"
+2024-05-20T22:45:16.625486+00:00 app[web.1]: Connected: None
+2024-05-20T22:45:16.626037+00:00 app[web.1]: 10.1.55.174 - - [20/May/2024:22:45:16 +0000] "POST /socket.io/?EIO=4&transport=polling&t=O-OBZPy&b64=1&sid=83OvlaM9JJvpLCyYAAAC HTTP/1.1" 200 2 "-" "node-XMLHttpRequest"
+2024-05-20T22:45:16.626125+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=O-OBZPy&b64=1&sid=83OvlaM9JJvpLCyYAAAC" host=tu-trader-3996d65ded90.herokuapp.com request_id=bb980fb6-b193-4803-83bc-e37b5d70faf9 fwd="107.21.195.19" dyno=web.1 connect=0ms service=1ms status=200 bytes=199 protocol=https
+2024-05-20T22:45:16.655515+00:00 app[web.1]: 10.1.92.36 - - [20/May/2024:22:45:16 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-OBZR7&b64=1&sid=83OvlaM9JJvpLCyYAAAC HTTP/1.1" 200 1 "-" "node-XMLHttpRequest"
+2024-05-20T22:45:16.655727+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-OBZR7&b64=1&sid=83OvlaM9JJvpLCyYAAAC" host=tu-trader-3996d65ded90.herokuapp.com request_id=53685269-59bc-42a1-83a4-6a7add343c51 fwd="107.21.195.19" dyno=web.1 connect=0ms service=1ms status=200 bytes=213 protocol=https
+2024-05-20T22:45:16.766157+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=83OvlaM9JJvpLCyYAAAC" host=tu-trader-3996d65ded90.herokuapp.com request_id=ede04bea-7bef-4968-8f3f-fb2a463f573f fwd="107.21.195.19" dyno=web.1 connect=0ms service=152ms status=101 bytes=253 protocol=https
+2024-05-20T22:45:16.766572+00:00 app[web.1]: Client disconnected
+2024-05-20T22:45:36.366026+00:00 app[web.1]: 10.1.16.136 - - [20/May/2024:22:45:36 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-OBeA8 HTTP/1.1" 200 97 "https://tu-trader-lz2mssfy9-tonni-diazs-projects.vercel.app/" "vercel-screenshot/1.0"
+2024-05-20T22:45:36.366121+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-OBeA8" host=tu-trader-3996d65ded90.herokuapp.com request_id=efb9c0b8-7358-42bd-bf94-3cd8ac6d85b3 fwd="143.110.237.119" dyno=web.1 connect=0ms service=1ms status=200 bytes=400 protocol=https
+2024-05-20T22:45:36.587390+00:00 app[web.1]: Connected: None
+2024-05-20T22:45:36.587893+00:00 app[web.1]: 10.1.16.136 - - [20/May/2024:22:45:36 +0000] "POST /socket.io/?EIO=4&transport=polling&t=O-OBeGR&sid=KXLju-SdPKWKvOogAAAE HTTP/1.1" 200 2 "https://tu-trader-lz2mssfy9-tonni-diazs-projects.vercel.app/" "vercel-screenshot/1.0"
+2024-05-20T22:45:36.588263+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=O-OBeGR&sid=KXLju-SdPKWKvOogAAAE" host=tu-trader-3996d65ded90.herokuapp.com request_id=c3eb5ff0-6f21-45c9-8848-e8c31e8a30ba fwd="143.110.237.119" dyno=web.1 connect=0ms service=2ms status=200 bytes=289 protocol=https
+2024-05-20T22:45:36.666139+00:00 app[web.1]: 10.1.16.136 - - [20/May/2024:22:45:36 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-OBeGT&sid=KXLju-SdPKWKvOogAAAE HTTP/1.1" 200 32 "https://tu-trader-lz2mssfy9-tonni-diazs-projects.vercel.app/" "vercel-screenshot/1.0"
+2024-05-20T22:45:36.666263+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-OBeGT&sid=KXLju-SdPKWKvOogAAAE" host=tu-trader-3996d65ded90.herokuapp.com request_id=ba05a0c5-cd90-4e87-8319-1fd6fbae47d1 fwd="143.110.237.119" dyno=web.1 connect=0ms service=1ms status=200 bytes=335 protocol=https
+2024-05-20T22:45:36.842911+00:00 app[web.1]: 10.1.16.136 - - [20/May/2024:22:45:36 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-OBeL1&sid=KXLju-SdPKWKvOogAAAE HTTP/1.1" 200 1 "https://tu-trader-lz2mssfy9-tonni-diazs-projects.vercel.app/" "vercel-screenshot/1.0"
+2024-05-20T22:45:36.843108+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-OBeL1&sid=KXLju-SdPKWKvOogAAAE" host=tu-trader-3996d65ded90.herokuapp.com request_id=b3e3c8c2-5082-402f-8f77-31d6a5d05ed3 fwd="143.110.237.119" dyno=web.1 connect=0ms service=1ms status=200 bytes=303 protocol=https
+2024-05-20T22:45:37.021751+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=KXLju-SdPKWKvOogAAAE" host=tu-trader-3996d65ded90.herokuapp.com request_id=1e983426-ce0e-4fec-93bc-9dfabbfa0711 fwd="143.110.237.119" dyno=web.1 connect=0ms service=340ms status=101 bytes=217 protocol=https
+2024-05-20T22:45:37.022146+00:00 app[web.1]: server=tu-trader-3996d65ded90.herokuapp.com//socket.io/ client=10.1.29.191:27071 socket shutdown error: [Errno 9] Bad file descriptorClient disconnected
+2024-05-20T22:46:12.513306+00:00 app[web.1]: 10.1.35.150 - - [20/May/2024:22:46:12 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-OBm-_ HTTP/1.1" 200 97 "https://tu-trader-lz2mssfy9-tonni-diazs-projects.vercel.app/" "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/24.0 Chrome/117.0.0.0 Mobile Safari/537.36"
+2024-05-20T22:46:12.513467+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-OBm-_" host=tu-trader-3996d65ded90.herokuapp.com request_id=7ed634c2-77b5-434e-959b-e77d8108bad9 fwd="161.35.233.220" dyno=web.1 connect=0ms service=1ms status=200 bytes=400 protocol=https
+2024-05-20T22:46:12.673934+00:00 app[web.1]: Connected: None
+2024-05-20T22:46:12.674404+00:00 app[web.1]: 10.1.35.150 - - [20/May/2024:22:46:12 +0000] "POST /socket.io/?EIO=4&transport=polling&t=O-OBn5C&sid=7GdpJXaTBfVIS8XDAAAG HTTP/1.1" 200 2 "https://tu-trader-lz2mssfy9-tonni-diazs-projects.vercel.app/" "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/24.0 Chrome/117.0.0.0 Mobile Safari/537.36"
+2024-05-20T22:46:12.675092+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=O-OBn5C&sid=7GdpJXaTBfVIS8XDAAAG" host=tu-trader-3996d65ded90.herokuapp.com request_id=06d13fe9-04bf-4cb4-95d3-6d7a66bae54c fwd="161.35.233.220" dyno=web.1 connect=0ms service=2ms status=200 bytes=289 protocol=https
+2024-05-20T22:46:12.753923+00:00 app[web.1]: 10.1.35.150 - - [20/May/2024:22:46:12 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-OBn5D&sid=7GdpJXaTBfVIS8XDAAAG HTTP/1.1" 200 32 "https://tu-trader-lz2mssfy9-tonni-diazs-projects.vercel.app/" "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/24.0 Chrome/117.0.0.0 Mobile Safari/537.36"
+2024-05-20T22:46:12.754091+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-OBn5D&sid=7GdpJXaTBfVIS8XDAAAG" host=tu-trader-3996d65ded90.herokuapp.com request_id=87d1afbc-6adf-4a6a-a25b-893b91c5aeed fwd="161.35.233.220" dyno=web.1 connect=0ms service=1ms status=200 bytes=335 protocol=https
+2024-05-20T22:46:12.914255+00:00 app[web.1]: 10.1.35.150 - - [20/May/2024:22:46:12 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-OBn8z&sid=7GdpJXaTBfVIS8XDAAAG HTTP/1.1" 200 1 "https://tu-trader-lz2mssfy9-tonni-diazs-projects.vercel.app/" "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/24.0 Chrome/117.0.0.0 Mobile Safari/537.36"
+2024-05-20T22:46:12.914451+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-OBn8z&sid=7GdpJXaTBfVIS8XDAAAG" host=tu-trader-3996d65ded90.herokuapp.com request_id=1e654fd5-63d9-4f90-9b37-c1075a010dcf fwd="161.35.233.220" dyno=web.1 connect=0ms service=1ms status=200 bytes=303 protocol=https
+2024-05-20T22:46:13.516324+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=7GdpJXaTBfVIS8XDAAAG" host=tu-trader-3996d65ded90.herokuapp.com request_id=8cafb53d-aa00-443f-aa9b-165d588f883a fwd="161.35.233.220" dyno=web.1 connect=0ms service=691ms status=101 bytes=217 protocol=https
+2024-05-20T22:46:13.516948+00:00 app[web.1]: server=tu-trader-3996d65ded90.herokuapp.com//socket.io/ client=10.1.44.173:30637 socket shutdown error: [Errno 9] Bad file descriptorClient disconnected
+2024-05-20T22:46:20.147818+00:00 app[web.1]: server=tu-trader-3996d65ded90.herokuapp.com//socket.io/ client=10.1.91.8:17655 socket shutdown error: [Errno 9] Bad file descriptorClient disconnected
+2024-05-20T22:46:20.147882+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=6BZuRwpgQ2FmYTZeAAAA" host=tu-trader-3996d65ded90.herokuapp.com request_id=afad8f7b-0cfe-4220-a5a1-b045367184c4 fwd="105.245.105.185" dyno=web.1 connect=0ms service=253284ms status=101 bytes=202 protocol=https
+2024-05-20T22:46:23.895342+00:00 app[web.1]: 10.1.48.182 - - [20/May/2024:22:46:23 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-OBpgt HTTP/1.1" 200 97 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-20T22:46:23.895548+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-OBpgt" host=tu-trader-3996d65ded90.herokuapp.com request_id=69a4db10-3471-4933-a763-5b8f1855bf99 fwd="105.245.105.185" dyno=web.1 connect=0ms service=1ms status=200 bytes=369 protocol=https
+2024-05-20T22:46:24.217219+00:00 app[web.1]: Connected: None
+2024-05-20T22:46:24.217699+00:00 app[web.1]: 10.1.48.182 - - [20/May/2024:22:46:24 +0000] "POST /socket.io/?EIO=4&transport=polling&t=O-OBpuL&sid=siXtzlHyz82kLYOMAAAI HTTP/1.1" 200 2 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-20T22:46:24.217982+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=O-OBpuL&sid=siXtzlHyz82kLYOMAAAI" host=tu-trader-3996d65ded90.herokuapp.com request_id=92dfed34-f8df-4d6b-9c5d-34e14dcff4c9 fwd="105.245.105.185" dyno=web.1 connect=0ms service=1ms status=200 bytes=258 protocol=https
+2024-05-20T22:46:24.220436+00:00 app[web.1]: 10.1.55.212 - - [20/May/2024:22:46:24 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-OBpuN&sid=siXtzlHyz82kLYOMAAAI HTTP/1.1" 200 32 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-20T22:46:24.220601+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-OBpuN&sid=siXtzlHyz82kLYOMAAAI" host=tu-trader-3996d65ded90.herokuapp.com request_id=a9e1ab59-ff26-4e68-8e87-d079a3142536 fwd="105.245.105.185" dyno=web.1 connect=0ms service=0ms status=200 bytes=304 protocol=https
+2024-05-20T22:46:24.999412+00:00 app[web.1]: 10.1.55.212 - - [20/May/2024:22:46:24 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-OBpzN&sid=siXtzlHyz82kLYOMAAAI HTTP/1.1" 200 1 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-20T22:46:25.000195+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-OBpzN&sid=siXtzlHyz82kLYOMAAAI" host=tu-trader-3996d65ded90.herokuapp.com request_id=aedddb6b-b860-49d1-abe5-07086d5d8f23 fwd="105.245.105.185" dyno=web.1 connect=0ms service=500ms status=200 bytes=272 protocol=https
+2024-05-20T22:46:26.143450+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=siXtzlHyz82kLYOMAAAI" host=tu-trader-3996d65ded90.herokuapp.com request_id=ae9993e9-bf2d-4fa8-83e8-94104b1d609e fwd="105.245.105.185" dyno=web.1 connect=0ms service=1400ms status=101 bytes=202 protocol=https
+2024-05-20T22:46:26.143578+00:00 app[web.1]: server=tu-trader-3996d65ded90.herokuapp.com//socket.io/ client=10.1.29.191:21599 socket shutdown error: [Errno 9] Bad file descriptorClient disconnected
+2024-05-20T22:46:26.307183+00:00 app[web.1]: 10.1.55.212 - - [20/May/2024:22:46:26 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-OBqPM HTTP/1.1" 200 97 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-20T22:46:26.307424+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-OBqPM" host=tu-trader-3996d65ded90.herokuapp.com request_id=d8d57be8-e22c-4cdf-a945-20dbe91de405 fwd="105.245.105.185" dyno=web.1 connect=0ms service=1ms status=200 bytes=369 protocol=https
+2024-05-20T22:46:26.619690+00:00 app[web.1]: Connected: None
+2024-05-20T22:46:26.620191+00:00 app[web.1]: 10.1.55.212 - - [20/May/2024:22:46:26 +0000] "POST /socket.io/?EIO=4&transport=polling&t=O-OBqT-&sid=aDpLcNpFHPZjDmNoAAAK HTTP/1.1" 200 2 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-20T22:46:26.620403+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=O-OBqT-&sid=aDpLcNpFHPZjDmNoAAAK" host=tu-trader-3996d65ded90.herokuapp.com request_id=a7646603-b0ce-4274-901e-e45ffbfce73e fwd="105.245.105.185" dyno=web.1 connect=0ms service=1ms status=200 bytes=258 protocol=https
+2024-05-20T22:46:26.620682+00:00 app[web.1]: 10.1.48.182 - - [20/May/2024:22:46:26 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-OBqU0&sid=aDpLcNpFHPZjDmNoAAAK HTTP/1.1" 200 32 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-20T22:46:26.620903+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-OBqU0&sid=aDpLcNpFHPZjDmNoAAAK" host=tu-trader-3996d65ded90.herokuapp.com request_id=b38d3c47-dbc4-4e27-ae4c-5fce340afc24 fwd="105.245.105.185" dyno=web.1 connect=0ms service=5ms status=200 bytes=304 protocol=https
+2024-05-20T22:46:27.401604+00:00 app[web.1]: 10.1.55.212 - - [20/May/2024:22:46:27 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-OBqYq&sid=aDpLcNpFHPZjDmNoAAAK HTTP/1.1" 200 1 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-20T22:46:27.401796+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-OBqYq&sid=aDpLcNpFHPZjDmNoAAAK" host=tu-trader-3996d65ded90.herokuapp.com request_id=fcefb65a-2859-480c-bf8e-dbf8a167f328 fwd="105.245.105.185" dyno=web.1 connect=0ms service=502ms status=200 bytes=272 protocol=https
+2024-05-20T22:46:50.412187+00:00 app[web.1]: 
+2024-05-20T22:46:50.412210+00:00 app[web.1]: ON BACKTEST
+2024-05-20T22:46:50.412210+00:00 app[web.1]: 
+2024-05-20T22:46:50.412211+00:00 app[web.1]: 1716163200000 None
+2024-05-20T22:46:50.412211+00:00 app[web.1]: 1716245210409
+2024-05-20T22:46:50.412211+00:00 app[web.1]: GETTING 1 klines...
+2024-05-20T22:46:50.412211+00:00 app[web.1]: 1716163200000
+2024-05-20T22:46:50.412212+00:00 app[web.1]: 2024-05-20 00:00:00
+2024-05-20T22:46:51.126205+00:00 app[web.1]: 92
+2024-05-20T22:46:51.126232+00:00 app[web.1]: Done fetching klines
+2024-05-20T22:46:51.133170+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-20T22:46:51.322675+00:00 app[web.1]: CE COMPLETE
+2024-05-20T22:46:51.322819+00:00 app[web.1]: CE_SMA: BEGIN BACKTESTING...
+2024-05-20T22:46:51.322819+00:00 app[web.1]: 
+2024-05-20T22:46:51.327008+00:00 app[web.1]: TOTAL TRADES: 0
+2024-05-20T22:46:51.327013+00:00 app[web.1]: division by zero
+2024-05-20T22:46:51.327416+00:00 app[web.1]: Exception occurred in file: /app/routes/strategies/ce_sma.py line 50
+2024-05-20T22:53:26.424696+00:00 app[web.1]: 10.1.29.27 - - [20/May/2024:22:53:26 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-ODQzj&b64=1 HTTP/1.1" 200 97 "-" "node-XMLHttpRequest"
+2024-05-20T22:53:26.424821+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-ODQzj&b64=1" host=tu-trader-3996d65ded90.herokuapp.com request_id=79f33f2b-ab6a-4629-af3f-e67afbf94dad fwd="3.238.200.79" dyno=web.1 connect=0ms service=1ms status=200 bytes=310 protocol=https
+2024-05-20T22:53:26.482101+00:00 app[web.1]: Connected: None
+2024-05-20T22:53:26.482596+00:00 app[web.1]: 10.1.35.10 - - [20/May/2024:22:53:26 +0000] "POST /socket.io/?EIO=4&transport=polling&t=O-ODR0B&b64=1&sid=SUuEiY-8bYn918jBAAAM HTTP/1.1" 200 2 "-" "node-XMLHttpRequest"
+2024-05-20T22:53:26.482866+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=O-ODR0B&b64=1&sid=SUuEiY-8bYn918jBAAAM" host=tu-trader-3996d65ded90.herokuapp.com request_id=72c53cf2-64d6-4a8b-8266-7e27f829a14a fwd="3.238.200.79" dyno=web.1 connect=0ms service=1ms status=200 bytes=199 protocol=https
+2024-05-20T22:53:26.485193+00:00 app[web.1]: 10.1.92.227 - - [20/May/2024:22:53:26 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-ODR0X&b64=1&sid=SUuEiY-8bYn918jBAAAM HTTP/1.1" 200 1 "-" "node-XMLHttpRequest"
+2024-05-20T22:53:26.485613+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-ODR0X&b64=1&sid=SUuEiY-8bYn918jBAAAM" host=tu-trader-3996d65ded90.herokuapp.com request_id=a445c1b9-2932-446b-b682-cda3741c7229 fwd="3.238.200.79" dyno=web.1 connect=0ms service=1ms status=200 bytes=213 protocol=https
+2024-05-20T22:53:26.564200+00:00 app[web.1]: 10.1.37.252 - - [20/May/2024:22:53:26 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-ODR1C&b64=1&sid=SUuEiY-8bYn918jBAAAM HTTP/1.1" 200 1 "-" "node-XMLHttpRequest"
+2024-05-20T22:53:26.564451+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-ODR1C&b64=1&sid=SUuEiY-8bYn918jBAAAM" host=tu-trader-3996d65ded90.herokuapp.com request_id=e5bb042c-d402-4fa3-ae27-56c8684f0855 fwd="3.238.200.79" dyno=web.1 connect=0ms service=1ms status=200 bytes=213 protocol=https
+2024-05-20T22:53:26.766547+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=SUuEiY-8bYn918jBAAAM" host=tu-trader-3996d65ded90.herokuapp.com request_id=af457a16-fdce-4faf-a66f-4158439d55d6 fwd="3.238.200.79" dyno=web.1 connect=1ms service=282ms status=101 bytes=253 protocol=https
+2024-05-20T22:53:26.766963+00:00 app[web.1]: Client disconnected
+2024-05-20T22:53:45.119859+00:00 app[web.1]: 10.1.85.196 - - [20/May/2024:22:53:45 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-ODVV3 HTTP/1.1" 200 97 "https://tu-trader-23bya0imp-tonni-diazs-projects.vercel.app/" "vercel-screenshot/1.0"
+2024-05-20T22:53:45.120035+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-ODVV3" host=tu-trader-3996d65ded90.herokuapp.com request_id=735df36c-618a-4298-85c6-545b47db3f21 fwd="161.35.233.220" dyno=web.1 connect=0ms service=1ms status=200 bytes=400 protocol=https
+2024-05-20T22:53:45.278127+00:00 app[web.1]: Connected: None
+2024-05-20T22:53:45.278610+00:00 app[web.1]: 10.1.85.196 - - [20/May/2024:22:53:45 +0000] "POST /socket.io/?EIO=4&transport=polling&t=O-ODVb8&sid=4gx9XTNBx51fi1yRAAAO HTTP/1.1" 200 2 "https://tu-trader-23bya0imp-tonni-diazs-projects.vercel.app/" "vercel-screenshot/1.0"
+2024-05-20T22:53:45.278834+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=O-ODVb8&sid=4gx9XTNBx51fi1yRAAAO" host=tu-trader-3996d65ded90.herokuapp.com request_id=d91de8ff-20f3-442f-9c63-5deff159ef4a fwd="161.35.233.220" dyno=web.1 connect=0ms service=1ms status=200 bytes=289 protocol=https
+2024-05-20T22:53:45.356643+00:00 app[web.1]: 10.1.85.196 - - [20/May/2024:22:53:45 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-ODVbA&sid=4gx9XTNBx51fi1yRAAAO HTTP/1.1" 200 32 "https://tu-trader-23bya0imp-tonni-diazs-projects.vercel.app/" "vercel-screenshot/1.0"
+2024-05-20T22:53:45.356800+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-ODVbA&sid=4gx9XTNBx51fi1yRAAAO" host=tu-trader-3996d65ded90.herokuapp.com request_id=38612e0b-eb18-46c0-9a82-ab48a77aeeb0 fwd="161.35.233.220" dyno=web.1 connect=0ms service=1ms status=200 bytes=335 protocol=https
+2024-05-20T22:54:36.034544+00:00 app[web.1]: Client disconnected
+2024-05-20T23:00:00.292185+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-20T23:00:00.292250+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-20T23:00:00.292261+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-20T23:00:00.292272+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716244905188&bar=15m
+2024-05-20T23:00:00.594174+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-20T23:00:00.738557+00:00 app[web.1]: CE COMPLETE
+2024-05-20T23:00:00.738668+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-20T23:00:00.738668+00:00 app[web.1]: 
+2024-05-20T23:00:00.739078+00:00 app[web.1]: RESUME JOB
+2024-05-20T23:15:00.294666+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-20T23:15:00.294735+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-20T23:15:00.294746+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-20T23:15:00.294755+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716244905188&bar=15m
+2024-05-20T23:15:00.563922+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-20T23:15:00.712370+00:00 app[web.1]: CE COMPLETE
+2024-05-20T23:15:00.712438+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-20T23:15:00.712439+00:00 app[web.1]: 
+2024-05-20T23:15:00.712848+00:00 app[web.1]: RESUME JOB
+2024-05-20T23:30:00.291413+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-20T23:30:00.291461+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-20T23:30:00.291461+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-20T23:30:00.291462+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716244905188&bar=15m
+2024-05-20T23:30:00.571883+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-20T23:30:00.834393+00:00 app[web.1]: CE COMPLETE
+2024-05-20T23:30:00.834414+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-20T23:30:00.834414+00:00 app[web.1]: 
+2024-05-20T23:30:00.834414+00:00 app[web.1]: RESUME JOB
+2024-05-20T23:45:00.291310+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-20T23:45:00.291346+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-20T23:45:00.291346+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-20T23:45:00.291347+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716244905188&bar=15m
+2024-05-20T23:45:00.569841+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-20T23:45:00.714782+00:00 app[web.1]: CE COMPLETE
+2024-05-20T23:45:00.714843+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-20T23:45:00.714843+00:00 app[web.1]: 
+2024-05-20T23:45:00.715186+00:00 app[web.1]: RESUME JOB
+2024-05-21T00:00:00.300266+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T00:00:00.300325+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T00:00:00.300334+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T00:00:00.300351+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716244905188&bar=15m
+2024-05-21T00:00:00.568154+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T00:00:00.772439+00:00 app[web.1]: CE COMPLETE
+2024-05-21T00:00:00.772620+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T00:00:00.772621+00:00 app[web.1]: 
+2024-05-21T00:00:00.773130+00:00 app[web.1]: RESUME JOB
+2024-05-21T00:02:51.225741+00:00 app[web.1]: Execution of job "tc_job (trigger: interval[0:00:01], next run at: 2024-05-21 00:02:51 UTC)" skipped: maximum number of running instances reached (1)
+2024-05-21T00:02:52.225111+00:00 app[web.1]: Execution of job "tc_job (trigger: interval[0:00:01], next run at: 2024-05-21 00:02:52 UTC)" skipped: maximum number of running instances reached (1)
+2024-05-21T00:02:53.225755+00:00 app[web.1]: Execution of job "tc_job (trigger: interval[0:00:01], next run at: 2024-05-21 00:02:53 UTC)" skipped: maximum number of running instances reached (1)
+2024-05-21T00:02:54.225988+00:00 app[web.1]: Execution of job "tc_job (trigger: interval[0:00:01], next run at: 2024-05-21 00:02:54 UTC)" skipped: maximum number of running instances reached (1)
+2024-05-21T00:02:55.225265+00:00 app[web.1]: Execution of job "tc_job (trigger: interval[0:00:01], next run at: 2024-05-21 00:02:55 UTC)" skipped: maximum number of running instances reached (1)
+2024-05-21T00:02:56.225821+00:00 app[web.1]: Execution of job "tc_job (trigger: interval[0:00:01], next run at: 2024-05-21 00:02:56 UTC)" skipped: maximum number of running instances reached (1)
+2024-05-21T00:02:57.225301+00:00 app[web.1]: Execution of job "tc_job (trigger: interval[0:00:01], next run at: 2024-05-21 00:02:57 UTC)" skipped: maximum number of running instances reached (1)
+2024-05-21T00:02:58.225793+00:00 app[web.1]: Execution of job "tc_job (trigger: interval[0:00:01], next run at: 2024-05-21 00:02:58 UTC)" skipped: maximum number of running instances reached (1)
+2024-05-21T00:02:59.225553+00:00 app[web.1]: Execution of job "tc_job (trigger: interval[0:00:01], next run at: 2024-05-21 00:02:59 UTC)" skipped: maximum number of running instances reached (1)
+2024-05-21T00:03:00.225485+00:00 app[web.1]: Execution of job "tc_job (trigger: interval[0:00:01], next run at: 2024-05-21 00:03:00 UTC)" skipped: maximum number of running instances reached (1)
+2024-05-21T00:03:01.225100+00:00 app[web.1]: Execution of job "tc_job (trigger: interval[0:00:01], next run at: 2024-05-21 00:03:01 UTC)" skipped: maximum number of running instances reached (1)
+2024-05-21T00:03:02.225268+00:00 app[web.1]: Execution of job "tc_job (trigger: interval[0:00:01], next run at: 2024-05-21 00:03:02 UTC)" skipped: maximum number of running instances reached (1)
+2024-05-21T00:03:03.225708+00:00 app[web.1]: Execution of job "tc_job (trigger: interval[0:00:01], next run at: 2024-05-21 00:03:03 UTC)" skipped: maximum number of running instances reached (1)
+2024-05-21T00:03:04.225754+00:00 app[web.1]: Execution of job "tc_job (trigger: interval[0:00:01], next run at: 2024-05-21 00:03:04 UTC)" skipped: maximum number of running instances reached (1)
+2024-05-21T00:03:05.225958+00:00 app[web.1]: Execution of job "tc_job (trigger: interval[0:00:01], next run at: 2024-05-21 00:03:05 UTC)" skipped: maximum number of running instances reached (1)
+2024-05-21T00:03:11.225925+00:00 app[web.1]: Execution of job "tc_job (trigger: interval[0:00:01], next run at: 2024-05-21 00:03:11 UTC)" skipped: maximum number of running instances reached (1)
+2024-05-21T00:03:13.225393+00:00 app[web.1]: Execution of job "tc_job (trigger: interval[0:00:01], next run at: 2024-05-21 00:03:13 UTC)" skipped: maximum number of running instances reached (1)
+2024-05-21T00:15:00.285913+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T00:15:00.286078+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T00:15:00.286081+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T00:15:00.286081+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716244905188&bar=15m
+2024-05-21T00:15:00.535589+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T00:15:00.671530+00:00 app[web.1]: CE COMPLETE
+2024-05-21T00:15:00.671629+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T00:15:00.671629+00:00 app[web.1]: 
+2024-05-21T00:15:00.672098+00:00 app[web.1]: RESUME JOB
+2024-05-21T00:30:00.285139+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T00:30:00.285207+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T00:30:00.285218+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T00:30:00.285237+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716244905188&bar=15m
+2024-05-21T00:30:00.571012+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T00:30:00.705868+00:00 app[web.1]: CE COMPLETE
+2024-05-21T00:30:00.705954+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T00:30:00.705955+00:00 app[web.1]: 
+2024-05-21T00:30:00.706312+00:00 app[web.1]: RESUME JOB
+2024-05-21T00:45:00.285511+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T00:45:00.285586+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T00:45:00.285604+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T00:45:00.285622+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716244905188&bar=15m
+2024-05-21T00:45:00.554907+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T00:45:00.725004+00:00 app[web.1]: CE COMPLETE
+2024-05-21T00:45:00.725067+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T00:45:00.725068+00:00 app[web.1]: 
+2024-05-21T00:45:00.725406+00:00 app[web.1]: RESUME JOB
+2024-05-21T00:53:37.782210+00:00 app[web.1]: Client disconnected
+2024-05-21T00:53:40.850913+00:00 app[web.1]: 10.1.46.174 - - [21/May/2024:00:53:40 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-Oey3C HTTP/1.1" 200 97 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T00:53:40.851216+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-Oey3C" host=tu-trader-3996d65ded90.herokuapp.com request_id=110a0cc2-d131-481e-8594-bbcb257b4bc8 fwd="105.245.105.185" dyno=web.1 connect=0ms service=1ms status=200 bytes=369 protocol=https
+2024-05-21T00:53:41.187504+00:00 app[web.1]: Connected: None
+2024-05-21T00:53:41.188127+00:00 app[web.1]: 10.1.46.174 - - [21/May/2024:00:53:41 +0000] "POST /socket.io/?EIO=4&transport=polling&t=O-OeyP9&sid=7XSmRUP4uRg1sMLOAAAQ HTTP/1.1" 200 2 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T00:53:41.188415+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=O-OeyP9&sid=7XSmRUP4uRg1sMLOAAAQ" host=tu-trader-3996d65ded90.herokuapp.com request_id=f0d9023d-7677-4764-aca5-0a278b54285c fwd="105.245.105.185" dyno=web.1 connect=0ms service=2ms status=200 bytes=258 protocol=https
+2024-05-21T00:53:41.200862+00:00 app[web.1]: 10.1.92.227 - - [21/May/2024:00:53:41 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-OeyPA&sid=7XSmRUP4uRg1sMLOAAAQ HTTP/1.1" 200 32 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T00:53:41.201481+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-OeyPA&sid=7XSmRUP4uRg1sMLOAAAQ" host=tu-trader-3996d65ded90.herokuapp.com request_id=407fab92-523d-48dc-9c84-8aeb5df155e2 fwd="105.245.105.185" dyno=web.1 connect=0ms service=1ms status=200 bytes=304 protocol=https
+2024-05-21T00:53:42.254191+00:00 app[web.1]: 10.1.92.227 - - [21/May/2024:00:53:42 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-OeyU5&sid=7XSmRUP4uRg1sMLOAAAQ HTTP/1.1" 200 1 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T00:53:42.254460+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-OeyU5&sid=7XSmRUP4uRg1sMLOAAAQ" host=tu-trader-3996d65ded90.herokuapp.com request_id=6c1a08f2-4d4a-4aa2-b854-32dd046ff1e4 fwd="105.245.105.185" dyno=web.1 connect=0ms service=773ms status=200 bytes=272 protocol=https
+2024-05-21T01:00:00.285329+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T01:00:00.285409+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T01:00:00.285432+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T01:00:00.285443+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716244905188&bar=15m
+2024-05-21T01:00:00.564378+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T01:00:00.747935+00:00 app[web.1]: CE COMPLETE
+2024-05-21T01:00:00.748006+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T01:00:00.748007+00:00 app[web.1]: 
+2024-05-21T01:00:00.748343+00:00 app[web.1]: RESUME JOB
+2024-05-21T01:15:00.290851+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T01:15:00.290921+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T01:15:00.290938+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T01:15:00.290953+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716244905188&bar=15m
+2024-05-21T01:15:00.553007+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T01:15:00.724998+00:00 app[web.1]: CE COMPLETE
+2024-05-21T01:15:00.725140+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T01:15:00.725141+00:00 app[web.1]: 
+2024-05-21T01:15:00.725651+00:00 app[web.1]: RESUME JOB
+2024-05-21T01:30:00.288906+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T01:30:00.288965+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T01:30:00.288975+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T01:30:00.288985+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716244905188&bar=15m
+2024-05-21T01:30:00.558763+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T01:30:00.721560+00:00 app[web.1]: CE COMPLETE
+2024-05-21T01:30:00.721625+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T01:30:00.721625+00:00 app[web.1]: 
+2024-05-21T01:30:00.721965+00:00 app[web.1]: RESUME JOB
+2024-05-21T01:44:52.423675+00:00 app[web.1]: server=tu-trader-3996d65ded90.herokuapp.com//socket.io/ client=10.1.55.62:21687 socket shutdown error: [Errno 9] Bad file descriptorClient disconnected
+2024-05-21T01:44:52.423677+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=7XSmRUP4uRg1sMLOAAAQ" host=tu-trader-3996d65ded90.herokuapp.com request_id=9a30a2ff-440c-4914-9134-61aa88f26fcf fwd="105.245.105.185" dyno=web.1 connect=0ms service=3070426ms status=101 bytes=202 protocol=https
+2024-05-21T01:45:00.285738+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T01:45:00.285791+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T01:45:00.285801+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T01:45:00.285810+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716244905188&bar=15m
+2024-05-21T01:45:00.572599+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T01:45:00.765188+00:00 app[web.1]: CE COMPLETE
+2024-05-21T01:45:00.765318+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T01:45:00.765319+00:00 app[web.1]: 
+2024-05-21T01:45:00.765829+00:00 app[web.1]: RESUME JOB
+2024-05-21T01:45:27.262997+00:00 app[web.1]: 10.1.37.117 - - [21/May/2024:01:45:27 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-Oqgo3 HTTP/1.1" 200 97 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T01:45:27.263477+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-Oqgo3" host=tu-trader-3996d65ded90.herokuapp.com request_id=0d66589d-8ae5-421d-9c54-bc749870cd81 fwd="105.245.105.185" dyno=web.1 connect=0ms service=1ms status=200 bytes=369 protocol=https
+2024-05-21T01:45:28.101888+00:00 app[web.1]: 10.1.59.164 - - [21/May/2024:01:45:28 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-Oqmf2 HTTP/1.1" 200 97 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T01:45:28.102051+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-Oqmf2" host=tu-trader-3996d65ded90.herokuapp.com request_id=b61de7e4-0225-4406-b542-b5682835a211 fwd="105.245.105.185" dyno=web.1 connect=0ms service=1ms status=200 bytes=369 protocol=https
+2024-05-21T01:45:35.074803+00:00 app[web.1]: Connected: None
+2024-05-21T01:45:35.075288+00:00 app[web.1]: 10.1.59.164 - - [21/May/2024:01:45:35 +0000] "POST /socket.io/?EIO=4&transport=polling&t=O-Oqo-V&sid=eIeYcaLS_Fj8dfFSAAAT HTTP/1.1" 200 2 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T01:45:35.075445+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=O-Oqo-V&sid=eIeYcaLS_Fj8dfFSAAAT" host=tu-trader-3996d65ded90.herokuapp.com request_id=1f120795-19d5-4e80-9c50-4fb3bf432c3f fwd="105.245.105.185" dyno=web.1 connect=0ms service=1ms status=200 bytes=258 protocol=https
+2024-05-21T01:45:35.246944+00:00 app[web.1]: 10.1.37.117 - - [21/May/2024:01:45:35 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-Oqo-X&sid=eIeYcaLS_Fj8dfFSAAAT HTTP/1.1" 200 32 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T01:45:35.247353+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-Oqo-X&sid=eIeYcaLS_Fj8dfFSAAAT" host=tu-trader-3996d65ded90.herokuapp.com request_id=a7914934-bec3-4ffd-bec3-d2083b5d469d fwd="105.245.105.185" dyno=web.1 connect=1ms service=1ms status=200 bytes=304 protocol=https
+2024-05-21T01:45:46.105654+00:00 app[web.1]: 10.1.37.117 - - [21/May/2024:01:45:46 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-OqqkB&sid=eIeYcaLS_Fj8dfFSAAAT HTTP/1.1" 200 1 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T01:45:46.106014+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-OqqkB&sid=eIeYcaLS_Fj8dfFSAAAT" host=tu-trader-3996d65ded90.herokuapp.com request_id=14761fe7-263d-41b9-8dfe-3cd6d57d6f11 fwd="105.245.105.185" dyno=web.1 connect=0ms service=6230ms status=200 bytes=272 protocol=https
+2024-05-21T02:00:00.286118+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T02:00:00.286224+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T02:00:00.286229+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T02:00:00.286240+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716244905188&bar=15m
+2024-05-21T02:00:00.561938+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T02:00:00.774031+00:00 app[web.1]: CE COMPLETE
+2024-05-21T02:00:00.774105+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T02:00:00.774105+00:00 app[web.1]: 
+2024-05-21T02:00:00.774426+00:00 app[web.1]: RESUME JOB
+2024-05-21T02:15:00.284573+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T02:15:00.284649+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T02:15:00.284671+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T02:15:00.284686+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716244905188&bar=15m
+2024-05-21T02:15:00.558004+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T02:15:00.714747+00:00 app[web.1]: CE COMPLETE
+2024-05-21T02:15:00.714885+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T02:15:00.714899+00:00 app[web.1]: 
+2024-05-21T02:15:00.715433+00:00 app[web.1]: RESUME JOB
+2024-05-21T02:29:36.268433+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=eIeYcaLS_Fj8dfFSAAAT" host=tu-trader-3996d65ded90.herokuapp.com request_id=ee7935f6-49a4-4a8a-bd4a-a7ba968cb67f fwd="105.245.105.185" dyno=web.1 connect=0ms service=2635555ms status=101 bytes=202 protocol=https
+2024-05-21T02:29:36.268659+00:00 app[web.1]: server=tu-trader-3996d65ded90.herokuapp.com//socket.io/ client=10.1.46.101:27153 socket shutdown error: [Errno 9] Bad file descriptorClient disconnected
+2024-05-21T02:30:00.286841+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T02:30:00.287038+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T02:30:00.287039+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T02:30:00.287040+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716244905188&bar=15m
+2024-05-21T02:30:00.572445+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T02:30:00.775974+00:00 app[web.1]: CE COMPLETE
+2024-05-21T02:30:00.776098+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T02:30:00.776099+00:00 app[web.1]: 
+2024-05-21T02:30:00.776588+00:00 app[web.1]: RESUME JOB
+2024-05-21T02:38:33.307048+00:00 app[web.1]: 10.1.55.212 - - [21/May/2024:02:38:33 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-P0hqp HTTP/1.1" 200 97 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T02:38:33.307187+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-P0hqp" host=tu-trader-3996d65ded90.herokuapp.com request_id=5fa00617-a151-4b03-9a27-84b04febf705 fwd="105.245.105.185" dyno=web.1 connect=0ms service=1ms status=200 bytes=369 protocol=https
+2024-05-21T02:41:38.192903+00:00 app[web.1]: 10.1.55.218 - - [21/May/2024:02:41:38 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-P197p HTTP/1.1" 200 97 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T02:41:38.193497+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-P197p" host=tu-trader-3996d65ded90.herokuapp.com request_id=81dacfb6-5de0-42b2-8c3c-94d58476cf91 fwd="105.245.105.185" dyno=web.1 connect=0ms service=1ms status=200 bytes=369 protocol=https
+2024-05-21T02:42:24.964578+00:00 app[web.1]: 10.1.55.218 - - [21/May/2024:02:42:24 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-P1cQo HTTP/1.1" 200 97 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T02:42:24.964647+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-P1cQo" host=tu-trader-3996d65ded90.herokuapp.com request_id=061a3819-3976-4adb-8f54-08b844fcbc8d fwd="105.245.105.185" dyno=web.1 connect=0ms service=1ms status=200 bytes=369 protocol=https
+2024-05-21T02:43:32.572655+00:00 app[web.1]: 10.1.32.31 - - [21/May/2024:02:43:32 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-P23jo HTTP/1.1" 200 97 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T02:43:32.572850+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-P23jo" host=tu-trader-3996d65ded90.herokuapp.com request_id=63778ef7-1896-443e-9868-cec655de646d fwd="105.245.105.185" dyno=web.1 connect=0ms service=1ms status=200 bytes=369 protocol=https
+2024-05-21T02:43:33.043930+00:00 app[web.1]: Connected: None
+2024-05-21T02:43:33.044754+00:00 app[web.1]: 10.1.32.31 - - [21/May/2024:02:43:33 +0000] "POST /socket.io/?EIO=4&transport=polling&t=O-P25l8&sid=XoQSd1BTB4B6KwolAAAY HTTP/1.1" 200 2 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T02:43:33.044835+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=O-P25l8&sid=XoQSd1BTB4B6KwolAAAY" host=tu-trader-3996d65ded90.herokuapp.com request_id=064e012f-2ad4-4455-b6f5-3d20c7e80895 fwd="105.245.105.185" dyno=web.1 connect=0ms service=1ms status=200 bytes=258 protocol=https
+2024-05-21T02:43:33.045467+00:00 app[web.1]: 10.1.57.193 - - [21/May/2024:02:43:33 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-P25l9&sid=XoQSd1BTB4B6KwolAAAY HTTP/1.1" 200 32 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T02:43:33.045677+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-P25l9&sid=XoQSd1BTB4B6KwolAAAY" host=tu-trader-3996d65ded90.herokuapp.com request_id=b24a14d0-2454-4642-b943-4cd1f729639e fwd="105.245.105.185" dyno=web.1 connect=0ms service=7ms status=200 bytes=304 protocol=https
+2024-05-21T02:43:33.988701+00:00 app[web.1]: 10.1.57.193 - - [21/May/2024:02:43:33 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-P25sp&sid=XoQSd1BTB4B6KwolAAAY HTTP/1.1" 200 1 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T02:43:33.988706+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-P25sp&sid=XoQSd1BTB4B6KwolAAAY" host=tu-trader-3996d65ded90.herokuapp.com request_id=93d6326e-b945-4c70-a898-0db250353b28 fwd="105.245.105.185" dyno=web.1 connect=0ms service=620ms status=200 bytes=272 protocol=https
+2024-05-21T02:45:00.285919+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T02:45:00.285977+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T02:45:00.285979+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T02:45:00.285989+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716244905188&bar=15m
+2024-05-21T02:45:00.544501+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T02:45:00.712622+00:00 app[web.1]: CE COMPLETE
+2024-05-21T02:45:00.712729+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T02:45:00.712729+00:00 app[web.1]: 
+2024-05-21T02:45:00.713755+00:00 app[web.1]: RESUME JOB
+2024-05-21T02:52:42.927502+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=XoQSd1BTB4B6KwolAAAY" host=tu-trader-3996d65ded90.herokuapp.com request_id=f2fbd222-f916-4dbf-90f1-9402ac8175e0 fwd="105.245.105.185" dyno=web.1 connect=0ms service=549228ms status=101 bytes=202 protocol=https
+2024-05-21T02:52:42.927905+00:00 app[web.1]: server=tu-trader-3996d65ded90.herokuapp.com//socket.io/ client=10.1.57.193:12297 socket shutdown error: [Errno 9] Bad file descriptorClient disconnected
+2024-05-21T03:00:00.288475+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T03:00:00.288501+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T03:00:00.288502+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T03:00:00.288502+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716244905188&bar=15m
+2024-05-21T03:00:00.569874+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T03:00:00.730282+00:00 app[web.1]: CE COMPLETE
+2024-05-21T03:00:00.730370+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T03:00:00.730371+00:00 app[web.1]: 
+2024-05-21T03:00:00.730734+00:00 app[web.1]: RESUME JOB
+2024-05-21T03:15:00.285407+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T03:15:00.285464+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T03:15:00.285474+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T03:15:00.285483+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716244905188&bar=15m
+2024-05-21T03:15:00.549200+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T03:15:00.689287+00:00 app[web.1]: CE COMPLETE
+2024-05-21T03:15:00.689369+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T03:15:00.689370+00:00 app[web.1]: 
+2024-05-21T03:15:00.689719+00:00 app[web.1]: RESUME JOB
+2024-05-21T03:30:00.286700+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T03:30:00.286769+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T03:30:00.286793+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T03:30:00.286810+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716244905188&bar=15m
+2024-05-21T03:30:00.546777+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T03:30:00.723301+00:00 app[web.1]: CE COMPLETE
+2024-05-21T03:30:00.723411+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T03:30:00.723443+00:00 app[web.1]: 
+2024-05-21T03:30:00.723824+00:00 app[web.1]: RESUME JOB
+2024-05-21T03:45:00.287210+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T03:45:00.287239+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T03:45:00.287239+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T03:45:00.287240+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716244905188&bar=15m
+2024-05-21T03:45:00.560968+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T03:45:00.714410+00:00 app[web.1]: CE COMPLETE
+2024-05-21T03:45:00.714484+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T03:45:00.714484+00:00 app[web.1]: 
+2024-05-21T03:45:00.714811+00:00 app[web.1]: RESUME JOB
+2024-05-21T04:00:00.285377+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T04:00:00.285457+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T04:00:00.285470+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T04:00:00.285491+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716244905188&bar=15m
+2024-05-21T04:00:00.576654+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T04:00:00.730467+00:00 app[web.1]: CE COMPLETE
+2024-05-21T04:00:00.730547+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T04:00:00.730547+00:00 app[web.1]: 
+2024-05-21T04:00:00.730927+00:00 app[web.1]: RESUME JOB
+2024-05-21T04:15:00.285880+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T04:15:00.285931+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T04:15:00.285944+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T04:15:00.285954+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716244905188&bar=15m
+2024-05-21T04:15:00.563531+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T04:15:00.709969+00:00 app[web.1]: CE COMPLETE
+2024-05-21T04:15:00.710045+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T04:15:00.710045+00:00 app[web.1]: 
+2024-05-21T04:15:00.710376+00:00 app[web.1]: RESUME JOB
+2024-05-21T04:30:00.285606+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T04:30:00.285661+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T04:30:00.285664+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T04:30:00.285676+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716244905188&bar=15m
+2024-05-21T04:30:00.565064+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T04:30:00.711138+00:00 app[web.1]: CE COMPLETE
+2024-05-21T04:30:00.711214+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T04:30:00.711214+00:00 app[web.1]: 
+2024-05-21T04:30:00.711549+00:00 app[web.1]: RESUME JOB
+2024-05-21T04:45:00.285296+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T04:45:00.285346+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T04:45:00.285357+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T04:45:00.285366+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716244905188&bar=15m
+2024-05-21T04:45:00.545019+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T04:45:00.697680+00:00 app[web.1]: CE COMPLETE
+2024-05-21T04:45:00.697743+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T04:45:00.697743+00:00 app[web.1]: 
+2024-05-21T04:45:00.698152+00:00 app[web.1]: RESUME JOB
+2024-05-21T04:59:39.583224+00:00 app[web.1]: 10.1.95.177 - - [21/May/2024:04:59:39 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-PXFSD HTTP/1.1" 200 97 "https://tu-trader-23bya0imp-tonni-diazs-projects.vercel.app/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) obsidian/1.5.12 Chrome/120.0.6099.283 Electron/28.2.3 Safari/537.36"
+2024-05-21T04:59:39.583629+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-PXFSD" host=tu-trader-3996d65ded90.herokuapp.com request_id=ae91a50c-cc45-48e8-aac4-170ff85b044f fwd="146.190.142.139" dyno=web.1 connect=0ms service=1ms status=200 bytes=400 protocol=https
+2024-05-21T04:59:39.808232+00:00 app[web.1]: Connected: None
+2024-05-21T04:59:39.808742+00:00 app[web.1]: 10.1.95.177 - - [21/May/2024:04:59:39 +0000] "POST /socket.io/?EIO=4&transport=polling&t=O-PXFZZ&sid=nEN1SLEnCFz9SliQAAAa HTTP/1.1" 200 2 "https://tu-trader-23bya0imp-tonni-diazs-projects.vercel.app/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) obsidian/1.5.12 Chrome/120.0.6099.283 Electron/28.2.3 Safari/537.36"
+2024-05-21T04:59:39.809001+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=O-PXFZZ&sid=nEN1SLEnCFz9SliQAAAa" host=tu-trader-3996d65ded90.herokuapp.com request_id=84ab9604-8861-4e56-a21d-faa0d96a4f98 fwd="146.190.142.139" dyno=web.1 connect=0ms service=1ms status=200 bytes=289 protocol=https
+2024-05-21T04:59:39.885778+00:00 app[web.1]: 10.1.95.177 - - [21/May/2024:04:59:39 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-PXFZb&sid=nEN1SLEnCFz9SliQAAAa HTTP/1.1" 200 32 "https://tu-trader-23bya0imp-tonni-diazs-projects.vercel.app/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) obsidian/1.5.12 Chrome/120.0.6099.283 Electron/28.2.3 Safari/537.36"
+2024-05-21T04:59:39.886144+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-PXFZb&sid=nEN1SLEnCFz9SliQAAAa" host=tu-trader-3996d65ded90.herokuapp.com request_id=960741c6-d94f-4f50-94b2-0dd55da4f257 fwd="146.190.142.139" dyno=web.1 connect=0ms service=1ms status=200 bytes=335 protocol=https
+2024-05-21T04:59:40.055728+00:00 app[web.1]: 10.1.95.177 - - [21/May/2024:04:59:40 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-PXFeI&sid=nEN1SLEnCFz9SliQAAAa HTTP/1.1" 200 1 "https://tu-trader-23bya0imp-tonni-diazs-projects.vercel.app/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) obsidian/1.5.12 Chrome/120.0.6099.283 Electron/28.2.3 Safari/537.36"
+2024-05-21T04:59:40.056088+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-PXFeI&sid=nEN1SLEnCFz9SliQAAAa" host=tu-trader-3996d65ded90.herokuapp.com request_id=bc20f6df-4297-46c0-9ca3-db310c8d0600 fwd="146.190.142.139" dyno=web.1 connect=0ms service=1ms status=200 bytes=303 protocol=https
+2024-05-21T04:59:40.240156+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=nEN1SLEnCFz9SliQAAAa" host=tu-trader-3996d65ded90.herokuapp.com request_id=7b732122-2297-424e-87cf-538afa0d4b06 fwd="146.190.142.139" dyno=web.1 connect=0ms service=342ms status=101 bytes=217 protocol=https
+2024-05-21T04:59:40.240632+00:00 app[web.1]: server=tu-trader-3996d65ded90.herokuapp.com//socket.io/ client=10.1.93.161:26461 socket shutdown error: [Errno 9] Bad file descriptorClient disconnected
+2024-05-21T04:59:45.070612+00:00 app[web.1]: 10.1.59.52 - - [21/May/2024:04:59:45 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-PXG3Q HTTP/1.1" 200 97 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T04:59:45.070751+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-PXG3Q" host=tu-trader-3996d65ded90.herokuapp.com request_id=6904583a-190e-44e1-b580-a0e9e16890ad fwd="105.245.106.61" dyno=web.1 connect=0ms service=1ms status=200 bytes=369 protocol=https
+2024-05-21T04:59:46.989219+00:00 app[web.1]: Connected: None
+2024-05-21T04:59:46.989715+00:00 app[web.1]: 10.1.59.52 - - [21/May/2024:04:59:46 +0000] "POST /socket.io/?EIO=4&transport=polling&t=O-PXG-J&sid=7SrRQfEa39o6KJwJAAAc HTTP/1.1" 200 2 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T04:59:46.990061+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=O-PXG-J&sid=7SrRQfEa39o6KJwJAAAc" host=tu-trader-3996d65ded90.herokuapp.com request_id=222f8ab1-bb74-4414-aa2e-514d2d58a607 fwd="105.245.106.61" dyno=web.1 connect=0ms service=1ms status=200 bytes=258 protocol=https
+2024-05-21T05:00:00.286000+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T05:00:00.286086+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T05:00:00.286100+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T05:00:00.286116+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716244905188&bar=15m
+2024-05-21T05:00:00.542583+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T05:00:00.703618+00:00 app[web.1]: CE COMPLETE
+2024-05-21T05:00:00.703700+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T05:00:00.703701+00:00 app[web.1]: 
+2024-05-21T05:00:00.704088+00:00 app[web.1]: RESUME JOB
+2024-05-21T05:00:28.227079+00:00 app[web.1]: 10.1.59.52 - - [21/May/2024:05:00:28 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-PXG-L&sid=7SrRQfEa39o6KJwJAAAc HTTP/1.1" 200 34 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T05:00:28.227246+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-PXG-L&sid=7SrRQfEa39o6KJwJAAAc" host=tu-trader-3996d65ded90.herokuapp.com request_id=09519fb4-8ee4-4f0f-b35b-3ff9ebb92655 fwd="105.245.106.61" dyno=web.1 connect=0ms service=2ms status=200 bytes=306 protocol=https
+2024-05-21T05:00:46.994200+00:00 app[web.1]: Client disconnected
+2024-05-21T05:01:11.276854+00:00 app[web.1]: Invalid session 7SrRQfEa39o6KJwJAAAc (further occurrences of this error will be logged with level INFO)
+2024-05-21T05:01:11.277381+00:00 app[web.1]: 10.1.59.52 - - [21/May/2024:05:01:11 +0000] "POST /socket.io/?EIO=4&transport=polling&t=O-PXRRJ&sid=7SrRQfEa39o6KJwJAAAc HTTP/1.1" 400 17 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T05:01:11.277435+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=O-PXRRJ&sid=7SrRQfEa39o6KJwJAAAc" host=tu-trader-3996d65ded90.herokuapp.com request_id=4c116055-d26c-44ad-b6b9-5bf3aaad9684 fwd="105.245.106.61" dyno=web.1 connect=0ms service=1ms status=400 bytes=283 protocol=https
+2024-05-21T05:01:11.285696+00:00 app[web.1]: 10.1.45.100 - - [21/May/2024:05:01:11 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-PXRRK&sid=7SrRQfEa39o6KJwJAAAc HTTP/1.1" 400 17 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T05:01:11.285796+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-PXRRK&sid=7SrRQfEa39o6KJwJAAAc" host=tu-trader-3996d65ded90.herokuapp.com request_id=61855c52-023e-40ec-aa47-65909fc7e7f7 fwd="105.245.106.61" dyno=web.1 connect=0ms service=1ms status=400 bytes=283 protocol=https
+2024-05-21T05:01:19.331228+00:00 app[web.1]: 10.1.50.144 - - [21/May/2024:05:01:19 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-PXdTV HTTP/1.1" 200 97 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T05:01:19.331351+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-PXdTV" host=tu-trader-3996d65ded90.herokuapp.com request_id=6ae008f6-8673-4127-a74b-021637af48f7 fwd="105.245.106.61" dyno=web.1 connect=0ms service=1ms status=200 bytes=369 protocol=https
+2024-05-21T05:01:19.668930+00:00 app[web.1]: Connected: None
+2024-05-21T05:01:19.669388+00:00 app[web.1]: 10.1.50.144 - - [21/May/2024:05:01:19 +0000] "POST /socket.io/?EIO=4&transport=polling&t=O-PXdvw&sid=_FL-0twYfoNj7iwOAAAe HTTP/1.1" 200 2 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T05:01:19.669788+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=O-PXdvw&sid=_FL-0twYfoNj7iwOAAAe" host=tu-trader-3996d65ded90.herokuapp.com request_id=85524711-5e3f-417c-b7c2-b37d1859fb9a fwd="105.245.106.61" dyno=web.1 connect=0ms service=1ms status=200 bytes=258 protocol=https
+2024-05-21T05:01:19.677174+00:00 app[web.1]: 10.1.57.2 - - [21/May/2024:05:01:19 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-PXdvx&sid=_FL-0twYfoNj7iwOAAAe HTTP/1.1" 200 32 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T05:01:19.677391+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-PXdvx&sid=_FL-0twYfoNj7iwOAAAe" host=tu-trader-3996d65ded90.herokuapp.com request_id=ca9f5db8-b379-483c-b118-7cf48dd87b06 fwd="105.245.106.61" dyno=web.1 connect=0ms service=1ms status=200 bytes=304 protocol=https
+2024-05-21T05:01:20.826738+00:00 app[web.1]: 10.1.57.2 - - [21/May/2024:05:01:20 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-PXd_B&sid=_FL-0twYfoNj7iwOAAAe HTTP/1.1" 200 1 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T05:01:20.826943+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-PXd_B&sid=_FL-0twYfoNj7iwOAAAe" host=tu-trader-3996d65ded90.herokuapp.com request_id=40aa2371-3450-460f-90a0-a4274b893cee fwd="105.245.106.61" dyno=web.1 connect=0ms service=840ms status=200 bytes=272 protocol=https
+2024-05-21T05:01:47.534421+00:00 app[web.1]: 
+2024-05-21T05:01:47.534453+00:00 app[web.1]: ON BACKTEST
+2024-05-21T05:01:47.534453+00:00 app[web.1]: 
+2024-05-21T05:01:47.534487+00:00 app[web.1]: 1716076800000 None
+2024-05-21T05:01:47.534587+00:00 app[web.1]: 1716267707534
+2024-05-21T05:01:47.534599+00:00 app[web.1]: GETTING 1 klines...
+2024-05-21T05:01:47.534623+00:00 app[web.1]: 1716076800000
+2024-05-21T05:01:47.534635+00:00 app[web.1]: 2024-05-19 00:00:00
+2024-05-21T05:01:48.267584+00:00 app[web.1]: 213
+2024-05-21T05:01:48.267650+00:00 app[web.1]: Done fetching klines
+2024-05-21T05:01:48.274596+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T05:01:48.620702+00:00 app[web.1]: CE COMPLETE
+2024-05-21T05:01:48.620919+00:00 app[web.1]: CE_SMA: BEGIN BACKTESTING...
+2024-05-21T05:01:48.620919+00:00 app[web.1]: 
+2024-05-21T05:01:48.629743+00:00 app[web.1]: TOTAL TRADES: 0
+2024-05-21T05:01:48.629747+00:00 app[web.1]: division by zero
+2024-05-21T05:01:48.629921+00:00 app[web.1]: Exception occurred in file: /app/routes/strategies/ce_sma.py line 50
+2024-05-21T05:03:04.000000+00:00 app[api]: Build started by user obediencekoza@gmail.com
+2024-05-21T05:03:31.531094+00:00 app[api]: Release v64 created by user obediencekoza@gmail.com
+2024-05-21T05:03:31.531094+00:00 app[api]: Deploy 49989f6f by user obediencekoza@gmail.com
+2024-05-21T05:03:32.025824+00:00 heroku[web.1]: Restarting
+2024-05-21T05:03:32.077980+00:00 heroku[web.1]: State changed from up to starting
+2024-05-21T05:03:32.974329+00:00 heroku[web.1]: Stopping all processes with SIGTERM
+2024-05-21T05:03:33.010579+00:00 app[web.1]: [2024-05-21 05:03:33 +0000] [2] [INFO] Handling signal: term
+2024-05-21T05:03:37.903456+00:00 heroku[web.1]: Starting process with command `gunicorn --worker-class eventlet -w 1 app:app`
+2024-05-21T05:03:38.576365+00:00 app[web.1]: Python buildpack: Detected 512 MB available memory and 8 CPU cores.
+2024-05-21T05:03:38.576446+00:00 app[web.1]: Python buildpack: Defaulting WEB_CONCURRENCY to 2 based on the available memory.
+2024-05-21T05:03:39.719445+00:00 app[web.1]: [2024-05-21 05:03:39 +0000] [2] [INFO] Starting gunicorn 22.0.0
+2024-05-21T05:03:39.719716+00:00 app[web.1]: [2024-05-21 05:03:39 +0000] [2] [INFO] Listening at: http://0.0.0.0:56141 (2)
+2024-05-21T05:03:39.719750+00:00 app[web.1]: [2024-05-21 05:03:39 +0000] [2] [INFO] Using worker: eventlet
+2024-05-21T05:03:39.722773+00:00 app[web.1]: [2024-05-21 05:03:39 +0000] [9] [INFO] Booting worker with pid: 9
+2024-05-21T05:03:39.838901+00:00 heroku[web.1]: State changed from starting to up
+2024-05-21T05:03:43.775169+00:00 app[web.1]: /app/.heroku/python/lib/python3.12/site-packages/pandas_ta/utils/_core.py:14: SyntaxWarning: invalid escape sequence '\g'
+2024-05-21T05:03:43.775231+00:00 app[web.1]: return re_.sub("([a-z])([A-Z])","\g<1> \g<2>", x).title()
+2024-05-21T05:03:45.000000+00:00 app[api]: Build succeeded
+2024-05-21T05:03:45.159738+00:00 app[web.1]: mongodb+srv://clickbait4587:baseline072@cluster0.qwyyk.mongodb.net/?retryWrites=true&w=majority
+2024-05-21T05:03:45.571662+00:00 app[web.1]: MONGO INITIALIZED
+2024-05-21T05:03:45.617496+00:00 app[web.1]: id=ObjectId('6644740c7af0ca0697c66a06') revision_id=None can_trade=True use_swing_low=True base='ETH' ccy='USDT' p_gain=0.01 sl_const=30.0 strict=False demo=True interval=15 category='spot' mult=1.8 ce_length=1
+2024-05-21T05:03:45.617502+00:00 app[web.1]: INITIALIZE OKX
+2024-05-21T05:03:45.617503+00:00 app[web.1]: Baseline@072
+2024-05-21T05:03:45.798024+00:00 app[web.1]: INIT BINANCE...
+2024-05-21T05:04:03.083578+00:00 app[web.1]: [2024-05-21 05:04:03 +0000] [2] [INFO] Shutting down: Master
+2024-05-21T05:04:03.095006+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=_FL-0twYfoNj7iwOAAAe" host=tu-trader-3996d65ded90.herokuapp.com request_id=b449c1b2-2794-4882-b51b-9a0364c36639 fwd="105.245.106.61" dyno=web.1 connect=0ms service=162575ms status=101 bytes=202 protocol=https
+2024-05-21T05:04:03.168617+00:00 heroku[web.1]: Error R12 (Exit timeout) -> At least one process failed to exit within 30 seconds of SIGTERM
+2024-05-21T05:04:03.171312+00:00 heroku[web.1]: Stopping remaining processes with SIGKILL
+2024-05-21T05:04:03.236416+00:00 heroku[web.1]: Process exited with status 0
+2024-05-21T05:04:04.541680+00:00 app[web.1]: 10.1.48.182 - - [21/May/2024:05:04:04 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-PYG1B HTTP/1.1" 200 97 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T05:04:04.541700+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-PYG1B" host=tu-trader-3996d65ded90.herokuapp.com request_id=70b8762f-4765-486d-ad50-0df633470eb1 fwd="105.245.106.61" dyno=web.1 connect=0ms service=1ms status=200 bytes=369 protocol=https
+2024-05-21T05:04:04.949475+00:00 app[web.1]: Connected: None
+2024-05-21T05:04:04.950109+00:00 app[web.1]: 10.1.48.182 - - [21/May/2024:05:04:04 +0000] "POST /socket.io/?EIO=4&transport=polling&t=O-PYGF6&sid=FGYaHhHqyj_JTnfbAAAA HTTP/1.1" 200 2 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T05:04:04.950211+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=O-PYGF6&sid=FGYaHhHqyj_JTnfbAAAA" host=tu-trader-3996d65ded90.herokuapp.com request_id=e1bf604a-a288-4506-8dd7-9f497bf0af1c fwd="105.245.106.61" dyno=web.1 connect=0ms service=2ms status=200 bytes=258 protocol=https
+2024-05-21T05:04:04.960691+00:00 app[web.1]: 10.1.48.146 - - [21/May/2024:05:04:04 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-PYGF8&sid=FGYaHhHqyj_JTnfbAAAA HTTP/1.1" 200 32 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T05:04:04.960954+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-PYGF8&sid=FGYaHhHqyj_JTnfbAAAA" host=tu-trader-3996d65ded90.herokuapp.com request_id=31587d55-25b8-409e-85de-439f2015442e fwd="105.245.106.61" dyno=web.1 connect=0ms service=1ms status=200 bytes=304 protocol=https
+2024-05-21T05:04:05.759816+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-PYGLb&sid=FGYaHhHqyj_JTnfbAAAA" host=tu-trader-3996d65ded90.herokuapp.com request_id=e1b77542-a92a-4c8d-bfc0-ab22d6a30acf fwd="105.245.106.61" dyno=web.1 connect=0ms service=517ms status=200 bytes=272 protocol=https
+2024-05-21T05:04:05.759980+00:00 app[web.1]: 10.1.48.146 - - [21/May/2024:05:04:05 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-PYGLb&sid=FGYaHhHqyj_JTnfbAAAA HTTP/1.1" 200 1 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T05:07:14.000000+00:00 app[api]: Build started by user obediencekoza@gmail.com
+2024-05-21T05:07:41.461899+00:00 app[api]: Deploy 2e0dce40 by user obediencekoza@gmail.com
+2024-05-21T05:07:41.461899+00:00 app[api]: Release v65 created by user obediencekoza@gmail.com
+2024-05-21T05:07:41.700453+00:00 heroku[web.1]: Restarting
+2024-05-21T05:07:41.751626+00:00 heroku[web.1]: State changed from up to starting
+2024-05-21T05:07:42.464159+00:00 heroku[web.1]: Stopping all processes with SIGTERM
+2024-05-21T05:07:42.483245+00:00 app[web.1]: [2024-05-21 05:07:42 +0000] [2] [INFO] Handling signal: term
+2024-05-21T05:07:47.858207+00:00 heroku[web.1]: Starting process with command `gunicorn --worker-class eventlet -w 1 app:app`
+2024-05-21T05:07:48.587068+00:00 app[web.1]: Python buildpack: Detected 512 MB available memory and 8 CPU cores.
+2024-05-21T05:07:48.587091+00:00 app[web.1]: Python buildpack: Defaulting WEB_CONCURRENCY to 2 based on the available memory.
+2024-05-21T05:07:49.805496+00:00 app[web.1]: [2024-05-21 05:07:49 +0000] [2] [INFO] Starting gunicorn 22.0.0
+2024-05-21T05:07:49.805778+00:00 app[web.1]: [2024-05-21 05:07:49 +0000] [2] [INFO] Listening at: http://0.0.0.0:8961 (2)
+2024-05-21T05:07:49.805821+00:00 app[web.1]: [2024-05-21 05:07:49 +0000] [2] [INFO] Using worker: eventlet
+2024-05-21T05:07:49.809114+00:00 app[web.1]: [2024-05-21 05:07:49 +0000] [9] [INFO] Booting worker with pid: 9
+2024-05-21T05:07:50.429000+00:00 heroku[web.1]: State changed from starting to up
+2024-05-21T05:07:52.915733+00:00 app[web.1]: /app/.heroku/python/lib/python3.12/site-packages/pandas_ta/utils/_core.py:14: SyntaxWarning: invalid escape sequence '\g'
+2024-05-21T05:07:52.915767+00:00 app[web.1]: return re_.sub("([a-z])([A-Z])","\g<1> \g<2>", x).title()
+2024-05-21T05:07:54.000000+00:00 app[api]: Build succeeded
+2024-05-21T05:07:54.372930+00:00 app[web.1]: mongodb+srv://clickbait4587:baseline072@cluster0.qwyyk.mongodb.net/?retryWrites=true&w=majority
+2024-05-21T05:07:54.779801+00:00 app[web.1]: MONGO INITIALIZED
+2024-05-21T05:07:54.827014+00:00 app[web.1]: id=ObjectId('6644740c7af0ca0697c66a06') revision_id=None can_trade=True use_swing_low=True base='ETH' ccy='USDT' p_gain=0.01 sl_const=30.0 strict=False demo=True interval=15 category='spot' mult=1.8 ce_length=1
+2024-05-21T05:07:54.827021+00:00 app[web.1]: INITIALIZE OKX
+2024-05-21T05:07:54.827022+00:00 app[web.1]: Baseline@072
+2024-05-21T05:07:54.990939+00:00 app[web.1]: INIT BINANCE...
+2024-05-21T05:08:12.488761+00:00 heroku[web.1]: Error R12 (Exit timeout) -> At least one process failed to exit within 30 seconds of SIGTERM
+2024-05-21T05:08:12.490927+00:00 heroku[web.1]: Stopping remaining processes with SIGKILL
+2024-05-21T05:08:12.512964+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=FGYaHhHqyj_JTnfbAAAA" host=tu-trader-3996d65ded90.herokuapp.com request_id=2bf6f775-9cca-47dc-b4bf-ef8b26a09804 fwd="105.245.106.61" dyno=web.1 connect=0ms service=247031ms status=101 bytes=202 protocol=https
+2024-05-21T05:08:12.569326+00:00 heroku[web.1]: Process exited with status 137
+2024-05-21T05:08:14.569892+00:00 app[web.1]: 10.1.55.218 - - [21/May/2024:05:08:14 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-PZD3R HTTP/1.1" 200 97 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T05:08:14.570052+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-PZD3R" host=tu-trader-3996d65ded90.herokuapp.com request_id=9db1ba10-6d14-4e62-8af9-eccdb01370b9 fwd="105.245.106.61" dyno=web.1 connect=0ms service=2ms status=200 bytes=369 protocol=https
+2024-05-21T05:08:15.778760+00:00 app[web.1]: Connected: None
+2024-05-21T05:08:15.779295+00:00 app[web.1]: 10.1.55.218 - - [21/May/2024:05:08:15 +0000] "POST /socket.io/?EIO=4&transport=polling&t=O-PZDUU&sid=DpF3pDVR6rf1adGMAAAA HTTP/1.1" 200 2 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T05:08:15.779477+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=O-PZDUU&sid=DpF3pDVR6rf1adGMAAAA" host=tu-trader-3996d65ded90.herokuapp.com request_id=e61f5c07-ecda-4570-89b8-3934b0cb0be7 fwd="105.245.106.61" dyno=web.1 connect=0ms service=2ms status=200 bytes=258 protocol=https
+2024-05-21T05:08:15.793012+00:00 app[web.1]: 10.1.29.27 - - [21/May/2024:05:08:15 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-PZDUV&sid=DpF3pDVR6rf1adGMAAAA HTTP/1.1" 200 32 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T05:08:15.793114+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-PZDUV&sid=DpF3pDVR6rf1adGMAAAA" host=tu-trader-3996d65ded90.herokuapp.com request_id=6270a4ed-8cee-41de-8076-072d3c7b0524 fwd="105.245.106.61" dyno=web.1 connect=0ms service=1ms status=200 bytes=304 protocol=https
+2024-05-21T05:08:16.595653+00:00 app[web.1]: 10.1.29.27 - - [21/May/2024:05:08:16 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-PZDb7&sid=DpF3pDVR6rf1adGMAAAA HTTP/1.1" 200 1 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T05:08:16.596041+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-PZDb7&sid=DpF3pDVR6rf1adGMAAAA" host=tu-trader-3996d65ded90.herokuapp.com request_id=9469d885-6ac8-4569-83d5-4ab5b4342fd6 fwd="105.245.106.61" dyno=web.1 connect=0ms service=485ms status=200 bytes=272 protocol=https
+2024-05-21T05:09:47.510998+00:00 app[web.1]: 10.1.55.62 - - [21/May/2024:05:09:47 +0000] "GET /orders HTTP/1.1" 200 3 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T05:09:47.511275+00:00 heroku[router]: at=info method=GET path="/orders" host=tu-trader-3996d65ded90.herokuapp.com request_id=348ee21b-e4ee-476c-aaa2-0d53917f44eb fwd="105.245.106.61" dyno=web.1 connect=0ms service=31ms status=200 bytes=179 protocol=https
+2024-05-21T05:09:57.919619+00:00 app[web.1]: 
+2024-05-21T05:09:57.919642+00:00 app[web.1]: ON BACKTEST
+2024-05-21T05:09:57.919642+00:00 app[web.1]: 
+2024-05-21T05:09:57.919733+00:00 app[web.1]: 1716076800000 None
+2024-05-21T05:09:57.919888+00:00 app[web.1]: 1716268197919
+2024-05-21T05:09:57.919900+00:00 app[web.1]: GETTING 1 klines...
+2024-05-21T05:09:57.919911+00:00 app[web.1]: 1716076800000
+2024-05-21T05:09:57.919948+00:00 app[web.1]: 2024-05-19 00:00:00
+2024-05-21T05:09:58.643144+00:00 app[web.1]: 213
+2024-05-21T05:09:58.643178+00:00 app[web.1]: Done fetching klines
+2024-05-21T05:09:58.650440+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T05:09:58.946881+00:00 app[web.1]: CE COMPLETE
+2024-05-21T05:09:58.947070+00:00 app[web.1]: CE_SMA: BEGIN BACKTESTING...
+2024-05-21T05:09:58.947070+00:00 app[web.1]: 
+2024-05-21T05:09:58.955179+00:00 app[web.1]: TOTAL TRADES: 0
+2024-05-21T05:10:10.482940+00:00 app[web.1]: 
+2024-05-21T05:10:10.482960+00:00 app[web.1]: ON BACKTEST
+2024-05-21T05:10:10.482960+00:00 app[web.1]: 
+2024-05-21T05:10:10.483008+00:00 app[web.1]: 1716076800000 None
+2024-05-21T05:10:10.483113+00:00 app[web.1]: 1716268210483
+2024-05-21T05:10:10.483117+00:00 app[web.1]: GETTING 1 klines...
+2024-05-21T05:10:10.483117+00:00 app[web.1]: 1716076800000
+2024-05-21T05:10:10.483138+00:00 app[web.1]: 2024-05-19 00:00:00
+2024-05-21T05:10:11.206838+00:00 app[web.1]: 213
+2024-05-21T05:10:11.206861+00:00 app[web.1]: Done fetching klines
+2024-05-21T05:10:11.214152+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T05:10:11.586282+00:00 app[web.1]: CE COMPLETE
+2024-05-21T05:10:11.586552+00:00 app[web.1]: CE_SMA: BEGIN BACKTESTING...
+2024-05-21T05:10:11.586560+00:00 app[web.1]: 
+2024-05-21T05:10:11.597837+00:00 app[web.1]: TOTAL TRADES: 0
+2024-05-21T05:11:39.950118+00:00 app[web.1]: 
+2024-05-21T05:11:39.950138+00:00 app[web.1]: ON BACKTEST
+2024-05-21T05:11:39.950139+00:00 app[web.1]: 
+2024-05-21T05:11:39.950200+00:00 app[web.1]: 1716076800000 1716335940000
+2024-05-21T05:11:39.950314+00:00 app[web.1]: 1716335940000
+2024-05-21T05:11:39.950327+00:00 app[web.1]: GETTING 1 klines...
+2024-05-21T05:11:39.950336+00:00 app[web.1]: 1716076800000
+2024-05-21T05:11:39.950362+00:00 app[web.1]: 2024-05-19 00:00:00
+2024-05-21T05:11:40.675162+00:00 app[web.1]: GETTING 2 klines...
+2024-05-21T05:11:40.675202+00:00 app[web.1]: 1716268500000
+2024-05-21T05:11:40.675203+00:00 app[web.1]: 2024-05-21 05:15:00
+2024-05-21T05:11:41.385418+00:00 app[web.1]: 213
+2024-05-21T05:11:41.385459+00:00 app[web.1]: Done fetching klines
+2024-05-21T05:11:41.391031+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T05:11:41.709114+00:00 app[web.1]: CE COMPLETE
+2024-05-21T05:11:41.709311+00:00 app[web.1]: CE_SMA: BEGIN BACKTESTING...
+2024-05-21T05:11:41.709313+00:00 app[web.1]: 
+2024-05-21T05:11:41.717651+00:00 app[web.1]: TOTAL TRADES: 0
+2024-05-21T05:11:51.530718+00:00 app[web.1]: 
+2024-05-21T05:11:51.530760+00:00 app[web.1]: ON BACKTEST
+2024-05-21T05:11:51.530765+00:00 app[web.1]: 
+2024-05-21T05:11:51.530819+00:00 app[web.1]: 1715731200000 1716335940000
+2024-05-21T05:11:51.530946+00:00 app[web.1]: 1716335940000
+2024-05-21T05:11:51.530955+00:00 app[web.1]: GETTING 1 klines...
+2024-05-21T05:11:51.530963+00:00 app[web.1]: 1715731200000
+2024-05-21T05:11:51.530988+00:00 app[web.1]: 2024-05-15 00:00:00
+2024-05-21T05:11:52.440588+00:00 app[web.1]: GETTING 2 klines...
+2024-05-21T05:11:52.440622+00:00 app[web.1]: 1716181200000
+2024-05-21T05:11:52.440623+00:00 app[web.1]: 2024-05-20 05:00:00
+2024-05-21T05:11:53.162726+00:00 app[web.1]: GETTING 3 klines...
+2024-05-21T05:11:53.162763+00:00 app[web.1]: 1716268500000
+2024-05-21T05:11:53.162763+00:00 app[web.1]: 2024-05-21 05:15:00
+2024-05-21T05:11:53.877528+00:00 app[web.1]: 597
+2024-05-21T05:11:53.877549+00:00 app[web.1]: Done fetching klines
+2024-05-21T05:11:53.884341+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T05:11:55.055738+00:00 app[web.1]: CE COMPLETE
+2024-05-21T05:11:55.056107+00:00 app[web.1]: CE_SMA: BEGIN BACKTESTING...
+2024-05-21T05:11:55.056108+00:00 app[web.1]: 
+2024-05-21T05:11:55.082207+00:00 app[web.1]: TOTAL TRADES: 2
+2024-05-21T05:12:12.805990+00:00 app[web.1]: 
+2024-05-21T05:12:12.806012+00:00 app[web.1]: ON BACKTEST
+2024-05-21T05:12:12.806016+00:00 app[web.1]: 
+2024-05-21T05:12:12.806093+00:00 app[web.1]: 1715731200000 1716335940000
+2024-05-21T05:12:12.806208+00:00 app[web.1]: 1716335940000
+2024-05-21T05:12:12.806222+00:00 app[web.1]: GETTING 1 klines...
+2024-05-21T05:12:12.806231+00:00 app[web.1]: 1715731200000
+2024-05-21T05:12:12.806253+00:00 app[web.1]: 2024-05-15 00:00:00
+2024-05-21T05:12:13.715560+00:00 app[web.1]: GETTING 2 klines...
+2024-05-21T05:12:13.715595+00:00 app[web.1]: 1716181200000
+2024-05-21T05:12:13.715596+00:00 app[web.1]: 2024-05-20 05:00:00
+2024-05-21T05:12:14.448994+00:00 app[web.1]: GETTING 3 klines...
+2024-05-21T05:12:14.449035+00:00 app[web.1]: 1716268500000
+2024-05-21T05:12:14.449035+00:00 app[web.1]: 2024-05-21 05:15:00
+2024-05-21T05:12:15.168112+00:00 app[web.1]: 597
+2024-05-21T05:12:15.168154+00:00 app[web.1]: Done fetching klines
+2024-05-21T05:12:15.175044+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T05:12:16.271365+00:00 app[web.1]: CE COMPLETE
+2024-05-21T05:12:16.271760+00:00 app[web.1]: CE_SMA: BEGIN BACKTESTING...
+2024-05-21T05:12:16.271768+00:00 app[web.1]: 
+2024-05-21T05:12:16.296267+00:00 app[web.1]: TOTAL TRADES: 2
+2024-05-21T05:15:00.315309+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T05:15:00.315378+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T05:15:00.315388+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T05:15:00.315398+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716268073127&bar=15m
+2024-05-21T05:15:00.586267+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T05:15:00.757904+00:00 app[web.1]: CE COMPLETE
+2024-05-21T05:15:00.758022+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T05:15:00.758036+00:00 app[web.1]: 
+2024-05-21T05:15:00.758557+00:00 app[web.1]: RESUME JOB
+2024-05-21T05:20:48.027594+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=DpF3pDVR6rf1adGMAAAA" host=tu-trader-3996d65ded90.herokuapp.com request_id=5fc198cc-dea6-4233-847c-1094dc74fabe fwd="105.245.106.61" dyno=web.1 connect=0ms service=751700ms status=101 bytes=202 protocol=https
+2024-05-21T05:20:48.027755+00:00 app[web.1]: server=tu-trader-3996d65ded90.herokuapp.com//socket.io/ client=10.1.45.100:11141 socket shutdown error: [Errno 9] Bad file descriptorClient disconnected
+2024-05-21T05:30:00.314110+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T05:30:00.314211+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T05:30:00.314234+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T05:30:00.314245+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716268073127&bar=15m
+2024-05-21T05:30:00.587163+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T05:30:00.781229+00:00 app[web.1]: CE COMPLETE
+2024-05-21T05:30:00.781291+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T05:30:00.781291+00:00 app[web.1]: 
+2024-05-21T05:30:00.781652+00:00 app[web.1]: RESUME JOB
+2024-05-21T05:39:30.463444+00:00 app[web.1]: 10.1.16.136 - - [21/May/2024:05:39:30 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-PgLro HTTP/1.1" 200 97 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T05:39:30.463613+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-PgLro" host=tu-trader-3996d65ded90.herokuapp.com request_id=cfa2823e-c7bf-40b7-afc8-9d62d8237b2b fwd="105.245.118.92" dyno=web.1 connect=0ms service=1ms status=200 bytes=369 protocol=https
+2024-05-21T05:39:30.865152+00:00 app[web.1]: Connected: None
+2024-05-21T05:39:30.865704+00:00 app[web.1]: 10.1.16.136 - - [21/May/2024:05:39:30 +0000] "POST /socket.io/?EIO=4&transport=polling&t=O-PgNJN&sid=1YuD8xniHkGNaEoGAAAC HTTP/1.1" 200 2 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T05:39:30.866034+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=O-PgNJN&sid=1YuD8xniHkGNaEoGAAAC" host=tu-trader-3996d65ded90.herokuapp.com request_id=33d3dd11-db35-4944-b9db-6ac479f93b93 fwd="105.245.118.92" dyno=web.1 connect=0ms service=2ms status=200 bytes=258 protocol=https
+2024-05-21T05:39:30.867004+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-PgNJO&sid=1YuD8xniHkGNaEoGAAAC" host=tu-trader-3996d65ded90.herokuapp.com request_id=31c23526-8096-4519-88a1-1644a02c1e9d fwd="105.245.118.92" dyno=web.1 connect=0ms service=0ms status=200 bytes=304 protocol=https
+2024-05-21T05:39:30.867065+00:00 app[web.1]: 10.1.47.192 - - [21/May/2024:05:39:30 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-PgNJO&sid=1YuD8xniHkGNaEoGAAAC HTTP/1.1" 200 32 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T05:39:31.718672+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-PgNOt&sid=1YuD8xniHkGNaEoGAAAC" host=tu-trader-3996d65ded90.herokuapp.com request_id=b1a45dfe-cbd8-436c-a0e1-6c5d71463155 fwd="105.245.118.92" dyno=web.1 connect=0ms service=581ms status=200 bytes=272 protocol=https
+2024-05-21T05:39:31.718850+00:00 app[web.1]: 10.1.47.192 - - [21/May/2024:05:39:31 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-PgNOt&sid=1YuD8xniHkGNaEoGAAAC HTTP/1.1" 200 1 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T05:45:00.314895+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T05:45:00.314946+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T05:45:00.314955+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T05:45:00.314964+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716268073127&bar=15m
+2024-05-21T05:45:00.589491+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T05:45:00.769298+00:00 app[web.1]: CE COMPLETE
+2024-05-21T05:45:00.769354+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T05:45:00.769355+00:00 app[web.1]: 
+2024-05-21T05:45:00.769682+00:00 app[web.1]: RESUME JOB
+2024-05-21T05:47:25.079327+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=1YuD8xniHkGNaEoGAAAC" host=tu-trader-3996d65ded90.herokuapp.com request_id=a5e92b80-edbe-464f-be77-9b3804df27f1 fwd="105.245.118.92" dyno=web.1 connect=0ms service=473679ms status=101 bytes=202 protocol=https
+2024-05-21T05:47:25.079455+00:00 app[web.1]: server=tu-trader-3996d65ded90.herokuapp.com//socket.io/ client=10.1.89.33:10461 socket shutdown error: [Errno 9] Bad file descriptorClient disconnected
+2024-05-21T06:00:00.316752+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T06:00:00.316825+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T06:00:00.316898+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T06:00:00.316898+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716268073127&bar=15m
+2024-05-21T06:00:00.590276+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T06:00:00.732046+00:00 app[web.1]: CE COMPLETE
+2024-05-21T06:00:00.732100+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T06:00:00.732100+00:00 app[web.1]: 
+2024-05-21T06:00:00.732435+00:00 app[web.1]: RESUME JOB
+2024-05-21T06:15:00.315227+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T06:15:00.315269+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T06:15:00.315281+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T06:15:00.315293+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716268073127&bar=15m
+2024-05-21T06:15:00.572970+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T06:15:00.722053+00:00 app[web.1]: CE COMPLETE
+2024-05-21T06:15:00.722113+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T06:15:00.722113+00:00 app[web.1]: 
+2024-05-21T06:15:00.722470+00:00 app[web.1]: RESUME JOB
+2024-05-21T06:30:00.314957+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T06:30:00.315014+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T06:30:00.315024+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T06:30:00.315028+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716268073127&bar=15m
+2024-05-21T06:30:00.608638+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T06:30:00.747286+00:00 app[web.1]: CE COMPLETE
+2024-05-21T06:30:00.747342+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T06:30:00.747342+00:00 app[web.1]: 
+2024-05-21T06:30:00.747655+00:00 app[web.1]: RESUME JOB
+2024-05-21T06:45:00.314907+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T06:45:00.314984+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T06:45:00.314997+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T06:45:00.315009+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716268073127&bar=15m
+2024-05-21T06:45:00.602880+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T06:45:00.775139+00:00 app[web.1]: CE COMPLETE
+2024-05-21T06:45:00.775205+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T06:45:00.775205+00:00 app[web.1]: 
+2024-05-21T06:45:00.775561+00:00 app[web.1]: RESUME JOB
+2024-05-21T07:00:00.314596+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T07:00:00.314752+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T07:00:00.314753+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T07:00:00.314754+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716268073127&bar=15m
+2024-05-21T07:00:00.596041+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T07:00:00.793901+00:00 app[web.1]: CE COMPLETE
+2024-05-21T07:00:00.793980+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T07:00:00.793980+00:00 app[web.1]: 
+2024-05-21T07:00:00.794394+00:00 app[web.1]: RESUME JOB
+2024-05-21T07:15:00.313566+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T07:15:00.313635+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T07:15:00.313655+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T07:15:00.313675+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716268073127&bar=15m
+2024-05-21T07:15:00.561926+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T07:15:00.727362+00:00 app[web.1]: CE COMPLETE
+2024-05-21T07:15:00.727484+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T07:15:00.727484+00:00 app[web.1]: 
+2024-05-21T07:15:00.727987+00:00 app[web.1]: RESUME JOB
+2024-05-21T07:25:06.625974+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-Q2Xxw" host=tu-trader-3996d65ded90.herokuapp.com request_id=a6402887-bd21-4d4f-bc84-835a23b8cd0c fwd="105.245.101.95" dyno=web.1 connect=0ms service=2ms status=200 bytes=369 protocol=https
+2024-05-21T07:25:06.626513+00:00 app[web.1]: 10.1.52.233 - - [21/May/2024:07:25:06 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-Q2Xxw HTTP/1.1" 200 97 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T07:25:06.975984+00:00 app[web.1]: Connected: None
+2024-05-21T07:25:06.976466+00:00 app[web.1]: 10.1.52.233 - - [21/May/2024:07:25:06 +0000] "POST /socket.io/?EIO=4&transport=polling&t=O-Q2YEg&sid=XBoWtTCRKhMuPbjiAAAE HTTP/1.1" 200 2 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T07:25:06.976739+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=O-Q2YEg&sid=XBoWtTCRKhMuPbjiAAAE" host=tu-trader-3996d65ded90.herokuapp.com request_id=8d82bf23-6498-4fef-967c-031fa08a286c fwd="105.245.101.95" dyno=web.1 connect=0ms service=1ms status=200 bytes=258 protocol=https
+2024-05-21T07:25:06.979883+00:00 app[web.1]: 10.1.28.47 - - [21/May/2024:07:25:06 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-Q2YEh&sid=XBoWtTCRKhMuPbjiAAAE HTTP/1.1" 200 32 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T07:25:06.980256+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-Q2YEh&sid=XBoWtTCRKhMuPbjiAAAE" host=tu-trader-3996d65ded90.herokuapp.com request_id=badba8d0-d16b-4ba8-b96a-5b745a89edeb fwd="105.245.101.95" dyno=web.1 connect=0ms service=1ms status=200 bytes=304 protocol=https
+2024-05-21T07:25:08.043640+00:00 app[web.1]: 10.1.28.47 - - [21/May/2024:07:25:08 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-Q2YJx&sid=XBoWtTCRKhMuPbjiAAAE HTTP/1.1" 200 1 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T07:25:08.043888+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-Q2YJx&sid=XBoWtTCRKhMuPbjiAAAE" host=tu-trader-3996d65ded90.herokuapp.com request_id=bdcb7c4a-f6b4-4225-a29c-e088973ee4f3 fwd="105.245.101.95" dyno=web.1 connect=0ms service=783ms status=200 bytes=272 protocol=https
+2024-05-21T07:30:00.314707+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T07:30:00.314772+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T07:30:00.314781+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T07:30:00.314793+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716268073127&bar=15m
+2024-05-21T07:30:00.579395+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T07:30:00.712262+00:00 app[web.1]: CE COMPLETE
+2024-05-21T07:30:00.712328+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T07:30:00.712329+00:00 app[web.1]: 
+2024-05-21T07:30:00.712655+00:00 app[web.1]: RESUME JOB
+2024-05-21T07:34:59.000000+00:00 app[api]: Build started by user obediencekoza@gmail.com
+2024-05-21T07:35:27.539483+00:00 app[api]: Deploy 88877e4e by user obediencekoza@gmail.com
+2024-05-21T07:35:27.539483+00:00 app[api]: Release v66 created by user obediencekoza@gmail.com
+2024-05-21T07:35:28.168164+00:00 heroku[web.1]: Restarting
+2024-05-21T07:35:28.220603+00:00 heroku[web.1]: State changed from up to starting
+2024-05-21T07:35:29.016017+00:00 heroku[web.1]: Stopping all processes with SIGTERM
+2024-05-21T07:35:29.041046+00:00 app[web.1]: [2024-05-21 07:35:29 +0000] [2] [INFO] Handling signal: term
+2024-05-21T07:35:34.376225+00:00 heroku[web.1]: Starting process with command `gunicorn --worker-class eventlet -w 1 app:app`
+2024-05-21T07:35:34.980971+00:00 app[web.1]: Python buildpack: Detected 512 MB available memory and 8 CPU cores.
+2024-05-21T07:35:34.981088+00:00 app[web.1]: Python buildpack: Defaulting WEB_CONCURRENCY to 2 based on the available memory.
+2024-05-21T07:35:36.059685+00:00 app[web.1]: [2024-05-21 07:35:36 +0000] [2] [INFO] Starting gunicorn 22.0.0
+2024-05-21T07:35:36.060017+00:00 app[web.1]: [2024-05-21 07:35:36 +0000] [2] [INFO] Listening at: http://0.0.0.0:26518 (2)
+2024-05-21T07:35:36.060046+00:00 app[web.1]: [2024-05-21 07:35:36 +0000] [2] [INFO] Using worker: eventlet
+2024-05-21T07:35:36.063204+00:00 app[web.1]: [2024-05-21 07:35:36 +0000] [9] [INFO] Booting worker with pid: 9
+2024-05-21T07:35:36.094318+00:00 heroku[web.1]: State changed from starting to up
+2024-05-21T07:35:39.084993+00:00 app[web.1]: /app/.heroku/python/lib/python3.12/site-packages/pandas_ta/utils/_core.py:14: SyntaxWarning: invalid escape sequence '\g'
+2024-05-21T07:35:39.085019+00:00 app[web.1]: return re_.sub("([a-z])([A-Z])","\g<1> \g<2>", x).title()
+2024-05-21T07:35:40.000000+00:00 app[api]: Build succeeded
+2024-05-21T07:35:40.322286+00:00 app[web.1]: mongodb+srv://clickbait4587:baseline072@cluster0.qwyyk.mongodb.net/?retryWrites=true&w=majority
+2024-05-21T07:35:40.740738+00:00 app[web.1]: MONGO INITIALIZED
+2024-05-21T07:35:40.790128+00:00 app[web.1]: id=ObjectId('6644740c7af0ca0697c66a06') revision_id=None can_trade=True use_swing_low=True base='ETH' ccy='USDT' p_gain=0.01 sl_const=30.0 strict=False demo=True interval=15 category='spot' mult=1.8 ce_length=1
+2024-05-21T07:35:40.790133+00:00 app[web.1]: INITIALIZE OKX
+2024-05-21T07:35:40.790133+00:00 app[web.1]: Baseline@072
+2024-05-21T07:35:40.954854+00:00 app[web.1]: INIT BINANCE...
+2024-05-21T07:35:59.067894+00:00 app[web.1]: [2024-05-21 07:35:59 +0000] [2] [INFO] Shutting down: Master
+2024-05-21T07:35:59.081531+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=XBoWtTCRKhMuPbjiAAAE" host=tu-trader-3996d65ded90.herokuapp.com request_id=b2142030-5504-4ca2-a97b-3ac19832d476 fwd="105.245.101.95" dyno=web.1 connect=0ms service=651308ms status=101 bytes=202 protocol=https
+2024-05-21T07:35:59.125672+00:00 heroku[web.1]: Error R12 (Exit timeout) -> At least one process failed to exit within 30 seconds of SIGTERM
+2024-05-21T07:35:59.127623+00:00 heroku[web.1]: Stopping remaining processes with SIGKILL
+2024-05-21T07:35:59.205218+00:00 heroku[web.1]: Process exited with status 137
+2024-05-21T07:36:01.356586+00:00 app[web.1]: 10.1.28.47 - - [21/May/2024:07:36:01 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-Q51sI HTTP/1.1" 200 97 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T07:36:01.356690+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-Q51sI" host=tu-trader-3996d65ded90.herokuapp.com request_id=488b0390-7596-4333-a515-a1258d7bd8f5 fwd="105.245.101.95" dyno=web.1 connect=0ms service=1ms status=200 bytes=369 protocol=https
+2024-05-21T07:36:01.691762+00:00 app[web.1]: Connected: None
+2024-05-21T07:36:01.692327+00:00 app[web.1]: 10.1.28.47 - - [21/May/2024:07:36:01 +0000] "POST /socket.io/?EIO=4&transport=polling&t=O-Q523y&sid=mS4ZZpPFZjY6Wh_VAAAA HTTP/1.1" 200 2 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T07:36:01.692476+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=O-Q523y&sid=mS4ZZpPFZjY6Wh_VAAAA" host=tu-trader-3996d65ded90.herokuapp.com request_id=d31c73fa-2293-4896-a748-5a1c1c4435a0 fwd="105.245.101.95" dyno=web.1 connect=0ms service=2ms status=200 bytes=258 protocol=https
+2024-05-21T07:36:01.694187+00:00 app[web.1]: 10.1.80.54 - - [21/May/2024:07:36:01 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-Q523z&sid=mS4ZZpPFZjY6Wh_VAAAA HTTP/1.1" 200 32 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T07:36:01.694495+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-Q523z&sid=mS4ZZpPFZjY6Wh_VAAAA" host=tu-trader-3996d65ded90.herokuapp.com request_id=a7dbede7-224b-46af-86ee-9ba671f15f1c fwd="105.245.101.95" dyno=web.1 connect=0ms service=1ms status=200 bytes=304 protocol=https
+2024-05-21T07:36:02.471191+00:00 app[web.1]: 10.1.80.54 - - [21/May/2024:07:36:02 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-Q529F&sid=mS4ZZpPFZjY6Wh_VAAAA HTTP/1.1" 200 1 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T07:36:02.471621+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-Q529F&sid=mS4ZZpPFZjY6Wh_VAAAA" host=tu-trader-3996d65ded90.herokuapp.com request_id=07eeadd3-1397-4e0f-b6dc-04d94c4db7e8 fwd="105.245.101.95" dyno=web.1 connect=0ms service=507ms status=200 bytes=272 protocol=https
+2024-05-21T07:41:25.000000+00:00 app[api]: Build started by user obediencekoza@gmail.com
+2024-05-21T07:41:51.775078+00:00 app[api]: Deploy 0623ec8a by user obediencekoza@gmail.com
+2024-05-21T07:41:51.775078+00:00 app[api]: Release v67 created by user obediencekoza@gmail.com
+2024-05-21T07:41:52.019603+00:00 heroku[web.1]: Restarting
+2024-05-21T07:41:52.070622+00:00 heroku[web.1]: State changed from up to starting
+2024-05-21T07:41:52.738475+00:00 heroku[web.1]: Stopping all processes with SIGTERM
+2024-05-21T07:41:52.765052+00:00 app[web.1]: [2024-05-21 07:41:52 +0000] [2] [INFO] Handling signal: term
+2024-05-21T07:41:58.222221+00:00 heroku[web.1]: Starting process with command `gunicorn --worker-class eventlet -w 1 app:app`
+2024-05-21T07:41:58.916559+00:00 app[web.1]: Python buildpack: Detected 512 MB available memory and 8 CPU cores.
+2024-05-21T07:41:58.916633+00:00 app[web.1]: Python buildpack: Defaulting WEB_CONCURRENCY to 2 based on the available memory.
+2024-05-21T07:42:00.229285+00:00 app[web.1]: [2024-05-21 07:42:00 +0000] [2] [INFO] Starting gunicorn 22.0.0
+2024-05-21T07:42:00.229725+00:00 app[web.1]: [2024-05-21 07:42:00 +0000] [2] [INFO] Listening at: http://0.0.0.0:14885 (2)
+2024-05-21T07:42:00.229890+00:00 app[web.1]: [2024-05-21 07:42:00 +0000] [2] [INFO] Using worker: eventlet
+2024-05-21T07:42:00.233174+00:00 app[web.1]: [2024-05-21 07:42:00 +0000] [9] [INFO] Booting worker with pid: 9
+2024-05-21T07:42:00.499371+00:00 heroku[web.1]: State changed from starting to up
+2024-05-21T07:42:03.079347+00:00 app[web.1]: /app/.heroku/python/lib/python3.12/site-packages/pandas_ta/utils/_core.py:14: SyntaxWarning: invalid escape sequence '\g'
+2024-05-21T07:42:03.079412+00:00 app[web.1]: return re_.sub("([a-z])([A-Z])","\g<1> \g<2>", x).title()
+2024-05-21T07:42:04.322218+00:00 app[web.1]: mongodb+srv://clickbait4587:baseline072@cluster0.qwyyk.mongodb.net/?retryWrites=true&w=majority
+2024-05-21T07:42:04.725929+00:00 app[web.1]: MONGO INITIALIZED
+2024-05-21T07:42:04.774707+00:00 app[web.1]: id=ObjectId('6644740c7af0ca0697c66a06') revision_id=None can_trade=True use_swing_low=True base='ETH' ccy='USDT' p_gain=0.01 sl_const=30.0 strict=False demo=True interval=15 category='spot' mult=1.8 ce_length=1
+2024-05-21T07:42:04.774713+00:00 app[web.1]: INITIALIZE OKX
+2024-05-21T07:42:04.774713+00:00 app[web.1]: Baseline@072
+2024-05-21T07:42:04.943089+00:00 app[web.1]: INIT BINANCE...
+2024-05-21T07:42:05.000000+00:00 app[api]: Build succeeded
+2024-05-21T07:42:22.793361+00:00 app[web.1]: [2024-05-21 07:42:22 +0000] [2] [INFO] Shutting down: Master
+2024-05-21T07:42:22.805414+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=mS4ZZpPFZjY6Wh_VAAAA" host=tu-trader-3996d65ded90.herokuapp.com request_id=dfc692d0-9580-4116-b6cf-049b5a83ba44 fwd="105.245.101.95" dyno=web.1 connect=0ms service=380596ms status=101 bytes=202 protocol=https
+2024-05-21T07:42:22.907724+00:00 heroku[web.1]: Process exited with status 0
+2024-05-21T07:42:25.401696+00:00 app[web.1]: 10.1.29.27 - - [21/May/2024:07:42:25 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-Q6VcJ HTTP/1.1" 200 97 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T07:42:25.401874+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-Q6VcJ" host=tu-trader-3996d65ded90.herokuapp.com request_id=ea25602d-d911-4752-bb11-d5eb1c8bc8bf fwd="105.245.101.95" dyno=web.1 connect=0ms service=1ms status=200 bytes=369 protocol=https
+2024-05-21T07:42:25.745666+00:00 app[web.1]: Connected: None
+2024-05-21T07:42:25.746295+00:00 app[web.1]: 10.1.29.27 - - [21/May/2024:07:42:25 +0000] "POST /socket.io/?EIO=4&transport=polling&t=O-Q6VqP&sid=eYdrFmo2vrc8BV4AAAAA HTTP/1.1" 200 2 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T07:42:25.746488+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=O-Q6VqP&sid=eYdrFmo2vrc8BV4AAAAA" host=tu-trader-3996d65ded90.herokuapp.com request_id=2dce7ca6-e7cc-4e3c-86c6-1f2f8a3a056a fwd="105.245.101.95" dyno=web.1 connect=0ms service=2ms status=200 bytes=258 protocol=https
+2024-05-21T07:42:25.752344+00:00 app[web.1]: 10.1.35.10 - - [21/May/2024:07:42:25 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-Q6VqR&sid=eYdrFmo2vrc8BV4AAAAA HTTP/1.1" 200 32 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T07:42:25.752591+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-Q6VqR&sid=eYdrFmo2vrc8BV4AAAAA" host=tu-trader-3996d65ded90.herokuapp.com request_id=653fbda7-df56-4d3f-a66d-10abe8e156ab fwd="105.245.101.95" dyno=web.1 connect=0ms service=1ms status=200 bytes=304 protocol=https
+2024-05-21T07:42:26.555666+00:00 app[web.1]: 10.1.35.10 - - [21/May/2024:07:42:26 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-Q6Vvj&sid=eYdrFmo2vrc8BV4AAAAA HTTP/1.1" 200 1 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T07:42:26.556248+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-Q6Vvj&sid=eYdrFmo2vrc8BV4AAAAA" host=tu-trader-3996d65ded90.herokuapp.com request_id=618a8091-7424-4630-b7b2-f819983f53b6 fwd="105.245.101.95" dyno=web.1 connect=0ms service=520ms status=200 bytes=272 protocol=https
+2024-05-21T07:45:00.599359+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T07:45:00.599451+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T07:45:00.599472+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T07:45:00.599489+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716277323264&bar=15m
+2024-05-21T07:45:00.887794+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T07:45:01.100554+00:00 app[web.1]: CE COMPLETE
+2024-05-21T07:45:01.100573+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T07:45:01.100573+00:00 app[web.1]: 
+2024-05-21T07:45:01.101016+00:00 app[web.1]: 
+2024-05-21T07:45:01.101018+00:00 app[web.1]: {'ts': Timestamp('2024-05-21 07:30:00'), 'buy_signal': 0.0, 'sell_signal': 0.0, 'sma_20': 3669.6800875, 'sma_50': 3622.8289175}
+2024-05-21T07:45:01.101018+00:00 app[web.1]: 
+2024-05-21T07:45:01.101032+00:00 app[web.1]: RESUME JOB
+2024-05-21T07:46:57.836133+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=eYdrFmo2vrc8BV4AAAAA" host=tu-trader-3996d65ded90.herokuapp.com request_id=e0e96353-c9ff-4d88-894d-835b212cba79 fwd="105.245.101.95" dyno=web.1 connect=0ms service=271558ms status=101 bytes=202 protocol=https
+2024-05-21T07:46:57.836333+00:00 app[web.1]: server=tu-trader-3996d65ded90.herokuapp.com//socket.io/ client=10.1.21.0:10269 socket shutdown error: [Errno 9] Bad file descriptorClient disconnected
+2024-05-21T08:00:00.596525+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T08:00:00.596608+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T08:00:00.596620+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T08:00:00.596630+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716277323264&bar=15m
+2024-05-21T08:00:00.868808+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T08:00:01.007366+00:00 app[web.1]: CE COMPLETE
+2024-05-21T08:00:01.007421+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T08:00:01.007422+00:00 app[web.1]: 
+2024-05-21T08:00:01.007782+00:00 app[web.1]: 
+2024-05-21T08:00:01.007784+00:00 app[web.1]: {'ts': Timestamp('2024-05-21 07:30:00'), 'buy_signal': 0.0, 'sell_signal': 0.0, 'sma_20': 3669.6800875, 'sma_50': 3622.8289175}
+2024-05-21T08:00:01.007785+00:00 app[web.1]: 
+2024-05-21T08:00:01.007803+00:00 app[web.1]: RESUME JOB
+2024-05-21T08:15:00.597743+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T08:15:00.597827+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T08:15:00.597828+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T08:15:00.597828+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716277323264&bar=15m
+2024-05-21T08:15:00.880129+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T08:15:01.020911+00:00 app[web.1]: CE COMPLETE
+2024-05-21T08:15:01.020979+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T08:15:01.020979+00:00 app[web.1]: 
+2024-05-21T08:15:01.021456+00:00 app[web.1]: 
+2024-05-21T08:15:01.021459+00:00 app[web.1]: {'ts': Timestamp('2024-05-21 07:30:00'), 'buy_signal': 0.0, 'sell_signal': 0.0, 'sma_20': 3669.6800875, 'sma_50': 3622.8289175}
+2024-05-21T08:15:01.021460+00:00 app[web.1]: 
+2024-05-21T08:15:01.021474+00:00 app[web.1]: RESUME JOB
+2024-05-21T08:30:00.599241+00:00 app[web.1]: GETTING OKX KLINES...
+2024-05-21T08:30:00.599330+00:00 app[web.1]: header:  {'Content-Type': 'application/json', 'x-simulated-trading': '1'}
+2024-05-21T08:30:00.599330+00:00 app[web.1]: domain: https://www.okx.com
+2024-05-21T08:30:00.599331+00:00 app[web.1]: url: /api/v5/market/index-candles?instId=ETH-USDT&after=1716277323264&bar=15m
+2024-05-21T08:30:00.879980+00:00 app[web.1]: BEGIN CE: 1.8
+2024-05-21T08:30:01.042160+00:00 app[web.1]: CE COMPLETE
+2024-05-21T08:30:01.042259+00:00 app[web.1]: CHECKING SIGNALS...
+2024-05-21T08:30:01.042259+00:00 app[web.1]: 
+2024-05-21T08:30:01.042701+00:00 app[web.1]: 
+2024-05-21T08:30:01.042703+00:00 app[web.1]: {'ts': Timestamp('2024-05-21 07:30:00'), 'buy_signal': 0.0, 'sell_signal': 0.0, 'sma_20': 3669.6800875, 'sma_50': 3622.8289175}
+2024-05-21T08:30:01.042704+00:00 app[web.1]: 
+2024-05-21T08:30:01.042736+00:00 app[web.1]: RESUME JOB
+2024-05-21T08:32:39.745919+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-QH_S2" host=tu-trader-3996d65ded90.herokuapp.com request_id=902620cb-4ce1-466d-a1ad-1d46a9729ecf fwd="105.245.126.221" dyno=web.1 connect=1ms service=4ms status=200 bytes=369 protocol=https
+2024-05-21T08:32:39.746216+00:00 app[web.1]: 10.1.57.193 - - [21/May/2024:08:32:39 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-QH_S2 HTTP/1.1" 200 97 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T08:32:40.068974+00:00 app[web.1]: Connected: None
+2024-05-21T08:32:40.069451+00:00 app[web.1]: 10.1.57.193 - - [21/May/2024:08:32:40 +0000] "POST /socket.io/?EIO=4&transport=polling&t=O-QH_ke&sid=OLPDZ2whV3Qtm0A8AAAC HTTP/1.1" 200 2 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T08:32:40.069738+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=O-QH_ke&sid=OLPDZ2whV3Qtm0A8AAAC" host=tu-trader-3996d65ded90.herokuapp.com request_id=010082af-164c-428f-b202-eb706902736d fwd="105.245.126.221" dyno=web.1 connect=0ms service=2ms status=200 bytes=258 protocol=https
+2024-05-21T08:32:40.082517+00:00 app[web.1]: 10.1.93.161 - - [21/May/2024:08:32:40 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-QH_kg&sid=OLPDZ2whV3Qtm0A8AAAC HTTP/1.1" 200 32 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T08:32:40.082776+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-QH_kg&sid=OLPDZ2whV3Qtm0A8AAAC" host=tu-trader-3996d65ded90.herokuapp.com request_id=3082780e-98a2-4131-9b26-a95a461ddbe5 fwd="105.245.126.221" dyno=web.1 connect=0ms service=1ms status=200 bytes=304 protocol=https
+2024-05-21T08:32:41.174810+00:00 app[web.1]: 10.1.93.161 - - [21/May/2024:08:32:41 +0000] "GET /socket.io/?EIO=4&transport=polling&t=O-QH_pu&sid=OLPDZ2whV3Qtm0A8AAAC HTTP/1.1" 200 1 "https://tu-trader.vercel.app/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+2024-05-21T08:32:41.176014+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=O-QH_pu&sid=OLPDZ2whV3Qtm0A8AAAC" host=tu-trader-3996d65ded90.herokuapp.com request_id=5e81ef2d-b992-4fa2-986d-fc380060e170 fwd="105.245.126.221" dyno=web.1 connect=0ms service=795ms status=200 bytes=272 protocol=https
+2024-05-21T08:33:11.959729+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=OLPDZ2whV3Qtm0A8AAAC" host=tu-trader-3996d65ded90.herokuapp.com request_id=0f9b0f8c-2364-426b-b81a-d8e401504bbe fwd="105.245.126.221" dyno=web.1 connect=0ms service=31055ms status=101 bytes=202 protocol=https
+2024-05-21T08:33:11.959804+00:00 app[web.1]: server=tu-trader-3996d65ded90.herokuapp.com//socket.io/ client=10.1.28.47:26631 socket shutdown error: [Errno 9] Bad file descriptorClient disconnected
