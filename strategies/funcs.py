@@ -9,10 +9,11 @@ def strategy(df: pd.DataFrame, balance: float, buy_cond, sell_cond, pair: list[s
 
     pos = False; 
     cnt = 0
+    _cnt = 0
     gain = 0
     loss = 0
 
-    m_data = { 'data': {} }
+    m_data = { 'data': [] }
     _data = {}
     entry: float = 0
     entry_limit: float | None = None
@@ -50,31 +51,32 @@ def strategy(df: pd.DataFrame, balance: float, buy_cond, sell_cond, pair: list[s
             loss = ret["loss"]
             print({'tp': ret['tp'], 'sl': ret['sl']})
             
-        if (not pos and buy_cond(prev_row)):
-            # PLACE MARKET BUY ORDER */
-            entry_limit = row['o'] if is_market else prev_row['c']
-            entry_limit = round(entry_limit, price_precision)
-            enter_ts = row['ts']
-            print(f"[ {row.ts} ] Limit buy order at {entry_limit}")
+        def _fill_buy_order(ret: dict):
+            nonlocal m_data, base, balance, _cnt, pos, base, enter_ts, sl, tp
+            m_data = ret['m_data']
+            base = ret['base']
+            balance = ret['balance']
+            _cnt = ret['_cnt']
+            pos = ret['pos']
+            base = ret['base']
 
+            enter_ts = row["ts"]
+            tp = round(entry * (1 + TP / 100), price_precision)
+            sl = round(entry * (1 - SL / 100), price_precision)
+
+        if skip == prev_row['ts']:
+            pass
+        
         if not pos and entry_limit:
             if prev_row['l'] <= entry_limit:
+               
                 entry = entry_limit
                 ret = fill_buy_order( entry=entry, prev_row=prev_row, 
                 entry_limit = entry_limit, enter_ts=enter_ts, 
                 taker = taker, base = base, balance = balance, 
                 base_precision=base_precision, m_data = m_data, pos = pos,)
                 
-                m_data = ret['m_data']
-                base = ret['base']
-                balance = ret['balance']
-                _cnt = ret['_cnt']
-                pos = ret['pos']
-                base = ret['base']
-
-                enter_ts = row["ts"]
-                tp = round(entry * (1 + TP / 100), price_precision)
-                sl = round(entry * (1 - SL / 100), price_precision)
+                _fill_buy_order(ret)
                 
         if pos and (sl or tp):
             print('HAS POS OR SL')
@@ -83,25 +85,41 @@ def strategy(df: pd.DataFrame, balance: float, buy_cond, sell_cond, pair: list[s
             _sl = sl
             _pos = pos
 
-            is_sl = sl and prev_row['l'] <= sl
+            is_sl = sl and row['l'] <= sl
 
             if sl and sl < entry and is_sl:
                 print("FILL AT SL")
                 exit = round(sl, price_precision)
 
-                ret = fill_sell_order(exit_limit, exit, prev_row, entry=entry, base = base, balance = balance, price_precision = price_precision, enter_ts = enter_ts, gain = gain, loss = loss, cnt = cnt, m_data = m_data, pos = pos, sl = sl, tp = tp, entry_limit = entry_limit)
+                ret = fill_sell_order(exit_limit, exit, row, entry=entry, base = base, balance = balance, price_precision = price_precision, enter_ts = enter_ts, gain = gain, loss = loss, cnt = cnt, m_data = m_data, pos = pos, sl = sl, tp = tp, entry_limit = entry_limit)
                 _fill_sell_order(ret)
-            elif tp and tp <= prev_row['h']:
+            elif tp and tp <= row['h']:
                 print("FILL AT TP")
                 exit = round(tp, price_precision)
 
-                ret = fill_sell_order(exit_limit, exit, prev_row, entry=entry, base = base, balance = balance, price_precision = price_precision, enter_ts = enter_ts, gain = gain, loss = loss, cnt = cnt, m_data = m_data, pos = pos, sl = sl, tp = tp, entry_limit = entry_limit)
+                ret = fill_sell_order(exit_limit, exit, row, entry=entry, base = base, balance = balance, price_precision = price_precision, enter_ts = enter_ts, gain = gain, loss = loss, cnt = cnt, m_data = m_data, pos = pos, sl = sl, tp = tp, entry_limit = entry_limit)
                 _fill_sell_order(ret)
 
             if not pos:
                 print({"entry": entry})
+                skip = row['ts']
 
-        
+        if (not pos and buy_cond(prev_row)):
+            # PLACE MARKET BUY ORDER */
+            entry_limit = row['o'] if is_market else prev_row['c']
+            entry_limit = round(entry_limit, price_precision)
+            enter_ts = row['ts']
+            print(f"[ {row.ts} ] {'Market' if is_market else 'Limit'} buy order at {entry_limit}")
+
+            if is_market:
+                entry = entry_limit
+                ret = fill_buy_order( entry=entry, prev_row=prev_row, 
+                entry_limit = entry_limit, enter_ts=enter_ts, 
+                taker = taker, base = base, balance = balance, 
+                base_precision=base_precision, m_data = m_data, pos = pos,)
+                
+                _fill_buy_order(ret)
+
     print(f"TOTAL TRADES: {cnt}")
     cnt = cnt if cnt > 0 else 1
     gain = round(gain * 100 / cnt, 2)

@@ -4,12 +4,15 @@ import json
 import requests
 from classes.test_platforms import Platform
 from data.data import data as dt
-from utils.functions import err_handler
+
+
 
 class TestBinance(Platform):
     maker = .1/100
     taker = .1/100
     def get_klines(self, symbol = None, start = None, end = None, interval = None, save_fp = None):
+        from utils.functions import err_handler
+        from utils.functions2 import new_date
         try:
             cnt = 0
             klines = []
@@ -24,7 +27,7 @@ class TestBinance(Platform):
                 while first_timestamp <= end:
                     print(f"GETTING {cnt + 1} klines...")
                     print(first_timestamp)
-                    print(datetime.fromtimestamp(first_timestamp / 1000))
+                    print(new_date(first_timestamp))
                     res = requests.get(f"https://data-api.binance.vision/api/v3/klines?symbol={symbol}&interval={parsed_interval}&startTime={first_timestamp}")
                     data = res.json()
                     klines = [*klines, *data]

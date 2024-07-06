@@ -12,7 +12,7 @@ from datetime import datetime
 import re
 import pytz
 from models.bot_model import Bot
-from utils.constants import scheduler
+from utils.constants import SL, TP, scheduler
 from utils.funcs.orders import OrderPlacer
 
 def is_email(text):
@@ -21,39 +21,35 @@ def is_email(text):
 
 def tu_job(op: OrderPlacer, bot: Bot, id):
     with scheduler.app.app_context():
-        """ print(f"JOB: {id}, RUN {op.cnt}")
+        """ print(f"JOB: {id}, RUN {op.cnt}") 
         if op.cnt >= 10:
             scheduler.pause_job(id) """
-        op.check_n_place_orders(bot)
+        op.check_n_place_orders()
         op.set_cnt(op.cnt + 1)
 
 
 def add_bot_job(bot: Bot):
-    op = OrderPlacer()
+    op = OrderPlacer(bot)
     job_id = str(bot.id)
     print(f"\nAdding job for bot: {bot.name}\n")
-    scheduler.add_job(job_id, lambda : tu_job( op, bot, job_id) , trigger="interval", seconds= 1)
+    scheduler.add_job(id=job_id, func= lambda : tu_job( op, bot, job_id) , trigger="interval", seconds=1)
 
 
 """ def parse_date(date):
     if isinstance(date, str):
-        date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
     date = date.astimezone(datetime.timezone(datetime.timedelta(hours=2)))
     return date.isoformat() """
 
+from utils.consts import TZ, date_format
+
 def new_date(ts: float):
-    return datetime.fromtimestamp(ts / 1000)
+    """ Will be divided here """
+    return datetime.fromtimestamp(ts / 1000, tz=pytz.timezone(TZ))
 
 def date_parse(date: str):
-    gmt = date.split(' ')[-1]
-    date = date.replace(gmt, '').strip()
     # Parse the date string with PM/AM and GMT+2 timezone
-    dt_obj = datetime.strptime(date, "%Y-%m-%d %I:%M:%S %p")  # Adjust format as needed
-    
-    # Convert to GMT+2 timezone
-    tz = pytz.timezone('Etc/GMT-2')
-    dt_obj = tz.localize(dt_obj)
-    
+    dt_obj = datetime.strptime(date, date_format)  # Adjust format as needed
+    dt_obj = dt_obj.astimezone(pytz.timezone(TZ))
     # Convert datetime object to Unix timestamp
     timestamp = int(dt_obj.timestamp() * 1000)
     return timestamp
@@ -68,12 +64,9 @@ def ensure_dir_exists(file_path: str):
     print("Creating directory")
     os.mkdir(dirname)
 
-def get_interval(m: int, plt: str) -> str:
-    if plt == "okx":
-        if m >= 60:
-            return f"{m // 60}H"
-        else:
-            return f"{m}m"
-    else:
-        return f"{m}m"
 
+def calc_sl(entry: float):
+    return entry * (1 - SL/100)
+
+def calc_tp(entry: float):
+    return entry * (1 + TP/100)

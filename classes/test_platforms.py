@@ -2,11 +2,9 @@ from datetime import datetime
 import json
 from utils.constants import demo
 from os import getenv
-from okx.MarketData import MarketAPI
+from okx.MarketData import MarketAPI 
 from pybit.market import Market
 
-from utils.functions import parse_date
-from utils.functions2 import ensure_dir_exists, get_interval, new_date
 
 class Platform:
     name: str
@@ -47,6 +45,9 @@ class TestOKX(Platform):
         savePath: str | None,
         is_bybit: bool
     ):
+        
+        from utils.functions import parse_date, get_interval
+        from utils.functions2 import ensure_dir_exists, new_date
         market_data = Market()
         end = end if end is not None else datetime.now()
         klines = []
@@ -134,3 +135,4 @@ class TestBybit(Platform):
             symbol=symbol,
             is_bybit=True
         )
+    

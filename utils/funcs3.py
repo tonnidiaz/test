@@ -38,3 +38,13 @@ def get_price_precision(pair: list[str], plat: str = 'bybit'):
     return precision(
         float(instru["minPricePrecision" if is_bybit else "tickSz"])
     )
+
+def fix_str(filename):
+    import re
+    # Define a regex pattern for unsupported characters
+    pattern = r'[<>:"/\\|?*\x00-\x1F]'
+    
+    # Replace unsupported characters with an underscore
+    sanitized_filename = re.sub(pattern, '_', filename)
+    
+    return sanitized_filename

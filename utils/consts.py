@@ -14,5 +14,8 @@ class IPlatform:
 platforms: list[IPlatform] = [
     IPlatform(name='binance', obj=TestBinance),
     IPlatform(name='bybit', obj=TestBybit),
-    IPlatform(name='okx', obj=TestOKX),
-]
+    IPlatform(name='okx', obj=TestOKX),]
+
+platforms_lst = ['binance', 'bybit', 'okx']
+date_format = "%Y-%m-%d %H:%M:%S%z"
+TZ = "Africa/Johannesburg"

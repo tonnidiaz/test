@@ -1,5 +1,7 @@
 from datetime import datetime
 import pytz
+from utils.consts import date_format
+from utils.functions import parse_date
 
 class P:
     name: str
@@ -19,19 +21,6 @@ class D(P):
 m = M('Tom')
 d = D('David')
 
-def date_parse(date: str):
-    gmt = date.split(' ')[-1]
-    date = date.replace(gmt, '').strip()
-    # Parse the date string with PM/AM and GMT+2 timezone
-    dt_obj = datetime.strptime(date, "%Y-%m-%d %I:%M:%S %p")  # Adjust format as needed
-    
-    # Convert to GMT+2 timezone
-    tz = pytz.timezone('Etc/GMT-2')
-    dt_obj = tz.localize(dt_obj)
-    
-    # Convert datetime object to Unix timestamp
-    timestamp = int(dt_obj.timestamp() * 1000)
-    return timestamp
     
 
 def main():
@@ -44,4 +33,5 @@ def main():
     fn()
     print(pos)
 
-main()
+#print(datetime.strptime("2021-01-01 00:00:00+02:00", date_format))
+print(parse_date(datetime.now()))

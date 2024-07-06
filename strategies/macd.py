@@ -1,6 +1,7 @@
 
 
 from classes.index import Strategy
+from strategies.ce_sma import RSI_ONLY
 
 
 class MACD_ONLY(Strategy):
@@ -118,6 +119,7 @@ class HL_HA(Strategy):
         super().__init__("HL_HA", "JUST A CE")
 
     def buy_cond(self, row):
+        print(row)
         return row['ha_c'] > row['ha_o']
 
     def sell_cond(self, row):

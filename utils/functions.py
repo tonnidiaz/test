@@ -8,28 +8,29 @@ import os, pytz
 import requests
 from datetime import datetime, timezone
 
+from utils.functions2 import new_date
+
 def dd_num(e):
     e = str(e).strip()
     return f"0{e}" if len(e) == 1 else e
 
-def to_iso_string(date_str):
-    date_arr = date_str.split(",")
-    time = date_arr[1].split(":")
-    time = ":".join([dd_num(el) for el in time])
-
-    date_arr = date_arr[0].split("/")
-    date = f"{date_arr[2]}-{dd_num(date_arr[0])}-{dd_num(date_arr[1])}"
-
-    return f"{date} {time} GMT+2"
+    
+from utils.consts import TZ, date_format
 
 def parse_date(date: str | datetime):
-    if type(date) is datetime:
+    """ if type(date) is datetime:
+
         date = date.isoformat(sep=" ")
-    dt_obj = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+    print(date)
+    dt_obj = datetime.strptime(date, date_format)
 
     dt_obj = dt_obj.replace(tzinfo=timezone.utc)
-    dt_obj = dt_obj.astimezone(pytz.timezone('Africa/Johannesburg'))
-    return dt_obj.strftime("%Y-%m-%d %H:%M:%S")
+    dt_obj = dt_obj.astimezone(pytz.timezone(TZ)) """
+    if type(date) is str:
+        date = datetime.strptime(date, date_format)
+    #date = date.replace(tzinfo=timezone.utc)
+    date = date.astimezone(pytz.timezone(TZ))
+    return date.strftime(date_format)
 
 
 def tu_path(pth: str):
@@ -41,13 +42,16 @@ def is_dev():
 
 def parse_klines(klines):
     """KLINES SHOULD COME IN SORTED [REVERSED] IF NEED BE"""
-
+    print("\nBEGIN PARSE...")
     # Grab only 7 columns
     klines = list(map(lambda x: x[0: 6], klines))
     df = pd.DataFrame(klines, columns = ['ts', 'o', 'h', 'l', 'c', 'v'], dtype=float)
     #df['ts'] = pd.to_datetime(df['ts'], unit='ms',)
+    df['ts'] = df['ts'].astype(str)
     for i, row in df.iterrows():
-        df.loc[i, 'ts'] = parse_date(datetime.fromtimestamp(row['ts'] / 1000) )
+        df.loc[i, 'ts'] = parse_date(new_date(float(row['ts'])) )
+
+    print("END PARSE\n")
     return df
  
 def zlsma(df: pd.DataFrame, length = 32, offset = 0):
@@ -79,20 +83,23 @@ def chandelier_exit(df : pd.DataFrame, length = 1, mult = 1.8):
 
     print(f"BEGIN CE: {mult}")
 
-    df['atr'] = pta.atr(df['h'], df['l'], df['c'], length)
-    df['long_stop'] = df['c'].rolling(window=length).max() - df['atr'] * mult
-    df['long_stop_prev'] = df['long_stop'].shift(1)
+    #df['atr'] = pta.atr(df['h'], df['l'], df['c'], length)
+    #df['long_stop'] = df['c'].rolling(window=length).max() - df['atr'] * mult
+    #df['long_stop_prev'] = df['long_stop'].shift(1)
 
-    df['short_stop'] = df['c'].rolling(window=length).min() + df['atr'] * mult
-    df['short_stop_prev'] = df['short_stop'].shift(1)
+    #df['short_stop'] = df['c'].rolling(window=length).min() + df['atr'] * mult
+    #df['short_stop_prev'] = df['short_stop'].shift(1)
 
-    df['sir'] = df['buy_signal'] = df['sell_signal'] = np.nan
+    #df['sir'] = df['buy_signal'] = df['sell_signal'] = np.nan
     sir = 1
-    
-    df['sma_20'] = pta.ema(df['c'], 20)
-    df['sma_50'] = pta.ema(df['c'], 50)
+    c = 'ha_c' if use_ha_close else 'c'
+    df['sma_20'] = pta.ema(df[c], 20)
+    df['sma_50'] = pta.ema(df[c], 50)
 
-    df['rsi'] = pta.rsi(df['c'], 14)
+    df['rsi'] = pta.rsi(df[c], 14)
+    macd = pta.macd(df[c])
+
+    #print(macd)
 
     """ for i, row in df.iterrows():
         if i > 0:
@@ -124,7 +131,7 @@ def chandelier_exit(df : pd.DataFrame, length = 1, mult = 1.8):
             df.loc[i, 'buy_signal'] = int(df['sir'][i] == 1 and df['sir'][i - 1] == -1)
             df.loc[i, 'sell_signal'] = int(df['sir'][i] == -1 and df['sir'][i - 1] == 1)
  """
-    df = df[['ts', 'o', 'h', 'l', 'c', 'sma_20', 'sma_50', 'buy_signal','sell_signal']]
+    #df = df[['ts', 'o', 'h', 'l', 'c', 'sma_20', 'sma_50', 'buy_signal','sell_signal']]
     
     print("CE COMPLETE")
     return df
@@ -137,12 +144,13 @@ def heikin_ashi(df : pd.DataFrame):
     ha_h = df[['h', 'c', 'o']].max(axis=1)
     ha_l = df[['l', 'c', 'o']].min(axis=1)
 
-    df['ha_o'] = ha_o
-    df['ha_h'] = ha_h
-    df['ha_l'] = ha_l
-    df['ha_c'] = ha_c
+    ha['ha_o'] = ha_o
+    ha['ha_h'] = ha_h
+    ha['ha_l'] = ha_l
+    ha['ha_c'] = ha_c
     print("HA COMPLETE")
-    return df
+    print(ha['ha_c'][0])
+    return ha
 
 cnt = 0
 klines = []
@@ -167,7 +175,7 @@ def get_klines(symbol, interval, start: int, end = None, save_fp = None):
     while first_timestamp <= end:
         print(f"GETTING {cnt + 1} klines...")
         print(first_timestamp)
-        print(datetime.fromtimestamp(first_timestamp / 1000))
+        print(new_date(first_timestamp))
         res = requests.get(f"https://api.bybit.com/v5/market/kline?category=spot&symbol={symbol}&interval={interval}&start={first_timestamp}")
         #print(res.json())
         res : list = res.json()['result']['list']
@@ -179,3 +187,15 @@ def get_klines(symbol, interval, start: int, end = None, save_fp = None):
     klines.reverse()
     print("DONE")
 
+def get_interval(m: int, plt: str) -> str:
+    if plt == "okx":
+        if m >= 60:
+            return f"{m // 60}H"
+        else:
+            return f"{m}m"
+    else:
+        return f"{m}m"
+
+
+def bot_log(bot: Bot, data):
+    print(f"\n[{bot.name}]\t{data}\n")

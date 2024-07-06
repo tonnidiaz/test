@@ -2,6 +2,7 @@
     "scripts": {
         "dev": "waitress-serve --listen=*8000 app:app", 
         "start": "sudo kill -9 `lsof -t -i:8000` && gunicorn -b 0.0.0.0:8000 --worker-class eventlet -w 1 app:app --preload",
-        "start1": "gunicorn -b 0.0.0.0:8000 --worker-class eventlet -w 1 app:app --preload"
+        "start1": "gunicorn -b 0.0.0.0:8000 --worker-class eventlet -w 1 app:app --preload",
+        "gen": "pigar generate"
     }
 }

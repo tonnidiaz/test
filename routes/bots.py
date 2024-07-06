@@ -6,7 +6,7 @@ from models.bot_model import Bot
 from models.user_model import User
 from utils.funcs.auth import validate
 from utils.funcs.orders import OrderPlacer
-from utils.functions import err_handler, tuned_err
+from utils.functions import bot_log, err_handler, tuned_err
 from utils.constants import scheduler
 from models.order_model import Order
 from utils.functions2 import add_bot_job
@@ -25,7 +25,7 @@ def create_bot_route():
         if not user:
             return tuned_err(401, "Unautorized")
         user = User.find_one(User.username == body.get("user")).run()
-        base, ccy = body['pair']
+        base, ccy = body.get('pair') if body.get('pair') else body.get('symbol')
 
         bot = Bot(
             name=body.get('name'),
@@ -33,12 +33,11 @@ def create_bot_route():
             interval=int(body.get('interval')),
             strategy=int(body.get('strategy')),
             base=base, ccy=ccy,
-            active=body.get('active'),
             demo=body.get('demo'),
             user=user.id,
-            start_amt=float(body.get("amt"))
+            start_amt=float(body.get("start_amt"))
         )
-
+ 
         bot.save()
         print("BOT SAVED")
         user.bots.append(bot.id)
@@ -60,10 +59,11 @@ def create_bot_route():
 @router.get("/")
 def get_apps_route():
     try:
+        print("GET BOTS") 
         username = request.args.get('user')
         user = User.find_one(User.username == username).run()
-
-        if not user:
+        print(username)
+        if username and not user:
             return tuned_err(404, "Page not found")
 
         bots = Bot.find(Bot.user == user.id).run() if username else Bot.find().run()
@@ -74,6 +74,11 @@ def get_apps_route():
         err_handler(e)
         return tuned_err()
 
+def populate_orders(bot: Bot):
+    orders = Order.find(Order.bot == bot.id).run()
+    orders = list(map(lambda x: json.loads(x.model_dump_json()), orders))
+    return orders
+
 @router.post("/<id>/edit")
 @jwt_required()
 def edit_bot_route(id):
@@ -81,40 +86,53 @@ def edit_bot_route(id):
         bot = Bot.find_one(Bot.id == PydanticObjectId(id)).run()
         if not bot:
             return tuned_err(404, "Bot not found")
-        
+        job_id = str(bot.id)
         fd = request.json
         key = fd.get('key')
         val = fd.get('val')
         
         if key == 'active':
-            job_id = str(bot.id)
+            
 
             # check if scheduler contains job
             bl = scheduler.get_job(job_id)
 
             # If deactivating n job is avail
             if bl and val == False:
-                scheduler.remove_job(job_id)
-                print("JOB REMOVED")
+                scheduler.pause_job(job_id)
+                bot_log(bot, "JOB PAUSED")
 
             elif val == True:
-                print("\nResuming jon\n")
+                bot_log(bot, "RESUMING JOB")
                 if not bl:
                     # Add job if it does not exist already
                     add_bot_job(bot)
                 else:
                     scheduler.resume_job(job_id)
+            bot.set({key: val})
+
 
         elif key == "multi":
             for k, v in val.items():
 
-                if k == "pair":
+                if k == "pair" or k == 'symbol':
                     bot.set({"base": v[0], "ccy": v[1]})
-                if k != "amt":
-                    bot.set({k: v})
+
+                bot.set({k: v})
         else:
             bot.set({fd.get('key'): fd.get('val')})
-        return json.loads(bot.model_dump_json())
+        bot.save()
+
+        if key == 'multi' and bot.active:
+            """ RESCHEDULE JOB BASED ON INTERVAL """
+            if scheduler.get_job(job_id):
+                scheduler.remove_job(job_id)
+            add_bot_job(bot)   
+            
+            bot_log(bot, "JOB RESCHEDULED")
+        bot.save()
+        return {**json.loads(bot.model_dump_json()), "orders": populate_orders(bot)}
+    
     except Exception as e:
         err_handler(e)
         return tuned_err()
@@ -126,10 +144,30 @@ def get_bot_by_id(id):
         bot = Bot.find_one(Bot.id == PydanticObjectId(id)).run()
         if not bot:
             return tuned_err(404, "Bot not found")
-        orders = Order.find(Order.bot == bot.id).run()
-        orders = list(map(lambda x: json.loads(x.model_dump_json()), orders))
+        orders = populate_orders(bot)
         return {**json.loads(bot.model_dump_json()), "orders": orders}
 
+    except Exception as e:
+        err_handler(e)
+        return tuned_err()
+    
+@router.post("/<id>/clear-orders")
+@jwt_required()
+def clear_orders_route(id):
+    try:
+        bot = Bot.find_one(Bot.id == PydanticObjectId(id)).run()
+        if not bot:
+            return tuned_err(404, "Bot not found")
+        for oid in bot.orders:
+            ord = Order.find_one(Order.id == oid).run()
+            if ord:
+                print(f"DELETING ORDER: {oid}...")
+                ord.delete()
+                bot.orders = list(filter( lambda x: x != oid, bot.orders))
+                bot.save()
+                print("ORDER DELEED\n")
+        orders = populate_orders(bot)
+        return {**json.loads(bot.model_dump_json()), "orders": orders}
     except Exception as e:
         err_handler(e)
         return tuned_err()

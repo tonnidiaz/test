@@ -148,6 +148,5 @@ def resume_bots():
     # Check for active bots and add jobs for 'em
     active_bots = Bot.find(Bot.active == True).run()
     for bot in active_bots:
-        return
         add_bot_job(bot)
 

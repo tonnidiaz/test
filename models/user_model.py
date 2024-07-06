@@ -11,3 +11,8 @@ class User(Document):
     is_admin: bool = False
     is_verified: bool = False
     bots: list[PydanticObjectId] = []
+    def __getitem__(self, key):
+        return getattr(self, key)
+    
+    def __setitem__(self, key, val):
+        return setattr(self, key, val)

@@ -77,8 +77,8 @@ def on_backtest(body, is_io = True):
     data['profit'] = round(data['balance'] - bal,2 if base_ccy[1] == "USDT" else 6)
     data = {**data, 'base': base_ccy[0], 'ccy': base_ccy[1]}
 
-    for k, v in data['data'].items():
-        data['data'][k]['ts'] = parse_date(k)
+    """ for k, v in data['data'].items():
+        data['data'][k]['ts'] = parse_date(k) """
 
     print(f"\nPROFIT = {base_ccy[1]} {data['profit']}")
     if is_io:

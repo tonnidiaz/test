@@ -57,7 +57,7 @@ def signup_route():
 @router.post('/auth/login')
 @jwt_required(optional=True)
 def login_route():
-
+    print("AUTH LOIGIN")
     try:
         body = request.json
         username = body.get('username')

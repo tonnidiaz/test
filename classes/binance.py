@@ -25,8 +25,7 @@ class Binance:
                 first_timestamp = int(start)
                 while first_timestamp <= end:
                     """ print(f"GETTING {cnt + 1} klines...")
-                    print(first_timestamp)
-                    print(datetime.fromtimestamp(first_timestamp / 1000)) """
+                    print(first_timestamp)"""
                     res = requests.get(f"https://data-api.binance.vision/api/v3/klines?symbol={symbol}&interval={parsed_interval}&startTime={first_timestamp}")
                     data = res.json()
                     klines = [*klines, *data]

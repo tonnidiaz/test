@@ -139,12 +139,11 @@ def resume_bots():
     # Check for active bots and add jobs for 'em
     active_bots = Bot.find(Bot.active == True).run()
     for bot in active_bots:
-        return
         add_bot_job(bot)
-
+scheduler.start()
+resume_bots()
 def start_app():
-    scheduler.start()
-    resume_bots()
+    
     socketio.run( app, debug=False, port=8000)
 
 def on_reload():
