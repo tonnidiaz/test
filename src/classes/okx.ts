@@ -133,12 +133,12 @@ export class OKX {
             let data: {
                 id: string;
                 fillTime: number;
-                fillSz: number;
+                fillSz: number; 
                 fillPx: number;
                 fee: number;
             } | null = null;
             let finalRes: OrderDetails | null = null;
-            botLog(this.bot, `IS_ALGO: ${isAlgo}`);
+            botLog(this.bot, `IS_ALGO: ${isAlgo}, ${{orderId}}`);
             const res = isAlgo
                 ? await this.client.getAlgoOrderDetails({ algoId: orderId })
                 : await this.client.getOrderDetails({
@@ -146,6 +146,7 @@ export class OKX {
                       instId: this.getSymbol(),
                   });
             if (DEV) {
+                console.log(`DEV: ${this.bot.name}`)
                 console.log(res);
             }
             if (isAlgo && (res[0].state == "effective")) {
