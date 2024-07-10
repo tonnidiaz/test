@@ -138,7 +138,8 @@ export class OKX {
                 fee: number;
             } | null = null;
             let finalRes: OrderDetails | null = null;
-            botLog(this.bot, `IS_ALGO: ${isAlgo}, ${{orderId}}`);
+            console.log(this.bot.name, `IS_ALGO: ${isAlgo}`, orderId);
+            
             const res = isAlgo
                 ? await this.client.getAlgoOrderDetails({ algoId: orderId })
                 : await this.client.getOrderDetails({
