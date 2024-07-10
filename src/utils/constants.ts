@@ -9149,9 +9149,9 @@ export const isMarket = true,
     useSwindLow = false,
     noFees = false,
     usePricePc = false,
-    useCurrRow = true, useProdPercs = false;
+    useCurrRow = true, useProdPercs = true;
 
-export let SL = useProdPercs ? .03 : .01//0.03//0.05; //.25//.5,
-export let TP = useProdPercs ? 1.5 : 1.7//1.5//2//1.5; // 3.5//5.3
+export let SL = .015//useProdPercs ? .03 : .01//0.03//0.05; //.25//.5,
+export let TP = 1.1//useProdPercs ? 1.5 : 1.7//1.5//2//1.5; // 3.5//5.3
 export const setSL = (v: number) => (SL = v);
 export const setTP = (v: number) => (TP = v);

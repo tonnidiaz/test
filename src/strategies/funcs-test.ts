@@ -64,7 +64,7 @@ export const strategy = ({
     const pricePrecision = getPricePrecision(pair, "bybit");
     const basePrecision = getCoinPrecision(pair, "sell", "bybit");
     balance = toFixed(balance, pricePrecision);
-    df = df.slice(20);
+    //df = df.slice(20);
     if (noFees) {
         /* maker = 0.08/100, taker = 0.01/100 */
     }

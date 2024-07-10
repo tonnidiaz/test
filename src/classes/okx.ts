@@ -110,8 +110,8 @@ export class OKX {
                           slTriggerPx: sl.toString(),
                           side,
                           sz: amt.toString(),
-                          tpOrdPx: "-1",
-                          slOrdPx: "-1",
+                          tpOrdPx: price.toString(),
+                          slOrdPx: sl.toString(),
                           algoClOrdId: clOrderId,
                       });
 
