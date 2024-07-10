@@ -3,10 +3,9 @@ import { IObj } from "./interfaces";
 const fp = "src/data/klines/binance/2021/DOGEUSDT_15m.json";
 import { atr, ema, rsi, sma, bollingerBands, macd } from "indicatorts";
 import path from "path";
-import { getPricePrecision, toFixed } from "./functions";
 import { P_DIFF, SL, TP, isStopOrder, useHaClose } from "./constants";
 import { OrderDetails } from "okx-api";
-import pd from 'node-pandas'
+import pd from "node-pandas";
 
 const ddNum = (e: any) => {
     e = `${e}`.trim();
@@ -20,12 +19,12 @@ const toISOString = (date: string) => {
         .map((el) => ddNum(el))
         .join(":");
     dateArr = dateArr[0].split("/");
-    date = `${dateArr[2]}-${ddNum(dateArr[0])}-${ddNum(dateArr[1])}`;
-    return `${date} ${time} GMT+2`;
+    date = `${dateArr[0]}-${ddNum(dateArr[1])}-${ddNum(dateArr[2])}`
+    return `${date} ${time}+02:00`;
 };
 export const parseDate = (date: Date | string) =>
     toISOString(
-        new Date(date).toLocaleString("en-US", {
+        new Date(date).toLocaleString("en-ZA", {
             timeZone: "Africa/Johannesburg",
         })
     ); /* .replaceAll("/", "-").replaceAll(",", ""); */
@@ -204,10 +203,7 @@ export const calcEntryPrice = (row: IObj, side: "buy" | "sell") => {
 export const calcSL = (entry: number) => {
     return entry * (1 - SL / 100);
 };
-export const calcTP = (row: any, entry: number) =>
-    isStopOrder
-        ? entry * (1 + TP / 100)
-        : row[useHaClose ? "ha_c" : "c"] * (1 - 0.0 / 100);
+export const calcTP = (row: any, entry: number) => entry * (1 + TP / 100);
 export const getInterval = (m: number, plt: "bybit" | "okx" | "binance") => {
     return plt == "okx"
         ? m >= 60

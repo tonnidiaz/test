@@ -11,6 +11,7 @@ import {
     botLog,
     getCoinPrecision,
     getPricePrecision,
+    sleep,
     toFixed,
 } from "../functions";
 import { Bybit } from "@/classes/bybit";
@@ -45,19 +46,22 @@ export const ensureDirExists = (filePath: string) => {
     fs.mkdirSync(dirname);
 };
 
-export const updateOrder = async (bot: IBot, orders: IOrder[]) => {
+export const updateOrder = async (bot: IBot) => {
     try {
+        const orders = await Order.find({
+            bot: bot._id,
+            base: bot.base,
+            ccy: bot.ccy,
+        }).exec();
         let lastOrder: IOrder | null = orders[orders.length - 1];
-        let isClosed = lastOrder?.is_closed == true;
+        let isClosed = !lastOrder || lastOrder?.is_closed == true;
         const plat = bot.platform == "bybit" ? new Bybit(bot) : new OKX(bot);
-        console.log(orders.length);
 
         if (
             orders.length &&
             (lastOrder.side == "buy" || lastOrder.order_id.length) &&
             !lastOrder.is_closed
         ) {
-            /* If last order [ currentOrder ] is not yet closed */
             isClosed = lastOrder.is_closed;
             let isSellOrder = lastOrder.order_id.length > 0;
 
@@ -93,41 +97,7 @@ export const updateOrder = async (bot: IBot, orders: IOrder[]) => {
                         isClosed = _isClosed;
                         lastOrder.order_id = res.id;
                     } else {
-                        /* Cancel if there's buyCondition  */
                         botLog(bot, "SELL ORDER NOT FILLED");
-                        /* const klines = await plat.getKlines({
-                            end: Date.now() - bot.interval * 60 * 1000,
-                        });
-
-                        if (!klines) return console.log("FAILED TO GET KLINES");
-
-                        const df = chandelierExit(
-                            heikinAshi(parseKlines(klines), [bot.base, bot.ccy])
-                        );
-
-                        botLog(bot, "CHECKING BUY_SIGNAL...");
-                        const currentCandle = df[df.length - 1];
-                        const strategy = objStrategies[bot.strategy - 1];
-
-                        console.log(currentCandle);
-                        if (strategy.buyCond(currentCandle)) { */
-                        if (!isStopOrder) {
-                            botLog(bot, "CANCELLING SELL ORDER...");
-                            const res = await plat.cancelOrder({ ordId: oid });
-                            if (!res) {
-                                botLog(bot, "FAILED TO CANCEL SELL ORDER");
-                                return;
-                            }
-                            botLog(bot, "CLEARING SELL ORDER_ID...");
-                            lastOrder.order_id = "";
-                            lastOrder.sell_timestamp = undefined;
-                            lastOrder.sell_price = 0;
-                            await lastOrder.save();
-                            botLog(bot, "ORDER_ID CLEARED");
-                            return "ok";
-                        }
-
-                        /* } */
                     }
                 } else {
                     /* BUY ORDER SECTIONS */
@@ -147,54 +117,10 @@ export const updateOrder = async (bot: IBot, orders: IOrder[]) => {
                         lastOrder.ccy_amt = res.fillSz * res.fillPx;
                         lastOrder.side = "sell";
                         lastOrder.buy_timestamp = ts;
-                    } else {
-                        /* Cancel if there's sellCondition  */
-                        if (!isStopOrder) {
-                            botLog(bot, "BUY ORDER NOT FILLED...");
-                            const klines = await plat.getKlines({
-                                end: Date.now() - bot.interval * 60 * 1000,
-                            });
-
-                            if (!klines)
-                                return console.log("FAILED TO GET KLINES");
-
-                            const df = chandelierExit(
-                                heikinAshi(parseKlines(klines), [
-                                    bot.base,
-                                    bot.ccy,
-                                ])
-                            );
-
-                            botLog(bot, "CHECKING SELL_SIGNAL...");
-                            const currentCandle = df[df.length - 1];
-                            const strategy = objStrategies[bot.strategy - 1];
-
-                            console.log(currentCandle);
-                            if (strategy.sellCond(currentCandle)) {
-                                botLog(bot, "CANCELLING BUY ORDER...");
-                                const res = await plat.cancelOrder({
-                                    ordId: oid,
-                                });
-                                if (!res) {
-                                    botLog(bot, "FAILED TO CANCEL BUY ORDER");
-                                    return;
-                                }
-                                botLog(bot, "DELETING ORDER...");
-                                botLog(bot, `Orders: ${bot.orders.length}`);
-                                bot.orders = bot.orders.filter(
-                                    (el) =>
-                                        el.toString() !=
-                                        lastOrder!._id.toString()
-                                );
-                                botLog(bot, `Orders: ${bot.orders.length}`);
-                                await Order.findByIdAndDelete(lastOrder!._id);
-                                await bot.save();
-                                botLog(bot, "ORDER DELETED");
-                                return "ok";
-                            }
-                        }
                     }
-                    /*  } */
+                }
+                if (res == "live") {
+                    return res;
                 }
             } else {
                 botLog(bot, "Order check error");
@@ -314,20 +240,51 @@ export const placeTrade = async ({
         if (side == "buy") {
             /* CRAETING A NEW BUY ORDER */
             order.buy_order_id = orderId;
+
+            if (order_type == "Market") {
+                /* KEEP CHECKING BUY ORDER TILL FILLED */
+                let _filled = false;
+                while (!_filled) {
+                    await sleep(5000);
+                    botLog(bot, "CHECKING MARKET BUY ORDER...");
+                    const res = await plat.getOrderbyId(orderId);
+
+                    if (!res) {
+                        _filled = true;
+                        return botLog(bot, "FAILED TO CHECK MARKET BUY ORDER");
+                    }
+                    if (res != "live") {
+                        _filled = true;
+                        const ts = {
+                            ...order.buy_timestamp,
+                            o: parseDate(new Date(res.fillTime)),
+                        };
+                        console.log("TS", JSON.stringify(ts));
+                        const fee = res.fee;
+                        let base_amt = res.fillSz;
+                        order.buy_order_id = res.id;
+                        order.buy_price = res.fillPx;
+                        order.buy_fee = Math.abs(fee);
+                        order.base_amt = base_amt;
+                        order.ccy_amt = res.fillSz * res.fillPx;
+                        order.side = "sell";
+                        order.buy_timestamp = ts;
+                    }
+                }
+            }
         } else {
             /* CREATING A SELL ORDER */
 
             order.order_id = orderId;
             order.sell_timestamp = { i: ts };
-            //order.sell_fee = Number(useBybit ? (mOrder as AccountOrderV5).cumExecFee : (mOrder as any).fee);
             order.sell_price = price!;
-            //order.base_amt = amt;
             order.side = side;
         }
 
         await order.save();
         await bot.save();
         botLog(bot, `${side} order placed, Bot updated`);
+        if (side == 'buy') return order
     } catch (error) {
         console.log(error);
         return;

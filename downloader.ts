@@ -85,8 +85,8 @@ const dld = async ({
                 const month = platNm == 'okx' ? (year < 2022 ? '07' : '01') : '01'
                 let klines = await plat.getKlines({
                     symbol: symb,
-                    start: Date.parse(`${year}-${month}-01 00:00:00 GMT+2`),
-                    end: Date.parse(`${year}-12-31 23:59:00 GMT+2`),
+                    start: Date.parse(`${year}-${month}-01 00:00:00+02:00`),
+                    end: Date.parse(`${year}-12-31 23:59:00+02:00`),
                     interval,
                     savePath: klinesPath,
                 });
@@ -148,11 +148,11 @@ dld({platNm: 'binance'})
 
 
 async function test() {
-    /* const klines = await bin.getKlines("SOLUSDT", undefined, Date.parse("2024-06-04 14:47:00 GMT+2"))
+    /* const klines = await bin.getKlines("SOLUSDT", undefined, Date.parse("2024-06-04 14:47:00+02:00"))
     console.log(chandelierExit(heikinAshi(parseKlines(klines!)))[klines!.length - 1]) */
 }
-//downloader({platNm: 'okx',symbol: 'SOL/USDT', start: '2024-07-07 00:00:00 GMT+2', end: '2024-10-20 23:59:00 GMT+2', interval: 15})
+//downloader({platNm: 'okx',symbol: 'SOL/USDT', start: '2024-07-07 00:00:00+02:00', end: '2024-10-20 23:59:00+02:00', interval: 15})
 
-const fp = "src/data/klines/binance/SOL-USDT_15m_2024-05-01 00 00 00 GMT+2_2024-06-11 23 59 00 GMT+2.json"
-const saveFp = "src/data/dfs/binance/SOL-USDT_15m_2024-05-01 00 00 00 GMT+2_2024-06-11 23 59 00 GMT+2.json"
+const fp = "src/data/klines/binance/SOL-USDT_15m_2024-05-01 00 00 00+02:00_2024-06-11 23 59 00+02:00.json"
+const saveFp = "src/data/dfs/binance/SOL-USDT_15m_2024-05-01 00 00 00+02:00_2024-06-11 23 59 00+02:00.json"
 //klinesToDf(fp, saveFp)

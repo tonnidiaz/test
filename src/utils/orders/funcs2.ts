@@ -15,7 +15,6 @@ import { OKX } from "@/classes/okx";
 import { Bybit } from "@/classes/bybit";
 import { botLog } from "../functions";
 import { objStrategies } from "@/strategies";
-import { isStopOrder } from "../constants";
 
 export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     const plat = bot.platform == "okx" ? new OKX(bot) : new Bybit(bot);
@@ -25,13 +24,12 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     });
 
     if (!klines) return console.log("FAILED TO GET KLINES");
-    console.log(`\n[${bot.name}]\tCHECKING SIGNALS...\n`);
 
     const df = chandelierExit(
         heikinAshi(parseKlines(klines), [bot.base, bot.ccy])
     );
     const row = df[df.length - 1];
-    botLog(bot, 'CANDLE');
+    botLog(bot, "CANDLE");
     console.log(row);
     const ts = new Date(
         Date.parse(row.ts) + bot.interval * 60 * 1000
@@ -45,7 +43,7 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
         base: bot.base,
         ccy: bot.ccy,
     }).exec();
-    
+
     const order = orders.length ? orders[orders.length - 1] : null;
     const isClosed = order?.is_closed;
 
@@ -72,36 +70,31 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
             price: entryLimit,
             plat: plat,
         });
-    } else if (!isClosed && order?.side == "sell" && order?.order_id == "") {
-        botLog(bot, 'CHECK TO SEE IF CAN PLACE ORDER...')
-        if (isStopOrder || strategy.sellCond(row)) {
-            /**
-             * Place sell order
-             */
-            const exitLimit = calcTP(row, order.buy_price);
-            const sl = calcSL(order.buy_price);
+
+        if (res) {
+            botLog(bot, "PLACING ALGO SELL ORDER...");
+            const tp = calcTP(row, res.buy_price);
+            const sl = calcSL(res.buy_price);
             console.log({
                 c: row.c,
                 o: row.o,
-                entry: order.buy_price,
-                exitLimit,
+                entry: res.buy_price,
+                exitLimit: tp,
                 sl,
             });
 
-            if (order) {
-                console.log(`[ ${bot.name} ]\tHAS SELL SIGNAL > GOING OUT`);
-                const amt = order.base_amt - order.buy_fee;
-                const res = await placeTrade({
-                    bot: bot,
-                    ts: parseDate(ts),
-                    amt: Number(amt),
-                    side: "sell",
-                    price: exitLimit,
-                    plat: plat,
-                    sl,
-                });
-            }
+            const amt = res.base_amt - res.buy_fee;
+            await placeTrade({
+                bot: bot,
+                ts: parseDate(ts),
+                amt: Number(amt),
+                side: "sell",
+                price: tp,
+                plat: plat,
+                sl,
+            });
+
+            botLog(bot, "ALGO ORDER PLACED. WAITING FOR NEXT ROUND!")
         }
     }
-    /* ------ START ---------- */
 };

@@ -276,3 +276,6 @@ export function getPricePrecision(baseCcy: string[], plat: "bybit" | "okx") {
         Number(instru[plat == "bybit" ? "minPricePrecision" : "tickSz"])
     );
 }
+export const sleep = async (ms: number) => {
+    await new Promise((res) => setTimeout(res, ms));
+};

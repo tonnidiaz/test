@@ -83,7 +83,7 @@ io.on("connection", (client) => {
                 start = start ?? parseDate(new Date());
                 const year = start.split("-")[0];
                 const pth =
-                    "src/data/klines/binance/SOL-USDT_5m_2023-01-01 00 00 00 GMT+2_2023-10-31 23 59 00 GMT+2.json";
+                    "src/data/klines/binance/SOL-USDT_5m_2023-01-01 00 00 00+02:00_2023-10-31 23 59 00+02:00.json";
                 klinesPath = test
                     ? tuPath(pth)
                     : tuPath(

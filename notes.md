@@ -41,9 +41,8 @@
     - Check if filled
     - Place ALGO SELL order
         - sl @ SL
-        - tp @ 100%
-        - Store _tp = TP
+        - tp @ TP
 - NEXT: 
     - Check if SL order was filled in prevRow and update pos
     - Or check if tp and tp order was filled
-    - Or update algo order to place tp order at 
+    - Update and continue

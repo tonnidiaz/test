@@ -1,30 +1,10 @@
 import { IBot } from "@/models/bot";
-import { TestBinance } from "./test-binance";
 import { Bot, Order } from "@/models";
 import { cancelJob, rescheduleJob } from "node-schedule";
-import { getJob, placeTrade, updateOrder } from "@/utils/orders/funcs";
-import {
-    calcEntryPrice,
-    calcSL,
-    calcTP,
-    chandelierExit,
-    heikinAshi,
-    parseDate,
-    parseKlines,
-} from "@/utils/funcs2";
+import { getJob, updateOrder } from "@/utils/orders/funcs";
 
-import { objStrategies, strategies } from "@/strategies";
-import { IOrder } from "@/models/order";
-import {
-    P_DIFF,
-    botJobSpecs,
-    isStopOrder,
-    slPercent,
-    test,
-} from "@/utils/constants";
-import { botLog, getCoinPrecision } from "@/utils/functions";
-import { Bybit } from "./bybit";
-import { OKX } from "./okx";
+import { botJobSpecs, test } from "@/utils/constants";
+import { botLog } from "@/utils/functions";
 import { afterOrderUpdate } from "@/utils/orders/funcs2";
 
 export class OrderPlacer {
@@ -39,11 +19,17 @@ export class OrderPlacer {
     async checkPlaceOrder() {
         const bot = await Bot.findById(this.bot._id).exec();
         if (!bot) return;
-        const plat = bot.platform == "bybit" ? new Bybit(bot) : new OKX(bot);
-        try {
-            const now = new Date();
-            const currMin = now.getMinutes();
+        const now = new Date();
+        const currMin = now.getMinutes();
 
+        const prodTimeCond =
+            bot.active &&
+            currMin % bot.interval == 0 &&
+            (this.lastCheckAt
+                ? `${this.lastCheckAt?.getHours()}:${this.lastCheckAt?.getMinutes()}` !=
+                  `${now.getHours()}:${now.getMinutes()}`
+                : true);
+        try {
             const mTest =
                 test &&
                 (
@@ -59,29 +45,35 @@ export class OrderPlacer {
                     `[ ${bot.name} ]\tCURR_MIN: [${currMin}]\tTEST: ${mTest}\n`
                 );
 
-            const prodTimeCond =
-                bot.active &&
-                currMin % bot.interval == 0 &&
-                (this.lastCheckAt
-                    ? `${this.lastCheckAt?.getHours()}:${this.lastCheckAt?.getMinutes()}` !=
-                      `${now.getHours()}:${now.getMinutes()}`
-                    : true);
-
             if (mTest || prodTimeCond) {
                 this.lastCheckAt = new Date();
                 cancelJob(getJob(bot._id.toString())!.job);
 
-                const job = getJob(`${bot._id}`)!;
-                if (job.active) {
-                    await afterOrderUpdate({ bot: bot });
-                }
-                if (job.active) {
-                    rescheduleJob(job.job, botJobSpecs(bot.interval));
-                    botLog(bot, "JOB RESUMED");
+                if (bot.active) {
+                    const res = await updateOrder(bot);
+                    if (!res) {
+                        return botLog(
+                            bot,
+                            "DID NOT GO ON WITH PROCESS SINCE COULD NOT UPDATE ORDER"
+                        );
+                    } else if (res != "live") {
+                        await afterOrderUpdate({ bot: bot });
+                    } else {
+                        botLog(bot, "[LIVE] ORDER NOT YET FILLED");
+                    }
                 }
             }
         } catch (err) {
             console.log(err);
+        } finally {
+            if (prodTimeCond) {
+                const job = getJob(`${bot._id}`)!;
+                const _bot = await Bot.findById(bot._id).exec();
+                if (_bot?.active) {
+                    rescheduleJob(job.job, botJobSpecs(_bot.interval));
+                    botLog(_bot, "JOB RESUMED");
+                }
+            }
         }
     }
 }
