@@ -36,39 +36,30 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var okx_1 = require("@/classes/okx");
-var test_binance_1 = require("@/classes/test-binance");
 var models_1 = require("@/models");
 var constants_1 = require("@/utils/constants");
-var funcs_1 = require("@/utils/funcs");
+var funcs_1 = require("@/utils/orders/funcs");
 var funcs2_1 = require("@/utils/funcs2");
 var functions_1 = require("@/utils/functions");
 var fs_1 = require("fs");
-var years = [2022, 2023, 2024, 2020], symbols = ["AVAX/USDT"], intervals = [15];
+var test_binance_1 = require("@/classes/test-binance");
+var test_platforms_1 = require("@/classes/test-platforms");
+var years = [2024], symbols = ['SOL'], intervals = [15, 5];
+symbols = symbols.map(function (el) { return "".concat(el, "/USDT"); });
 function downloader(_a) {
-    var symbol = _a.symbol, start = _a.start, end = _a.end, interval = _a.interval;
+    var symbol = _a.symbol, start = _a.start, end = _a.end, interval = _a.interval, _b = _a.platNm, platNm = _b === void 0 ? 'binance' : _b;
     return __awaiter(this, void 0, void 0, function () {
-        var symbArr, fname, fpath, useOkx, bin, bot, okx, plat, klines;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
+        var symbArr, fname, fpath, plat;
+        return __generator(this, function (_c) {
+            switch (_c.label) {
                 case 0:
-                    console.log("Downloading...");
                     symbArr = symbol.split("/");
                     fname = "".concat(symbArr.join('-'), "_").concat(interval, "m_").concat(start, "_").concat(end, ".json").replace(/[\/|\\:*?"<>]/g, " ");
                     console.log(fname);
-                    fpath = (0, funcs2_1.tuPath)("".concat(constants_1.klinesDir, "/").concat(fname));
+                    fpath = (0, funcs2_1.tuPath)("".concat(constants_1.klinesRootDir, "/").concat(platNm, "/").concat(fname));
                     (0, funcs_1.ensureDirExists)(fpath);
-                    useOkx = false;
-                    symbol = useOkx ? symbArr.join("-") : symbArr.join("");
-                    bin = new test_binance_1.TestBinance();
-                    bot = new models_1.Bot({
-                        name: "TBOT",
-                        base: symbArr[0],
-                        ccy: symbArr[1],
-                        interval: interval,
-                    });
-                    okx = new okx_1.OKX(bot);
-                    plat = useOkx ? okx : bin;
+                    symbol = platNm == 'okx' ? symbArr.join("-") : symbArr.join("");
+                    plat = platNm == 'okx' ? new test_platforms_1.TestOKX() : platNm == 'bybit' ? new test_platforms_1.TestBybit() : new test_binance_1.TestBinance();
                     return [4 /*yield*/, plat.getKlines({
                             symbol: symbol,
                             start: Date.parse(start),
@@ -77,7 +68,7 @@ function downloader(_a) {
                             savePath: fpath
                         })];
                 case 1:
-                    klines = _b.sent();
+                    _c.sent();
                     console.log("DONE DOWNLOADING KLINES");
                     return [2 /*return*/];
             }
@@ -85,9 +76,9 @@ function downloader(_a) {
     });
 }
 var dld = function (_a) {
-    var _b = _a.parse, parse = _b === void 0 ? false : _b, _c = _a.useOkx, useOkx = _c === void 0 ? true : _c;
+    var _b = _a.parse, parse = _b === void 0 ? false : _b, _c = _a.platNm, platNm = _c === void 0 ? 'binance' : _c;
     return __awaiter(void 0, void 0, void 0, function () {
-        var bin, _i, years_1, year, _d, symbols_1, symb, _e, intervals_1, interval, msymb, fname, klinesPath, dfsPath, bot, okx, plat, klines, df;
+        var bin, _i, years_1, year, _d, symbols_1, symb, _e, intervals_1, interval, msymb, fname, klinesPath, dfsPath, bot, plat, month, klines, df;
         return __generator(this, function (_f) {
             switch (_f.label) {
                 case 0:
@@ -109,10 +100,10 @@ var dld = function (_a) {
                     interval = intervals_1[_e];
                     console.log("\nDownloading ".concat(symb, ", ").concat(year, ", ").concat(interval, "m\n"));
                     msymb = symb.split("/");
-                    symb = useOkx ? msymb.join("-") : msymb.join("");
+                    symb = platNm == 'okx' ? msymb.join("-") : msymb.join("");
                     fname = "".concat(symb, "_").concat(interval, "m.json");
-                    klinesPath = "".concat(constants_1.klinesDir, "/").concat(year, "/").concat(fname);
-                    dfsPath = "".concat(constants_1.dfsDir, "/").concat(year, "/").concat(fname);
+                    klinesPath = "".concat(constants_1.klinesRootDir, "/").concat(platNm, "/").concat(year, "/").concat(fname);
+                    dfsPath = "".concat(constants_1.dfsRootDir, "/").concat(platNm, "/").concat(year, "/").concat(fname);
                     (0, funcs_1.ensureDirExists)(klinesPath);
                     bot = new models_1.Bot({
                         name: "TBOT",
@@ -120,11 +111,11 @@ var dld = function (_a) {
                         ccy: msymb[1],
                         interval: interval,
                     });
-                    okx = new okx_1.OKX(bot);
-                    plat = useOkx ? okx : bin;
+                    plat = platNm == 'okx' ? new test_platforms_1.TestOKX() : platNm == 'bybit' ? new test_platforms_1.TestBybit() : new test_binance_1.TestBinance();
+                    month = platNm == 'okx' ? (year < 2022 ? '07' : '01') : '01';
                     return [4 /*yield*/, plat.getKlines({
                             symbol: symb,
-                            start: Date.parse("".concat(year, "-01-01 00:00:00 GMT+2")),
+                            start: Date.parse("".concat(year, "-").concat(month, "-01 00:00:00 GMT+2")),
                             end: Date.parse("".concat(year, "-12-31 23:59:00 GMT+2")),
                             interval: interval,
                             savePath: klinesPath,
@@ -132,7 +123,7 @@ var dld = function (_a) {
                 case 4:
                     klines = _f.sent();
                     if (parse && klines) {
-                        df = (0, funcs2_1.chandelierExit)((0, funcs2_1.heikinAshi)((0, funcs2_1.parseKlines)(klines)));
+                        df = (0, funcs2_1.chandelierExit)((0, funcs2_1.heikinAshi)((0, funcs2_1.parseKlines)(klines), [bot.base, bot.ccy]));
                         (0, funcs_1.ensureDirExists)(dfsPath);
                         (0, fs_1.writeFileSync)(dfsPath, JSON.stringify(df));
                     }
@@ -170,7 +161,7 @@ var createDf = function (year, interval, symb) { return __awaiter(void 0, void 0
             return [2 /*return*/];
         }
         klines = (0, functions_1.readJson)(klinesPath);
-        df = (0, funcs2_1.chandelierExit)((0, funcs2_1.heikinAshi)((0, funcs2_1.parseKlines)(klines)));
+        df = (0, funcs2_1.chandelierExit)((0, funcs2_1.heikinAshi)((0, funcs2_1.parseKlines)(klines), []));
         (0, funcs_1.ensureDirExists)(dfsPath);
         (0, fs_1.writeFileSync)(dfsPath, JSON.stringify(df));
         return [2 /*return*/];
@@ -184,7 +175,7 @@ var klinesToDf = function (fp, saveFp) { return __awaiter(void 0, void 0, void 0
             return [2 /*return*/];
         }
         klines = (0, functions_1.readJson)(fp);
-        df = (0, funcs2_1.chandelierExit)((0, funcs2_1.heikinAshi)((0, funcs2_1.parseKlines)(klines)));
+        df = (0, funcs2_1.chandelierExit)((0, funcs2_1.heikinAshi)((0, funcs2_1.parseKlines)(klines), []));
         (0, funcs_1.ensureDirExists)(saveFp);
         (0, fs_1.writeFileSync)(saveFp, JSON.stringify(df));
         console.log("DONE WRITING DF");
@@ -203,8 +194,8 @@ function afterKlines() {
         }
     }
 }
-//dld({useOkx: false})
-createDf(2024, 15, "AVAXUSDT");
+//dld({platNm: 'okx'}) 
+//createDf(2024,15,"SOLUSDT")
 //afterKlines()
 function test() {
     return __awaiter(this, void 0, void 0, function () {
@@ -213,7 +204,7 @@ function test() {
         });
     });
 }
-//downloader({symbol: 'SUI/USDT', start: '2023-01-01 00:00:00 GMT+2', end: '2023-10-31 23:59:00 GMT+2', interval: 5})
+downloader({ symbol: 'SOL/USDT', start: '2024-07-07 00:00:00 GMT+2', end: '2024-10-20 23:59:00 GMT+2', interval: 15 });
 var fp = "src/data/klines/binance/SOL-USDT_15m_2024-05-01 00 00 00 GMT+2_2024-06-11 23 59 00 GMT+2.json";
 var saveFp = "src/data/dfs/binance/SOL-USDT_15m_2024-05-01 00 00 00 GMT+2_2024-06-11 23 59 00 GMT+2.json";
 //klinesToDf(fp, saveFp)

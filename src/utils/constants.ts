@@ -9126,20 +9126,32 @@ export const instruments = [
     },
 ];
 export let jobs: { job: Job; id: string; active: boolean }[] = [];
-export const setJobs = (val: typeof jobs)=> jobs = val;
+export const setJobs = (val: typeof jobs) => (jobs = val);
 export const test = false;
-export const botJobSpecs = (min: number)=> min == 60 ? '0 * * * *' : `*/${min} * * * *`// = test ? "*/10 * * * * *" : "* * * * * *";
+export const botJobSpecs = (min: number) =>
+    min == 60 ? "0 * * * *" : `*/${min} * * * *`; // = test ? "*/10 * * * * *" : "* * * * * *";
 export const dfsDir = "src/data/dfs/binance",
     klinesDir = "src/data/klines/binance";
-export const dfsRootDir = "src/data/dfs",
-    klinesRootDir = "src/data/klines";
+
 export const MAKER_FEE_RATE = 0.1 / 100;
 export const TAKER_FEE_RATE = 0.1 / 100,
     P_DIFF = 0.0 / 100;
 export const slPercent = 0.5 / 100,
     minDiff = 0;
 export const platforms = ["bybit", "okx"];
+export const dfsRootDir = "src/data/dfs",
+    klinesRootDir = "src/data/klines";
 export const isMarket = true,
-    cancelOnCond = true,
-    useHaClose = false, demo = true,
-    isStopOrder = true;
+    cancelOnCond = false,
+    useHaClose = true,
+    demo = true,
+    isStopOrder = false,
+    useSwindLow = false,
+    noFees = false,
+    usePricePc = false,
+    useCurrRow = true, useProdPercs = false;
+
+export let SL = useProdPercs ? .03 : .01//0.03//0.05; //.25//.5,
+export let TP = useProdPercs ? 1.5 : 1.7//1.5//2//1.5; // 3.5//5.3
+export const setSL = (v: number) => (SL = v);
+export const setTP = (v: number) => (TP = v);

@@ -4,10 +4,16 @@ import {
     SL,
     TAKER_FEE_RATE,
     TP,
+    cancelOnCond,
     isMarket,
+    isStopOrder,
     noFees,
+    slPercent,
+    useCurrRow,
+    useHaClose,
     useSwindLow,
 } from "@/utils/constants";
+import { calcEntryPrice, calcSL, calcTP } from "@/utils/funcs2";
 import {
     getCoinPrecision,
     getPricePrecision,
@@ -49,6 +55,7 @@ export const strategy = ({
     console.log("CE_SMA: BEGIN BACKTESTING...\n");
     let entry: number = 0,
         entryLimit: number | null = null,
+        exitLimit: number | null = null,
         tp: number | null = null,
         base: number = 0,
         sl: number | null = null,
@@ -72,6 +79,7 @@ export const strategy = ({
     for (let i = d + 1; i < df.length; i++) {
         const prevRow = df[i - 1],
             row = df[i];
+        //let _bal = balance; // * (90/100)
 
         console.log(`\nTS: ${row.ts}`);
         _cnt += 1;
@@ -99,49 +107,96 @@ export const strategy = ({
                 (_cnt = ret._cnt);
             enterTs = row.ts;
             tp = toFixed(entry * (1 + TP / 100), pricePrecision);
+            //tp = balance * (1 + TP / 100)
+            //tp /= base
+            // nb = bal * (1+tp)
+            // nb = base * x
             sl = toFixed(entry * (1 - SL / 100), pricePrecision);
+
+            //skip = true;
             buyFees += ret.fee;
         };
-        if (pos) {
-            console.log("HAS SL OR TP");
-            if (pos && sl && sl <= entry && prevRow.l <= sl) {
-                exit = toFixed(sl, pricePrecision);
-                console.log("FILL @ SL");
-                exit = toFixed(exit, pricePrecision);
-                const ret = fillSellOrder({
-                    exitLimit: tp,
-                    exit,
-                    prevRow: prevRow,
+
+        if (!pos && entryLimit) {
+            if (prevRow.l <= entryLimit) {
+                entry = toFixed(entryLimit, pricePrecision);
+                const ret = fillBuyOrder({
                     entry,
-                    base,
-                    balance,
-                    pricePrecision,
-                    enterTs,
-                    gain,
-                    maker,
-                    loss,
-                    cnt,
-                    mData,
-                    pos,
-                    sl,
-                    tp,
+                    prevRow: row,
                     entryLimit,
+                    enterTs,
+                    taker,
+                    base,
+                    balance, //: _bal,
+                    basePrecision,
+                    mData: { ...mData },
+                    pos,
                 });
-                w = 0;
-                l += 1;
-                _fillSellOrder(ret);
-            } 
-            else if (pos && tp && prevRow.h >= tp) {
+                _fillBuyOrder(ret);
+            }
+        }
+        const theRow = useCurrRow ? row : prevRow;
+        if (pos && (sl || tp)) {
+            console.log("HAS SL OR TP");
+            if (pos && sl && sl <= entry /*  && sl <= prevRow.h */) {
                 /* FILL SL ORDER IF ANY */
-                    console.log('FILL @ TP');
-                    const _market = false
-                    exit = _market ? row.o : tp;
+                let goOn = false;
+                if (theRow.o <= sl) {
+                    exit = theRow.o;
+                    goOn = true;
+                } else if (theRow.o > sl && theRow.l <= sl) {
+                    exit = sl;
+                    goOn = true;
+                }
+
+                if (goOn) {
+                    console.log("FILL @ SL");
+                    exit = toFixed(exit, pricePrecision);
+                    const ret = fillSellOrder({
+                        exitLimit: tp,
+                        exit,
+                        prevRow: theRow,
+                        entry,
+                        base,
+                        balance,
+                        pricePrecision,
+                        enterTs,
+                        gain,
+                        maker,
+                        loss,
+                        cnt,
+                        mData,
+                        pos,
+                        sl,
+                        tp,
+                        entryLimit,
+                    });
+                    w = 0;
+                    l += 1;
+                    _fillSellOrder(ret);
+                }
+            }
+            if (pos && tp) {
+                /* FILL SL ORDER IF ANY */
+
+                let goOn = false;
+
+                if (theRow.o >= tp) {
+                    exit = theRow.o;
+                    goOn = true;
+                } else if (theRow.o < tp && theRow.h >= tp) {
+                    exit = tp;
+                    goOn = true;
+                }
+
+                if (goOn) {
+                    console.log("FILL @ TP");
                     exit = toFixed(exit, pricePrecision);
                     const ret = fillSellOrder({
                         exitLimit: sl,
                         exit,
                         maker,
-                        prevRow,
+                        prevRow: theRow,
                         //bal,
                         entry,
                         base,
@@ -160,15 +215,39 @@ export const strategy = ({
                     l = 0;
                     w += 1;
                     _fillSellOrder(ret);
-                
+                }
             }
         }
-  
+        6;
+        if (skip) {
+            skip = false;
+            continue;
+            /* console.log(`\nSKIP: ${enterTs == prevRow.ts}`);
+            if (1) {
+                const isSl = exit == sl;
+                console.log(`IS_SL: ${isSl}`);
+                const filled = isSl ? row.l <= exit : exit <= row.h;
+                console.log({ l: row.l, sl, exit, h: row.h });
+                console.log(`[${prevRow.ts}]\tFILLED: ${filled}`);
+                skip = !filled;
+                pos = !filled
+            }
+            console.log("\n");
+            if (skip) continue; */
+        }
         console.log(`\nLOSS" ${l}\n`);
+
+        /*  if (l >= 10 && c < 10 && !pos){
+                console.log("WAIT A COUPLE OF CANDLES...");
+                c += 1
+                continue
+            }
+            c = 0 */
         if (!pos && buyCond(prevRow)) {
             /* PLACE MARKET BUY ORDER */
             entryLimit = isMarket ? row.o : prevRow.ha_c;
             entryLimit = toFixed(entryLimit!, pricePrecision);
+            //entry = entryLimit;
             enterTs = row.ts;
 
             if (isMarket) {
@@ -190,9 +269,28 @@ export const strategy = ({
                 _fillBuyOrder(ret);
             } else {
                 console.log(`[ ${row.ts} ] Limit buy order at ${entryLimit}`);
-              
+                /* if (row.l <= entryLimit) {
+                    entry = entryLimit > row.h ? row.h : entryLimit;
+                    //balance -= _bal;
+                    const ret = fillBuyOrder({
+                        entry,
+                        prevRow,
+                        entryLimit,
+                        enterTs,
+                        taker,
+                        base,
+                        balance, //: _bal,
+                        basePrecision,
+                        mData: { ...mData },
+                        pos,
+                    });
+                    _fillBuyOrder(ret);
+                } */
             }
-        }
+        } /* else if (pos && sellCond(prevRow, entry)) {
+            //enterTs = row.ts
+            //exitLimit = prevRow.sma_20
+        } */
     }
 
     const oKeys = Object.keys(mData.data);

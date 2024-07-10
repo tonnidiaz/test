@@ -7,11 +7,11 @@ class MACD_ONLY extends Strategy {
     desc: string = `Enters: macd > 0  \n  Exit:  macd < 0`;
 
     buyCond(row: IObj): boolean {
-        return row.macd > row.signal && row.c < row.bb_lower;
+        return row.macd > 0;
     }
 
     sellCond(row: IObj): boolean {
-        return row.macd < row.signal && row.c > row.bb_upper;
+        return row.macd < 0;
     }
 }
 class MACD_EXT extends Strategy {
@@ -19,15 +19,27 @@ class MACD_EXT extends Strategy {
     desc: string = `Enters: macd > 0  \n  Exit:  macd < 0`;
 
     buyCond(row: IObj): boolean {
-        return row.hist > 0 && row.c > row.o;
+        return row.macd > 0 && row.c > row.o;
     }
 
     sellCond(row: IObj): boolean {
-        return row.hist < 0 && row.c < row.o
+        return row.macd < 0 && row.c < row.o
     }
 }
 
+class MACD_MA extends Strategy {
+    name: string = "MACD_MA";
+    desc: string = `Enter: macd > 0 && sma20 >  sma50, Exit: oposite`;
 
+    buyCond(row: IObj): boolean {
+        return row.macd > 0 && row.sma_20 > row.sma_50;
+    }
+
+    sellCond(row: IObj): boolean {
+        const cond = row.macd < 0 && row.sma_20 < row.sma_50;
+        return cond;
+    }
+}
 class MA_ONLY extends Strategy {
     name: string = "MA_ONLY";
     desc: string = `Enter: sma20 >  sma50, Exit: oposite `;
@@ -38,20 +50,6 @@ class MA_ONLY extends Strategy {
 
     sellCond(row: IObj): boolean {
         return row.sma_20 < row.sma_50;
- 
-    }
-}
-
-class MACD_MA extends Strategy {
-    name: string = "MACD_MA";
-    desc: string = `Enter: macd > 0 && sma20 >  sma50, Exit: oposite`;
-
-    buyCond(row: IObj): boolean {
-        return MACD_EXT.prototype.buyCond(row) && MA_ONLY.prototype.buyCond(row)
-    }
-
-    sellCond(row: IObj): boolean {
-        return MACD_EXT.prototype.sellCond(row) && MA_ONLY.prototype.sellCond(row)
     }
 }
 class SMA_EXT extends Strategy {
@@ -102,25 +100,12 @@ class CE_MACD extends Strategy {
     name: string = "CE_MACD";
     desc: string = "JUST A CE";
     buyCond(row: IObj): boolean {
-        return CE_ONLY.prototype.buyCond(row) || MACD_EXT.prototype.buyCond(row);
+        return CE_ONLY.prototype.buyCond(row) || MACD_ONLY.prototype.buyCond(row);
     }
 
     sellCond(row: IObj): boolean {
         return (
-            CE_ONLY.prototype.sellCond(row) || MACD_EXT.prototype.sellCond(row)
-        );
-    }
-}
-class MA_RSI extends Strategy {
-    name: string = "MA_RSI";
-    desc: string = "JUST A CE";
-    buyCond(row: IObj): boolean {
-        return MA_ONLY.prototype.buyCond(row) || RSI_ONLY.prototype.buyCond(row);
-    }
-
-    sellCond(row: IObj): boolean {
-        return (
-            MA_ONLY.prototype.sellCond(row) || RSI_ONLY.prototype.sellCond(row)
+            CE_ONLY.prototype.sellCond(row) || MACD_ONLY.prototype.sellCond(row)
         );
     }
 }
@@ -128,12 +113,12 @@ class RITA extends Strategy {
     name: string = "RITA";
     desc: string = "JUST A CE";
     buyCond(row: IObj): boolean {
-        return  (CE_ONLY.prototype.buyCond(row) || RSI_ONLY.prototype.buyCond(row) || MA_ONLY.prototype.buyCond(row))// || RSI_ONLY.prototype.buyCond(row))
+        return  (CE_ONLY.prototype.buyCond(row) && RSI_ONLY.prototype.buyCond(row) && MA_ONLY.prototype.buyCond(row))// || RSI_ONLY.prototype.buyCond(row))
     }
 
     sellCond(row: IObj): boolean {
         return(
-            (CE_ONLY.prototype.sellCond(row) || RSI_ONLY.prototype.sellCond(row) || MA_ONLY.prototype.sellCond(row))// || RSI_ONLY.prototype.sellCond(row)
+            (CE_ONLY.prototype.sellCond(row) && RSI_ONLY.prototype.sellCond(row) && MA_ONLY.prototype.sellCond(row))// || RSI_ONLY.prototype.sellCond(row)
         );
     }
 }
@@ -153,11 +138,11 @@ class HL_HA extends Strategy {
     name: string = "HL_HA";
     desc: string = "JUST A CE";
     buyCond(row: IObj): boolean {
-        return row.ha_c > row.ha_o// || RSI_ONLY.prototype.buyCond(row)
+        return row.ha_c > row.ha_o;
     }
 
     sellCond(row: IObj): boolean {
-        return row.ha_c < row.ha_o// || RSI_ONLY.prototype.sellCond(row)
+        return row.ha_c < row.ha_o;
     }
 }
 
@@ -170,7 +155,6 @@ export const strategies = [
     new CE_ONLY(),
     new CE_MA(),
     new CE_MACD(),
-    new MA_RSI(),
     new RITA(),
     new HL(), new HL_HA()
 ];

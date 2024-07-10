@@ -17,10 +17,15 @@ import { platforms } from "./consts";
 
 const corsOptions: CorsOptions = { origin: "*" };
 const io = new Server({ cors: corsOptions }); // yes, no server arg here; it's not required
+let prevData: IObj | null = null
 // attach stuff to io
 io.on("connection", (client) => {
     console.log(`${client.id} CONNECTED`);
 
+    if (prevData){
+        io.emit('backtest', prevData)
+        //prevData = null
+    }
     io.emit("event", "This is event");
     client.on("event", (d) => {
         console.log(d);
@@ -51,8 +56,10 @@ io.on("connection", (client) => {
                 useFile,
                 file,
                 isParsed,
+                clId
             } = data;
-console.log('ON BACKTEST');
+            console.log("ON BACKTEST");
+            prevData = null
             const startTs = Date.parse(start),
                 endTs = Date.parse(end);
 
@@ -62,7 +69,7 @@ console.log('ON BACKTEST');
             client.emit("backtest", "Getting klines...");
 
             const plat = platforms[platform].obj;
-            const platName = platforms[platform].name
+            const platName = platforms[platform].name;
             let symbol: string =
                 plat instanceof TestOKX ? baseCcy.join("-") : baseCcy.join("");
             console.log(symbol);
@@ -108,13 +115,16 @@ console.log('ON BACKTEST');
             if (offline && !useFile)
                 console.log(`\nKLINES_PATH: ${klinesPath!}\n`);
             if (useFile) console.log(`\nUse file\n`);
-            client.emit("backtest", "Analyzing data...");
+            
             klines =
                 useFile && file
                     ? JSON.parse(file.toString("utf-8"))
                     : offline
-                    ? readJson(klinesPath!)
+                    ? (await require(klinesPath!))
                     : klines;
+                console.log({startTs, m: Number(klines[0][0]), endTs});
+            klines = klines.filter(el=> startTs <= Number(el[0]) && Number(el[0]) <= endTs)
+            client.emit("backtest", "Analyzing data...");
             klines = isParsed && useFile ? klines : parseKlines(klines);
             let df = chandelierExit(
                 isHa && useFile ? klines : heikinAshi(klines, baseCcy)
@@ -142,7 +152,7 @@ console.log('ON BACKTEST');
                 df,
                 balance: bal,
                 lev,
-                pair: baseCcy, 
+                pair: baseCcy,
                 pGain,
                 maker: plat.maker,
                 taker: plat.taker,
@@ -152,15 +162,12 @@ console.log('ON BACKTEST');
                 getPricePrecision(baseCcy, platName as any)
             );
             retData = { ...retData, base: baseCcy[0], ccy: baseCcy[1] };
-            const orders = retData.data;
-            for (let ts of Object.keys(orders)) {
-                retData.data[ts]["ts"] = parseDate(
-                    new Date(Date.parse(ts) + interval * 0 * 1000)
-                );
-                // retData.data[ts]['enterTs'] = parseDate(new Date(Date.parse(retData.data[ts]['enterTs'] ) + interval * 60 * 1000))
-            }
-            console.log(`PROFIT: ${retData.profit}`);
-            client.emit("backtest", { data: retData });
+        
+            console.log(`TRADES: ${retData.trades}`);
+            console.log(`PROFIT: ${retData.profit}\n`);
+            retData = { data: retData, clId }
+            prevData = retData
+            io.emit("backtest", retData );
             return retData;
         } catch (e: any) {
             console.log(e.response?.data ?? e);
@@ -199,7 +206,7 @@ console.log('ON BACKTEST');
             client.emit("test-candles", "Getting klines...");
 
             const plat = platforms[platform].obj;
-            const platName = platforms[platform].name
+            const platName = platforms[platform].name;
             let symbol: string =
                 plat instanceof TestOKX ? baseCcy.join("-") : baseCcy.join("");
             console.log(symbol);
@@ -251,7 +258,7 @@ console.log('ON BACKTEST');
                     : klines;
             klines = parseKlines(klines);
 
-            let df =chandelierExit(heikinAshi(klines, baseCcy));
+            let df = chandelierExit(heikinAshi(klines, baseCcy));
             if (offline && !useFile) {
                 // Return oly df from startTs to endTs
                 console.log(df[0]);
@@ -269,11 +276,25 @@ console.log('ON BACKTEST');
                     ts: ts,
                     sma_20: el.sma_20,
                     sma_50: el.sma_50,
-                    std: { o: el.o, h: el.h, l: el.l, c: el.c },
+                    std: {
+                        o: el.o,
+                        h: el.h,
+                        l: el.l,
+                        c: el.c,
+                        macd: el.macd,
+                        signal: el.signal,
+                        hist: el.hist,
+                        sma_20: el.sma_20,
+                        sma_50: el.sma_50,
+                    },
                     ha: { o: el.ha_o, h: el.ha_h, l: el.ha_l, c: el.ha_c },
                 };
             });
-            client.emit("test-candles", { data: retData, symbol: baseCcy, interval });
+            client.emit("test-candles", {
+                data: retData,
+                symbol: baseCcy,
+                interval,
+            });
             return retData;
         } catch (e: any) {
             console.log(e.response?.data ?? e);

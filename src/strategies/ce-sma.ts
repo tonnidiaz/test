@@ -13,6 +13,18 @@ export class RSI_ONLY extends Strategy {
         return row.rsi > 100 - fastRSI
     }
 }
+export class ANY extends Strategy {
+    name: string = "ANY";
+    desc: string = `Enter: macd > 0 && sma20 >  sma50, Exit: oposite`;
+
+    buyCond(row: IObj): boolean {
+        return true
+    }
+
+    sellCond(row: IObj): boolean {
+        return true
+    }
+}
 class BB_SMA extends Strategy {
     name: string = "BB_SMA";
     desc: string = `Enter: macd > 0 && sma20 >  sma50, Exit: oposite`;
@@ -44,4 +56,4 @@ class ThreeSum extends Strategy {
     }
 }
 
-export const strategies = [new RSI_ONLY(),]// [ new BB_SMA(), new ThreeSum()];
+export const strategies = [new RSI_ONLY(), new ANY()]// [ new BB_SMA(), new ThreeSum()];

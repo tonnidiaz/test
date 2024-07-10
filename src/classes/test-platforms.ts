@@ -82,99 +82,98 @@ export class TestOKX extends Platform {
         savePath?: string | undefined;
         isBybit?: boolean;
     }) {
-        const client = new RestClientV5();
-        end = end ?? Date.now();
-        let klines: any[] = [];
-        let cnt = 0;
-        console.log(
-            `[ ${isBybit ? "ByBit" : this.name} ] \t GETTING KLINES.. FOR ` +
-                symbol
-        );
+        
+            const client = new RestClientV5();
+            end = end ?? Date.now();
+            let klines: any[] = [];
+            let cnt = 0;
+            console.log(
+                `[ ${
+                    isBybit ? "ByBit" : this.name
+                } ] \t GETTING KLINES.. FOR ` + symbol
+            );
 
-        if (start) {
-            start =
-                (isBybit ? start : start - interval * 60 * 1000) -
-                20 * interval * 60000; /* ACCORDING TO RETURNED DATA */
-        }
+            if (start) {
+                start =
+                    (isBybit ? start : start - interval * 60 * 1000) -
+                    20 * interval * 60000; /* ACCORDING TO RETURNED DATA */
+            }
 
-        if (start) {
-            let firstTs = start;
-            while (firstTs <= end) {
-                console.log(`GETTING ${cnt + 1} KLINES...`);
-                const limit = 100;
-                const after = firstTs + (limit - 1) * interval * 60 * 1000;
-                console.log(
-                    `Before: ${parseDate(
-                        new Date(firstTs)
-                    )} \t After: ${parseDate(new Date(after))}`
-                );
-                console.log("GETTING MARK PRICE");
-                const res = isBybit
-                    ? await client.getKline({
+            if (start) {
+                let firstTs = start;
+                while (firstTs <= end) {
+                    console.log(`GETTING ${cnt + 1} KLINES...`);
+                    const limit = 100;
+                    const after = firstTs + (limit - 1) * interval * 60 * 1000;
+                    console.log(
+                        `Before: ${parseDate(
+                            new Date(firstTs)
+                        )} \t After: ${parseDate(new Date(after))}`
+                    );
+                    console.log("GETTING MARK PRICE");
+                    const res = isBybit
+                        ? await client.getKline({
+                              category: "spot",
+                              symbol,
+                              interval: interval as any,
+                              start: firstTs,
+                          })
+                        : await this.client.getHistoricCandles(
+                              symbol,
+                              getInterval(interval, "okx"),
+                              {
+                                  before: `${firstTs}`,
+                                  after: `${after}`,
+                                  limit: `${limit}`,
+                              }
+                          );
+                    const data = isBybit
+                        ? (res as any).result.list
+                        : (res as Candle[]);
+                    if (!data.length) break;
+                    klines.push(...[...data].reverse());
+
+                    firstTs = Number(data[0][0]) + interval * 60 * 1000;
+                    console.log(new Date(firstTs).toISOString());
+                    if (savePath) {
+                        ensureDirExists(savePath);
+                        writeFileSync(savePath, JSON.stringify(klines));
+                        console.log("Saved");
+                    }
+                    cnt += 1;
+                }
+            } else {
+                const res = await (isBybit
+                    ? client.getKline({
                           category: "spot",
                           symbol,
                           interval: interval as any,
-                          start: firstTs,
+                          start,
+                          end,
                       })
-                    : await this.client.getHistoricCandles(
+                    : this.client.getHistoricCandles(
                           symbol,
                           getInterval(interval, "okx"),
                           {
-                              before: `${firstTs}`,
-                              after: `${after}`,
-                              limit: `${limit}`,
+                              before: start ? `${start}` : undefined,
+                              after: end ? `${end}` : undefined,
                           }
-                      );
+                      ));
                 const data = isBybit
                     ? (res as any).result.list
                     : (res as Candle[]);
-                if (!data.length) break;
-                klines.push(...[...data].reverse());
-
-                firstTs = Number(data[0][0]) + interval * 60 * 1000;
-                console.log(new Date(firstTs).toISOString());
-                if (savePath) {
-                    ensureDirExists(savePath);
-                    writeFileSync(savePath, JSON.stringify(klines));
-                    console.log("Saved");
-                }
-                cnt += 1;
+                klines = [...data].reverse();
             }
-        } else {
-            const res = await (isBybit
-                ? client.getKline({
-                      category: "spot",
-                      symbol,
-                      interval: interval as any,
-                      start,
-                      end,
-                  })
-                : this.client.getHistoricCandles(
-                      symbol,
-                      getInterval(interval, "okx"),
-                      {
-                          before: start ? `${start}` : undefined,
-                          after: end ? `${end}` : undefined,
-                      }
-                  ));
-            const data = isBybit ? (res as any).result.list : (res as Candle[]);
-            klines = [...data].reverse();
-        }
 
-        let d = [...klines];
-        console.log(d[d.length - 1]);
-        return d;
+            let d = [...klines];
+            console.log(d[d.length - 1]);
+            return d;
+        
     }
 }
 
 export class TestBybit extends Platform {
     name: string = "ByBit";
-    client: RestClientV5;
-
-    constructor() {
-        super();
-        this.client = new RestClientV5();
-    }
     async getKlines({
         start,
         end,

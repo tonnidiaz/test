@@ -16,9 +16,9 @@ import { readJson } from "@/utils/functions";
 import { existsSync, writeFileSync } from "fs";
 import { TestBinance } from "@/classes/test-binance";
 import { TestBybit, TestOKX } from "@/classes/test-platforms";
-let years = [2021,2022,2023,2024],
-    symbols = [ 'UMA', 'PEOPLE', 'DOGE'],
-    intervals = [60];
+let years = [2021],
+    symbols = [ 'UMA'],
+    intervals = [1];
 symbols = symbols.map(el=> `${el}/USDT`)
 
 async function downloader({
@@ -151,7 +151,7 @@ async function test() {
     /* const klines = await bin.getKlines("SOLUSDT", undefined, Date.parse("2024-06-04 14:47:00 GMT+2"))
     console.log(chandelierExit(heikinAshi(parseKlines(klines!)))[klines!.length - 1]) */
 }
-//downloader({symbol: 'SOL/USDT', start: '2024-06-15 00:00:00 GMT+2', end: '2024-06-20 23:59:00 GMT+2', interval: 15})
+//downloader({platNm: 'okx',symbol: 'SOL/USDT', start: '2024-07-07 00:00:00 GMT+2', end: '2024-10-20 23:59:00 GMT+2', interval: 15})
 
 const fp = "src/data/klines/binance/SOL-USDT_15m_2024-05-01 00 00 00 GMT+2_2024-06-11 23 59 00 GMT+2.json"
 const saveFp = "src/data/dfs/binance/SOL-USDT_15m_2024-05-01 00 00 00 GMT+2_2024-06-11 23 59 00 GMT+2.json"

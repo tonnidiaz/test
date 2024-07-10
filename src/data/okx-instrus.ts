@@ -1,4 +1,5 @@
-export const okxInstrus = [
+export const okxInstrus = 
+[
     {
         "alias": "",
         "baseCcy": "BTC",

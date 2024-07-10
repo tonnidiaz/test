@@ -134,8 +134,7 @@ export const strategy = ({
             else if (pos && tp && prevRow.h >= tp) {
                 /* FILL SL ORDER IF ANY */
                     console.log('FILL @ TP');
-                    const _market = false
-                    exit = _market ? row.o : tp;
+                    exit = tp//row.o;
                     exit = toFixed(exit, pricePrecision);
                     const ret = fillSellOrder({
                         exitLimit: sl,

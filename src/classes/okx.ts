@@ -236,7 +236,7 @@ export class OKX {
             }
         } else {
             const res = await this.client.getCandles(
-                symbol,
+                 symbol,
                 getInterval(interval, "okx"),
                 {
                     before: start ? `${start}` : undefined,

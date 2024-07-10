@@ -1,3 +1,5 @@
 # Plans and ideas
 
-- For accurate tests, scrape ha data from tradingview using pinescript
+- Enter a position using half of portfolio
+- Exit pos and add the funds made back to portfolio
+- Repeat with new amount

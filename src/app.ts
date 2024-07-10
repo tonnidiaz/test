@@ -99,7 +99,7 @@ const main = async ()=>{
     for (let bot of activeBots){
         await addBotJob(bot)
     }
-    new MainOKX()
+    //new MainOKX()
 }
 
 main()

@@ -1,11 +1,12 @@
 import fs from "fs";
 import { IObj } from "./interfaces";
 const fp = "src/data/klines/binance/2021/DOGEUSDT_15m.json";
-import { atr, ema, rsi, sma, bollingerBands } from "indicatorts";
+import { atr, ema, rsi, sma, bollingerBands, macd } from "indicatorts";
 import path from "path";
 import { getPricePrecision, toFixed } from "./functions";
-import { P_DIFF, isStopOrder, useHaClose } from "./constants";
+import { P_DIFF, SL, TP, isStopOrder, useHaClose } from "./constants";
 import { OrderDetails } from "okx-api";
+import pd from 'node-pandas'
 
 const ddNum = (e: any) => {
     e = `${e}`.trim();
@@ -69,13 +70,45 @@ export const heikinAshi = (df: IObj[], pair: string[]) => {
     })) as IObj[];
 };
 
-export const tuMacd = (df: IObj[]) => {
+const tuMacd2 = (df: IObj[]) => {
+    const def = false;
+    const fast = def ? 12 : 12, // 1,//12,
+        slow = def ? 26 : 25, //26,
+        signal = def ? 9 : 10; //9;
+
+    const prices = df.map((el) => el[useHaClose ? "ha_c" : "c"]);
+
+    const _macd = macd(prices, { slow, signal, fast });
+    const histogram: number[] = [];
+    for (let i = 0; i < _macd.macdLine.length; i++)
+        histogram.push(_macd.macdLine[i] - _macd.signalLine[i]);
+    return { ..._macd, histogram };
+    /* let shortEMA = ema(prices, { period: fast });
+    let longEMA = ema(prices, { period: slow });
+    let macdLine: number[] = [];
+
+    for (let i = 0; i < prices.length; i++) {
+        macdLine.push(shortEMA[i] - longEMA[i]);
+    }
+    let signalLine = ema(macdLine, { period: signal });
+    let histogram: number[] = [];
+    for (let i = 0; i < macdLine.length; i++) {
+        histogram.push(macdLine[i] - signalLine[i]);
+    }
+    return {
+        macdLine: macdLine,
+        signalLine: signalLine,
+        histogram: histogram,
+    }; */
+};
+const tuMacd = (df: IObj[]) => {
     const closings = df.map((el) => el[useHaClose ? "ha_c" : "c"]);
-    const fastLen = 1, //12,//10, //2,//5, //26
-        slowLen = 2, //26,//58, //7//13,//100
-        signalLen = 2; //9//8; //6
-    const smaSrc: string = "sma";
-    const smaSignal: string = "sma";
+    const fastLen = 12, //10, //2,//5, //26
+        slowLen = 26, //58, //7//13,//100
+        signalLen = 9; //8; //6
+
+    const smaSrc: string = "ema";
+    const smaSignal: string = "ema";
 
     const fastMa =
         smaSrc == "sma"
@@ -99,7 +132,7 @@ export const tuMacd = (df: IObj[]) => {
 };
 //export const chandelierExit = (df: IObj[], mult = 1.8, atrLen = 1) => {
 export const chandelierExit = (df: IObj[]) => {
-    const mult = 1.4,
+    const mult = 1.2,
         atrLen = 1;
     const highs = df.map((e) => e[useHaClose ? "ha_h" : "c"]);
     const lows = df.map((e) => e[useHaClose ? "ha_l" : "c"]);
@@ -109,14 +142,17 @@ export const chandelierExit = (df: IObj[]) => {
 
     const ATR = atr(highs, lows, closings, { period: atrLen });
     const _atr = ATR.atrLine;
-    const rsiLen = 1,
-        fastLen = 15 /* 15 */,
+    const rsiLen = 2,
+        fastLen = 20 /* 15 */,
         slowLen = 50; /* 50 */
 
     const sma20 = ema(closings, { period: fastLen });
     const sma50 = ema(closings, { period: slowLen }); /* TODO: 4 */
     const _rsi = rsi(closings, { period: rsiLen });
+    const bb = bollingerBands(closings, { period: 20 });
     let sir = 1;
+
+    const { histogram, macdLine, signalLine } = tuMacd2(df);
 
     for (let i = 0; i < df.length; i++) {
         const ceClosings = closings.slice(i - atrLen, i);
@@ -129,6 +165,14 @@ export const chandelierExit = (df: IObj[]) => {
         df[i].sma_20 = sma20[i];
         df[i].sma_50 = sma50[i];
         df[i]["rsi"] = _rsi[i];
+        df[i].bb_lower = bb.lower[i];
+        df[i].bb_upper = bb.upper[i];
+
+        /* MACD */
+        df[i].hist = histogram[i];
+        df[i].macd = macdLine[i];
+        df[i].signal = signalLine[i];
+        /* END MACD */
         if (i > 0) {
             const lsp = pdf.long_stop;
             const ssp = pdf.short_stop;
@@ -147,7 +191,6 @@ export const chandelierExit = (df: IObj[]) => {
         }
     }
 
-    df = tuMacd(df);
     console.log("CE DONE");
     return df.map((el) => el);
 };
@@ -158,10 +201,12 @@ export const calcEntryPrice = (row: IObj, side: "buy" | "sell") => {
 };
 
 //export const calcSL = (entry: number) => entry * (1 - 0.1 / 100);
-export const calcSL = (entry: number) => entry * (1 - 0.05 / 100);
+export const calcSL = (entry: number) => {
+    return entry * (1 - SL / 100);
+};
 export const calcTP = (row: any, entry: number) =>
     isStopOrder
-        ? entry * (1 + 3.5 / 100)
+        ? entry * (1 + TP / 100)
         : row[useHaClose ? "ha_c" : "c"] * (1 - 0.0 / 100);
 export const getInterval = (m: number, plt: "bybit" | "okx" | "binance") => {
     return plt == "okx"
