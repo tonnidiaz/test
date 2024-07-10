@@ -110,8 +110,8 @@ export class OKX {
                           slTriggerPx: sl.toString(),
                           side,
                           sz: amt.toString(),
-                          tpOrdPx: price.toString(),
-                          slOrdPx: sl.toString(),
+                          tpOrdPx: this.bot.order_type == "Market" ? "-1" : price.toString(),
+                          slOrdPx: this.bot.order_type == "Market" ? "-1" : sl.toString(),
                           algoClOrdId: clOrderId,
                       });
 

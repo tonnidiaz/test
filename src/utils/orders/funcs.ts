@@ -241,7 +241,7 @@ export const placeTrade = async ({
             /* CRAETING A NEW BUY ORDER */
             order.buy_order_id = orderId;
 
-            if (order_type == "Market") {
+            if (true || order_type == "Market") {
                 /* KEEP CHECKING BUY ORDER TILL FILLED */
                 let _filled = false;
                 while (!_filled) {
