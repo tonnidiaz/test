@@ -110,8 +110,8 @@ export class OKX {
                           slTriggerPx: sl.toString(),
                           side,
                           sz: amt.toString(),
-                          tpOrdPx: this.bot.order_type == "Market" ? "-1" : price.toString(),
-                          slOrdPx: this.bot.order_type == "Market" ? "-1" : sl.toString(),
+                          tpOrdPx: this.bot.order_type == "Market" ? "-1" : (price * (1 - .01/100)).toString(),
+                          slOrdPx: this.bot.order_type == "Market" ? "-1" : (sl * (1 - .01/100)).toString(),
                           algoClOrdId: clOrderId,
                       });
 
@@ -148,7 +148,8 @@ export class OKX {
             if (DEV) {
                 console.log(res);
             }
-            if (isAlgo && res[0].state == "effective") {
+            if (isAlgo && (res[0].state == "effective")) {
+                botLog(this.bot, "IS_EFFECTIVE")
                 const res2 = (
                     await this.client.getOrderDetails({
                         instId: this.getSymbol(),
