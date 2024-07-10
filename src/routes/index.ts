@@ -40,11 +40,11 @@ router.get("/platforms", (req, res) => {
 router.get("/test", async (req, res) => {
     const { q, id, bs, cy } = req.query;
     const bot = new Bot({
-        base: bs ?? "PEOPLE",
+        base: bs ?? "UMA",
         ccy: cy ?? "USDT",
         name: "TBot",
-        platform: "bybit",
-        order_type: "Limit",
+        platform: "okx",
+        order_type: "Market",
     });
     const plat = bot.platform == "bybit" ? new Bybit(bot) : new OKX(bot);
     const side: string = "sell";
@@ -52,15 +52,16 @@ router.get("/test", async (req, res) => {
     const szPr = getCoinPrecision([bot.base, bot.ccy], "sell", bot.platform);
     let px = side == 'sell' ? 0.08973 : 0.08100; //0.07961
     let sz = side == "buy" ? 15 / px : 60;
-    const oid = "1709493118698786048";
+    const oid = "1615261603501297664";
     const sl = toFixed(0.08759, pxPr)//toFixed(px * (1 + ((side == 'sell' ? -.05/100 : .05/100))), pxPr)
     px = toFixed(px, pxPr);
     sz = toFixed(sz, szPr);
 
+
     const r =
         q == "place"
             ? await plat.placeOrder(sz, px, side as any, sl, Date.now().toString())
-            : await plat.getOrderbyId((id as any) ?? oid, false); //placeOrder(43.415972599999996, undefined, "sell")
+            : await plat.getOrderbyId((id as any) ?? oid, true); //placeOrder(43.415972599999996, undefined, "sell")
     console.log(r);
     res.json({});
 });

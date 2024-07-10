@@ -166,7 +166,7 @@ export class OKX {
                 botLog(this.bot, "[OKX Class] ORDER NOT YET FILLED");
                 return "live";
             }
-            console.log(finalRes);
+            console.log(this.bot.name, 'FINAL RES', finalRes);
             data = parseFilledOrder(finalRes);
 
             return data;
