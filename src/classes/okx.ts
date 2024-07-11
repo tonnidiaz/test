@@ -145,7 +145,7 @@ export class OKX {
                       ordId: orderId!,
                       instId: this.getSymbol(),
                   });
-            if (DEV) {
+            if (DEV || true) {
                 console.log(`DEV: ${this.bot.name}`);
                 console.log(res);
             }

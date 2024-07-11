@@ -38,7 +38,7 @@ router.get("/platforms", (req, res) => {
 });
 
 router.get("/test", async (req, res) => {
-    const { q, id, bs, cy } = req.query;
+    const { q, id, bs, cy, algoId } = req.query;
     const bot = new Bot({
         base: bs ?? "UMA",
         ccy: cy ?? "USDT",
@@ -56,12 +56,15 @@ router.get("/test", async (req, res) => {
     const sl = toFixed(0.08759, pxPr)//toFixed(px * (1 + ((side == 'sell' ? -.05/100 : .05/100))), pxPr)
     px = toFixed(px, pxPr);
     sz = toFixed(sz, szPr);
+    
+    const isAlgo = algoId ? true : false
+    const _id = (isAlgo ? algoId : id) ?? oid
 
 
     const r =
         q == "place"
             ? await plat.placeOrder(sz, px, side as any, sl, Date.now().toString())
-            : await plat.getOrderbyId((id as any) ?? oid, true); //placeOrder(43.415972599999996, undefined, "sell")
+            : await plat.getOrderbyId(_id as string, isAlgo); //placeOrder(43.415972599999996, undefined, "sell")
     console.log(r);
     res.json({});
 });
