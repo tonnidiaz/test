@@ -48,15 +48,17 @@ export const ensureDirExists = (filePath: string) => {
 
 export const updateOrder = async (bot: IBot) => {
     try {
-        const orders = await Order.find({
+        const orders =( await Order.find({
             bot: bot._id,
             base: bot.base,
             ccy: bot.ccy,
-        }).exec();
+        }).exec()).filter(el=> bot.orders.includes(el._id));
+
         let lastOrder: IOrder | null = orders[orders.length - 1];
         let isClosed = !lastOrder || lastOrder?.is_closed == true;
+        if (!lastOrder) return {isClosed, lastOrder}
+        
         const plat = bot.platform == "bybit" ? new Bybit(bot) : new OKX(bot);
-
         if (
             orders.length &&
             (lastOrder.side == "buy" || lastOrder.order_id.length) &&

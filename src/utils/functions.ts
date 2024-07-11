@@ -213,7 +213,7 @@ export const readJson = (fp: string) => {
 };
 
 export const botLog = (bot: IBot, data: any) => {
-    console.log(`\n[ ${bot.name} ]\t${data}\n`);
+    console.log(`\n[ ${bot.name} ]`, data, '\n');
 };
 
 export function capitalizeFirstLetter(string) {

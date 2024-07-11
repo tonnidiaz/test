@@ -152,5 +152,17 @@ router.post("/:id/edit", authMid, async (req, res) => {
         return tunedErr(res, 500, "Failed to edit bot");
     }
 });
+router.post("/:id/delete", authMid, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const bot = await Bot.findByIdAndDelete(id).exec();
+        if (!bot) return tunedErr(res, 400, "BOT NOT FOUND")
+        return res.send("BOT DELETED")
+    } catch (error) {
+        console.log(error);
+        return tunedErr(res, 500, "Failed to delete bot");
+    }
+});
 
 export default router;

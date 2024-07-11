@@ -51,7 +51,8 @@ export class OrderPlacer {
 
                 if (bot.active) {
                     const res = await updateOrder(bot);
-                    if (!res) {
+                   botLog(bot, res)
+                    if (!res) { 
                         return botLog(
                             bot,
                             "DID NOT GO ON WITH PROCESS SINCE COULD NOT UPDATE ORDER"
