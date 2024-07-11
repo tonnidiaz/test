@@ -6,6 +6,8 @@ import path from "path";
 import { P_DIFF, SL, TP, isStopOrder, useHaClose } from "./constants";
 import { OrderDetails } from "okx-api";
 import pd from "node-pandas";
+import { IBot } from "@/models/bot";
+import { Order } from "@/models";
 
 const ddNum = (e: any) => {
     e = `${e}`.trim();
@@ -19,7 +21,7 @@ const toISOString = (date: string) => {
         .map((el) => ddNum(el))
         .join(":");
     dateArr = dateArr[0].split("/");
-    date = `${dateArr[0]}-${ddNum(dateArr[1])}-${ddNum(dateArr[2])}`
+    date = `${dateArr[0]}-${ddNum(dateArr[1])}-${ddNum(dateArr[2])}`;
     return `${date} ${time}+02:00`;
 };
 export const parseDate = (date: Date | string) =>
@@ -220,4 +222,15 @@ export const parseFilledOrder = (finalRes: OrderDetails) => {
         fee: Number(finalRes.fee),
         fillTime: Number(finalRes.fillTime),
     };
+};
+
+export const findBotOrders = async (bot: IBot) => {
+    const orders = (
+        await Order.find({
+            bot: bot._id,
+            base: bot.base,
+            ccy: bot.ccy,
+        }).exec()
+    ).filter((el) => bot.orders.includes(el._id));
+    return orders;
 };

@@ -106,7 +106,7 @@ export const strategy = ({
         profit: number = 0;
 
     const pricePrecision = getPricePrecision(pair, "bybit");
-    const basePrecision = getCoinPrecision(pair, "sell", "bybit");
+    const basePrecision = getCoinPrecision(pair, "limit", "bybit");
     balance = toFixed(balance, pricePrecision);
     df = df.slice(20);
     candles = candles.slice(20);

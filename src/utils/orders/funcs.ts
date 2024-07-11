@@ -15,7 +15,7 @@ import {
     toFixed,
 } from "../functions";
 import { Bybit } from "@/classes/bybit";
-import { chandelierExit, heikinAshi, parseDate, parseKlines } from "../funcs2";
+import { chandelierExit, findBotOrders, heikinAshi, parseDate, parseKlines } from "../funcs2";
 import { objStrategies } from "@/strategies";
 
 export const getJob = (id: string) => jobs.find((el) => el.id == id);
@@ -48,11 +48,7 @@ export const ensureDirExists = (filePath: string) => {
 
 export const updateOrder = async (bot: IBot) => {
     try {
-        const orders =( await Order.find({
-            bot: bot._id,
-            base: bot.base,
-            ccy: bot.ccy,
-        }).exec()).filter(el=> bot.orders.includes(el._id));
+        const orders =await findBotOrders(bot)
 
         let lastOrder: IOrder | null = orders[orders.length - 1];
         let isClosed = !lastOrder || lastOrder?.is_closed == true;
@@ -156,11 +152,7 @@ export const placeTrade = async ({
     plat: Bybit | OKX;
 }) => {
     try {
-        const orders = await Order.find({
-            bot: bot._id,
-            base: bot.base,
-            ccy: bot.ccy,
-        }).exec();
+        const orders = await findBotOrders(bot)
 
         if (!amt) {
             /// GET THE QUOTE BALANCE AND USE 75 IF THIS IS FIRST ORDER
@@ -195,7 +187,7 @@ export const placeTrade = async ({
         sl = toFixed(sl ?? 0, pxPr);
         price = toFixed(price, pxPr);
         amt =
-            bot.order_type == "Market"
+            bot.order_type == "Market" || isStopOrder
                 ? amt
                 : side == "sell"
                 ? amt
@@ -204,7 +196,7 @@ export const placeTrade = async ({
             amt,
             getCoinPrecision(
                 [bot.base, bot.ccy],
-                order_type == "Limit" ? "sell" : side,
+                side == 'sell' ? 'limit' : 'market',
                 bot.platform
             )
         );
@@ -247,7 +239,7 @@ export const placeTrade = async ({
                 /* KEEP CHECKING BUY ORDER TILL FILLED */
                 let _filled = false;
                 while (!_filled) {
-                    await sleep(5000);
+                    await sleep(1000);
                     botLog(bot, "CHECKING MARKET BUY ORDER...");
                     const res = await plat.getOrderbyId(orderId);
 

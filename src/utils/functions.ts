@@ -238,7 +238,7 @@ export function precision(a: number) {
 
 export function getCoinPrecision(
     baseCcy: string[],
-    side: "buy" | "sell" = "sell",
+    oType: 'limit' | 'market',
     plat: "bybit" | "okx"
 ) {
     const instru: IObj | undefined =
@@ -253,10 +253,10 @@ export function getCoinPrecision(
     if (!instru) return 0;
     const pr =
         plat == "bybit"
-            ? side == "buy"
+            ? oType == "market"
                 ? instru.quotePrecision
                 : instru?.basePrecision
-            : side == "buy"
+            : oType == "market"
             ? instru.tickSz
             : instru.lotSz;
     return precision(Number(pr));

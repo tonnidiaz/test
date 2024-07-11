@@ -6,6 +6,7 @@ import { getJob, updateOrder } from "@/utils/orders/funcs";
 import { botJobSpecs, test } from "@/utils/constants";
 import { botLog } from "@/utils/functions";
 import { afterOrderUpdate } from "@/utils/orders/funcs2";
+import { findBotOrders } from "@/utils/funcs2";
 
 export class OrderPlacer {
     cnt: number = 0;
@@ -33,11 +34,7 @@ export class OrderPlacer {
             const mTest =
                 test &&
                 (
-                    await Order.find({
-                        bot: bot._id,
-                        base: bot.base,
-                        ccy: bot.ccy,
-                    }).exec()
+                    await findBotOrders(bot)
                 ).length <= 4;
 
             if (test || true)

@@ -1,20 +1,13 @@
 import { IBot } from "@/models/bot";
 import { ensureDirExists } from "@/utils/orders/funcs";
 import { getInterval, parseDate, parseFilledOrder } from "@/utils/funcs2";
-import { botLog, getCoinPrecision, getPricePrecision } from "@/utils/functions";
-import axios from "axios";
+import { botLog } from "@/utils/functions";
 import { writeFileSync } from "fs";
 import { RestClient, WebsocketClient } from "okx-api";
 import type {
-    AlgoOrderDetailsRequest,
-    AlgoOrderDetailsResult,
     OrderDetails,
 } from "okx-api";
-import { DEV, isStopOrder } from "@/utils/constants";
-import { Bot, Order } from "@/models";
-import { afterOrderUpdate } from "@/utils/orders/funcs2";
-import { Bybit } from "./bybit";
-import { IOrder } from "@/models/order";
+import { DEV } from "@/utils/constants";
 import { configDotenv } from "dotenv";
 configDotenv();
 
@@ -110,8 +103,14 @@ export class OKX {
                           slTriggerPx: sl.toString(),
                           side,
                           sz: amt.toString(),
-                          tpOrdPx: this.bot.order_type == "Market" ? "-1" : (price * (1 - .01/100)).toString(),
-                          slOrdPx: this.bot.order_type == "Market" ? "-1" : (sl * (1 - .01/100)).toString(),
+                          tpOrdPx:
+                              this.bot.order_type == "Market"
+                                  ? "-1"
+                                  : (price * (1 - 0.01 / 100)).toString(),
+                          slOrdPx:
+                              this.bot.order_type == "Market"
+                                  ? "-1"
+                                  : (sl * (1 - 0.01 / 100)).toString(),
                           algoClOrdId: clOrderId,
                       });
 
@@ -133,13 +132,13 @@ export class OKX {
             let data: {
                 id: string;
                 fillTime: number;
-                fillSz: number; 
+                fillSz: number;
                 fillPx: number;
                 fee: number;
             } | null = null;
             let finalRes: OrderDetails | null = null;
             console.log(this.bot.name, `IS_ALGO: ${isAlgo}`, orderId);
-            
+
             const res = isAlgo
                 ? await this.client.getAlgoOrderDetails({ algoId: orderId })
                 : await this.client.getOrderDetails({
@@ -147,31 +146,27 @@ export class OKX {
                       instId: this.getSymbol(),
                   });
             if (DEV) {
-                console.log(`DEV: ${this.bot.name}`)
+                console.log(`DEV: ${this.bot.name}`);
                 console.log(res);
             }
-            if (isAlgo && (res[0].state == "effective")) {
-                botLog(this.bot, "IS_EFFECTIVE")
-                const res2 = (
-                    await this.client.getOrderDetails({
-                        instId: this.getSymbol(),
-                        ordId: res[0].ordId,
-                    })
-                )[0];
-                finalRes = res2;
-            } else if (!isAlgo && res[0].state == "filled") {
-                finalRes = res[0];
+            if (isAlgo && res[0].state == "effective") {
+                botLog(this.bot, "IS_EFFECTIVE");
+                return await this.getOrderbyId(res[0].ordId);
+            } else if (!isAlgo) {
+                if (res[0].state == "live") return "live";
+                else if (res[0].state == "filled") finalRes = res[0];
             }
             if (!finalRes) {
                 botLog(this.bot, "[OKX Class] ORDER NOT YET FILLED");
                 return "live";
             }
-            console.log(this.bot.name, 'FINAL RES', finalRes);
+            console.log(this.bot.name, "FINAL RES", finalRes);
             data = parseFilledOrder(finalRes);
 
             return data;
-        } catch (error) {
+        } catch (error: any) {
             console.log(error);
+            if(isAlgo && error?.code == "51603") return await this.getOrderbyId(orderId);
         }
     }
 
@@ -239,7 +234,7 @@ export class OKX {
             }
         } else {
             const res = await this.client.getCandles(
-                 symbol,
+                symbol,
                 getInterval(interval, "okx"),
                 {
                     before: start ? `${start}` : undefined,
@@ -259,4 +254,3 @@ export class OKX {
         return `${this.bot.base}-${this.bot.ccy}`;
     }
 }
-

@@ -49,7 +49,7 @@ router.get("/test", async (req, res) => {
     const plat = bot.platform == "bybit" ? new Bybit(bot) : new OKX(bot);
     const side: string = "sell";
     const pxPr = getPricePrecision([bot.base, bot.ccy], bot.platform);
-    const szPr = getCoinPrecision([bot.base, bot.ccy], "sell", bot.platform);
+    const szPr = 2//getCoinPrecision([bot.base, bot.ccy], "sell", bot.platform);
     let px = side == 'sell' ? 0.08973 : 0.08100; //0.07961
     let sz = side == "buy" ? 15 / px : 60;
     const oid = "1615261603501297664";

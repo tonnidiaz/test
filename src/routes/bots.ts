@@ -155,10 +155,21 @@ router.post("/:id/edit", authMid, async (req, res) => {
 router.post("/:id/delete", authMid, async (req, res) => {
     try {
         const { id } = req.params;
-
-        const bot = await Bot.findByIdAndDelete(id).exec();
-        if (!bot) return tunedErr(res, 400, "BOT NOT FOUND")
-        return res.send("BOT DELETED")
+        const bot = await Bot.findById(id).exec()
+         if (!bot) return tunedErr(res, 400, "BOT NOT FOUND");
+         const orders = bot.orders
+        const _res = await Bot.findByIdAndDelete(id).exec();
+       
+        for (let oid of orders) {
+            console.log(oid);
+            const order = await Order.findById(oid);
+            if (order) {
+                console.log(`DELETING ORDER ` + oid);
+                await Order.findByIdAndRemove(oid).exec();
+                console.log("Order deleted");
+            }
+        }
+        return res.send("BOT DELETED");
     } catch (error) {
         console.log(error);
         return tunedErr(res, 500, "Failed to delete bot");

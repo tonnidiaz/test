@@ -4,6 +4,7 @@ import {
     calcSL,
     calcTP,
     chandelierExit,
+    findBotOrders,
     heikinAshi,
     parseDate,
     parseKlines,
@@ -36,13 +37,8 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     ).toISOString();
 
     const strategy = objStrategies[bot.strategy - 1];
-    botLog(bot, "STRATEGY:");
-    console.log(strategy);
-    const orders = await Order.find({
-        bot: bot._id,
-        base: bot.base,
-        ccy: bot.ccy,
-    }).exec();
+    botLog(bot, strategy);
+    const orders = await findBotOrders(bot);
 
     const order = orders.length ? orders[orders.length - 1] : null;
     const isClosed = order?.is_closed;
@@ -57,7 +53,7 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
             : bot.start_amt;
 
         const entryLimit = calcEntryPrice(row, "buy");
-        console.log({
+        botLog(bot, {
             c: row.c,
             o: row.o,
             entryLimit,
@@ -75,7 +71,7 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
             botLog(bot, "PLACING ALGO SELL ORDER...");
             const tp = calcTP(row, res.buy_price);
             const sl = calcSL(res.buy_price);
-            console.log({
+            botLog(bot, {
                 c: row.c,
                 o: row.o,
                 entry: res.buy_price,
@@ -94,7 +90,7 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
                 sl,
             });
 
-            botLog(bot, "ALGO ORDER PLACED. WAITING FOR NEXT ROUND!")
+            botLog(bot, "ALGO ORDER PLACED. WAITING FOR NEXT ROUND!");
         }
     }
 };

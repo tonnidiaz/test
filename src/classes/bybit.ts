@@ -4,8 +4,6 @@ import { parseDate } from "@/utils/funcs2";
 import {
     botLog,
     capitalizeFirstLetter,
-    getCoinPrecision,
-    getPricePrecision,
 } from "@/utils/functions";
 import { RestClientV5 } from "bybit-api";
 import { writeFileSync } from "fs";
