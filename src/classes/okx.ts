@@ -165,7 +165,8 @@ export class OKX {
 
             return data;
         } catch (error: any) {
-            console.log(error);
+            botLog(this.bot, "ERROR")
+            botLog(this.bot, error);
             if(isAlgo && error?.code == "51603") return await this.getOrderbyId(orderId);
         }
     }

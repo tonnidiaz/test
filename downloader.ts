@@ -16,9 +16,9 @@ import { readJson } from "@/utils/functions";
 import { existsSync, writeFileSync } from "fs";
 import { TestBinance } from "@/classes/test-binance";
 import { TestBybit, TestOKX } from "@/classes/test-platforms";
-let years = [2021, 2024 ],
-    symbols = [ 'UMA'],
-    intervals = [3];
+let years = [2021, 2023 ],
+    symbols = [ 'MEME', "NEAR"],
+    intervals = [5];
 symbols = symbols.map(el=> `${el}/USDT`)
 
 async function downloader({

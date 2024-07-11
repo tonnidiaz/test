@@ -90,7 +90,7 @@ export const fillSellOrder = ({
     entryLimit: number | null;
     pos: boolean;
 }) => {
-    //console.log({ balance,_bal, base, exitLimit, exit, entry, maker });
+    console.log({ exitLimit, exit, entry });
     //console.log(`MIKA: ${exit >= entry ? "gain" : "loss"}`);
     console.log("FILL SELL ORDER");
     balance = base * exit

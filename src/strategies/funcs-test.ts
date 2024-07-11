@@ -105,7 +105,9 @@ export const strategy = ({
         if (pos) {
             console.log("HAS SL OR TP");
             if (pos && sl && sl <= entry && prevRow.l <= sl) {
-                exit = toFixed(sl, pricePrecision);
+                const _market = false
+                    exit = _market ? row.o : prevRow.l//sl;
+                exit = toFixed(exit, pricePrecision);
                 console.log("FILL @ SL");
                 exit = toFixed(exit, pricePrecision);
                 const ret = fillSellOrder({

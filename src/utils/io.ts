@@ -115,14 +115,16 @@ io.on("connection", (client) => {
             if (offline && !useFile)
                 console.log(`\nKLINES_PATH: ${klinesPath!}\n`);
             if (useFile) console.log(`\nUse file\n`);
-            
+             console.log({start, end});
             klines =
                 useFile && file
                     ? JSON.parse(file.toString("utf-8"))
                     : offline
                     ? (await require(klinesPath!))
                     : klines;
+               
                 console.log({startTs, m: Number(klines[0][0]), endTs});
+                console.log({startTs: new Date(startTs), m: Number(klines[0][0]), endTs: new Date(endTs)});
             klines = klines.filter(el=> startTs <= Number(el[0]) && Number(el[0]) <= endTs)
             client.emit("backtest", "Analyzing data...");
             klines = isParsed && useFile ? klines : parseKlines(klines);
