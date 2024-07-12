@@ -279,3 +279,14 @@ export function getPricePrecision(baseCcy: string[], plat: "bybit" | "okx") {
 export const sleep = async (ms: number) => {
     await new Promise((res) => setTimeout(res, ms));
 };
+
+
+
+export const isSameDate = (d1: Date, d2: Date)=>{
+    const _d1 = d1.toISOString().split('T')
+    const _d1Date = _d1[0], _d1Time = _d1[1].slice(0, 5)
+
+    const _d2 = d2.toISOString().split('T')
+    const _d2Date = _d2[0], _d2Time = _d2[1].slice(0, 5)
+    return _d1Date == _d2Date && _d1Time == _d2Time
+}

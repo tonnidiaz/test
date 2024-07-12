@@ -3,6 +3,8 @@ import { ensureDirExists } from "@/utils/orders/funcs";
 import { getInterval, parseDate } from "@/utils/funcs2";
 import { botLog } from "@/utils/functions";
 import axios, { AxiosResponse } from "axios";
+import crypto from "crypto";
+
 import { writeFileSync } from "fs";
 import {
     RestClientV5,
@@ -55,7 +57,7 @@ export class TestOKX extends Platform {
     maker: number = 0.08 / 100;
     taker: number = 0.1 / 100;
     client: RestClient;
- flag: "1" | "0";
+    flag: "1" | "0";
     apiKey: string;
     apiSecret: string;
     passphrase: string;
@@ -95,93 +97,88 @@ export class TestOKX extends Platform {
         savePath?: string | undefined;
         isBybit?: boolean;
     }) {
-        
-            const client = new RestClientV5();
-            end = end ?? Date.now();
-            let klines: any[] = [];
-            let cnt = 0;
-            console.log(
-                `[ ${
-                    isBybit ? "ByBit" : this.name
-                } ] \t GETTING KLINES.. FOR ` + symbol
-            );
+        const client = new RestClientV5();
+        end = end ?? Date.now();
+        let klines: any[] = [];
+        let cnt = 0;
+        console.log(
+            `[ ${isBybit ? "ByBit" : this.name} ] \t GETTING KLINES.. FOR ` +
+                symbol
+        );
 
-            if (start) {
-                start =
-                    (isBybit ? start : start - interval * 60 * 1000) -
-                    20 * interval * 60000; /* ACCORDING TO RETURNED DATA */
-            }
+        if (start) {
+            start =
+                (isBybit ? start : start - interval * 60 * 1000) -
+                20 * interval * 60000; /* ACCORDING TO RETURNED DATA */
+        }
 
-            if (start) {
-                let firstTs = start;
-                while (firstTs <= end) {
-                    console.log(`GETTING ${cnt + 1} KLINES...`);
-                    const limit = 100;
-                    const after = firstTs + (limit - 1) * interval * 60 * 1000;
-                    console.log(
-                        `Before: ${parseDate(
-                            new Date(firstTs)
-                        )} \t After: ${parseDate(new Date(after))}`
-                    );
-                    console.log("GETTING MARK PRICE");
-                    const res = isBybit
-                        ? await client.getKline({
-                              category: "spot",
-                              symbol,
-                              interval: interval as any,
-                              start: firstTs,
-                          })
-                        : await this.client.getHistoricCandles(
-                              symbol,
-                              getInterval(interval, "okx"),
-                              {
-                                  before: `${firstTs}`,
-                                  after: `${after}`,
-                                  limit: `${limit}`,
-                              }
-                          );
-                    const data = isBybit
-                        ? (res as any).result.list
-                        : (res as Candle[]);
-                    if (!data.length) break;
-                    klines.push(...[...data].reverse());
-
-                    firstTs = Number(data[0][0]) + interval * 60 * 1000;
-                    console.log(new Date(firstTs).toISOString());
-                    if (savePath) {
-                        ensureDirExists(savePath);
-                        writeFileSync(savePath, JSON.stringify(klines));
-                        console.log("Saved");
-                    }
-                    cnt += 1;
-                }
-            } else {
-                const res = await (isBybit
-                    ? client.getKline({
+        if (start) {
+            let firstTs = start;
+            while (firstTs <= end) {
+                console.log(`GETTING ${cnt + 1} KLINES...`);
+                const limit = 100;
+                const after = firstTs + (limit - 1) * interval * 60 * 1000;
+                console.log(
+                    `Before: ${parseDate(
+                        new Date(firstTs)
+                    )} \t After: ${parseDate(new Date(after))}`
+                );
+                console.log("GETTING MARK PRICE");
+                const res = isBybit
+                    ? await client.getKline({
                           category: "spot",
                           symbol,
                           interval: interval as any,
-                          start,
-                          end,
+                          start: firstTs,
                       })
-                    : this.client.getHistoricCandles(
+                    : await this.client.getHistoricCandles(
                           symbol,
                           getInterval(interval, "okx"),
                           {
-                              before: start ? `${start}` : undefined,
-                              after: end ? `${end}` : undefined,
+                              before: `${firstTs}`,
+                              after: `${after}`,
+                              limit: `${limit}`,
                           }
-                      ));
+                      );
                 const data = isBybit
                     ? (res as any).result.list
                     : (res as Candle[]);
-                klines = [...data].reverse();
-            }
+                if (!data.length) break;
+                klines.push(...[...data].reverse());
 
-            let d = [...klines];
-            console.log(d[d.length - 1]);
-            return d;
-        
+                firstTs = Number(data[0][0]) + interval * 60 * 1000;
+                console.log(new Date(firstTs).toISOString());
+                if (savePath) {
+                    ensureDirExists(savePath);
+                    writeFileSync(savePath, JSON.stringify(klines));
+                    console.log("Saved");
+                }
+                cnt += 1;
+            }
+        } else {
+            const res = await (isBybit
+                ? client.getKline({
+                      category: "spot",
+                      symbol,
+                      interval: interval as any,
+                      start,
+                      end,
+                  })
+                : this.client.getHistoricCandles(
+                      symbol,
+                      getInterval(interval, "okx"),
+                      {
+                          before: start ? `${start}` : undefined,
+                          after: end ? `${end}` : undefined,
+                      }
+                  ));
+            const data = isBybit ? (res as any).result.list : (res as Candle[]);
+            klines = [...data].reverse();
+        }
+
+        let d = [...klines];
+        console.log(d[d.length - 1]);
+        return d;
     }
     async getTrades({
         start,
@@ -196,12 +193,12 @@ export class TestOKX extends Platform {
         savePath?: string | undefined;
         isBybit?: boolean;
     }) {
-        return []
-            /* const client = new RestClientV5();
+        try {
+            const client = new RestClientV5();
             end = end ?? Date.now();
             let trades: any[] = [];
             let cnt = 0;
-            const interval = 1
+            const interval = 1 / 100;
             console.log(
                 `[ ${
                     isBybit ? "ByBit" : this.name
@@ -209,56 +206,78 @@ export class TestOKX extends Platform {
             );
 
             if (start) {
-                let firstTs = start;
-                while (firstTs <= end) {
+                let endTs = end;
+                console.log(endTs, end);
+                while (endTs > start) {
                     console.log(`GETTING ${cnt + 1} TRADES...`);
                     const limit = 100;
-                    const after = firstTs + (limit - 1) * interval * 60 * 1000;
+                    //const after = firstTs + (limit - 1) * interval * 60 * 1000;
                     console.log(
                         `Before: ${parseDate(
-                            new Date(firstTs)
-                        )} \t After: ${parseDate(new Date(after))}`
+                            new Date(start)
+                        )} \t After: ${parseDate(new Date(endTs))}`
                     );
-                    const res = isBybit
-                        ? await client.getKline({
-                              category: "spot",
-                              symbol, 
-                              interval: interval as any,
-                              start: firstTs,
-                          })
-                        : await this.client.getHistoricTrades(
-                              symbol,
-                              {
-                                  before: `${firstTs}`,
-                                  after: `${after}`,
-                                  limit: `${limit}`,
-                                  type: '2'
-                              }
-                          );
+                    const res = await this.client.getHistoricTrades(symbol, {
+                        //before: `${firstTs}`,
+                        after: `${endTs}`,
+                        limit: `${limit}`,
+                        type: "2",
+                    });
                     const data = isBybit
                         ? (res as any).result.list
                         : (res as Trade[]);
                     if (!data.length) break;
-                    trades.push(...[...data].reverse());
+                    trades = [...trades, ...data];
 
-                    firstTs = Number(data[0].ts) + interval * 60 * 1000;
-                    console.log(new Date(firstTs).toISOString());
+                    endTs = Number(data[data.length - 1].ts);
+                    console.log("END_TS:");
+                    console.log(new Date(endTs).toISOString());
                     if (savePath) {
                         ensureDirExists(savePath);
                         writeFileSync(savePath, JSON.stringify(trades));
                         console.log("Saved");
                     }
+                    console.log(`DONE ${cnt}`);
                     cnt += 1;
                 }
             }
-            let d = [...trades];
-            console.log(d[d.length - 1]);
-            return d;
-         */
+            console.log("\nDONE GETTING ALL TRADES\n");
+            let d = [...trades.reverse()];
+            if (trades.length)
+                console.log({
+                    trades: {
+                        ...trades[0],
+                        ts: parseDate(new Date(Number(trades[0].ts))),
+                    },
+                });
+            return d.sort((a, b) => Number(a.ts) - Number(b.ts));
+        } catch (e) {
+            console.log(e);
+        }
     }
 }
 
 export class TestBybit extends Platform {
+    client: RestClientV5;
+    apiKey: string;
+    apiSecret: string;
+    constructor() {
+        super();
+        const apiKey = demo
+            ? process.env.BYBIT_API_KEY_DEV!
+            : process.env.BYBIT_API_KEY!;
+        const apiSecret = demo
+            ? process.env.BYBIT_API_SECRET_DEV!
+            : process.env.BYBIT_API_SECRET!;
+        this.apiKey = apiKey;
+        this.apiSecret = apiSecret;
+        this.client = new RestClientV5({
+            key: apiKey,
+            secret: apiSecret,
+            demoTrading: true,
+            //testnet: demo,
+        });
+    }
     name: string = "ByBit";
     async getKlines({
         start,
@@ -281,6 +300,114 @@ export class TestBybit extends Platform {
             symbol,
             isBybit: true,
         });
+    }
+
+    createSignature(apiKey, apiSecret, params) {
+        const paramString = Object.keys(params)
+            .sort()
+            .map((key) => `${key}=${encodeURIComponent(params[key])}`)
+            .join("&");
+
+        const timestamp = Date.now();
+        const prehashString = `${timestamp}${apiKey}5000${paramString}`;
+        const signature = crypto
+            .createHmac("sha256", apiSecret)
+            .update(prehashString)
+            .digest("hex");
+        const headers = {
+            "X-BAPI-API-KEY": apiKey,
+            "X-BAPI-SIGN": signature,
+            "X-BAPI-TIMESTAMP": timestamp,
+            "X-BAPI-RECV-WINDOW": 5000,
+        };
+        return headers;
+    }
+    async getTrades({
+        start,
+        end,
+        savePath,
+        symbol,
+    }: {
+        end?: number | undefined;
+        start?: number | undefined;
+        symbol: string;
+        savePath?: string | undefined;
+    }) {
+        try {
+            const rootURL = demo
+                ? "https://api-demo.bybit.com"
+                : "https://api.bybit.com";
+            end = end ?? Date.now();
+            let trades: any[] = [];
+            let cnt = 0;
+            const interval = 1 / 100;
+            console.log(`[ ${this.name} ] \t GETTING TRADES.. FOR ` + symbol);
+            console.log(symbol);
+            if (start) {
+                let endTs = end;
+                console.log(endTs, start);
+                let v = false;
+                while (!v /* endTs > start */) {
+                    console.log(`GETTING ${cnt + 1} TRADES...`);
+                    const limit = 100;
+                    //const after = firstTs + (limit - 1) * interval * 60 * 1000;
+                    console.log(
+                        `START: ${parseDate(
+                            new Date(start)
+                        )} \t END: ${parseDate(new Date(endTs))}`
+                    );
+
+                    const params = {category: "spot" , symbol, };
+                    const res = await axios.get(
+                        `${rootURL}/v5/execution/list`,
+                        {
+                            headers: this.createSignature(
+                                this.apiKey,
+                                this.apiSecret,
+                                params
+                            ),
+                            params,
+                        }
+                    );
+                    console.log(res.data);
+                    break;
+                    /*  if (res.retCode == 0){
+                        console.log(res.result.list);
+                    }else{
+                        console.log(res);
+                    }
+
+                    const data = res.result.list;
+
+                    if (!data.length) break;
+                    trades = [...trades, ...data.map(el=>({ts: el.execTime, px: Number(el.execPrice), sz: Number(el.execQty), side: el.side, symbol: el.symbol}))];
+
+                    endTs = Number(data[data.length - 1].execTime);
+                    console.log("START_TS:");
+                    console.log(new Date(endTs).toISOString());
+                    if (savePath) {
+                        ensureDirExists(savePath);
+                        writeFileSync(savePath, JSON.stringify(trades));
+                        console.log("Saved");
+                    }
+                    console.log(`DONE ${cnt}`);
+                    cnt += 1; */
+                }
+            }
+            console.log("\nDONE GETTING ALL TRADES\n");
+            let d = [...trades.reverse()];
+            if (trades.length)
+                console.log({
+                    trades: {
+                        ...trades[0],
+                        ts: parseDate(new Date(Number(trades[0].ts))),
+                    },
+                });
+            return d.sort((a, b) => Number(a.ts) - Number(b.ts));
+        } catch (e: any) {
+            console.log("ERROR\n");
+            console.log(e?.response?.statusText);
+        }
     }
 
     async getOBData() {

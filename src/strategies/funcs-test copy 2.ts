@@ -12,7 +12,6 @@ import { parseDate } from "@/utils/funcs2";
 import {
     getCoinPrecision,
     getPricePrecision,
-    isSameDate,
     toFixed,
 } from "@/utils/functions";
 import { IObj } from "@/utils/interfaces";
@@ -68,8 +67,11 @@ export const strategy = ({
     const pricePrecision = getPricePrecision(pair, "bybit");
     const basePrecision = getCoinPrecision(pair, "limit", "bybit");
     balance = toFixed(balance, pricePrecision);
- 
-    console.log({trades: {...trades[0], ts: parseDate(new Date(Number(trades[0].ts)))}});
+    //df = df.slice(20);
+    if (noFees) {
+        /* maker = 0.08/100, taker = 0.01/100 */
+    }
+    console.log(trades);
 
     for (let i = d + 1; i < df.length; i++) {
         //if (balance < 10) continue;
@@ -107,88 +109,14 @@ export const strategy = ({
         };
         if (pos) {
             console.log("HAS SL OR TP");
-            const slIndex = trades.findIndex(el=> {
-                const ts = Number(el.ts)
-                const date = new Date(ts)
-                const candleDate = new Date(prevRow.ts)
-                //console.log("\nSL_INDEX: ", {date, candleDate});
-                return Number(el.px) <= sl! && isSameDate(date, candleDate) } )
-            const tpIndex = trades.findIndex(el=> {
-                const ts = Number(el.ts)
-                const date = new Date(ts)
-                const candleDate = new Date(prevRow.ts)
-                //console.log("\nTP_INDEX: ", {date, candleDate});
-                return Number(el.px) >= tp! && isSameDate(date, candleDate) } )
-            
-            console.log({slIndex, tpIndex});
-            console.log(trades[slIndex], trades[tpIndex]);
 
-            const slFirst = slIndex != -1 && ( tpIndex == -1 || slIndex < tpIndex)
-            const tpFirst = tpIndex != -1 && ( slIndex == -1 || tpIndex < slIndex)
-            console.log({slFirst, tpFirst, sl, l: prevRow.l});
-
-            if (slFirst && prevRow.c >= prevRow.o ){
-                console.log("FILL @ SL");
-                exit = row.o;
-                exit = toFixed(exit, pricePrecision);
-                exit = toFixed(exit, pricePrecision);
-                const ret = fillSellOrder({
-                    exitLimit: tp,
-                    exit,
-                    prevRow: row,
-                    entry,
-                    base,
-                    balance,
-                    pricePrecision,
-                    enterTs,
-                    gain,
-                    maker,
-                    loss,
-                    cnt,
-                    mData,
-                    pos,
-                    sl,
-                    tp,
-                    entryLimit,
-                });
-                w = 0;
-                l += 1;
-                _fillSellOrder(ret);
-            }
-            else if (tpFirst && tp){
-                console.log("FILL @ TP");
-                exit = tp
-                exit = toFixed(exit, pricePrecision);
-                const ret = fillSellOrder({
-                    exitLimit: sl,
-                    exit,
-                    maker,
-                    prevRow,
-                    entry,
-                    base,
-                    balance,
-                    pricePrecision,
-                    enterTs,
-                    gain,
-                    loss,
-                    cnt,
-                    mData,
-                    pos,
-                    sl,
-                    tp,
-                    entryLimit,
-                });
-                l = 0;
-                w += 1;
-                _fillSellOrder(ret);
-            }
-           /*  if ( slFirst /* prevRow.c > prevRow.o ){
+            if (prevRow.c > prevRow.o){
              if (
                 pos &&
                 sl &&
                 sl <= entry &&
-                prevRow.l <= sl /* &&
-                prevRow.c >= prevRow.o                                                               
+                prevRow.l <= sl &&
+                prevRow.c >= prevRow.o                                                                
             ) {
                 exit = row.o;
                 exit = toFixed(exit, pricePrecision);
@@ -215,8 +143,8 @@ export const strategy = ({
                 w = 0;
                 l += 1;
                 _fillSellOrder(ret);
-            } if (pos && tp && prevRow.h >= tp /* && prevRow.c >= prevRow.o ) {
-                /* FILL TP ORDER IF ANY 
+            } if (pos && tp && prevRow.h >= tp /* && prevRow.c >= prevRow.o */) {
+                /* FILL TP ORDER IF ANY */
                 console.log("FILL @ TP");
                 exit = tp
                 exit = toFixed(exit, pricePrecision);
@@ -244,9 +172,9 @@ export const strategy = ({
                 _fillSellOrder(ret);
             }   
             }
-            if (pos && tpFirst){
-                if (pos && tp && prevRow.h >= tp /* && prevRow.c >= prevRow.o ) {
-                    /* FILL TP ORDER IF ANY 
+            else{
+                if (pos && tp && prevRow.h >= tp /* && prevRow.c >= prevRow.o */) {
+                    /* FILL TP ORDER IF ANY */
                     console.log("FILL @ TP");
                     exit = tp
                     exit = toFixed(exit, pricePrecision);
@@ -306,7 +234,7 @@ export const strategy = ({
                     l += 1;
                     _fillSellOrder(ret);
                 }
-            } */
+            }
             
         }
 

@@ -10,7 +10,7 @@ import {
 var router = express.Router();
 import os from "os";
 import { strategies } from "@/strategies";
-import { chandelierExit, parseKlines } from "@/utils/funcs2";
+import { chandelierExit, parseDate, parseKlines } from "@/utils/funcs2";
 import fs, { writeFileSync } from "fs";
 import { heikinAshi } from "../utils/funcs2";
 import { Bot } from "@/models";
@@ -19,7 +19,7 @@ import { BotSchema, IBot } from "@/models/bot";
 import { Bybit } from "@/classes/bybit";
 import { ensureDirExists } from "@/utils/orders/funcs";
 import { platforms } from "@/utils/constants";
-import { TestOKX } from "@/classes/test-platforms";
+import { TestBybit, TestOKX } from "@/classes/test-platforms";
 
 const fp = false
     ? "src/data/klines/binance/2021/DOGEUSDT_15m.json"
@@ -72,9 +72,12 @@ router.get("/test", async (req, res) => {
 
 router.get('/trades', async (req, res)=>{
     const  {start, end, symbol} = req.query as any
-    const plat = new TestOKX()
-    const ret = await plat.getTrades({start, symbol, end})
-    console.log(ret);
+    const plat = new TestBybit()//new TestOKX()
+    console.log({start, end});
+    const ret = await plat.getTrades({start: Date.parse(start), symbol, end: end ? Date.parse(end) : end})
+    if (ret){
+        return res.json(ret.map(el=>({...el, ts: parseDate(new Date(Number(el.ts)))})));
+    }
     res.send("OK")
 })
 router.post("/encode", async (req, res) => {
