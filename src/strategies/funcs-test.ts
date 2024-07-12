@@ -109,12 +109,14 @@ export const strategy = ({
         };
         if (pos) {
             console.log("HAS SL OR TP");
-            if (
+
+            if (prevRow.c > prevRow.o){
+             if (
                 pos &&
                 sl &&
                 sl <= entry &&
                 prevRow.l <= sl &&
-                prevRow.c >= prevRow.o && prevRow.h < tp!                                                                           
+                prevRow.c >= prevRow.o                                                                
             ) {
                 exit = row.o;
                 exit = toFixed(exit, pricePrecision);
@@ -168,7 +170,72 @@ export const strategy = ({
                 l = 0;
                 w += 1;
                 _fillSellOrder(ret);
+            }   
             }
+            else{
+                if (pos && tp && prevRow.h >= tp /* && prevRow.c >= prevRow.o */) {
+                    /* FILL TP ORDER IF ANY */
+                    console.log("FILL @ TP");
+                    exit = tp
+                    exit = toFixed(exit, pricePrecision);
+                    const ret = fillSellOrder({
+                        exitLimit: sl,
+                        exit,
+                        maker,
+                        prevRow,
+                        entry,
+                        base,
+                        balance,
+                        pricePrecision,
+                        enterTs,
+                        gain,
+                        loss,
+                        cnt,
+                        mData,
+                        pos,
+                        sl,
+                        tp,
+                        entryLimit,
+                    });
+                    l = 0;
+                    w += 1;
+                    _fillSellOrder(ret);
+                }  
+                if (
+                    pos &&
+                    sl &&
+                    sl <= entry &&
+                    prevRow.l <= sl &&
+                    prevRow.c >= prevRow.o                                                                
+                ) {
+                    exit = row.o;
+                    exit = toFixed(exit, pricePrecision);
+                    exit = toFixed(exit, pricePrecision);
+                    const ret = fillSellOrder({
+                        exitLimit: tp,
+                        exit,
+                        prevRow: prevRow,
+                        entry,
+                        base,
+                        balance,
+                        pricePrecision,
+                        enterTs,
+                        gain,
+                        maker,
+                        loss,
+                        cnt,
+                        mData,
+                        pos,
+                        sl,
+                        tp,
+                        entryLimit,
+                    });
+                    w = 0;
+                    l += 1;
+                    _fillSellOrder(ret);
+                }
+            }
+            
         }
 
         console.log(`\nLOSS" ${l}\n`);

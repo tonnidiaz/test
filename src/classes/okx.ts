@@ -57,18 +57,20 @@ export class OKX {
         }
     }
 
-    async cancelOrder({ ordId }: { ordId: string }) {
+    async cancelOrder({ ordId, isAlgo }: { ordId: string, isAlgo?: boolean }) {
         try {
-            const res = await this.client.cancelOrder({
+            botLog(this.bot, "CANCELLING ORDER...");
+            const res = await ( isAlgo ? this.client.cancelAlgoOrder([{algoId: ordId, instId: this.getSymbol()}]) : this.client.cancelOrder({
                 ordId,
                 instId: this.getSymbol(),
-            });
+            }))
+            
             if (res[0].sCode != "0") {
                 botLog(this.bot, "FAILED TO CANCEL ORDER");
                 console.log(res[0]);
                 return;
             }
-            return res[0].ordId;
+            return ordId;
         } catch (error) {}
     }
     async placeOrder(
@@ -134,7 +136,7 @@ export class OKX {
             }
             console.log(`\ORDER PLACED FOR BOT=${this.bot.name}\n`);
             const d: any = res[0];
-            const id: string = side == "buy" ? d.ordId : d.algoId;
+            const id: string = side == "buy" ? d.ordId : ( (price) ? d.algoId: d.ordId);
             return id;
         } catch (error) {
             console.log(error);

@@ -119,6 +119,7 @@ export const updateOrder = async (bot: IBot) => {
                             klines = parseKlines(klines);
                             const prevRow = klines[klines.length - 1];
                             const sl = calcSL(lastOrder.buy_price);
+                            botLog(bot, {sl})
                             if (prevRow.l <= sl && prevRow.c >= prevRow.o) {
                                 botLog(
                                     bot,
@@ -132,10 +133,13 @@ export const updateOrder = async (bot: IBot) => {
                                     amt,
                                     getCoinPrecision(
                                         [bot.base, bot.ccy],
-                                        "market",
+                                        "limit",
                                         bot.platform
                                     )
                                 );
+                                botLog(bot, "CANCELLING TP ORDER...")
+                                const cancelRes = await plat.cancelOrder({ordId: lastOrder.order_id, isAlgo: true})
+                                if (!cancelRes){return}
                                 const orderId = await plat.placeOrder(
                                     amt,
                                     undefined,
