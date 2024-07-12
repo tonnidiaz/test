@@ -19,8 +19,10 @@ export class Strategy {
         pair,
         maker,
         taker,
+        trades
     }: {
         df: IObj[];
+        trades: IObj[];
         balance: number;
         lev?: number;
         pGain?: number;
@@ -40,6 +42,7 @@ export class Strategy {
             lev,
             maker,
             taker,
+            trades
         });
         return mData;
     }

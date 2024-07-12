@@ -11,7 +11,7 @@ import {
     CategorySymbolListV5,
     OHLCVKlineV5,
 } from "bybit-api";
-import { Candle, RestClient } from "okx-api";
+import { Candle, RestClient, Trade } from "okx-api";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -35,6 +35,19 @@ export class Platform {
     }): Promise<any[] | undefined> {
         return;
     }
+    async getTrades({
+        start,
+        end,
+        savePath,
+        symbol,
+    }: {
+        end?: number;
+        start?: number;
+        symbol: string;
+        savePath?: string;
+    }): Promise<any[] | undefined> {
+        return;
+    }
 }
 
 export class TestOKX extends Platform {
@@ -42,7 +55,7 @@ export class TestOKX extends Platform {
     maker: number = 0.08 / 100;
     taker: number = 0.1 / 100;
     client: RestClient;
-    flag: "1" | "0";
+ flag: "1" | "0";
     apiKey: string;
     apiSecret: string;
     passphrase: string;
@@ -169,6 +182,79 @@ export class TestOKX extends Platform {
             console.log(d[d.length - 1]);
             return d;
         
+    }
+    async getTrades({
+        start,
+        end,
+        savePath,
+        symbol,
+        isBybit,
+    }: {
+        end?: number | undefined;
+        start?: number | undefined;
+        symbol: string;
+        savePath?: string | undefined;
+        isBybit?: boolean;
+    }) {
+        return []
+            /* const client = new RestClientV5();
+            end = end ?? Date.now();
+            let trades: any[] = [];
+            let cnt = 0;
+            const interval = 1
+            console.log(
+                `[ ${
+                    isBybit ? "ByBit" : this.name
+                } ] \t GETTING TRADES.. FOR ` + symbol
+            );
+
+            if (start) {
+                let firstTs = start;
+                while (firstTs <= end) {
+                    console.log(`GETTING ${cnt + 1} TRADES...`);
+                    const limit = 100;
+                    const after = firstTs + (limit - 1) * interval * 60 * 1000;
+                    console.log(
+                        `Before: ${parseDate(
+                            new Date(firstTs)
+                        )} \t After: ${parseDate(new Date(after))}`
+                    );
+                    const res = isBybit
+                        ? await client.getKline({
+                              category: "spot",
+                              symbol, 
+                              interval: interval as any,
+                              start: firstTs,
+                          })
+                        : await this.client.getHistoricTrades(
+                              symbol,
+                              {
+                                  before: `${firstTs}`,
+                                  after: `${after}`,
+                                  limit: `${limit}`,
+                                  type: '2'
+                              }
+                          );
+                    const data = isBybit
+                        ? (res as any).result.list
+                        : (res as Trade[]);
+                    if (!data.length) break;
+                    trades.push(...[...data].reverse());
+
+                    firstTs = Number(data[0].ts) + interval * 60 * 1000;
+                    console.log(new Date(firstTs).toISOString());
+                    if (savePath) {
+                        ensureDirExists(savePath);
+                        writeFileSync(savePath, JSON.stringify(trades));
+                        console.log("Saved");
+                    }
+                    cnt += 1;
+                }
+            }
+            let d = [...trades];
+            console.log(d[d.length - 1]);
+            return d;
+         */
     }
 }
 

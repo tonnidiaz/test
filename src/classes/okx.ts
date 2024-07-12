@@ -4,9 +4,7 @@ import { getInterval, parseDate, parseFilledOrder } from "@/utils/funcs2";
 import { botLog } from "@/utils/functions";
 import { writeFileSync } from "fs";
 import { RestClient, WebsocketClient } from "okx-api";
-import type {
-    OrderDetails,
-} from "okx-api";
+import type { AlgoOrderResult, OrderDetails, OrderResult } from "okx-api";
 import { DEV } from "@/utils/constants";
 import { configDotenv } from "dotenv";
 configDotenv();
@@ -75,44 +73,60 @@ export class OKX {
     }
     async placeOrder(
         amt: number,
-        price: number,
+        price?: number,
         side: "buy" | "sell" = "buy",
-        sl: number,
-        clOrderId: string
+        sl?: number,
+        clOrderId?: string
     ) {
         /* Place limit order at previous close */
         const od = { price, sl, amt, side };
         botLog(this.bot, `PLACING ORDER: ${JSON.stringify(od)}`);
         try {
-            const res =
-                side == "buy"
-                    ? await this.client.submitOrder({
-                          instId: this.getSymbol(),
-                          tdMode: "cash",
-                          ordType: "market",
-                          side,
-                          sz: amt.toString(),
-                          clOrdId: clOrderId,
-                          //px: price.toString(),
-                      })
-                    : await this.client.placeAlgoOrder({
-                          instId: this.getSymbol(),
-                          tdMode: "cash",
-                          ordType: "oco",
-                          tpTriggerPx: price.toString(),
-                          slTriggerPx: sl.toString(),
-                          side,
-                          sz: amt.toString(),
-                          tpOrdPx:
+            let res: OrderResult[] | AlgoOrderResult[];
+
+            if (side == "buy") {
+                res = await this.client.submitOrder({
+                    instId: this.getSymbol(),
+                    tdMode: "cash",
+                    ordType: "market",
+                    side,
+                    sz: amt.toString(),
+                    clOrdId: clOrderId,
+                    //px: price.toString(),
+                });
+            } else {
+                if (price) {
+                    res = await this.client.placeAlgoOrder({
+                        instId: this.getSymbol(),
+                        tdMode: "cash",
+                        ordType: "conditional",
+                        tpTriggerPx: price.toString(),
+                        //slTriggerPx: sl.toString(),
+                        side,
+                        sz: amt.toString(),
+                        tpOrdPx:
+                            this.bot.order_type == "Market"
+                                ? "-1"
+                                : (price * (1 - 0.0 / 100)).toString(),
+                        /* slOrdPx:
                               this.bot.order_type == "Market"
                                   ? "-1"
-                                  : (price * (1 - 0.01 / 100)).toString(),
-                          slOrdPx:
-                              this.bot.order_type == "Market"
-                                  ? "-1"
-                                  : (sl * (1 - 0.01 / 100)).toString(),
-                          algoClOrdId: clOrderId,
-                      });
+                                  : (sl * (1 - 0.0 / 100)).toString(), */
+                        algoClOrdId: clOrderId,
+                    });
+                }
+                else{
+                    res = await this.client.submitOrder({
+                        instId: this.getSymbol(),
+                        tdMode: "cash",
+                        ordType: "market",
+                        side,
+                        sz: amt.toString(),
+                        clOrdId: clOrderId,
+                        //px: price.toString(),
+                    });
+                }
+            }
 
             if (res[0].sCode != "0") {
                 console.log(res[0]);
@@ -165,9 +179,10 @@ export class OKX {
 
             return data;
         } catch (error: any) {
-            botLog(this.bot, "ERROR")
+            botLog(this.bot, "ERROR");
             botLog(this.bot, error);
-            if(isAlgo && error?.code == "51603") return await this.getOrderbyId(orderId);
+            if (isAlgo && error?.code == "51603")
+                return await this.getOrderbyId(orderId);
         }
     }
 

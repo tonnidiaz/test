@@ -65,6 +65,7 @@ io.on("connection", (client) => {
 
             let klinesPath: string | null;
             let klines: any[] = [];
+            let trades: any[] = [];
 
             client.emit("backtest", "Getting klines...");
 
@@ -110,6 +111,16 @@ io.on("connection", (client) => {
                     client.emit("err", "Failed to get klines");
                     return;
                 }
+                const r2 = await plat.getTrades({
+                    start: startTs,
+                    end: endTs,
+                    symbol,
+                });
+                if (!r2) {
+                    client.emit("err", "Failed to get trades");
+                    return;
+                }
+                trades = r2
                 klines = r;
             }
             if (offline && !useFile)
@@ -152,6 +163,7 @@ io.on("connection", (client) => {
             const pGain = data.pGain ? Number(data.pGain) : undefined;
             let retData = objStrategies[strNum - 1].run({
                 df,
+                trades,
                 balance: bal,
                 lev,
                 pair: baseCcy,
