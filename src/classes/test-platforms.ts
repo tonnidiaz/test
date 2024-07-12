@@ -3,7 +3,7 @@ import { ensureDirExists } from "@/utils/orders/funcs";
 import { getInterval, parseDate } from "@/utils/funcs2";
 import { botLog } from "@/utils/functions";
 import axios, { AxiosResponse } from "axios";
-import crypto from "crypto";
+import crypto from "crypto"
 
 import { writeFileSync } from "fs";
 import {
@@ -226,6 +226,7 @@ export class TestOKX extends Platform {
                     const data = isBybit
                         ? (res as any).result.list
                         : (res as Trade[]);
+                        console.log(data);
                     if (!data.length) break;
                     trades = [...trades, ...data];
 
@@ -259,8 +260,6 @@ export class TestOKX extends Platform {
 
 export class TestBybit extends Platform {
     client: RestClientV5;
-    apiKey: string;
-    apiSecret: string;
     constructor() {
         super();
         const apiKey = demo
@@ -269,12 +268,11 @@ export class TestBybit extends Platform {
         const apiSecret = demo
             ? process.env.BYBIT_API_SECRET_DEV!
             : process.env.BYBIT_API_SECRET!;
-        this.apiKey = apiKey;
-        this.apiSecret = apiSecret;
+
         this.client = new RestClientV5({
             key: apiKey,
             secret: apiSecret,
-            demoTrading: true,
+            demoTrading: demo,
             //testnet: demo,
         });
     }
@@ -301,27 +299,23 @@ export class TestBybit extends Platform {
             isBybit: true,
         });
     }
-
-    createSignature(apiKey, apiSecret, params) {
+     createSignature(apiKey, apiSecret, params) {
         const paramString = Object.keys(params)
-            .sort()
-            .map((key) => `${key}=${encodeURIComponent(params[key])}`)
-            .join("&");
+          .sort()
+          .map(key => `${key}=${params[key]}`)
+          .join('&');
 
-        const timestamp = Date.now();
-        const prehashString = `${timestamp}${apiKey}5000${paramString}`;
-        const signature = crypto
-            .createHmac("sha256", apiSecret)
-            .update(prehashString)
-            .digest("hex");
+          const timestamp = Date.now().toString()
+        const prehashString = `${timestamp}${apiKey}${paramString}`;
+        const signature =  crypto.createHmac('sha256', apiSecret).update(prehashString).digest('hex');
         const headers = {
-            "X-BAPI-API-KEY": apiKey,
-            "X-BAPI-SIGN": signature,
-            "X-BAPI-TIMESTAMP": timestamp,
-            "X-BAPI-RECV-WINDOW": 5000,
-        };
-        return headers;
-    }
+            'X-BYBIT-API-KEY': apiKey,
+            'X-BYBIT-SIGNATURE': signature,
+            'X-BYBIT-TIMESTAMP': timestamp,
+            'Content-Type': 'application/json'
+          };
+          return headers
+      }
     async getTrades({
         start,
         end,
@@ -334,9 +328,6 @@ export class TestBybit extends Platform {
         savePath?: string | undefined;
     }) {
         try {
-            const rootURL = demo
-                ? "https://api-demo.bybit.com"
-                : "https://api.bybit.com";
             end = end ?? Date.now();
             let trades: any[] = [];
             let cnt = 0;
@@ -346,8 +337,7 @@ export class TestBybit extends Platform {
             if (start) {
                 let endTs = end;
                 console.log(endTs, start);
-                let v = false;
-                while (!v /* endTs > start */) {
+                while (endTs > start) {
                     console.log(`GETTING ${cnt + 1} TRADES...`);
                     const limit = 100;
                     //const after = firstTs + (limit - 1) * interval * 60 * 1000;
@@ -356,22 +346,14 @@ export class TestBybit extends Platform {
                             new Date(start)
                         )} \t END: ${parseDate(new Date(endTs))}`
                     );
-
-                    const params = {category: "spot" , symbol, };
-                    const res = await axios.get(
-                        `${rootURL}/v5/execution/list`,
-                        {
-                            headers: this.createSignature(
-                                this.apiKey,
-                                this.apiSecret,
-                                params
-                            ),
-                            params,
-                        }
-                    );
-                    console.log(res.data);
-                    break;
-                    /*  if (res.retCode == 0){
+                    const res = await this.client.getPublicTradingHistory({
+                        
+                        category: "spot",
+                       symbol,
+                        
+                       limit:10,
+                    });
+                    if (res.retCode == 0){
                         console.log(res.result.list);
                     }else{
                         console.log(res);
@@ -380,9 +362,9 @@ export class TestBybit extends Platform {
                     const data = res.result.list;
 
                     if (!data.length) break;
-                    trades = [...trades, ...data.map(el=>({ts: el.execTime, px: Number(el.execPrice), sz: Number(el.execQty), side: el.side, symbol: el.symbol}))];
+                    trades = [...trades, ...data.map(el=>({ts: el.time, px: Number(el.price), sz: Number(el.price), side: el.side, symbol: el.symbol}))];
 
-                    endTs = Number(data[data.length - 1].execTime);
+                    endTs = Number(data[data.length - 1].time);
                     console.log("START_TS:");
                     console.log(new Date(endTs).toISOString());
                     if (savePath) {
@@ -391,7 +373,7 @@ export class TestBybit extends Platform {
                         console.log("Saved");
                     }
                     console.log(`DONE ${cnt}`);
-                    cnt += 1; */
+                    cnt += 1;
                 }
             }
             console.log("\nDONE GETTING ALL TRADES\n");
@@ -404,9 +386,8 @@ export class TestBybit extends Platform {
                     },
                 });
             return d.sort((a, b) => Number(a.ts) - Number(b.ts));
-        } catch (e: any) {
-            console.log("ERROR\n");
-            console.log(e?.response?.statusText);
+        } catch (e) {
+            console.log(e);
         }
     }
 

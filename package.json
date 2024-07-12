@@ -9,6 +9,7 @@
     "start": "node -r ./config-paths.js ./dist/index.js",
     "strt": "node dist/index.js",
     "dev": "tsx watch index.ts",
+    "koyeb-logs": "koyeb services logs 66051f71-bbd0-4112-84b4-a679b355f8fb",
     "ngrok": "ngrok http 8000 --domain=arriving-repeatedly-raccoon.ngrok-free.app",
     "build": "rimraf ./dist/ && npx tsc && copyfiles -u 1 ./src/views/**/* ./src/public/**/* ./src/assets/**/* ./dist/src"
   },

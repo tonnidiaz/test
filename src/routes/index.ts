@@ -20,6 +20,7 @@ import { Bybit } from "@/classes/bybit";
 import { ensureDirExists } from "@/utils/orders/funcs";
 import { platforms } from "@/utils/constants";
 import { TestBybit, TestOKX } from "@/classes/test-platforms";
+import { Phemex } from "@/classes/phemex";
 
 const fp = false
     ? "src/data/klines/binance/2021/DOGEUSDT_15m.json"
@@ -72,12 +73,13 @@ router.get("/test", async (req, res) => {
 
 router.get('/trades', async (req, res)=>{
     const  {start, end, symbol} = req.query as any
-    const plat = new TestBybit()//new TestOKX()
+    const plat = new Phemex()//new TestOKX()
     console.log({start, end});
-    const ret = await plat.getTrades({start: Date.parse(start), symbol, end: end ? Date.parse(end) : end})
+    const ret = await plat.getTrades()
+    /* const ret = await plat.getTrades({start: Date.parse(start), symbol, end: end ? Date.parse(end) : end})
     if (ret){
         return res.json(ret.map(el=>({...el, ts: parseDate(new Date(Number(el.ts)))})));
-    }
+    } */
     res.send("OK")
 })
 router.post("/encode", async (req, res) => {

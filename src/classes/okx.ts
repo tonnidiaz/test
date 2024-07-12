@@ -161,7 +161,7 @@ export class OKX {
                       ordId: orderId!,
                       instId: this.getSymbol(),
                   });
-            if (DEV || true) {
+            if (DEV) {
                 console.log(`DEV: ${this.bot.name}`);
                 console.log(res);
             }
@@ -264,7 +264,18 @@ export class OKX {
         }
 
         let d = [...klines];
-        console.log(d[d.length - 1]);
+        const lastCandle = d[d.length - 1]
+        console.log({lastCandle});
+        if (Number(lastCandle[8]) == 0){
+            botLog(this.bot, "LAST CANDLE NOT YET CLOSED")
+            return await this.getKlines({
+                start,
+                end,
+                savePath,
+                interval,
+                symbol,
+            })
+        }
         return d;
     }
 
