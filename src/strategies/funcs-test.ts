@@ -74,7 +74,7 @@ export const strategy = ({
     console.log(trades);
 
     for (let i = d + 1; i < df.length; i++) {
-        if (balance < 10) continue;
+        //if (balance < 10) continue;
         const prevRow = df[i - 1],
             row = df[i];
 
@@ -124,7 +124,7 @@ export const strategy = ({
                 const ret = fillSellOrder({
                     exitLimit: tp,
                     exit,
-                    prevRow: prevRow,
+                    prevRow: row,
                     entry,
                     base,
                     balance,
@@ -214,7 +214,7 @@ export const strategy = ({
                     const ret = fillSellOrder({
                         exitLimit: tp,
                         exit,
-                        prevRow: prevRow,
+                        prevRow: row,
                         entry,
                         base,
                         balance,

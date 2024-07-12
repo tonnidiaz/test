@@ -172,8 +172,9 @@ export const updateOrder = async (bot: IBot) => {
                                     }
                                     if (res && res != "live") {
                                         _filled = true;
+                                        _isClosed = true
                                         const fee = Math.abs(res.fee); // In USDT
-
+                                        
                                         /* Buy/Base fee already removed when placing sell order  */
                                         lastOrder.new_ccy_amt =
                                             res.fillSz * res.fillPx;
@@ -198,7 +199,7 @@ export const updateOrder = async (bot: IBot) => {
                                         isClosed = _isClosed;
                                         lastOrder.order_id = res.id;
                                         await lastOrder.save();
-                                        return { isClosed: true, lastOrder };
+                                        return { isClosed, lastOrder };
                                     }
                                 }
                             }
