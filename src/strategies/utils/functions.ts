@@ -70,6 +70,7 @@ export const fillSellOrder = ({
     pos,
     maker,
     entryLimit,
+    isSl = false
 }: {
     exitLimit: number | null;
     exit: number;
@@ -89,6 +90,7 @@ export const fillSellOrder = ({
     tp: number | null;
     entryLimit: number | null;
     pos: boolean;
+    isSl?: boolean;
 }) => {
     console.log({ exitLimit, exit, entry });
     //console.log(`MIKA: ${exit >= entry ? "gain" : "loss"}`);
@@ -107,7 +109,7 @@ export const fillSellOrder = ({
         fill: exitLimit,
         enterTs,
         ts,
-        c: exit,
+        c: `${isSl ? 'SL' : 'TP'} ${exit}`,
         balance: `[${base}] \t ${balance} { ${((exit - entry)/entry * 100).toFixed(2)}% } fee: ${fee}`,
     });
     /* Position now filled */
@@ -117,7 +119,7 @@ export const fillSellOrder = ({
     /* ADD FUNDS BACK TO PORTFOLIO */
 
     //balance += _bal;
-    if (exit >= entry) gain += 1;
+    if (!isSl) gain += 1;
     else loss += 1;
     cnt += 1;
     (entryLimit = null), (tp = null), (sl = null), (pos = false);
