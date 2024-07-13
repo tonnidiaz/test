@@ -221,6 +221,7 @@ export const parseFilledOrder = (finalRes: OrderDetails) => {
         fillSz: Number(finalRes.accFillSz),
         fee: Number(finalRes.fee),
         fillTime: Number(finalRes.fillTime),
+        cTime: Number(finalRes.cTime),
     };
 };
 

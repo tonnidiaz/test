@@ -148,6 +148,7 @@ export class OKX {
             let data: {
                 id: string;
                 fillTime: number;
+                cTime: number;
                 fillSz: number;
                 fillPx: number;
                 fee: number;

@@ -83,7 +83,7 @@ export const updateOrderInDb = async (order: IOrder, res: any) => {
     order.is_closed = true;
     order.sell_fee = fee;
     order.sell_timestamp = {
-        ...order.sell_timestamp,
+        i: parseDate(new Date(res.cTime)),
         o: parseDate(new Date(res.fillTime)),
     };
     /* order == currentOrder */

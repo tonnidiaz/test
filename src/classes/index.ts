@@ -7,6 +7,7 @@ import { botJobSpecs, test } from "@/utils/constants";
 import { botLog } from "@/utils/functions";
 import { afterOrderUpdate } from "@/utils/orders/funcs2";
 import { findBotOrders } from "@/utils/funcs2";
+import { wsOkx } from "./main-okx";
 
 export class OrderPlacer {
     cnt: number = 0;
@@ -49,7 +50,11 @@ export class OrderPlacer {
                 if (bot.active) {
                     const res = await updateOrder(bot);
                    botLog(bot, res)
-                    if (!res) { 
+                   if (res == false){
+                    /* POS = TRUE -> ADD BOT TO LIST IN WS */
+                   await wsOkx.addBot(bot.id)
+                   }else{
+                    if (!res) {  
                         return botLog(
                             bot,
                             "DID NOT GO ON WITH PROCESS SINCE COULD NOT UPDATE ORDER"
@@ -59,6 +64,8 @@ export class OrderPlacer {
                     } else {
                         botLog(bot, "[LIVE] ORDER NOT YET FILLED");
                     }
+                   }
+                    
                 }
             }
         } catch (err) {

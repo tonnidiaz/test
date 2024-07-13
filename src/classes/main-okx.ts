@@ -5,9 +5,9 @@ import { Bot, Order } from "@/models";
 import { calcSL, calcTP, parseDate, parseKlines } from "@/utils/funcs2";
 import { ObjectId } from "mongoose";
 import { botLog } from "@/utils/functions";
-import { wsOkx } from "@/utils/constants";
 import { OKX } from "./okx";
 import { placeTrade } from "@/utils/orders/funcs";
+import { demo } from "@/utils/constants";
 configDotenv();
 
 interface IOpenBot {
@@ -61,7 +61,7 @@ export class WsOKX {
             market: "demo",
         });
 
-        this.wsList = [this.ws, this.wsDemo];
+        this.wsList = [ demo ? this.wsDemo : this.ws];
         console.log("MAIN_OKX INIT");
     }
 
@@ -102,6 +102,7 @@ export class WsOKX {
                     const px = Number(ticker.last);
                     const ts = parseDate(new Date(Number(ticker.ts)));
                     for (let bot of this.botsWithPos) {
+                        console.log({...bot, px});
                         if (px <= bot.sl || px >= bot.tp) {
                             updateOpenBot(bot, px);
                         }
@@ -134,6 +135,7 @@ export class WsOKX {
         if (!order) return botLog(bot, `ORDER: ${oid} not found`);
 
         const entry = order.buy_price;
+        this.botsWithPos = this.botsWithPos.filter(el=> el.id != botId)
         this.botsWithPos.push({
             id: botId,
             sl: calcSL(entry),
@@ -196,3 +198,7 @@ const updateOpenBot = async (openBot: IOpenBot, px: number) => {
         console.log(e);
     }
 };
+
+
+export let wsOkx: WsOKX = new WsOKX()
+wsOkx.initWs()

@@ -1,13 +1,13 @@
 import { authMid } from "@/middleware/auth.mid";
 import { Bot, Order, User } from "@/models";
 import { IBot } from "@/models/bot";
-import { botJobSpecs, jobs, wsOkx } from "@/utils/constants";
+import { botJobSpecs, jobs} from "@/utils/constants";
 import { addBotJob } from "@/utils/orders/funcs";
 import { botLog, tunedErr } from "@/utils/functions";
 import { IObj } from "@/utils/interfaces";
 import express from "express";
 import schedule from "node-schedule";
-import { WsOKX } from "@/classes/main-okx";
+import { wsOkx } from "@/classes/main-okx";
 
 const router = express.Router();
 

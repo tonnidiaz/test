@@ -61,6 +61,9 @@ export const updateOrder = async (bot: IBot) => {
         let lastOrder: IOrder | null = orders[orders.length - 1];
         let isClosed = !lastOrder || lastOrder?.is_closed == true;
         if (!lastOrder) return { isClosed, lastOrder };
+        if (lastOrder.side == 'sell' && !lastOrder.order_id.length){
+            return false
+        }
 
         const plat = bot.platform == "bybit" ? new Bybit(bot) : new OKX(bot);
         if (

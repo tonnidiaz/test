@@ -12,11 +12,11 @@ import botsRouter from "./routes/bots";
 const app = express();
 import { default as mongoose } from "mongoose";
 import cors from "cors";
-import { DEV, setJobs, wsOkx } from "./utils/constants";
+import { DEV, setJobs } from "./utils/constants";
 import dotenv from "dotenv";
-import { Bot } from "./models";
+import { Bot, Order } from "./models";
 import { addBotJob } from "./utils/orders/funcs";
-import { WsOKX } from "./classes/main-okx";
+import { wsOkx } from "./classes/main-okx";
 import { botLog } from "./utils/functions";
 
 dotenv.config();
@@ -101,6 +101,12 @@ const main = async () => {
     for (let bot of activeBots) {
         await addBotJob(bot)
         botLog(bot, "INITIALIZING WS...")
+        if (bot.orders.length){
+            const lastOrder = await Order.findById(bot.orders[bot.orders.length - 1]).exec()
+            if (lastOrder && lastOrder.side == 'sell' && !lastOrder.order_id.length){
+                await wsOkx.addBot(bot.id)
+            }
+        }
         await wsOkx.sub(bot)
         
     }
