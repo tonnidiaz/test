@@ -16,10 +16,11 @@ import { OKX } from "@/classes/okx";
 import { Bybit } from "@/classes/bybit";
 import { botLog } from "../functions";
 import { objStrategies } from "@/strategies";
+import { trueRange } from "indicatorts";
 
 export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
-    const plat = bot.platform == "okx" ? new OKX(bot) : new Bybit(bot);
-    botLog(bot, "SIM: GETTING KLINES...")
+    const plat =  new OKX(bot)
+    botLog(bot, "SIM: GETTING KLINES...");
     /* const klines = await plat.getKlines({
         end: Date.now() - bot.interval * 60 * 1000,
     });
@@ -52,12 +53,12 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
             ? order.new_ccy_amt - Math.abs(order.sell_fee)
             : bot.start_amt;
 
-        const entryLimit = 0//calcEntryPrice(row, "buy");
+        const entryLimit = 0; //calcEntryPrice(row, "buy");
         botLog(bot, {
             entryLimit,
         });
 
-        const ts = new Date()
+        const ts = new Date();
         const res = await placeTrade({
             bot: bot,
             ts: parseDate(ts),
@@ -68,27 +69,27 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
         });
 
         if (res) {
-            botLog(bot, "PLACING ALGO SELL ORDER...");
-            const tp = calcTP(res.buy_price);
-            const sl = calcSL(res.buy_price);
-            botLog(bot, {
-                entry: res.buy_price,
-                exitLimit: tp,
-                sl,
-            });
-
-            const amt = res.base_amt - res.buy_fee;
-            await placeTrade({
-                bot: bot,
-                ts: parseDate(ts),
-                amt: Number(amt),
-                side: "sell",
-                price: tp,
-                plat: plat,
-                sl,
-            });
-
-            botLog(bot, "ALGO ORDER PLACED. WAITING FOR NEXT ROUND!");
+            botLog(bot, "WAITING FOR NEXT ROUND!");
         }
     }
+};
+
+export const updateOrderInDb = async (order: IOrder, res: any) => {
+    const fee = Math.abs(res.fee); // In USDT
+
+    /* Buy/Base fee already removed when placing sell order  */
+    order.new_ccy_amt = res.fillSz * res.fillPx;
+    order.sell_price = res.fillPx;
+    order.is_closed = true;
+    order.sell_fee = fee;
+    order.sell_timestamp = {
+        ...order.sell_timestamp,
+        o: parseDate(new Date(res.fillTime)),
+    };
+    /* order == currentOrder */
+    const bal = order.new_ccy_amt - Math.abs(res.fee);
+    const profit = ((bal - order.ccy_amt) / order.ccy_amt) * 100;
+    order.profit = profit;
+    order.order_id = res.id;
+    await order.save();
 };

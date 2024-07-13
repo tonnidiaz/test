@@ -210,7 +210,7 @@ export class OKX {
         symbol?: string;
         savePath?: string;
     }) {
-        end = end ?? Date.now();
+        end = end ?? Date.now() - this.bot.interval * 60 * 1000;
         let klines: any[] = [];
         let cnt = 0;
         interval = interval ?? this.bot.interval;

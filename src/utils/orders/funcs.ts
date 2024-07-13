@@ -24,6 +24,7 @@ import {
     parseKlines,
 } from "../funcs2";
 import { objStrategies } from "@/strategies";
+import { updateOrderInDb } from "./funcs2";
 
 export const getJob = (id: string) => jobs.find((el) => el.id == id);
 
@@ -82,25 +83,7 @@ export const updateOrder = async (bot: IBot) => {
                     console.log(`\n[${bot.name}] : Updating sell order\n`);
 
                     if (_isClosed && res != "live") {
-                        const fee = Math.abs(res.fee); // In USDT
-
-                        /* Buy/Base fee already removed when placing sell order  */
-                        lastOrder.new_ccy_amt = res.fillSz * res.fillPx;
-                        lastOrder.sell_price = res.fillPx;
-                        lastOrder.is_closed = _isClosed;
-                        lastOrder.sell_fee = fee;
-                        lastOrder.sell_timestamp = {
-                            ...lastOrder.sell_timestamp,
-                            o: parseDate(new Date(res.fillTime)),
-                        };
-                        /* lastOrder == currentOrder */
-                        const bal = lastOrder.new_ccy_amt - Math.abs(res.fee);
-                        const profit =
-                            ((bal - lastOrder.ccy_amt) / lastOrder.ccy_amt) *
-                            100;
-                        lastOrder.profit = profit;
-                        isClosed = _isClosed;
-                        lastOrder.order_id = res.id;
+                        updateOrderInDb(lastOrder, res);
                     } else {
                         if (res == "live") {
                             botLog(
@@ -119,7 +102,7 @@ export const updateOrder = async (bot: IBot) => {
                             klines = parseKlines(klines);
                             const prevRow = klines[klines.length - 1];
                             const sl = calcSL(lastOrder.buy_price);
-                            botLog(bot, {sl})
+                            botLog(bot, { sl });
                             if (prevRow.l <= sl && prevRow.c >= prevRow.o) {
                                 botLog(
                                     bot,
@@ -137,9 +120,14 @@ export const updateOrder = async (bot: IBot) => {
                                         bot.platform
                                     )
                                 );
-                                botLog(bot, "CANCELLING TP ORDER...")
-                                const cancelRes = await plat.cancelOrder({ordId: lastOrder.order_id, isAlgo: true})
-                                if (!cancelRes){return}
+                                botLog(bot, "CANCELLING TP ORDER...");
+                                const cancelRes = await plat.cancelOrder({
+                                    ordId: lastOrder.order_id,
+                                    isAlgo: true,
+                                });
+                                if (!cancelRes) {
+                                    return;
+                                }
                                 const orderId = await plat.placeOrder(
                                     amt,
                                     undefined,
@@ -172,33 +160,9 @@ export const updateOrder = async (bot: IBot) => {
                                     }
                                     if (res && res != "live") {
                                         _filled = true;
-                                        _isClosed = true
-                                        const fee = Math.abs(res.fee); // In USDT
-                                        
-                                        /* Buy/Base fee already removed when placing sell order  */
-                                        lastOrder.new_ccy_amt =
-                                            res.fillSz * res.fillPx;
-                                        lastOrder.sell_price = res.fillPx;
-                                        lastOrder.is_closed = _isClosed;
-                                        lastOrder.sell_fee = fee;
-                                        lastOrder.sell_timestamp = {
-                                            ...lastOrder.sell_timestamp,
-                                            o: parseDate(
-                                                new Date(res.fillTime)
-                                            ),
-                                        };
-                                        /* lastOrder == currentOrder */
-                                        const bal =
-                                            lastOrder.new_ccy_amt -
-                                            Math.abs(res.fee);
-                                        const profit =
-                                            ((bal - lastOrder.ccy_amt) /
-                                                lastOrder.ccy_amt) *
-                                            100;
-                                        lastOrder.profit = profit;
+                                        _isClosed = true;
                                         isClosed = _isClosed;
-                                        lastOrder.order_id = res.id;
-                                        await lastOrder.save();
+                                        await updateOrderInDb(lastOrder, res);
                                         return { isClosed, lastOrder };
                                     }
                                 }
@@ -259,7 +223,7 @@ export const placeTrade = async ({
     sl?: number;
     side: "buy" | "sell";
     price: number;
-    plat: Bybit | OKX;
+    plat: OKX;
 }) => {
     try {
         const orders = await findBotOrders(bot);
@@ -374,6 +338,25 @@ export const placeTrade = async ({
                         order.side = "sell";
                         order.buy_timestamp = ts;
                     }
+                }
+            }
+        } else if (side == "sell" && !sl && price == 0) {
+            botLog(bot, "CHECKING MARKET SELL STATUS...");
+
+            let _filled = false;
+            while (!_filled) {
+                await sleep(1000);
+                botLog(bot, "CHECKING MARKET SELL ORDER...");
+                const res = await plat.getOrderbyId(orderId);
+
+                if (!res) {
+                    _filled = true;
+                    return botLog(bot, "FAILED TO CHECK MARKET SELL ORDER");
+                }
+                if (res && res != "live") {
+                    _filled = true;
+                    await updateOrderInDb(order, res);
+                    return { isClosed: true, lastOrder: order };
                 }
             }
         } else {
