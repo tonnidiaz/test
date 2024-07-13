@@ -1,12 +1,13 @@
 import { authMid } from "@/middleware/auth.mid";
 import { Bot, Order, User } from "@/models";
 import { IBot } from "@/models/bot";
-import { botJobSpecs, jobs } from "@/utils/constants";
+import { botJobSpecs, jobs, wsOkx } from "@/utils/constants";
 import { addBotJob } from "@/utils/orders/funcs";
 import { botLog, tunedErr } from "@/utils/functions";
 import { IObj } from "@/utils/interfaces";
 import express from "express";
 import schedule from "node-schedule";
+import { WsOKX } from "@/classes/main-okx";
 
 const router = express.Router();
 
@@ -101,6 +102,9 @@ router.post("/:id/edit", authMid, async (req, res) => {
         const { key, val } = fd;
         const jobId = `${bot._id}`;
         const bool = jobs.find((el) => el.id == jobId);
+        botLog(bot, "UNSUB TO PREV SYMBOL TICKERS...");
+
+        wsOkx.unsub(bot)
         if (key == "active") {
             if (bool && !val) {
                 // Deactivate JOB
@@ -135,17 +139,22 @@ router.post("/:id/edit", authMid, async (req, res) => {
             }
         }
         await bot.save();
-        if (key == "multi" && bot.active) {
-            /* RESCADULE IN CASE INTERVAL CHANGED */
-            if (bool) {
-                const r = bool.job.reschedule(botJobSpecs(bot.interval)); //schedule.rescheduleJob(bool.job, botJobSpecs);
-                if (!r) {
-                    botLog(bot, "FAILED TO RESUME JOB");
+        if (bot.active) {
+            if (key == "multi") {
+                /* RESCADULE IN CASE INTERVAL CHANGED */
+                if (bool) {
+                    const r = bool.job.reschedule(botJobSpecs(bot.interval)); //schedule.rescheduleJob(bool.job, botJobSpecs);
+                    if (!r) {
+                        botLog(bot, "FAILED TO RESUME JOB");
+                    }
+                    const jobIndex = jobs.findIndex((el) => el.id == jobId);
+                    jobs[jobIndex] = { ...bool, active: true };
                 }
-                const jobIndex = jobs.findIndex((el) => el.id == jobId);
-                jobs[jobIndex] = { ...bool, active: true };
             }
+            botLog(bot, "RE-SUB TO TICKERS...");
+            await wsOkx.sub(bot)
         }
+
         res.json((await bot.populate("orders")).toJSON());
     } catch (error) {
         console.log(error);
@@ -155,11 +164,11 @@ router.post("/:id/edit", authMid, async (req, res) => {
 router.post("/:id/delete", authMid, async (req, res) => {
     try {
         const { id } = req.params;
-        const bot = await Bot.findById(id).exec()
-         if (!bot) return tunedErr(res, 400, "BOT NOT FOUND");
-         const orders = bot.orders
+        const bot = await Bot.findById(id).exec();
+        if (!bot) return tunedErr(res, 400, "BOT NOT FOUND");
+        const orders = bot.orders;
         const _res = await Bot.findByIdAndDelete(id).exec();
-       
+
         for (let oid of orders) {
             console.log(oid);
             const order = await Order.findById(oid);

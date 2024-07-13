@@ -12,10 +12,12 @@ import botsRouter from "./routes/bots";
 const app = express();
 import { default as mongoose } from "mongoose";
 import cors from "cors";
-import { DEV, setJobs } from "./utils/constants";
+import { DEV, setJobs, wsOkx } from "./utils/constants";
 import dotenv from "dotenv";
 import { Bot } from "./models";
 import { addBotJob } from "./utils/orders/funcs";
+import { WsOKX } from "./classes/main-okx";
+import { botLog } from "./utils/functions";
 
 dotenv.config();
 // view engine setup
@@ -93,10 +95,14 @@ const job = schedule.scheduleJob("* * * * * *", function(){
 jobs.push({job, id: "1"}) */
 
 const main = async () => {
+    
     const activeBots = await Bot.find({ active: true }).exec();
     setJobs([]);
     for (let bot of activeBots) {
-        await addBotJob(bot);
+        await addBotJob(bot)
+        botLog(bot, "INITIALIZING WS...")
+        await wsOkx.sub(bot)
+        
     }
     //new MainOKX()
 };

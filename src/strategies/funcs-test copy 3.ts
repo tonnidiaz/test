@@ -65,8 +65,6 @@ export const strategy = ({
         w = 0,
         c = 0,
         profit: number = 0;
-    maker = 0.001 / 100;
-    taker = 0.001 / 100;
     const pricePrecision = getPricePrecision(pair, platNm);
     const basePrecision = getCoinPrecision(pair, "limit", platNm);
     balance = toFixed(balance, pricePrecision);
@@ -78,7 +76,7 @@ export const strategy = ({
         const prevRow = df[i - 1],
             row = df[i];
 
-        //console.log(`\nTS: ${row.ts}`);
+        console.log(`\nTS: ${row.ts}`);
         _cnt += 1;
 
         const _fillSellOrder = (ret: ReturnType<typeof fillSellOrder>) => {
@@ -110,26 +108,26 @@ export const strategy = ({
 
         const isGreen = prevRow.c >= prevRow.o;
         if (pos) {
-            /* console.log("HAS SL OR TP");
+            /* console.log("HAS SL OR TP"); */
             console.log({
-                c: prevRow.c,
-                o: prevRow.o,
-                h: prevRow.h,
-                l: prevRow.l,
+                c: row.c,
+                o: row.o,
+                h: row.h,
+                l: row.l,
                 tp,
                 sl,
                 isGreen,
-            }); */
+            });
             const slIndex = trades.findIndex((el) => {
                 const ts = Date.parse(el.ts);
                 const date = new Date(ts);
-                const candleDate = new Date(prevRow.ts);
+                const candleDate = new Date(row.ts);
                 return Number(el.px) <= sl! && isSameDate(date, candleDate);
             });
             const tpIndex = trades.findIndex((el) => {
                 const ts = Date.parse(el.ts);
                 const date = new Date(ts);
-                const candleDate = new Date(prevRow.ts);
+                const candleDate = new Date(row.ts);
                 return Number(el.px) >= tp! && isSameDate(date, candleDate);
             });
 
@@ -140,102 +138,13 @@ export const strategy = ({
                 slIndex != -1 && (tpIndex == -1 || slIndex < tpIndex);
             const tpFirst =
                 tpIndex != -1 && (slIndex == -1 || tpIndex < slIndex);
-            //console.log({ slFirst, tpFirst, sl, l: prevRow.l });
-
+            console.log({ slFirst, tpFirst, sl, l: row.l });
+            const slCond = row.l <= sl! && isGreen;
+            const tpCond = row.h >= tp!
             if (slFirst) {
-                if (pos && prevRow.l <= sl! && isGreen){
-                  //console.log("FILL @ SL");
-                exit = row.o;
-                exit = toFixed(exit, pricePrecision);
-                exit = toFixed(exit, pricePrecision);
-                const ret = fillSellOrder({
-                    exitLimit: tp,
-                    exit,
-                    prevRow: row,
-                    entry,
-                    base,
-                    balance,
-                    pricePrecision,
-                    enterTs,
-                    gain,
-                    maker,
-                    loss,
-                    cnt,
-                    mData,
-                    pos,
-                    sl,
-                    tp,
-                    entryLimit,
-                });
-                w = 0;
-                l += 1;
-                _fillSellOrder(ret);  
-                }if (pos && tp && prevRow.h >= tp && prevRow.l < tp) {
-                    /* FILL TP ORDER IF ANY */
-                    //console.log("FILL @ TP");
-                    exit = tp
-                    exit = toFixed(exit, pricePrecision);
-                    const ret = fillSellOrder({
-                        exitLimit: sl,
-                        exit,
-                        maker,
-                        prevRow,
-                        entry,
-                        base,
-                        balance,
-                        pricePrecision,
-                        enterTs,
-                        gain,
-                        loss,
-                        cnt,
-                        mData,
-                        pos,
-                        sl,
-                        tp,
-                        entryLimit,
-                    });
-                    l = 0;
-                    w += 1;
-                    _fillSellOrder(ret);
-                } 
-                
-            } else if (tpFirst && tp) {
-                if (pos && tp && prevRow.h >= tp && prevRow.l < tp /* && prevRow.c >= prevRow.o */) {
-                    /* FILL TP ORDER IF ANY */
-                    //console.log("FILL @ TP");
-                    exit = tp
-                    exit = toFixed(exit, pricePrecision);
-                    const ret = fillSellOrder({
-                        exitLimit: sl,
-                        exit,
-                        maker,
-                        prevRow,
-                        entry,
-                        base,
-                        balance,
-                        pricePrecision,
-                        enterTs,
-                        gain,
-                        loss,
-                        cnt,
-                        mData,
-                        pos,
-                        sl,
-                        tp,
-                        entryLimit,
-                    });
-                    l = 0;
-                    w += 1;
-                    _fillSellOrder(ret);
-                }  
-                if (
-                    pos &&
-                    sl &&
-                    sl <= entry &&
-                    prevRow.l <= sl &&
-                    isGreen                                                                
-                ) {
-                    exit = row.o;
+                if (pos && sl && slCond) {
+                    //console.log("FILL @ SL");
+                    exit = row.o <= sl! ? row.o : sl;
                     exit = toFixed(exit, pricePrecision);
                     exit = toFixed(exit, pricePrecision);
                     const ret = fillSellOrder({
@@ -260,9 +169,96 @@ export const strategy = ({
                     w = 0;
                     l += 1;
                     _fillSellOrder(ret);
-                };
+                }
+                if (pos && tp && tpCond) {
+                    /* FILL TP ORDER IF ANY */
+                    //console.log("FILL @ TP");
+                    exit = row.o >= tp! ? row.o : tp;
+                    exit = toFixed(exit, pricePrecision);
+                    const ret = fillSellOrder({
+                        exitLimit: sl,
+                        exit,
+                        maker,
+                        prevRow,
+                        entry,
+                        base,
+                        balance,
+                        pricePrecision,
+                        enterTs,
+                        gain,
+                        loss,
+                        cnt,
+                        mData,
+                        pos,
+                        sl,
+                        tp,
+                        entryLimit,
+                    });
+                    l = 0;
+                    w += 1;
+                    _fillSellOrder(ret);
+                }
+            } else if (tpFirst && tp) {
+                if (
+                    pos &&
+                    tp && tpCond
+                ) {
+                    /* FILL TP ORDER IF ANY */
+                    //console.log("FILL @ TP");
+                    exit = row.o >= tp! ? row.o : tp;
+                    exit = toFixed(exit, pricePrecision);
+                    const ret = fillSellOrder({
+                        exitLimit: sl,
+                        exit,
+                        maker,
+                        prevRow,
+                        entry,
+                        base,
+                        balance,
+                        pricePrecision,
+                        enterTs,
+                        gain,
+                        loss,
+                        cnt,
+                        mData,
+                        pos,
+                        sl,
+                        tp,
+                        entryLimit,
+                    });
+                    l = 0;
+                    w += 1;
+                    _fillSellOrder(ret);
+                }
+                if (pos && slCond) {
+                    exit = row.o <= sl! ? row.o : sl;
+                    exit = toFixed(exit, pricePrecision);
+                    exit = toFixed(exit, pricePrecision);
+                    const ret = fillSellOrder({
+                        exitLimit: tp,
+                        exit,
+                        prevRow: row,
+                        entry,
+                        base,
+                        balance,
+                        pricePrecision,
+                        enterTs,
+                        gain,
+                        maker,
+                        loss,
+                        cnt,
+                        mData,
+                        pos,
+                        sl,
+                        tp,
+                        entryLimit,
+                    });
+                    w = 0;
+                    l += 1;
+                    _fillSellOrder(ret);
+                }
             }
-       }
+        }
 
         //console.log(`\nLOSS" ${l}\n`);
         if (!pos && buyCond(prevRow)) {

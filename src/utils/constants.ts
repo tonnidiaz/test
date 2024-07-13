@@ -1,3 +1,4 @@
+import { WsOKX } from "@/classes/main-okx";
 import { configDotenv } from "dotenv";
 import { Job } from "node-schedule";
 configDotenv();
@@ -9154,10 +9155,11 @@ export const isMarket = true,
     useCurrRow = true,
     useProdPercs = true;
 
-export let SL = 1//.002//3; //.002//.02//.015//.05//useProdPercs ? .03 : .01//0.03//0.05; //.25//.5,
-export let TP = 1.5//.2//1; //.2//.3//1.1//1.7//useProdPercs ? 1.5 : 1.7//1.5//2//1.5; // 3.5//5.3
+export let SL = 5.5//.002//3; //.002//.02//.015//.05//useProdPercs ? .03 : .01//0.03//0.05; //.25//.5,
+export let TP = 3.5//.2//1; //.2//.3//1.1//1.7//useProdPercs ? 1.5 : 1.7//1.5//2//1.5; // 3.5//5.3
 export const setSL = (v: number) => (SL = v);
 export const setTP = (v: number) => (TP = v);
-
+export let wsOkx: WsOKX = new WsOKX()
+wsOkx.initWs()
 export const checkGreen = true,
-    slFirstAlways = false;
+    slFirstAlways = true; 

@@ -94,8 +94,6 @@ export const strategy = ({
         w = 0,
         c = 0,
         profit: number = 0;
-    maker = 0.001 / 100;
-    taker = 0.001 / 100;
     const pricePrecision = getPricePrecision(pair, platNm);
     const basePrecision = getCoinPrecision(pair, "limit", platNm);
     console.log({pricePrecision, basePrecision});
@@ -145,35 +143,7 @@ export const strategy = ({
             
             //console.log("HAS SL OR TP");
             //console.log({c: prevRow.c, o: prevRow.o, h: prevRow.h, l: prevRow.l, tp, sl, isGreen} )
-              if (pos && tp && row.h >= tp) {
-                    // CHECK IF ORDER WAS FILLED AT TP 
-                    console.log("FILL @ TP");
-                    exit = row.o >= tp ? row.o : tp
-                    exit = toFixed(exit, pricePrecision);
-                    const ret = fillSellOrder({
-                        exitLimit: sl,
-                        exit,
-                        maker,
-                        prevRow,
-                        entry,
-                        base,
-                        balance,
-                        pricePrecision,
-                        enterTs,
-                        gain,
-                        loss,
-                        cnt,
-                        mData,
-                        pos,
-                        sl,
-                        tp,
-                        entryLimit,
-                    });
-                    l = 0;
-                    w += 1;
-                    _fillSellOrder(ret);
-                }  
-              if (
+            if (
                 pos &&
                 sl &&
                 row.l < sl && isGreen                                                      
@@ -204,7 +174,36 @@ export const strategy = ({
                 w = 0;
                 l += 1;
                 _fillSellOrder(ret);
-            }
+            } 
+            if (pos && tp && row.h >= tp) {
+                    // CHECK IF ORDER WAS FILLED AT TP 
+                    console.log("FILL @ TP");
+                    exit = row.o >= tp ? row.o : tp
+                    exit = toFixed(exit, pricePrecision);
+                    const ret = fillSellOrder({
+                        exitLimit: sl,
+                        exit,
+                        maker,
+                        prevRow,
+                        entry,
+                        base,
+                        balance,
+                        pricePrecision,
+                        enterTs,
+                        gain,
+                        loss,
+                        cnt,
+                        mData,
+                        pos,
+                        sl,
+                        tp,
+                        entryLimit,
+                    });
+                    l = 0;
+                    w += 1;
+                    _fillSellOrder(ret);
+                }  
+             
         
               
             
