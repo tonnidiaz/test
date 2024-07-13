@@ -40,6 +40,7 @@ import { IObj } from "./interfaces";
 import { IBot } from "@/models/bot";
 import { instruments } from "./constants";
 import { okxInstrus } from "@/data/okx-instrus";
+import { binanceInfo } from "./binance-info";
 
 const tunedErr = (res: Response, status: number, msg: string, e?: any) => {
     if (e) {
@@ -237,42 +238,43 @@ export function precision(a: number) {
 }
 
 export function getCoinPrecision(
-    baseCcy: string[],
+    pair: string[],
     oType: 'limit' | 'market',
-    plat: "bybit" | "okx"
+    plat: "bybit" | "okx" | "binance"
 ) {
     const instru: IObj | undefined =
-        plat == "bybit"
+        plat == "binance" ? binanceInfo.symbols.find(el=> el.baseAsset == pair[0] && el.quoteAsset == pair[1]) : (plat == "bybit"
             ? instruments.find(
                   (el) =>
-                      el.baseCoin == baseCcy[0] && el.quoteCoin == baseCcy[1]
+                      el.baseCoin == pair[0] && el.quoteCoin == pair[1]
               )
             : okxInstrus.find(
-                  (el) => el.baseCcy == baseCcy[0] && el.quoteCcy == baseCcy[1]
-              );
+                  (el) => el.baseCcy == pair[0] && el.quoteCcy == pair[1]
+              ));
     if (!instru) return 0;
-    const pr =
-        plat == "bybit"
+    if (plat == "binance"){return Number(oType == "market" ? instru.quoteAssetPrecision : instru.baseAssetPrecision)}
+    const pr = (plat == "bybit"
             ? oType == "market"
                 ? instru.quotePrecision
                 : instru?.basePrecision
             : oType == "market"
             ? instru.tickSz
-            : instru.lotSz;
+            : instru.lotSz);
     return precision(Number(pr));
 }
-export function getPricePrecision(baseCcy: string[], plat: "bybit" | "okx") {
+export function getPricePrecision(pair: string[], plat: "binance" | "bybit" | "okx") {
     const instru: IObj | undefined =
-        plat == "bybit"
+        plat == "binance" ? binanceInfo.symbols.find(el=> el.baseAsset == pair[0] && el.quoteAsset == pair[1]) : ( plat == "bybit"
             ? instruments.find(
                   (el) =>
-                      el.baseCoin == baseCcy[0] && el.quoteCoin == baseCcy[1]
+                      el.baseCoin == pair[0] && el.quoteCoin == pair[1]
               )
             : okxInstrus.find(
-                  (el) => el.baseCcy == baseCcy[0] && el.quoteCcy == baseCcy[1]
-              );
+                  (el) => el.baseCcy == pair[0] && el.quoteCcy == pair[1]
+              ));
     if (!instru) return 0;
-    return precision(
+    
+    return plat == 'binance' ? Number(instru.quoteAssetPrecision) :  precision(
         Number(instru[plat == "bybit" ? "minPricePrecision" : "tickSz"])
     );
 }

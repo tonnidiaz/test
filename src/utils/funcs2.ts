@@ -205,7 +205,7 @@ export const calcEntryPrice = (row: IObj, side: "buy" | "sell") => {
 export const calcSL = (entry: number) => {
     return entry * (1 - SL / 100);
 };
-export const calcTP = (row: any, entry: number) => entry * (1 + TP / 100);
+export const calcTP = (entry: number) => entry * (1 + TP / 100);
 export const getInterval = (m: number, plt: "bybit" | "okx" | "binance") => {
     return plt == "okx"
         ? m >= 60

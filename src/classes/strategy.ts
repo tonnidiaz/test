@@ -13,13 +13,14 @@ export class Strategy {
         return false;
     }
     run({
-        df, 
+        df,
         balance,
         lev = 1,
         pair,
         maker,
         taker,
-        trades
+        platNm,
+        trades,
     }: {
         df: IObj[];
         trades: IObj[];
@@ -29,6 +30,7 @@ export class Strategy {
         maker: number;
         taker: number;
         pair: string[];
+        platNm: "binance" | "bybit" | "okx";
     }) {
         console.log(
             `\nRunning ${this.name} strategy [${this.desc}] \t ${pair}\n`
@@ -42,7 +44,8 @@ export class Strategy {
             lev,
             maker,
             taker,
-            trades
+            trades,
+            platNm,
         });
         return mData;
     }

@@ -15,6 +15,7 @@ import {
 } from "bybit-api";
 import { Candle, RestClient, Trade } from "okx-api";
 import dotenv from "dotenv";
+import { ITrade } from "@/utils/interfaces";
 
 dotenv.config();
 
@@ -47,7 +48,9 @@ export class Platform {
         start?: number;
         symbol: string;
         savePath?: string;
-    }): Promise<any[] | undefined> {
+    }): Promise<ITrade[] | undefined> {
+        console.log(`\nGETTING TRADES FOR ${symbol}...\n`);
+        if (savePath){ensureDirExists(savePath)}
         return;
     }
 }

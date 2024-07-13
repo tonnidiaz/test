@@ -13,3 +13,7 @@ export interface IAddress  {
     phone: string,
     name: string,
 }
+
+export interface ITrade {
+    ts: string, symbol: string, px: number, sz: number
+}

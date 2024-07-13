@@ -8,7 +8,12 @@ import {
     parseKlines,
     tuPath,
 } from "./funcs2";
-import { klinesDir, klinesRootDir } from "./constants";
+import {
+    klinesDir,
+    klinesRootDir,
+    tradesRootDir,
+    withTrades,
+} from "./constants";
 import { existsSync } from "fs";
 import { getPricePrecision, readJson, toFixed } from "./functions";
 import { objStrategies, strategies } from "@/strategies";
@@ -17,13 +22,13 @@ import { platforms } from "./consts";
 
 const corsOptions: CorsOptions = { origin: "*" };
 const io = new Server({ cors: corsOptions }); // yes, no server arg here; it's not required
-let prevData: IObj | null = null
+let prevData: IObj | null = null;
 // attach stuff to io
 io.on("connection", (client) => {
     console.log(`${client.id} CONNECTED`);
 
-    if (prevData){
-        io.emit('backtest', prevData)
+    if (prevData) {
+        io.emit("backtest", prevData);
         //prevData = null
     }
     io.emit("event", "This is event");
@@ -56,10 +61,10 @@ io.on("connection", (client) => {
                 useFile,
                 file,
                 isParsed,
-                clId
+                clId,
             } = data;
             console.log("ON BACKTEST");
-            prevData = null
+            prevData = null;
             const startTs = Date.parse(start),
                 endTs = Date.parse(end);
 
@@ -90,6 +95,9 @@ io.on("connection", (client) => {
                     : tuPath(
                           `${klinesRootDir}/${platName.toLowerCase()}/${year}/${symbol}_${interval}m.json`
                       );
+                const tradesPath = tuPath(
+                    `${tradesRootDir}/${platName.toLocaleLowerCase()}/${year}/trades.json`
+                );
 
                 if (!existsSync(klinesPath!)) {
                     const err = {
@@ -97,6 +105,12 @@ io.on("connection", (client) => {
                     };
                     client.emit("backtest", err);
                     return;
+                }
+                if (existsSync(tradesPath)) {
+                    trades = await require(tradesPath);
+                    console.log({
+                        trades: [trades[0], trades[trades.length - 1]],
+                    });
                 }
             } else if (!offline && !useFile) {
                 //const bot = new Bot({name:"Temp", base: baseCcy[0], ccy: baseCcy[1]})
@@ -111,32 +125,40 @@ io.on("connection", (client) => {
                     client.emit("err", "Failed to get klines");
                     return;
                 }
-                const r2 = await plat.getTrades({
-                    start: startTs,
-                    end: endTs,
-                    symbol,
-                });
+                const r2 = !withTrades
+                    ? []
+                    : await plat.getTrades({
+                          start: startTs,
+                          end: endTs,
+                          symbol,
+                      });
                 if (!r2) {
                     client.emit("err", "Failed to get trades");
                     return;
                 }
-                trades = r2
+                trades = r2;
                 klines = r;
             }
             if (offline && !useFile)
                 console.log(`\nKLINES_PATH: ${klinesPath!}\n`);
             if (useFile) console.log(`\nUse file\n`);
-             console.log({start, end});
+            console.log({ start, end });
             klines =
                 useFile && file
                     ? JSON.parse(file.toString("utf-8"))
                     : offline
-                    ? (await require(klinesPath!))
+                    ? await require(klinesPath!)
                     : klines;
-               
-                console.log({startTs, m: Number(klines[0][0]), endTs});
-                console.log({startTs: new Date(startTs), m: Number(klines[0][0]), endTs: new Date(endTs)});
-            klines = klines.filter(el=> startTs <= Number(el[0]) && Number(el[0]) <= endTs)
+
+            console.log({ startTs, m: Number(klines[0][0]), endTs });
+            console.log({
+                startTs: new Date(startTs),
+                m: Number(klines[0][0]),
+                endTs: new Date(endTs),
+            });
+            klines = klines.filter(
+                (el) => startTs <= Number(el[0]) && Number(el[0]) <= endTs
+            );
             client.emit("backtest", "Analyzing data...");
             klines = isParsed && useFile ? klines : parseKlines(klines);
             let df = chandelierExit(
@@ -170,18 +192,19 @@ io.on("connection", (client) => {
                 pGain,
                 maker: plat.maker,
                 taker: plat.taker,
+                platNm: platName.toLowerCase() as any
             });
             retData.profit = toFixed(
                 retData.balance - bal,
                 getPricePrecision(baseCcy, platName as any)
             );
             retData = { ...retData, base: baseCcy[0], ccy: baseCcy[1] };
-        
+
             console.log(`TRADES: ${retData.trades}`);
             console.log(`PROFIT: ${retData.profit}\n`);
-            retData = { data: retData, clId }
-            prevData = retData
-            io.emit("backtest", retData );
+            retData = { data: retData, clId };
+            prevData = retData;
+            io.emit("backtest", retData);
             return retData;
         } catch (e: any) {
             console.log(e.response?.data ?? e);

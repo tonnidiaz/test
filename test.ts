@@ -801,9 +801,4 @@ const trades = [
     }
 ]
 
-let res: any[] = []
 
-
-for (let prevRow of res){
-    const slTrade = trades.find(trade => Number(trade.ts) >= Date.parse(prevRow.ts) && Number(trade.px) <= prevRow);
-}

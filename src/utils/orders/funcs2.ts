@@ -19,8 +19,8 @@ import { objStrategies } from "@/strategies";
 
 export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     const plat = bot.platform == "okx" ? new OKX(bot) : new Bybit(bot);
-
-    const klines = await plat.getKlines({
+    botLog(bot, "SIM: GETTING KLINES...")
+    /* const klines = await plat.getKlines({
         end: Date.now() - bot.interval * 60 * 1000,
     });
 
@@ -34,7 +34,7 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     console.log(row);
     const ts = new Date(
         Date.parse(row.ts) + bot.interval * 60 * 1000
-    ).toISOString();
+    ).toISOString(); */
 
     const strategy = objStrategies[bot.strategy - 1];
     botLog(bot, strategy);
@@ -44,7 +44,7 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     const isClosed = order?.is_closed;
 
     /* ------ START ---------- */
-    if ((isClosed || !order) && strategy.buyCond(row)) {
+    if ((isClosed || !order) && true /* buyCond */) {
         // Place buy order
         console.log(`[ ${bot.name} ]\tHAS BUY SIGNAL > GOING IN`);
 
@@ -52,12 +52,12 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
             ? order.new_ccy_amt - Math.abs(order.sell_fee)
             : bot.start_amt;
 
-        const entryLimit = calcEntryPrice(row, "buy");
+        const entryLimit = 0//calcEntryPrice(row, "buy");
         botLog(bot, {
-            c: row.c,
-            o: row.o,
             entryLimit,
         });
+
+        const ts = new Date()
         const res = await placeTrade({
             bot: bot,
             ts: parseDate(ts),
@@ -69,11 +69,9 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
 
         if (res) {
             botLog(bot, "PLACING ALGO SELL ORDER...");
-            const tp = calcTP(row, res.buy_price);
+            const tp = calcTP(res.buy_price);
             const sl = calcSL(res.buy_price);
             botLog(bot, {
-                c: row.c,
-                o: row.o,
                 entry: res.buy_price,
                 exitLimit: tp,
                 sl,
