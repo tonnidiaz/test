@@ -198,11 +198,8 @@ const saveFp =
     "src/data/dfs/binance/SOL-USDT_15m_2024-05-01 00 00 00+02:00_2024-06-11 23 59 00+02:00.json";
 //klinesToDf(fp, saveFp)
 
-//getTrades({symbol: "SOLUSDT", start: Date.parse("2021-01-02 00:00:00+02:00"), end: Date.parse("2021-01-02 23:59:00+02:00") });
 
-const mergeTrades = ({symbol, start, platNm = "binance"}: {symbol: string, start: number, platNm?: string }) =>{
-    const startDate = parseDate(new Date(start))
-    const year = startDate.split('-')[0]
+const mergeTrades = ({symbol, year, platNm = "binance"}: {symbol: string, year: number, platNm?: string }) =>{
 
     const dir = `${tradesRootDir}/${platNm}/${year}`
     if (!existsSync(dir))
@@ -224,4 +221,7 @@ const mergeTrades = ({symbol, start, platNm = "binance"}: {symbol: string, start
     console.log("DONE MERGING TRADES");
 }
 
-mergeTrades({symbol: "SOLUSDT", start: Date.parse("2021-01-02 00:00:00+02:00")})
+mergeTrades({symbol: "SOLUSDT", year: 2021})
+
+//getTrades({symbol: "SOLUSDT", start: Date.parse("2021-01-03 00:31:18+02:00"), end: Date.parse("2021-01-10 23:59:00+02:00") });
+

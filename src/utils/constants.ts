@@ -9158,4 +9158,4 @@ export let TP = .2//.2//.3//1.1//1.7//useProdPercs ? 1.5 : 1.7//1.5//2//1.5; // 
 export const setSL = (v: number) => (SL = v);
 export const setTP = (v: number) => (TP = v);
 
-export const withTrades = false, slFirstAlways = false
+export const /* withTrades = false, */ slFirstAlways = false 

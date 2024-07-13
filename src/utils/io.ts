@@ -12,7 +12,6 @@ import {
     klinesDir,
     klinesRootDir,
     tradesRootDir,
-    withTrades,
 } from "./constants";
 import { existsSync } from "fs";
 import { getPricePrecision, readJson, toFixed } from "./functions";
@@ -62,6 +61,7 @@ io.on("connection", (client) => {
                 file,
                 isParsed,
                 clId,
+                T
             } = data;
             console.log("ON BACKTEST");
             prevData = null;
@@ -106,12 +106,15 @@ io.on("connection", (client) => {
                     client.emit("backtest", err);
                     return;
                 }
-                if (existsSync(tradesPath)) {
+                if (T){
+                  if (existsSync(tradesPath)) {
                     trades = await require(tradesPath);
                     console.log({
                         trades: [trades[0], trades[trades.length - 1]],
                     });
+                }  
                 }
+                
             } else if (!offline && !useFile) {
                 //const bot = new Bot({name:"Temp", base: baseCcy[0], ccy: baseCcy[1]})
                 //const bybit = new Bybit(bot)
@@ -125,7 +128,7 @@ io.on("connection", (client) => {
                     client.emit("err", "Failed to get klines");
                     return;
                 }
-                const r2 = !withTrades
+                const r2 = !T
                     ? []
                     : await plat.getTrades({
                           start: startTs,

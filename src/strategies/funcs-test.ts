@@ -8,7 +8,6 @@ import {
     noFees,
     slFirstAlways,
     useSwindLow,
-    withTrades,
 } from "@/utils/constants";
 import {strategy as strWithTrades} from './funcs-test copy 3'
 import { parseDate } from "@/utils/funcs2";
@@ -46,7 +45,7 @@ export const strategy = ({
     platNm: 'binance' | 'bybit' | 'okx'
 }) => {
 
-    if (withTrades) return strWithTrades({
+    if (trades.length) return strWithTrades({
         df,
         balance,
         buyCond,
@@ -84,6 +83,7 @@ export const strategy = ({
     taker = 0.001 / 100;
     const pricePrecision = getPricePrecision(pair, platNm);
     const basePrecision = getCoinPrecision(pair, "limit", platNm);
+    console.log({pricePrecision, basePrecision});
     balance = toFixed(balance, pricePrecision);
     //df = df.slice(20);
     if (noFees) {
@@ -125,10 +125,12 @@ export const strategy = ({
             sl = toFixed(entry * (1 - SL / 100), pricePrecision);
             buyFees += ret.fee;
         };
+        const isGreen = prevRow.c >= prevRow.o
         if (pos) {
+            
             console.log("HAS SL OR TP");
-
-            if (slFirstAlways || prevRow.c >= prevRow.o){
+            console.log({c: prevRow.c, o: prevRow.o, h: prevRow.h, l: prevRow.l, tp, sl, isGreen} )
+            if (slFirstAlways || isGreen/* SL FIRST */){
                  
              if (
                 pos &&
@@ -138,7 +140,6 @@ export const strategy = ({
                 prevRow.c >= prevRow.o                                                                
             ) {
                 exit = row.o;
-                exit = toFixed(exit, pricePrecision);
                 exit = toFixed(exit, pricePrecision);
                 const ret = fillSellOrder({
                     exitLimit: tp,
@@ -162,7 +163,7 @@ export const strategy = ({
                 w = 0;
                 l += 1;
                 _fillSellOrder(ret);
-            } if (pos && tp && prevRow.h >= tp) {
+            } if (pos && tp && prevRow.h >= tp && prevRow.l < tp) {
                     /* FILL TP ORDER IF ANY */
                     console.log("FILL @ TP");
                     exit = tp
@@ -192,7 +193,7 @@ export const strategy = ({
                 } 
             }
             else{
-                if (pos && tp && prevRow.h >= tp /* && prevRow.c >= prevRow.o */) {
+                if (pos && tp && prevRow.h >= tp && prevRow.l < tp /* && prevRow.c >= prevRow.o */) {
                     /* FILL TP ORDER IF ANY */
                     console.log("FILL @ TP");
                     exit = tp

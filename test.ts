@@ -1,3 +1,5 @@
+import { parseDate } from "@/utils/funcs2";
+
 const trades = [
     {
         "instId": "SOL-USDT",
@@ -801,4 +803,10 @@ const trades = [
     }
 ]
 
-
+console.log(parseDate(new Date()));
+const json = require('./src/data/trades/binance/2021/trades.json')
+console.log(json.findIndex(el=>{
+    const ts = new Date(el.ts)
+    console.log(ts);
+    return el.ts == "2021-01-04 23:18:09+02:00" }));
+console.log(parseDate(new Date()));
