@@ -1,4 +1,4 @@
-import { noFees } from "@/utils/constants";
+import { isStopOrder, noFees } from "@/utils/constants";
 import { toFixed } from "@/utils/functions";
 import { IObj } from "@/utils/interfaces";
 
@@ -92,7 +92,9 @@ export const fillSellOrder = ({
     pos: boolean;
     isSl?: boolean;
 }) => {
-    console.log({ exitLimit, exit, entry });
+
+    const _isTp =  !isStopOrder ? exit >= entry : !isSl
+    console.log({ exitLimit, exit, entry, base });
     //console.log(`MIKA: ${exit >= entry ? "gain" : "loss"}`);
     console.log("FILL SELL ORDER");
     balance = base * exit
@@ -109,7 +111,7 @@ export const fillSellOrder = ({
         fill: exitLimit,
         enterTs,
         ts,
-        c: `${isSl ? 'SL' : 'TP'} ${exit}`,
+        c: `${!_isTp ? 'SL' : 'TP'}: ${exit}`,
         balance: `[${base}] \t ${balance} { ${((exit - entry)/entry * 100).toFixed(2)}% } fee: ${fee}`,
     });
     /* Position now filled */
@@ -119,7 +121,7 @@ export const fillSellOrder = ({
     /* ADD FUNDS BACK TO PORTFOLIO */
 
     //balance += _bal;
-    if (!isSl) gain += 1;
+    if (_isTp) gain += 1;
     else loss += 1;
     cnt += 1;
     (entryLimit = null), (tp = null), (sl = null), (pos = false);

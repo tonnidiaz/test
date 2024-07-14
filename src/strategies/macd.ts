@@ -47,11 +47,23 @@ class MACD_MA extends Strategy {
     desc: string = `Enter: macd > 0 && sma20 >  sma50, Exit: oposite`;
 
     buyCond(row: IObj): boolean {
-        return MACD_EXT.prototype.buyCond(row) && MA_ONLY.prototype.buyCond(row)
+        return MACD_EXT.prototype.buyCond(row) || MA_ONLY.prototype.buyCond(row)
     }
 
     sellCond(row: IObj): boolean {
-        return MACD_EXT.prototype.sellCond(row) && MA_ONLY.prototype.sellCond(row)
+        return MACD_EXT.prototype.sellCond(row) || MA_ONLY.prototype.sellCond(row)
+    }
+}
+class MACD_HL_HA extends Strategy {
+    name: string = "MACD_HL_HA";
+    desc: string = `Enter: macd > 0 && sma20 >  sma50, Exit: oposite`;
+
+    buyCond(row: IObj): boolean {
+        return MACD_EXT.prototype.buyCond(row) && HL_HA.prototype.buyCond(row)
+    }
+
+    sellCond(row: IObj): boolean {
+        return MACD_EXT.prototype.sellCond(row) && HL_HA.prototype.sellCond(row)
     }
 }
 class SMA_EXT extends Strategy {
@@ -172,5 +184,5 @@ export const strategies = [
     new CE_MACD(),
     new MA_RSI(),
     new RITA(),
-    new HL(), new HL_HA()
+    new HL(), new HL_HA(), new MACD_HL_HA()
 ];

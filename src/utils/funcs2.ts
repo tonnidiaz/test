@@ -73,9 +73,9 @@ export const heikinAshi = (df: IObj[], pair: string[]) => {
 
 const tuMacd2 = (df: IObj[]) => {
     const def = false;
-    const fast = def ? 12 : 12, // 1,//12,
-        slow = def ? 26 : 25, //26,
-        signal = def ? 9 : 10; //9;
+    const fast = def ? 12 : 5, //12, // 1,//12,
+        slow = def ? 26 : 12,//25, //26,
+        signal = def ? 9 : 5//10; //9;
 
     const prices = df.map((el) => el[useHaClose ? "ha_c" : "c"]);
 
@@ -102,39 +102,11 @@ const tuMacd2 = (df: IObj[]) => {
         histogram: histogram,
     }; */
 };
-const tuMacd = (df: IObj[]) => {
-    const closings = df.map((el) => el[useHaClose ? "ha_c" : "c"]);
-    const fastLen = 12, //10, //2,//5, //26
-        slowLen = 26, //58, //7//13,//100
-        signalLen = 9; //8; //6
 
-    const smaSrc: string = "ema";
-    const smaSignal: string = "ema";
-
-    const fastMa =
-        smaSrc == "sma"
-            ? sma(closings, { period: fastLen })
-            : ema(closings, { period: fastLen });
-    const slowMa =
-        smaSrc == "sma"
-            ? sma(closings, { period: slowLen })
-            : ema(closings, { period: slowLen });
-    const md = fastMa.map((e, i) => e - slowMa[i]);
-    const signal =
-        smaSignal == "sma"
-            ? sma(md, { period: signalLen })
-            : ema(md, { period: signalLen });
-
-    for (let i = 0; i < df.length; i++) {
-        const hist = md[i] - signal[i];
-        df[i].macd = hist;
-    }
-    return df;
-};
 //export const chandelierExit = (df: IObj[], mult = 1.8, atrLen = 1) => {
 export const chandelierExit = (df: IObj[]) => {
-    const mult = 1.2,
-        atrLen = 1;
+    const mult = 2,
+        atrLen = 5;
     const highs = df.map((e) => e[useHaClose ? "ha_h" : "c"]);
     const lows = df.map((e) => e[useHaClose ? "ha_l" : "c"]);
     const closings = df.map((e) => e[useHaClose ? "ha_c" : "c"]);
@@ -144,8 +116,8 @@ export const chandelierExit = (df: IObj[]) => {
     const ATR = atr(highs, lows, closings, { period: atrLen });
     const _atr = ATR.atrLine;
     const rsiLen = 2,
-        fastLen = 20 /* 15 */,
-        slowLen = 50; /* 50 */
+        fastLen = 5 /* 15 */,
+        slowLen = 15; /* 50 */
 
     const sma20 = ema(closings, { period: fastLen });
     const sma50 = ema(closings, { period: slowLen }); /* TODO: 4 */

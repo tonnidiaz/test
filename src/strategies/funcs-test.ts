@@ -6,11 +6,13 @@ import {
     TP,
     checkGreen,
     isMarket,
+    isStopOrder,
     noFees,
     slFirstAlways,
     useSwindLow,
 } from "@/utils/constants";
 import {strategy as strWithTrades} from './funcs-test copy 3'
+import {strategy as strWithSellCond} from './funcs-test copy 9 - sellcond'
 import { strategy as strWithGreenCheck } from "./funcs-test copy 5 - isGreen check";
 
 import { parseDate } from "@/utils/funcs2";
@@ -48,6 +50,17 @@ export const strategy = ({
     platNm: 'binance' | 'bybit' | 'okx'
 }) => {
 
+    if (!isStopOrder) return strWithSellCond({
+        df,
+        balance,
+        buyCond,
+        sellCond,
+        lev,
+        pair,
+        maker,
+        taker,
+        trades, platNm
+    })
     if (trades.length) return strWithTrades({
         df,
         balance,
@@ -139,16 +152,13 @@ export const strategy = ({
             buyFees += ret.fee;
         };
         const isGreen = prevRow.c >= prevRow.o
-        if (pos) {
-            
-            //console.log("HAS SL OR TP");
-            //console.log({c: prevRow.c, o: prevRow.o, h: prevRow.h, l: prevRow.l, tp, sl, isGreen} )
+        const _sellFunc = ()=>{
             if (
                 pos &&
                 sl &&
-                row.l < sl && isGreen                                                      
+                prevRow.l <= sl && isGreen                                                      
             ) {
-                exit = row.o <= sl ? row.o : sl//row.o;
+                exit = row.o //<= sl ? row.o : sl//row.o;
                 exit = toFixed(exit, pricePrecision);
                 exit = toFixed(exit, pricePrecision);
                 const ret = fillSellOrder({
@@ -175,10 +185,10 @@ export const strategy = ({
                 l += 1;
                 _fillSellOrder(ret);
             } 
-            if (pos && tp && row.h >= tp) {
+           if (pos && tp && (prevRow.l >= tp) /* && row.o >= entry */) {
                     // CHECK IF ORDER WAS FILLED AT TP 
                     console.log("FILL @ TP");
-                    exit = row.o >= tp ? row.o : tp
+                    exit = row.o
                     exit = toFixed(exit, pricePrecision);
                     const ret = fillSellOrder({
                         exitLimit: sl,
@@ -202,10 +212,13 @@ export const strategy = ({
                     l = 0;
                     w += 1;
                     _fillSellOrder(ret);
-                }  
-             
-        
-              
+                } 
+        }
+        if (pos) {
+            
+            //console.log("HAS SL OR TP");
+            //console.log({c: prevRow.c, o: prevRow.o, h: prevRow.h, l: prevRow.l, tp, sl, isGreen} )
+_sellFunc()
             
         }
         if (!pos && skip){
@@ -236,6 +249,7 @@ export const strategy = ({
                     pos,
                 });
                 _fillBuyOrder(ret);
+                //if (pos) _sellFunc()
             } else {
                 console.log(`[ ${row.ts} ] Limit buy order at ${entryLimit}`);
             }

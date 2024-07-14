@@ -259,7 +259,7 @@ export const strategy = ({
         //console.log(`\nLOSS" ${l}\n`);
         if (!pos && buyCond(prevRow)) {
             /* PLACE MARKET BUY ORDER */
-            entryLimit = isMarket ? row.o : prevRow.ha_c;
+            entryLimit = isMarket ? (exit > 0 ? exit : row.o ): prevRow.ha_c;
             entryLimit = toFixed(entryLimit!, pricePrecision);
             enterTs = row.ts;
 
@@ -280,7 +280,7 @@ export const strategy = ({
                     pos,
                 });
                 _fillBuyOrder(ret);
-                //sellFunc()
+                sellFunc()
             } else {
                 console.log(`[ ${row.ts} ] Limit buy order at ${entryLimit}`);
             }

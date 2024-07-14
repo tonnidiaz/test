@@ -106,6 +106,7 @@ export const strategy = ({
             enterTs = row.ts;
             tp = toFixed(entry * (1 + TP / 100), pricePrecision);
             sl = toFixed(entry * (1 - SL / 100), pricePrecision);
+            // pos = prevRow.ha_l <= entry && entry <= prevRow.ha_h;
             entryLimit = null;
             buyFees += ret.fee;
             //skip = true;
@@ -134,17 +135,47 @@ export const strategy = ({
             _fillSellOrder(ret);
         }
         const isGreen = prevRow.c >= prevRow.o;
+        if (!pos && entryLimit) {
+            if (prevRow.l <= entryLimit) {
+                entry = toFixed(entryLimit, pricePrecision);
+
+                const ret = fillBuyOrder({
+                    entry,
+                    prevRow: row,
+                    entryLimit,
+                    enterTs,
+                    taker,
+                    base,
+                    balance, //: _bal,
+                    basePrecision,
+                    mData: { ...mData },
+                    pos,
+                });
+                _fillBuyOrder(ret);
+            } else if (
+                !cancelOnCond ||
+                sellCond(prevRow, entryLimit, df, i - 1)
+            ) {
+                console.log(`${row.ts} \t CANCELLING BUY ORDER`);
+                mData["data"].push({
+                    side: `buy \t {h:${prevRow.h}, l: ${prevRow.l}}`,
+                    c: entryLimit,
+                    pricePrecision,
+                    enterTs,
+                    ts: prevRow.ts,
+                    cancel: true,
+                });
+                entryLimit = null;
+                pos = false;
+            }
+        }
+
         const _tp = entry * (1 + TP / 100);
-        const isTp = prevRow.c >= _tp && isGreen;
+        const isTp = prevRow.h >= _tp && isGreen;
         const isSl = prevRow.l <= sl! && isGreen
-
-
         if (pos) {
             console.log("HAS POS");
             if (exitLimit && exitLimit <= prevRow.c && prevRow.l >= entry) {
-                exit = toFixed(row.o, pricePrecision);
-                _fillSell(exit, row);
-            }else if ((isTp) && !exitLimit){
                 exit = toFixed(row.o, pricePrecision);
                 _fillSell(exit, row);
             }
@@ -152,8 +183,9 @@ export const strategy = ({
 
         if (!pos && !entryLimit && buyCond(prevRow)) {
             /* PLACE MARKET BUY ORDER */
-            entryLimit = row.o
+            entryLimit = isMarket ? row.o : prevRow.ha_c;
             entryLimit = toFixed(entryLimit!, pricePrecision);
+            //entry = entryLimit;
             enterTs = row.ts;
 
             if (isMarket) {
@@ -178,19 +210,25 @@ export const strategy = ({
                 console.log(`[ ${row.ts} ] Limit buy order at ${entryLimit}`);
             }
         } else if (pos) {
-            if (!exitLimit && (sellCond(prevRow, entry) || isSl)) {
+            if (!exitLimit && (sellCond(prevRow, entry) || isSl || isTp)) {
                 console.log("SELL COND");
 
-                exitLimit = prevRow.c// * (1 + .6/100)
+                exitLimit = prevRow.ha_c;
                 exitLimit = toFixed(exitLimit!, pricePrecision);
                 enterTs = row.ts;
 
-                if (isSl){
+                if (isSl || isTp){
                     exit = toFixed(row.o, pricePrecision)
                     _fillSell(exit, theRow)
 
                 }
-            }
+            } /* else if (isSl) {
+                exit = toFixed(row.o, pricePrecision);
+                _fillSell(exit, row);
+            } else if (isTp) {
+                exit = toFixed(row.o, pricePrecision);
+                _fillSell(exit, row);
+            } */
         }
     }
 

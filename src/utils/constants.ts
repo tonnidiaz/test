@@ -9145,20 +9145,20 @@ export const dfsRootDir = "src/data/dfs",
     tradesRootDir = "src/data/trades";
 
 export const isMarket = true,
-    cancelOnCond = false,
-    useHaClose = true,
+    cancelOnCond = true,
+    useHaClose = false,
     demo = true,
-    isStopOrder = true,
+    isStopOrder = false,
     useSwindLow = false,
     noFees = false,
     usePricePc = false,
     useCurrRow = true,
-    useProdPercs = true;
+    useProdPercs = false;
 
-export let SL = .1//5.5//.002//3; //.002//.02//.015//.05//useProdPercs ? .03 : .01//0.03//0.05; //.25//.5,
-export let TP = .05//3.5//.2//1; //.2//.3//1.1//1.7//useProdPercs ? 1.5 : 1.7//1.5//2//1.5; // 3.5//5.3
+export let SL = 7//3; //.002//.02//.015//.05//useProdPercs ? .03 : .01//0.03//0.05; //.25//.5,
+export let TP = 9.5//1; //.2//.3//1.1//1.7//useProdPercs ? 1.5 : 1.7//1.5//2//1.5; // 3.5//5.3
 export const setSL = (v: number) => (SL = v);
 export const setTP = (v: number) => (TP = v);
 
-export const checkGreen = true,
-    slFirstAlways = false; 
+export const checkGreen = false,
+    slFirstAlways = true; 
