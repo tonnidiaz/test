@@ -120,11 +120,8 @@ export const chandelierExit = (df: IObj[]) => {
         slowLen = 2; /* 50 */
 
     const sma20 = ema(closings, { period: fastLen });
-    const sma50 = ema(closings, { period: slowLen }); /* TODO: 4 */
-    const sma_pred_20 = ema(closings, { period: 15 }); /* TODO: 4 */
-    const sma_pred_50 = ema(closings, { period: 90 }); /* TODO: 4 */
+    const sma50 = ema(closings, { period: slowLen });
     const _rsi = rsi(closings, { period: rsiLen });
-    const bb = bollingerBands(closings, { period: 20 });
     let sir = 1;
 
     const { histogram, macdLine, signalLine } = tuMacd2(df);
@@ -140,11 +137,7 @@ export const chandelierExit = (df: IObj[]) => {
         df[i].sma_20 = sma20[i];
         df[i].sma_50 = sma50[i];
 
-        df[i].sma_pred_20 = sma_pred_20[i]
-        df[i].sma_pred_50 = sma_pred_50[i]
         df[i]["rsi"] = _rsi[i];
-        df[i].bb_lower = bb.lower[i];
-        df[i].bb_upper = bb.upper[i];
 
         /* MACD */
         df[i].hist = histogram[i];
