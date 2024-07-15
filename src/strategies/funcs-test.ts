@@ -1,7 +1,7 @@
 import { fillBuyOrder, fillSellOrder } from "./utils/functions";
 import {
     MAKER_FEE_RATE,
-    SL,
+    SL, SL2,
     TAKER_FEE_RATE,
     TP,
     checkGreen,
@@ -145,18 +145,20 @@ export const strategy = ({
         if (!pos && entryLimit) {
             let goOn = true,
                 isSl = false;
-            const sl = entry * (1 + SL / 100);
+            const sl = entry * (1 + SL2 / 100);
 
             //if (prevRow.l <= prevRow.ha_l /* && prevRow.ha_l < prevRow.h */) {
-            entryLimit = prevRow.ha_o;
+            entryLimit = prevRow.o;
             //}
             if (entryLimit) {
                 if (prevRow.ha_c <= entryLimit) {
+                    /* IF PREV HA CLOSE REACHED ENTRY_LIMIT, PLACE MARKET BUY ORDER */
                     entry = row.o;
-                } /* else if (sl < row.h && sl > row.l && isGreen) {
+                } else if (sl < row.h && sl > row.l && isGreen) {
+                    /* OR IF SL IS REACHED AT CURR ROW, PLACE MARKET BUY */
                 isSl = true;
-                entry = row.o
-            }  */ else {
+                entry = sl
+            }  else {
                     goOn = false;
                 }
 
@@ -189,9 +191,11 @@ export const strategy = ({
             let goOn = true,
                 isSl = false;
               if (prevRow.h > tp /* && prevRow.l <= tp */) {
+                /* IF PREV ROW HIGH REACHED TO, PLACE MARKET SELL */
                 exit = row.o;
             } 
             else if (row.l <= sl) {
+                /* IF ROW REACHES SL PLACE MARKET SELL */
                 exit = sl;
             } else {
                 goOn = false;
