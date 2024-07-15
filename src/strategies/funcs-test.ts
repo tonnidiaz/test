@@ -148,19 +148,10 @@ export const strategy = ({
             const sl = entry * (1 + SL2 / 100);
 
             //if (prevRow.l <= prevRow.ha_l /* && prevRow.ha_l < prevRow.h */) {
-            entryLimit = prevRow.o;
+            //entryLimit = prevRow.c;
             //}
-            if (entryLimit) {
-                if (prevRow.ha_c <= entryLimit) {
-                    /* IF PREV HA CLOSE REACHED ENTRY_LIMIT, PLACE MARKET BUY ORDER */
-                    entry = row.o;
-                } else if (sl < row.h && sl > row.l && isGreen) {
-                    /* OR IF SL IS REACHED AT CURR ROW, PLACE MARKET BUY */
-                isSl = true;
-                entry = sl
-            }  else {
-                    goOn = false;
-                }
+            if (true) {
+                entry = row.o
 
                 if (goOn) {
                     console.log({
