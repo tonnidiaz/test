@@ -150,9 +150,9 @@ export const strategy = ({
                 (((prevRow.l - entryLimit) / entryLimit) * 100).toFixed(2)
             );
 
-            if (prevRow.l <= prevRow.ha_l /* && prevRow.ha_l < prevRow.h */) {
+            //if (prevRow.l <= prevRow.ha_l /* && prevRow.ha_l < prevRow.h */) {
                 entryLimit = prevRow.ha_o;
-            }
+            //}
             if (entryLimit){
                if (prevRow.ha_c <= entryLimit) {
                 entry = row.o;
