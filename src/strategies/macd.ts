@@ -2,7 +2,7 @@ import { Strategy } from "@/classes/strategy";
 import { IObj } from "@/utils/interfaces";
 import { RSI_ONLY } from "./ce-sma";
 
-class MACD_ONLY extends Strategy {
+export class MACD_ONLY extends Strategy {
     name: string = "MACD ONLY";
     desc: string = `Enters: macd > 0  \n  Exit:  macd < 0`;
 
@@ -14,7 +14,7 @@ class MACD_ONLY extends Strategy {
         return row.macd < row.signal && row.c > row.bb_upper;
     }
 }
-class MACD_EXT extends Strategy {
+export class MACD_EXT extends Strategy {
     name: string = "MACD EXT";
     desc: string = `Enters: macd > 0  \n  Exit:  macd < 0`;
 
@@ -28,7 +28,7 @@ class MACD_EXT extends Strategy {
 }
 
 
-class MA_ONLY extends Strategy {
+export class MA_ONLY extends Strategy {
     name: string = "MA_ONLY";
     desc: string = `Enter: sma20 >  sma50, Exit: oposite `;
 
@@ -42,7 +42,7 @@ class MA_ONLY extends Strategy {
     }
 }
 
-class MACD_MA extends Strategy {
+export class MACD_MA extends Strategy {
     name: string = "MACD_MA";
     desc: string = `Enter: macd > 0 && sma20 >  sma50, Exit: oposite`;
 
@@ -54,7 +54,7 @@ class MACD_MA extends Strategy {
         return MACD_EXT.prototype.sellCond(row) || MA_ONLY.prototype.sellCond(row)
     }
 }
-class MACD_HL_HA extends Strategy {
+export class MACD_HL_HA extends Strategy {
     name: string = "MACD_HL_HA";
     desc: string = `Enter: macd > 0 && sma20 >  sma50, Exit: oposite`;
 
@@ -66,7 +66,7 @@ class MACD_HL_HA extends Strategy {
         return MACD_EXT.prototype.sellCond(row) && HL_HA.prototype.sellCond(row)
     }
 }
-class SMA_EXT extends Strategy {
+export class SMA_EXT extends Strategy {
     name: string = "SMA EXT";
     desc: string = `Enter: sma20 >  sma50 && low is < 5% from o, Exit: oposite `;
 
@@ -85,7 +85,7 @@ class SMA_EXT extends Strategy {
     }
 }
 
-class CE_ONLY extends Strategy {
+export class CE_ONLY extends Strategy {
     name: string = "CE_ONLY";
     desc: string = "JUST A CE";
     buyCond(row: IObj): boolean {
@@ -97,7 +97,7 @@ class CE_ONLY extends Strategy {
     }
 }
 
-class CE_MA extends Strategy {
+export class CE_MA extends Strategy {
     name: string = "CE_MA";
     desc: string = "JUST A CE";
     buyCond(row: IObj): boolean {
@@ -110,7 +110,7 @@ class CE_MA extends Strategy {
         );
     }
 }
-class CE_MACD extends Strategy {
+export class CE_MACD extends Strategy {
     name: string = "CE_MACD";
     desc: string = "JUST A CE";
     buyCond(row: IObj): boolean {
@@ -123,7 +123,7 @@ class CE_MACD extends Strategy {
         );
     }
 }
-class MA_RSI extends Strategy {
+export class MA_RSI extends Strategy {
     name: string = "MA_RSI";
     desc: string = "JUST A CE";
     buyCond(row: IObj): boolean {
@@ -136,7 +136,7 @@ class MA_RSI extends Strategy {
         );
     }
 }
-class RITA extends Strategy {
+export class RITA extends Strategy {
     name: string = "RITA";
     desc: string = "JUST A CE";
     buyCond(row: IObj): boolean {
@@ -150,7 +150,7 @@ class RITA extends Strategy {
     }
 }
 
-class HL extends Strategy {
+export class HL extends Strategy {
     name: string = "HL";
     desc: string = "JUST A CE";
     buyCond(row: IObj): boolean {
@@ -161,7 +161,7 @@ class HL extends Strategy {
         return row.c < row.o;
     }
 }
-class HL_HA extends Strategy {
+export class HL_HA extends Strategy {
     name: string = "HL_HA";
     desc: string = "JUST A CE";
     buyCond(row: IObj): boolean {

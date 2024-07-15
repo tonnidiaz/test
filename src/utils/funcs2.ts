@@ -41,7 +41,7 @@ export const parseKlines = (klines: [][]) => {
     return df;
 };
 
-export const heikinAshi = (df: IObj[], pair: string[]) => {
+export const heikinAshi = (df: IObj[]) => {
     console.log("\nBEGIN HA\n");
     const ha: IObj[] = [];
     for (let i = 0; i < df.length; i++) {
@@ -116,11 +116,13 @@ export const chandelierExit = (df: IObj[]) => {
     const ATR = atr(highs, lows, closings, { period: atrLen });
     const _atr = ATR.atrLine;
     const rsiLen = 2,
-        fastLen = 5 /* 15 */,
-        slowLen = 15; /* 50 */
+        fastLen = 1 /* 15 */,
+        slowLen = 2; /* 50 */
 
     const sma20 = ema(closings, { period: fastLen });
     const sma50 = ema(closings, { period: slowLen }); /* TODO: 4 */
+    const sma_pred_20 = ema(closings, { period: 15 }); /* TODO: 4 */
+    const sma_pred_50 = ema(closings, { period: 90 }); /* TODO: 4 */
     const _rsi = rsi(closings, { period: rsiLen });
     const bb = bollingerBands(closings, { period: 20 });
     let sir = 1;
@@ -137,6 +139,9 @@ export const chandelierExit = (df: IObj[]) => {
             pdf = df[i - 1];
         df[i].sma_20 = sma20[i];
         df[i].sma_50 = sma50[i];
+
+        df[i].sma_pred_20 = sma_pred_20[i]
+        df[i].sma_pred_50 = sma_pred_50[i]
         df[i]["rsi"] = _rsi[i];
         df[i].bb_lower = bb.lower[i];
         df[i].bb_upper = bb.upper[i];
