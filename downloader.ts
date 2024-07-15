@@ -23,9 +23,9 @@ import { existsSync, readdirSync, writeFileSync } from "fs";
 import { TestBinance } from "@/classes/test-binance";
 import { TestBybit, TestOKX } from "@/classes/test-platforms";
 import { ITrade } from "@/utils/interfaces";
-let years = [2021, 2023],
+let years = [2021, 2023, 2024],
     symbols = ["SOL", "NEAR", "MASK", "MINA"],
-    intervals = [3, 5];
+    intervals = [60];
 symbols = symbols.map((el) => `${el}/USDT`);
 
 async function downloader({
@@ -182,9 +182,7 @@ const getTrades = async ({symbol, start, end, platNm = "binance"}: {symbol: stri
     });
     console.log(r[0], r[r.length - 1]);
 };
-//dld({platNm: 'binance'})
-//createDf(2024,15,"SOLUSDT")
-//afterKlines()
+
 
 async function test() {
     /* const klines = await bin.getKlines("SOLUSDT", undefined, Date.parse("2024-06-04 14:47:00+02:00"))
@@ -221,7 +219,12 @@ const mergeTrades = ({symbol, year, platNm = "binance"}: {symbol: string, year: 
     console.log("DONE MERGING TRADES");
 }
 
-mergeTrades({symbol: "SOLUSDT", year: 2021})
+//mergeTrades({symbol: "SOLUSDT", year: 2021})
 
 //getTrades({symbol: "SOLUSDT", start: Date.parse("2021-01-03 00:31:18+02:00"), end: Date.parse("2021-01-10 23:59:00+02:00") });
 
+
+
+dld({platNm: 'binance'})
+//createDf(2024,15,"SOLUSDT")
+//afterKlines()

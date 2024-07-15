@@ -1,4 +1,5 @@
-import { fillBuyOrder, fillSellOrder } from "./utils/functions";
+
+    import { fillBuyOrder, fillSellOrder } from "./utils/functions";
 import {
     MAKER_FEE_RATE,
     SL,
@@ -188,16 +189,20 @@ export const strategy = ({
             let goOn = true,
                 isSl = false;
 
-            
-            if (exitLimit && exitLimit < prevRow.h && prevRow.l > prevRow.ha_l){
-                exit = row.o
+            if (prevRow.l > prevRow.ha_l && !isGreen /* && sl <= row.h */) {
+                /* IF ROW REACHES SL PLACE MARKET SELL */
+                exit = row.o; //row.h < sl ? row.h : sl;
                 
+            } else if (prevRow.h >= tp && prevRow.l <= tp) {
+                //IF PREV ROW HIGH REACHED TO, PLACE MARKET SELL
+                exit = row.o; // row.o;
+               
             }
-           
+            else if (prevRow.h > exitLimit){exit = row.o; isSl = true;}
             else {
                 goOn = false;
             }
-
+            
             if (goOn) {
                 console.log({
                     entry,
@@ -211,7 +216,7 @@ export const strategy = ({
                 });
                 console.log("FILLING SELL ORDER..");
                 _fillSell(exit, row);
-                //if (isSl || true) continue;
+                if (isSl) continue;
             }
         }
 
@@ -238,9 +243,9 @@ export const strategy = ({
                 });
                 _fillBuyOrder(ret);
             }
-        } else if (pos && !exitLimit && sellCond(prevRow, entry, df, i) && !isGreen) {
+        } else if (pos && !exitLimit && sellCond(prevRow, entry, df, i)) {
             // Place limit sell order
-            exitLimit = prevRow.h 
+            exitLimit = prevRow.ha_o
             enterTs = row.ts;
             console.log(
                 `[ ${row.ts} ] \t Limit sell order at ${exitLimit?.toFixed(2)}`
