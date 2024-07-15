@@ -146,63 +146,56 @@ export const strategy = ({
             let goOn = true,
                 isSl = false;
             const sl = entry * (1 + SL / 100);
-            const entryFromLow = Number(
-                (((prevRow.l - entryLimit) / entryLimit) * 100).toFixed(2)
-            );
 
             //if (prevRow.l <= prevRow.ha_l /* && prevRow.ha_l < prevRow.h */) {
-                entryLimit = prevRow.ha_o;
+            entryLimit = prevRow.ha_o;
             //}
-            if (entryLimit){
-               if (prevRow.ha_c <= entryLimit) {
-                entry = row.o;
+            if (entryLimit) {
+                if (prevRow.ha_c <= entryLimit) {
+                    entry = row.o;
+                } /* else if (sl < row.h && sl > row.l && isGreen) {
+                isSl = true;
+                entry = row.o
+            }  */ else {
+                    goOn = false;
+                }
+
+                if (goOn) {
+                    console.log({
+                        entryLimit,
+                        o: prevRow.o,
+                        h: prevRow.h,
+                        l: prevRow.l,
+                        c: prevRow.c,
+                    });
+                    console.log("FILLING BUY ORDER..");
+
+                    const ret = fillBuyOrder({
+                        entry,
+                        prevRow: row,
+                        entryLimit,
+                        enterTs,
+                        taker,
+                        base,
+                        balance, //: _bal,
+                        basePrecision,
+                        mData: { ...mData },
+                        pos,
+                    });
+                    _fillBuyOrder(ret);
+                }
+            }
+        } else if (pos && exitLimit && tp && sl) {
+            let goOn = true,
+                isSl = false;
+              if (prevRow.h > tp /* && prevRow.l <= tp */) {
+                exit = row.o;
+            } 
+            else if (row.l <= sl) {
+                exit = sl;
             } else {
                 goOn = false;
             }
-            /*  else if (sl < row.h && sl > row.l && isGreen) {
-                isSl = true;
-                entry = sl;
-            }  */
-
-            if (goOn) {
-                console.log({
-                    entryLimit,
-                    o: prevRow.o,
-                    h: prevRow.h,
-                    l: prevRow.l,
-                    ha_l: `${entryFromLow}%`,
-                    hit: prevRow.l <= entryLimit,
-                    c: prevRow.c,
-                });
-                console.log("FILLING BUY ORDER..");
-
-                const ret = fillBuyOrder({
-                    entry,
-                    prevRow: row,
-                    entryLimit,
-                    enterTs,
-                    taker,
-                    base,
-                    balance, //: _bal,
-                    basePrecision,
-                    mData: { ...mData },
-                    pos,
-                });
-                _fillBuyOrder(ret);
-            } 
-            }
-            
-        } else if (pos && exitLimit) {
-            let goOn = true,
-                isSl = false;
-            const sl = entry * (1 - SL / 100);
-
-            if (prevRow.ha_l <= exitLimit && prevRow.ha_h >= exitLimit) {
-                exit = exitLimit
-            }/*  else if (sl < prevRow.h && sl > prevRow.l) {
-                isSl = true;
-                exit = row.o;
-            }  */else goOn = false;
 
             if (goOn) {
                 console.log({
@@ -242,7 +235,7 @@ export const strategy = ({
             }
         } else if (pos && sellCond(prevRow, entry, df, i)) {
             // Place limit sell order
-            exitLimit = prevRow.ha_c;
+            exitLimit = prevRow.ha_o;
             enterTs = row.ts;
             console.log(
                 `[ ${row.ts} ] \t Limit sell order at ${exitLimit?.toFixed(2)}`
