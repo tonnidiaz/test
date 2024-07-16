@@ -213,7 +213,7 @@ export const strategy = ({
             console.log(
                 `[ ${row.ts} ] \t Limit buy order at ${entryLimit?.toFixed(2)}`
             );
-            if (isMarket) {
+            if (isMarket && entryLimit) {
                 entry = toFixed(row.o, pricePrecision);
                 const ret = fillBuyOrder({
                     entry,

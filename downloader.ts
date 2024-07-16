@@ -117,7 +117,7 @@ const dld = async ({
                 });
                 if (parse && klines) {
                     const df = chandelierExit(
-                        heikinAshi(parseKlines(klines), [bot.base, bot.ccy])
+                        heikinAshi(parseKlines(klines))
                     );
                     ensureDirExists(dfsPath);
                     writeFileSync(dfsPath, JSON.stringify(df));
@@ -142,7 +142,7 @@ const createDf = async (year: number, interval: number, symb: string) => {
     }
 
     const klines = readJson(klinesPath);
-    const df = chandelierExit(heikinAshi(parseKlines(klines), []));
+    const df = chandelierExit(heikinAshi(parseKlines(klines)));
     ensureDirExists(dfsPath);
     writeFileSync(dfsPath, JSON.stringify(df));
 };
@@ -153,7 +153,7 @@ const klinesToDf = async (fp: string, saveFp: string) => {
         return;
     }
     const klines = readJson(fp);
-    const df = chandelierExit(heikinAshi(parseKlines(klines), []));
+    const df = chandelierExit(heikinAshi(parseKlines(klines)));
     ensureDirExists(saveFp);
     writeFileSync(saveFp, JSON.stringify(df));
     console.log("DONE WRITING DF");
