@@ -220,21 +220,10 @@ export const placeTrade = async ({
 
         const clOrderId = Date.now().toString();
 
-        const order =
-            side == "buy"
-                ? new Order({
-                      buy_price: price,
-                      buy_timestamp: { i: ts },
-                      side: side,
-                      bot: bot.id,
-                      base: bot.base,
-                      ccy: bot.ccy,
-                  })
-                : orders[orders.length - 1];
+        const order = orders[orders.length - 1];
 
         order.cl_order_id = clOrderId;
         await order.save();
-        if (side == "buy") bot.orders.push(order._id);
 
         const orderId = await plat.placeOrder(amt, price, side, sl, clOrderId);
 
@@ -248,7 +237,7 @@ export const placeTrade = async ({
             /* CRAETING A NEW BUY ORDER */
             order.buy_order_id = orderId;
 
-            if (true || order_type == "Market") {
+            if (price == 0 || order_type == "Market") {
                 /* KEEP CHECKING BUY ORDER TILL FILLED */
                 let _filled = false;
                 while (!_filled) {
