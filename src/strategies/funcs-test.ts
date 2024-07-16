@@ -203,6 +203,7 @@ export const strategy = ({
                     pos,
                 });
                 _fillBuyOrder(ret);
+                
             }
         } else if (pos && exitLimit) {
             console.log("HAS POS");
