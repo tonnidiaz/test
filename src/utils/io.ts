@@ -165,7 +165,7 @@ io.on("connection", (client) => {
             client.emit("backtest", "Analyzing data...");
             klines = isParsed && useFile ? klines : parseKlines(klines);
             let df = chandelierExit(
-                isHa && useFile ? klines : heikinAshi(klines, baseCcy)
+                isHa && useFile ? klines : heikinAshi(klines)
             );
             if (offline && !useFile) {
                 // Return oly df from startTs to endTs
@@ -298,7 +298,7 @@ io.on("connection", (client) => {
                     : klines;
             klines = parseKlines(klines);
 
-            let df = chandelierExit(heikinAshi(klines, baseCcy));
+            let df = chandelierExit(heikinAshi(klines));
             if (offline && !useFile) {
                 // Return oly df from startTs to endTs
                 console.log(df[0]);

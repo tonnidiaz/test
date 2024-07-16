@@ -292,3 +292,7 @@ export const isSameDate = (d1: Date, d2: Date)=>{
     const _d2Date = _d2[0], _d2Time = _d2[1].slice(0, 5)
     return _d1Date == _d2Date && _d1Time == _d2Time
 }
+
+export const isBetween = (l: number, num: number, h: number)=>{
+    return l < num && num < h
+}
