@@ -92,7 +92,7 @@ export const afterOrderUpdate = async ({
 
         const exitLimit = prevRow.ha_c;
         order.sell_timestamp = { i: parseDate(new Date()) };
-        order.buy_price = exitLimit;
+        order.sell_price = exitLimit;
 
         await order.save();
         botLog(bot, `EXIT_LIMIT UPDATED TO: ${exitLimit}`);
