@@ -1,21 +1,30 @@
-# curr_cundle = prev_candle in real_mode
-#Check curr candle for signal
+## CURR STRATEGY
+Order = dict
+buy_px = 5
+sell_px = 10
 
-o = 1
-h = 2
-l = -5
-c = 2
+pos = Order.side == 'sell' and not Order.is_closed
+entryLimit = buy_px != 0
+exitLimit = sell_px != 0
 
-sl = 3
-tp = 10
+prev: dict
+is_green = prev.c >= prev.o
 
-if o <= sl:
-    exit = o
+SL2 = .5
+# CHECK PREVIOUS STUFF
+if not pos and entryLimit:
 
-elif o > sl and l <= sl:
-    exit  = sl
+    sl = entryLimit * (1 + SL2/100)
+    isHaHit = prev.ha_l < entryLimit
+    entryFromLow = 0 # % diff between PREV.ha_; and prev.l
 
-elif o >= tp:
-    exit  = o
-elif o < tp and h >= tp:
-    exit = tp
+    if isHaHit and entryFromLow < .5: # LESS THAN .5% DIFF BETWEEN LOW AND ENTRY
+        entryLimit *= (1 + entryFromLow / 100) # Adjust the entryLimit so the real low also reaches it 
+        
+    if (prev.l < entryLimit or prev.l < sl) and is_green:
+        # PLACE MARKET BUY
+        pos = True
+
+elif pos and exitLimit:
+    
+

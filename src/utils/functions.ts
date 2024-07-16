@@ -294,5 +294,11 @@ export const isSameDate = (d1: Date, d2: Date)=>{
 }
 
 export const isBetween = (l: number, num: number, h: number)=>{
-    return l < num && num < h
+    let ret = false
+    if (h == 0 || l == 0 ){
+        ret = h == 0 ? l < num : num < h
+    }else{
+        ret = l < num && num < h
+    }
+    return ret
 }
