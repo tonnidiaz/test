@@ -101,7 +101,7 @@ export const updateOrder = async (bot: IBot) => {
             if (isGreen && (prevRow.l < entryLimit || prevRow.l < sl)) {
                 /* EITHER THE LIMIT OR THE SL WAS REACHED */
                 /* PLACE MARKET BUY */
-                const amt = order
+                const amt = order && order.buy_order_id.length
                     ? order.new_ccy_amt - Math.abs(order.sell_fee)
                     : bot.start_amt;
 

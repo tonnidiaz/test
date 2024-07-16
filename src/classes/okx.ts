@@ -266,7 +266,7 @@ export class OKX {
 
         let d = [...klines];
         const lastCandle = d[d.length - 1]
-        console.log({lastCandle});
+        //console.log({lastCandle});
         if (Number(lastCandle[8]) == 0){
             botLog(this.bot, "LAST CANDLE NOT YET CLOSED")
             return await this.getKlines({

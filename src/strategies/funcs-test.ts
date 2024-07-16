@@ -264,7 +264,7 @@ export const strategy = ({
             }
         } else if (
             pos 
-        //    && !exitLimit
+        // && !exitLimit
              &&
             sellCond(prevRow, entry, df, i)
             //&& !isGreen
