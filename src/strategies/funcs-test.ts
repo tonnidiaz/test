@@ -151,14 +151,17 @@ export const strategy = ({
         if (!pos && entryLimit) {
             let goOn = true,
                 isSl = false;
-            const _sl = entryLimit * (1 + SL2 / 100);
+            let _sl = entryLimit * (1 + SL2 / 100);
+            _sl = Number(_sl.toFixed(pricePrecision))
+
             const isHitHa = isBetween(prevRow.ha_l, entryLimit, 0);
             const eFromL = Number(
                 (((prevRow.l - prevRow.ha_l) / prevRow.ha_l) * 100).toFixed(2)
             );
             if (isHitHa) console.log({ eFromL });
             if (isHitHa && eFromL < 0.5) {
-                entryLimit *= 1 + eFromL / 100;
+                entryLimit *= (1 + eFromL / 100);
+                entryLimit = Number(entryLimit.toFixed(pricePrecision))
             }
             if (isBetween(prevRow.l, entryLimit, 0) && isGreen) {
                 entry = row.o;
@@ -205,7 +208,7 @@ export const strategy = ({
             console.log("HAS POS");
             let goOn = true,
                 isSl = false;
-            const _sl = entry * (1 - SL2 / 100);
+            const _sl = Number((entry * (1 - SL2 / 100)).toFixed(pricePrecision));
 
             if (isBetween(0, _sl, prevRow.h) && !isGreen) {
                 exit = row.o;
@@ -283,7 +286,8 @@ export const strategy = ({
             if (isHaHit) console.log({ eFromH });
             let _ex = 0;
             if (isHaHit && eFromH < 0.5) {
-                exitLimit *= 1 - (eFromH) / 100;
+                exitLimit *= (1 - (eFromH) / 100);
+                exitLimit = Number(exitLimit.toFixed(pricePrecision))
             }
 
             if (exitLimit < row.h) {

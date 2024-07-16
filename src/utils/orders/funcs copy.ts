@@ -2,7 +2,7 @@ import { OrderPlacer } from "@/classes";
 import { Bot, Order } from "@/models";
 import { IBot } from "@/models/bot";
 import { scheduleJob } from "node-schedule";
-import { SL2, botJobSpecs, isStopOrder, jobs } from "../constants";
+import { botJobSpecs, isStopOrder, jobs } from "../constants";
 import path from "path";
 import fs from "fs";
 import { IOrder } from "@/models/order";
@@ -57,64 +57,153 @@ export const ensureDirExists = (filePath: string) => {
 export const updateOrder = async (bot: IBot) => {
     /* CHECK PREV ORDERS */
     try {
-        const pxPr = getPricePrecision([bot.base, bot.ccy], bot.platform);
         const orders = await findBotOrders(bot);
 
         let lastOrder: IOrder | null = orders[orders.length - 1];
         let isClosed = !lastOrder || lastOrder?.is_closed == true;
         if (!lastOrder) return { isClosed, lastOrder };
 
-        if (lastOrder.side == "sell" && !lastOrder.order_id.length) {
-            return false;
+        if (lastOrder.side == 'sell' && !lastOrder.order_id.length){
+            return false
         }
 
-        const plat = new OKX(bot);
-        const _pos = lastOrder.side == "buy" && !lastOrder.is_closed;
-        let entryLimit = lastOrder.buy_price;
-        if (orders.length && _pos && entryLimit != 0) {
+        const plat = bot.platform == "bybit" ? new Bybit(bot) : new OKX(bot);
+        const _pos = lastOrder.side == "buy" && !lastOrder.is_closed
+        const entryLimit = lastOrder.buy_price
+        if (
+            orders.length && _pos && entryLimit != 0
+        ) {
             /* CHECK IF BUY CONDITIONS ARE MET */
+            isClosed = lastOrder.is_closed;
+            let isSellOrder = lastOrder.order_id.length > 0;
 
-            botLog(bot, "GETTING KLINES TO SEE IF BUY CAN BE FILLED...");
-            const klines = await plat.getKlines({});
+            const oid = isSellOrder
+                ? lastOrder.order_id
+                : lastOrder.buy_order_id;
+            botLog(bot, "Checking order...");
+            const res = await plat.getOrderbyId(oid, isSellOrder);
+            if (res) {
+                let _isClosed = res != "live";
 
-            if (!klines) return botLog(bot, "FAILED TO GET KLINES");
-            const df = heikinAshi(parseKlines(klines));
-            const prevRow = df[df.length - 1];
-            const isGreen = prevRow.c >= prevRow.o;
+                if (isSellOrder) {
+                    console.log(`\n[${bot.name}] : Updating sell order\n`);
 
-            const sl = entryLimit * (1 + SL2 / 100);
-            const isHaHit = prevRow.ha_l < entryLimit;
-            const entryFromLow = Number(
-                (((prevRow.l - prevRow.ha_l) / prevRow.ha_l) * 100).toFixed(2)
-            );
-            botLog(bot, { entryLimit, sl, isHaHit, entryFromLow, prevRow });
+                    if (_isClosed && res != "live") {
+                        updateOrderInDb(lastOrder, res);
+                    } else {
+                        if (res == "live") {
+                            botLog(
+                                bot,
+                                "GETTING KLINES TO TEST IF SL PRICE IS REACHED..."
+                            );
+                            const plat = new OKX(bot);
 
-            if (isHaHit && entryFromLow < 0.5) {
-                /* RE-ADJUST ENTRY LIMIT */
-                entryLimit *= 1 + entryFromLow / 100;
-                entryLimit = Number(entryLimit.toFixed(pxPr));
-                lastOrder.buy_price = entryLimit;
-                await lastOrder.save();
+                            let klines = await plat.getKlines({
+                                end: Date.now() - bot.interval * 60 * 1000,
+                            });
+
+                            if (!klines)
+                                return botLog(bot, "FAILED TO GET KLINES");
+
+                            klines = parseKlines(klines);
+                            const prevRow = klines[klines.length - 1];
+                            const sl = calcSL(lastOrder.buy_price);
+                            botLog(bot, { sl });
+                            if (prevRow.l <= sl && prevRow.c >= prevRow.o) {
+                                botLog(
+                                    bot,
+                                    "SL CONDITIONS MET, PLACE MARKET SELL"
+                                );
+
+                                /* HERE */
+                                let amt =
+                                    lastOrder.base_amt - lastOrder.buy_fee;
+                                amt = toFixed(
+                                    amt,
+                                    getCoinPrecision(
+                                        [bot.base, bot.ccy],
+                                        "limit",
+                                        bot.platform
+                                    )
+                                );
+                                botLog(bot, "CANCELLING TP ORDER...");
+                                const cancelRes = await plat.cancelOrder({
+                                    ordId: lastOrder.order_id,
+                                    isAlgo: true,
+                                });
+                                if (!cancelRes) {
+                                    return;
+                                }
+                                const orderId = await plat.placeOrder(
+                                    amt,
+                                    undefined,
+                                    "sell"
+                                );
+
+                                if (!orderId) {
+                                    botLog(bot, "Failed to place order");
+                                    return;
+                                }
+
+                                botLog(bot, "CHECKING MARKET SELL ORDER...");
+                                let _filled = false;
+                                while (!_filled) {
+                                    await sleep(1000);
+                                    botLog(
+                                        bot,
+                                        "CHECKING MARKET SELL ORDER..."
+                                    );
+                                    const res = await plat.getOrderbyId(
+                                        orderId
+                                    );
+
+                                    if (!res) {
+                                        _filled = true;
+                                        return botLog(
+                                            bot,
+                                            "FAILED TO CHECK MARKET SELL ORDER"
+                                        );
+                                    }
+                                    if (res && res != "live") {
+                                        _filled = true;
+                                        _isClosed = true;
+                                        isClosed = _isClosed;
+                                        await updateOrderInDb(lastOrder, res);
+                                        return { isClosed, lastOrder };
+                                    }
+                                }
+                            }
+                        }
+
+                        botLog(bot, "SELL ORDER NOT FILLED");
+                    }
+                } else {
+                    /* BUY ORDER SECTIONS */
+                    if (_isClosed && res != "live") {
+                        console.log(`\n[${bot.name}] : Updating buy order\n`);
+                        const ts = {
+                            ...lastOrder.buy_timestamp,
+                            o: parseDate(new Date(res.fillTime)),
+                        };
+                        console.log("TS", JSON.stringify(ts));
+                        const fee = res.fee;
+                        let base_amt = res.fillSz;
+                        lastOrder.buy_order_id = res.id;
+                        lastOrder.buy_price = res.fillPx;
+                        lastOrder.buy_fee = Math.abs(fee);
+                        lastOrder.base_amt = base_amt;
+                        lastOrder.ccy_amt = res.fillSz * res.fillPx;
+                        lastOrder.side = "sell";
+                        lastOrder.buy_timestamp = ts;
+                    }
+                }
+                if (res == "live") {
+                    return res;
+                }
+            } else {
+                botLog(bot, "Order check error");
+                return;
             }
-
-            if (isGreen && (prevRow.l < entryLimit || prevRow.l < sl)) {
-                /* EITHER THE LIMIT OR THE SL WAS REACHED */
-                /* PLACE MARKET BUY */
-                const amt = lastOrder
-            ? lastOrder.new_ccy_amt - Math.abs(lastOrder.sell_fee)
-            : bot.start_amt;
-
-                const ts = new Date();
-                const res = await placeTrade({
-                    bot: bot,
-                    ts: parseDate(ts),
-                    amt,
-                    side: "buy",
-                    price: 0, /* 0 for market buy */
-                    plat: plat,
-                });
-            }
-            
 
             botLog(bot, "SAVING ORDER...");
             await lastOrder?.save();

@@ -45,6 +45,7 @@ export class OrderPlacer {
 
             if (mTest || prodTimeCond) {
                 this.lastCheckAt = new Date();
+                /* PAUSE THE SCHEDULER */
                 cancelJob(getJob(bot._id.toString())!.job);
 
                 if (bot.active) {

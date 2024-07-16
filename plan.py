@@ -11,6 +11,7 @@ prev: dict
 is_green = prev.c >= prev.o
 entry = 0
 SL2 = .5
+
 # CHECK PREVIOUS STUFF
 if not pos and entryLimit:
 
