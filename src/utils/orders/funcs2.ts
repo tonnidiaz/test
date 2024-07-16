@@ -17,9 +17,18 @@ import { Bybit } from "@/classes/bybit";
 import { botLog } from "../functions";
 import { objStrategies } from "@/strategies";
 import { trueRange } from "indicatorts";
+import { IObj } from "../interfaces";
 
-export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
-    const plat =  new OKX(bot)
+export const afterOrderUpdate = async ({
+    bot,
+    prevRow,
+    isGreen,
+}: {
+    bot: IBot;
+    prevRow: IObj;
+    isGreen: boolean;
+}) => {
+    const plat = new OKX(bot);
     botLog(bot, "SIM: GETTING KLINES...");
     /* const klines = await plat.getKlines({
         end: Date.now() - bot.interval * 60 * 1000,
@@ -41,37 +50,54 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     botLog(bot, strategy);
     const orders = await findBotOrders(bot);
 
-    const order = orders.length ? orders[orders.length - 1] : null;
-    const isClosed = order?.is_closed;
+    let order = orders.length ? orders[orders.length - 1] : null;
+
+    const pos = order && order.side == "sell";
+    console.log({ pos });
 
     /* ------ START ---------- */
-    if ((isClosed || !order) && true /* buyCond */) {
+    if (!pos && strategy.buyCond(prevRow)) {
         // Place buy order
-        console.log(`[ ${bot.name} ]\tHAS BUY SIGNAL > GOING IN`);
+        botLog(bot, "BUY ORDER NOT YET PLACED, UPDATING ENTRY_LIMIT");
 
-        const amt = order
-            ? order.new_ccy_amt - Math.abs(order.sell_fee)
-            : bot.start_amt;
-
-        const entryLimit = 0; //calcEntryPrice(row, "buy");
+        const entryLimit = prevRow.ha_c;
         botLog(bot, {
             entryLimit,
         });
 
         const ts = new Date();
-        const res = await placeTrade({
-            bot: bot,
-            ts: parseDate(ts),
-            amt,
-            side: "buy",
-            price: entryLimit,
-            plat: plat,
-        });
 
-        if (res) {
-            botLog(bot, "WAITING FOR NEXT ROUND!");
+        /* CREATE NEW ORDER */
+        if (!order) {
+            order = new Order({
+                buy_price: entryLimit,
+
+                side: "buy",
+                bot: bot.id,
+                base: bot.base,
+                ccy: bot.ccy,
+            });
+            bot.orders.push(order.id)
+
+            await bot.save()
         }
+        /* ENTER_TS */
+        order.buy_timestamp = { i: parseDate(ts) };
+        order.buy_price = entryLimit;
+
+        await order.save();
+        botLog(bot, `ENTRY_LIMIT UPDATED to ${entryLimit}`);
+    } else if (pos && order && !order.is_closed && strategy.sellCond(prevRow)) {
+        botLog(bot, "ORDER NOT YET CLOSED, UPDATING EXIT_LIMIT");
+
+        const exitLimit = prevRow.ha_c;
+        order.sell_timestamp = { i: parseDate(new Date()) };
+        order.buy_price = exitLimit;
+
+        await order.save();
+        botLog(bot, `EXIT_LIMIT UPDATED TO: ${exitLimit}`);
     }
+
 };
 
 export const updateOrderInDb = async (order: IOrder, res: any) => {

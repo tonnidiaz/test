@@ -264,7 +264,7 @@ export const strategy = ({
             }
         } else if (
             pos 
-            && !exitLimit
+        //    && !exitLimit
              &&
             sellCond(prevRow, entry, df, i)
             //&& !isGreen
@@ -280,7 +280,7 @@ export const strategy = ({
         }
 
         if (pos && exitLimit) {
-            const isHaHit = exitLimit < row.ha_h;
+            const isHaHit = exitLimit <= prevRow.ha_h;
             const eFromH = Number(
                 (((exitLimit - row.h) / row.h) * 100).toFixed(2)
             );
@@ -291,7 +291,7 @@ export const strategy = ({
                 exitLimit = Number(exitLimit.toFixed(pricePrecision))
             }
 
-            if (exitLimit < row.h) {
+            if (exitLimit <= row.h) {
                 exit = exitLimit; // (exitLimit + prevRow.c) / 2
                 console.log("FILLING SELL ORDER AT EXIT");
                 _fillSell(exit, row);

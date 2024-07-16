@@ -32,11 +32,7 @@ export class OrderPlacer {
                   `${now.getHours()}:${now.getMinutes()}`
                 : true);
         try {
-            const mTest =
-                test &&
-                (
-                    await findBotOrders(bot)
-                ).length <= 4;
+            const mTest = test && (await findBotOrders(bot)).length <= 4;
 
             if (test || true)
                 console.log(
@@ -50,23 +46,26 @@ export class OrderPlacer {
 
                 if (bot.active) {
                     const res = await updateOrder(bot);
-                   botLog(bot, res)
-                   if (res == false){
-                    /* POS = TRUE -> ADD BOT TO LIST IN WS */
-                   await wsOkx.addBot(bot.id)
-                   }else{
-                    if (!res) {  
-                        return botLog(
-                            bot,
-                            "DID NOT GO ON WITH PROCESS SINCE COULD NOT UPDATE ORDER"
-                        );
-                    } else if (res != "live") {
-                        await afterOrderUpdate({ bot: bot });
+                    botLog(bot, res);
+                    if (res == false) {
+                        /* POS = TRUE -> ADD BOT TO LIST IN WS */
+                        await wsOkx.addBot(bot.id);
                     } else {
-                        botLog(bot, "[LIVE] ORDER NOT YET FILLED");
+                        if (!res) {
+                            return botLog(
+                                bot,
+                                "DID NOT GO ON WITH PROCESS SINCE COULD NOT UPDATE ORDER"
+                            );
+                        } else if (res.prevRow) {
+                            await afterOrderUpdate({
+                                bot: bot,
+                                prevRow: res.prevRow,
+                                isGreen: res.isGreen,
+                            });
+                        } else {
+                            botLog(bot, "[LIVE] ORDER NOT YET FILLED");
+                        }
                     }
-                   }
-                    
                 }
             }
         } catch (err) {

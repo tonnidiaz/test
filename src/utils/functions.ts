@@ -41,6 +41,7 @@ import { IBot } from "@/models/bot";
 import { instruments } from "./constants";
 import { okxInstrus } from "@/data/okx-instrus";
 import { binanceInfo } from "./binance-info";
+import { parseDate } from "./funcs2";
 
 const tunedErr = (res: Response, status: number, msg: string, e?: any) => {
     if (e) {
@@ -214,7 +215,7 @@ export const readJson = (fp: string) => {
 };
 
 export const botLog = (bot: IBot, data: any) => {
-    console.log(`\n[ ${bot.name} ]`, data, '\n');
+    console.log(`\n[${parseDate(new Date())}] [ ${bot.name} ]`, data, '\n');
 };
 
 export function capitalizeFirstLetter(string) {

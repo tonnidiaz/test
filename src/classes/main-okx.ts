@@ -2,19 +2,26 @@ import { IBot } from "@/models/bot";
 import { WebsocketClient } from "okx-api";
 import { configDotenv } from "dotenv";
 import { Bot, Order } from "@/models";
-import { calcSL, calcTP, parseDate, parseKlines } from "@/utils/funcs2";
+import {
+    calcSL,
+    calcTP,
+    findBotOrders,
+    heikinAshi,
+    parseDate,
+    parseKlines,
+} from "@/utils/funcs2";
 import { ObjectId } from "mongoose";
-import { botLog } from "@/utils/functions";
+import { botLog, getPricePrecision } from "@/utils/functions";
 import { OKX } from "./okx";
 import { placeTrade } from "@/utils/orders/funcs";
-import { demo } from "@/utils/constants";
+import { DEV, demo } from "@/utils/constants";
 configDotenv();
 
 interface IOpenBot {
     id: ObjectId;
-    sl: number;
-    tp: number;
+    exitLimit: number;
     entry: number;
+    ha_h: number;
 }
 
 let isSubed = false;
@@ -61,7 +68,7 @@ export class WsOKX {
             market: "demo",
         });
 
-        this.wsList = [ demo ? this.wsDemo : this.ws];
+        this.wsList = [demo ? this.wsDemo : this.ws];
         console.log("MAIN_OKX INIT");
     }
 
@@ -92,8 +99,10 @@ export class WsOKX {
 
             ws.on("update", async (e) => {
                 const { data, arg } = e;
-                console.log("WS UPDATE");
-                console.log(arg);
+                if (DEV) {
+                    console.log("WS UPDATE");
+                    console.log(arg);
+                }
 
                 if (arg.channel == "tickers") {
                     /* HANDLE TICKERS */
@@ -102,10 +111,8 @@ export class WsOKX {
                     const px = Number(ticker.last);
                     const ts = parseDate(new Date(Number(ticker.ts)));
                     for (let bot of this.botsWithPos) {
-                        console.log({...bot, px});
-                        if (px <= bot.sl || px >= bot.tp) {
-                            updateOpenBot(bot, px);
-                        }
+                        console.log({ ...bot, h: px });
+                        updateOpenBot(bot, px);
                     }
                 }
             });
@@ -133,14 +140,20 @@ export class WsOKX {
         const oid = bot.orders[bot.orders.length - 1];
         const order = await Order.findById(oid).exec();
         if (!order) return botLog(bot, `ORDER: ${oid} not found`);
+        const plat = new OKX(bot);
+        const klines = await plat.getKlines({});
+        const df = heikinAshi(parseKlines(klines));
+        const prevRow = df[df.length - 1];
+        console.log("WS OKX");
+        botLog(bot, { prevRow });
 
         const entry = order.buy_price;
-        this.botsWithPos = this.botsWithPos.filter(el=> el.id != botId)
+        this.botsWithPos = this.botsWithPos.filter((el) => el.id != botId);
         this.botsWithPos.push({
             id: botId,
-            sl: calcSL(entry),
-            tp: calcTP(entry),
+            exitLimit: order.sell_price,
             entry,
+            ha_h: prevRow.ha_h,
         });
         console.log(`WS: BOT: ${botId} added`);
     }
@@ -154,34 +167,30 @@ const updateOpenBot = async (openBot: IOpenBot, px: number) => {
     try {
         wsOkx.rmvBot(openBot.id);
         const bot = await Bot.findById(openBot.id).exec();
-        if (bot) {
+
+        if (!bot) return;
+        const plat = new OKX(bot);
+        const orders = await findBotOrders(bot);
+        const pricePrecision = getPricePrecision([bot.base, bot.ccy], bot.platform);
+        const order = orders[orders.length - 1];
+        if (bot && order.side == 'sell' && !order.is_closed && order.sell_price != 0) {
+            let { exitLimit, ha_h } = openBot;
+            const h = px;
             /* CHECK CONDITIONS */
             let place = false;
-            if (px <= openBot.sl) {
-                botLog(bot!, "SELL AT SL?");
-                const plat = new OKX(bot!);
-                let klines = await plat.getKlines({});
-                /* CHECK IF PREV CANDLE IS GREEN */
-                klines = parseKlines(klines);
-                const candle = klines[klines.length - 1];
-                botLog(bot, { candle });
-                const isGreen = candle.c >= candle.o;
-                botLog(bot, { isGreen });
-                if (isGreen) {
-                    botLog(bot, "Fill at SL");
-                    place = true;
-                }
-            } else {
-                botLog(bot, "FILL AT TP");
-                place = true;
+            // px == row.h
+            const isHaHit = openBot.exitLimit <= ha_h;
+            const eFromH = Number((((exitLimit - h) / h) * 100).toFixed(2));
+            botLog(bot, { isHaHit });
+            if (isHaHit && eFromH < 0.5) {
+                exitLimit *= 1 - eFromH / 100;
+                exitLimit = Number(exitLimit.toFixed(pricePrecision));
+                order.sell_price = exitLimit;
+                await order.save();
+                botLog(bot, `EXIT_LIMIT TO ${exitLimit} due to ha_h`);
             }
-            if (place) {
-                const plat = new OKX(bot);
-                botLog(bot, `PLACING MARKET SELL ORDER AT ${px}`);
-                const oid = bot.orders[bot.orders.length - 1];
-                const order = await Order.findById(oid).exec();
-                if (!order) return botLog(bot, `ORDER: ${oid} not found`);
-
+            if (exitLimit <= h) {
+                botLog(bot, `PLACING MARKET SELL ORDER AT ${exitLimit}`);
                 const amt = order.base_amt - order.buy_fee;
                 const r = await placeTrade({
                     bot: bot,
@@ -189,9 +198,9 @@ const updateOpenBot = async (openBot: IOpenBot, px: number) => {
                     amt: Number(amt),
                     side: "sell",
                     plat: plat,
-                    price: 0
+                    price: 0,
                 });
-                if(!r) botLog(bot, "FAILED TO PLACE MARKET SELL ORDER")
+                if (!r) botLog(bot, "FAILED TO PLACE MARKET SELL ORDER");
             }
         }
     } catch (e) {
@@ -199,6 +208,5 @@ const updateOpenBot = async (openBot: IOpenBot, px: number) => {
     }
 };
 
-
-export let wsOkx: WsOKX = new WsOKX()
-wsOkx.initWs()
+export let wsOkx: WsOKX = new WsOKX();
+wsOkx.initWs();

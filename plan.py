@@ -62,3 +62,4 @@ if pos and exitLimit:
     elif isHaHit and isHit:
         #PLACE MARKET SELL
 
+        pass
