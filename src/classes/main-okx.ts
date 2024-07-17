@@ -99,17 +99,18 @@ export class WsOKX {
 
             ws.on("update", async (e) => {
                 const { data, arg } = e;
-                if (DEV) {
-                    console.log("WS UPDATE");
-                    console.log(arg);
-                }
+                
 
                 if (arg.channel == "tickers") {
                     /* HANDLE TICKERS */
-
+  
                     const ticker = data[0];
                     const px = Number(ticker.last);
                     const ts = parseDate(new Date(Number(ticker.ts)));
+                      if (DEV) {
+                        console.log("WS UPDATE");
+                        console.log({ts, px});
+                    }
                     for (let bot of this.botsWithPos) {
                         console.log({ ...bot, h: px });
                         updateOpenBot(bot, px);
@@ -135,6 +136,7 @@ export class WsOKX {
     }
 
     async addBot(botId: ObjectId) {
+        console.log(`[${parseDate(new Date())}] WS: ADDING BOT: ${botId} added`);
         const bot = await Bot.findById(botId).exec();
         if (!bot) return console.log("BOT NOT FOUND");
         const oid = bot.orders[bot.orders.length - 1];
@@ -155,11 +157,17 @@ export class WsOKX {
             entry,
             ha_h: prevRow.ha_h,
         });
-        console.log(`WS: BOT: ${botId} added`);
+
+        await this.sub(bot)
+        console.log(`[${parseDate(new Date())}] WS: BOT: ${botId} added`);
     }
     async rmvBot(botId: ObjectId) {
         this.botsWithPos = this.botsWithPos.filter((el) => el.id != botId);
-        console.log(`WS: BOT: ${botId} removed`);
+        const bot = await Bot.findById(botId).exec()
+        if (!(await Bot.find({base: bot?.base, ccy: bot?.ccy}).exec()).length){
+            await this.unsub(bot!)
+        }
+        console.log(`[${parseDate(new Date())}] WS: BOT: ${botId} removed`);
     }
 }
 

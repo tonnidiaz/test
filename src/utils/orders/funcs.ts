@@ -76,11 +76,11 @@ export const updateOrder = async (bot: IBot) => {
             return false;
         } */
 
-        const _pos = order.side == "sell";
+        const pos = order && order.side == "sell" && !order.is_closed;
         let entryLimit = order.buy_price;
         let exitLimit = order.sell_price;
 
-        if (orders.length && !_pos && entryLimit != 0) {
+        if (orders.length && !pos && entryLimit != 0) {
             /* CHECK IF BUY CONDITIONS ARE MET */
 
             const sl = entryLimit * (1 + SL2 / 100);
@@ -119,7 +119,7 @@ export const updateOrder = async (bot: IBot) => {
                 }
             }
             await order?.save();
-        } else if (_pos && exitLimit != 0 && !order.is_closed) {
+        } else if (pos && exitLimit != 0 && !order.is_closed) {
             /* ORDER WAS  NOT FILLED AT EXIT */
 
             const sl = entryLimit * (1 - SL2 / 100);
@@ -137,7 +137,7 @@ export const updateOrder = async (bot: IBot) => {
                 });
                 if (!r) botLog(bot, "FAILED TO PLACE MARKET SELL ORDER");
             }else{
-                botLog(bot, "ADDOM BOT TO WS")
+                botLog(bot, "ADD BOT TO WS")
                 return false
             }
         }

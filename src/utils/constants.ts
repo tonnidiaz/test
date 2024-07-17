@@ -9146,7 +9146,7 @@ export const dfsRootDir = "src/data/dfs",
 
 export const isMarket = false,
     cancelOnCond = true,
-    useHaClose = true,
+    useHaClose = false,
     demo = true,
     isStopOrder = false,
     useSwindLow = false,
@@ -9155,12 +9155,12 @@ export const isMarket = false,
     useCurrRow = true,
     useProdPercs = false;
 
-export let SL = 1//.25//7//3; //.002//.02//.015//.05//useProdPercs ? .03 : .01//0.03//0.05; //.25//.5,
-export let TP = 5.5//9.5//1; //.2//.3//1.1//1.7//useProdPercs ? 1.5 : 1.7//1.5//2//1.5; // 3.5//5.3
+export let SL = 10//1//.25//7//3; //.002//.02//.015//.05//useProdPercs ? .03 : .01//0.03//0.05; //.25//.5,
+export let TP = 5.5//5.5//9.5//1; //.2//.3//1.1//1.7//useProdPercs ? 1.5 : 1.7//1.5//2//1.5; // 3.5//5.3
 export const SL2 = .5
 export const setSL = (v: number) => (SL = v);
 export const setTP = (v: number) => (TP = v);
 
-export const checkGreen = false,
+export const checkGreen = false, rf = false,
     slFirstAlways = true; 
 

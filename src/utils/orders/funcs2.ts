@@ -18,6 +18,7 @@ import { botLog } from "../functions";
 import { objStrategies } from "@/strategies";
 import { trueRange } from "indicatorts";
 import { IObj } from "../interfaces";
+import { wsOkx } from "@/classes/main-okx";
 
 export const afterOrderUpdate = async ({
     bot,
@@ -52,7 +53,7 @@ export const afterOrderUpdate = async ({
 
     let order = orders.length ? orders[orders.length - 1] : null;
 
-    const pos = order && order.side == "sell";
+    const pos = order && order.side == "sell" && !order.is_closed;
     console.log({ pos });
 
     /* ------ START ---------- */
@@ -68,7 +69,7 @@ export const afterOrderUpdate = async ({
         const ts = new Date();
 
         /* CREATE NEW ORDER */
-        if (!order) {
+        if (!order || order.is_closed) {
             order = new Order({
                 buy_price: entryLimit,
 
@@ -96,6 +97,8 @@ export const afterOrderUpdate = async ({
 
         await order.save();
         botLog(bot, `EXIT_LIMIT UPDATED TO: ${exitLimit}`);
+        botLog(bot, "WATCHING FOR THE PX CHANGES")
+        await wsOkx.addBot(bot.id)
     }
 
 };

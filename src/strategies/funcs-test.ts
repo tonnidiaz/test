@@ -9,11 +9,13 @@ import {
     isMarket,
     isStopOrder,
     noFees,
+    rf,
     slFirstAlways,
     useSwindLow,
 } from "@/utils/constants";
 import { strategy as strWithTrades } from "./funcs-test copy 3";
 import { strategy as strWithSellCond } from "./funcs-test copy 9 - sellcond";
+import { strategy as strCopy6 } from "./funcs-test copy 6";
 import { strategy as strWithGreenCheck } from "./funcs-test copy 5 - isGreen check";
 
 import { parseDate } from "@/utils/funcs2";
@@ -51,6 +53,18 @@ export const strategy = ({
     trades: IObj[];
     platNm: "binance" | "bybit" | "okx";
 }) => {
+if (rf){
+  return strCopy6({df,
+        balance,
+        buyCond,
+        sellCond,
+        pair,
+        maker,
+        taker,
+        trades,
+        platNm,})  
+}
+    
     let pos = false;
     let cnt = 0,
         gain = 0,

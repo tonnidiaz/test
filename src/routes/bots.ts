@@ -104,7 +104,7 @@ router.post("/:id/edit", authMid, async (req, res) => {
         const bool = jobs.find((el) => el.id == jobId);
         botLog(bot, "UNSUB TO PREV SYMBOL TICKERS...");
 
-        wsOkx.unsub(bot)
+        await wsOkx.rmvBot(bot.id)
         if (key == "active") {
             if (bool && !val) {
                 // Deactivate JOB
@@ -152,7 +152,7 @@ router.post("/:id/edit", authMid, async (req, res) => {
                 }
             }
             botLog(bot, "RE-SUB TO TICKERS...");
-            await wsOkx.sub(bot)
+            
             if (bot.orders.length){
                 const order = await Order.findById(bot.orders[bot.orders.length - 1]).exec()
                 if (order && order.side == 'sell' && !order.is_closed && order.sell_price != 0){
