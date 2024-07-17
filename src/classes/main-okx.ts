@@ -184,9 +184,10 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, row: IObj) => {
         if (bot && order.side == 'sell' && !order.is_closed && order.sell_price != 0) {
             let { exitLimit } = openBot;
             /* CHECK CONDITIONS */
-            const isHaHit = exitLimit <= row.ha_c /* ASSUMING THAT THE CURRENT HA_C IS THE CURR HA_H */;
-            const eFromH = Number(((exitLimit - row.c) / row.c* 100 ).toFixed(2));
+            const isHaHit = exitLimit <= row.ha_h /* ASSUMING THAT THE CURRENT HA_C IS THE CURR HA_H */;
+            const eFromH = Number(((exitLimit - row.h) / row.h* 100 ).toFixed(2));
             botLog(bot, { isHaHit, eFromH });
+            botLog(bot, {row})
             if (isHaHit) {
                 exitLimit *= 1 - eFromH / 100;
                 exitLimit = Number(exitLimit.toFixed(pricePrecision));

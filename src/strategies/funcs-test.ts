@@ -282,7 +282,7 @@ export const strategy = ({
                 exitLimit *= (1 - (eFromH/ 100) );
                 exitLimit = Number(exitLimit.toFixed(pricePrecision))
             }
-
+            console.log({isHaHit, exitLimit, h: row.h});
             if (exitLimit <= row.h) {
                 exit = exitLimit; // (exitLimit + prevRow.c) / 2
                 //exit = exitLimit * (1 - randomNum(0.02, .5)/100); // (exitLimit + prevRow.c) / 2
