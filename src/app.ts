@@ -95,20 +95,25 @@ const job = schedule.scheduleJob("* * * * * *", function(){
 jobs.push({job, id: "1"}) */
 
 const main = async () => {
-    
     const activeBots = await Bot.find({ active: true }).exec();
     setJobs([]);
     for (let bot of activeBots) {
-        await addBotJob(bot)
-        botLog(bot, "INITIALIZING WS...")
-        if (bot.orders.length){
-            const lastOrder = await Order.findById(bot.orders[bot.orders.length - 1]).exec()
-            if (lastOrder && lastOrder.side == 'sell' && !lastOrder.order_id.length){
-                await wsOkx.addBot(bot.id)
+        await addBotJob(bot);
+        botLog(bot, "INITIALIZING WS...");
+        if (bot.orders.length) {
+            const lastOrder = await Order.findById(
+                bot.orders[bot.orders.length - 1]
+            ).exec();
+            if (
+                lastOrder &&
+                lastOrder.side == "sell" &&
+                !lastOrder.is_closed &&
+                lastOrder.sell_price != 0
+            ) {
+                await wsOkx.addBot(bot.id);
             }
         }
-        await wsOkx.sub(bot)
-        
+        await wsOkx.sub(bot);
     }
     //new MainOKX()
 };

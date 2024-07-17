@@ -22,30 +22,23 @@ import { wsOkx } from "@/classes/main-okx";
 
 export const afterOrderUpdate = async ({
     bot,
-    prevRow,
-    isGreen,
 }: {
     bot: IBot;
-    prevRow: IObj;
-    isGreen: boolean;
 }) => {
     const plat = new OKX(bot);
     botLog(bot, "SIM: GETTING KLINES...");
-    /* const klines = await plat.getKlines({
+    const klines = await plat.getKlines({
         end: Date.now() - bot.interval * 60 * 1000,
     });
 
     if (!klines) return console.log("FAILED TO GET KLINES");
 
-    const df = chandelierExit(
-        heikinAshi(parseKlines(klines), [bot.base, bot.ccy])
-    );
+    const df =   heikinAshi(parseKlines(klines))
+    
     const row = df[df.length - 1];
+    const prevRow = row
     botLog(bot, "CANDLE");
     console.log(row);
-    const ts = new Date(
-        Date.parse(row.ts) + bot.interval * 60 * 1000
-    ).toISOString(); */
 
     const strategy = objStrategies[bot.strategy - 1];
     botLog(bot, strategy);
@@ -53,7 +46,11 @@ export const afterOrderUpdate = async ({
 
     let order = orders.length ? orders[orders.length - 1] : null;
 
-    const pos = order && order.side == "sell" && !order.is_closed;
+    const pos =
+        order &&
+        order.side == "sell" &&
+        !order.is_closed &&
+        order.buy_order_id.length;
     console.log({ pos });
 
     /* ------ START ---------- */
@@ -67,12 +64,28 @@ export const afterOrderUpdate = async ({
         });
 
         const ts = new Date();
+        /* PLACE MARKET BUY ORDER */
+        const amt =
+            order && order.buy_order_id.length
+                ? order.new_ccy_amt - Math.abs(order.sell_fee)
+                : bot.start_amt;
 
+        const res = await placeTrade({
+            bot: bot,
+            ts: parseDate(ts),
+            amt,
+            side: "buy",
+            price: 0 /* 0 for market buy */,
+            plat: plat,
+        });
+        if (res) {
+            botLog(bot, "MARKET BUY ORDER PLACED. TO WS SELL CHECK");
+        }
         /* CREATE NEW ORDER */
-        if (!order || order.is_closed) {
+        /* if (!order || order.is_closed) {
             order = new Order({
                 buy_price: entryLimit,
-
+ 
                 side: "buy",
                 bot: bot.id,
                 base: bot.base,
@@ -81,13 +94,13 @@ export const afterOrderUpdate = async ({
             bot.orders.push(order.id)
 
             await bot.save()
-        }
-        /* ENTER_TS */
+    }
+        // ENTER_TS 
         order.buy_timestamp = { i: parseDate(ts) };
         order.buy_price = entryLimit;
 
         await order.save();
-        botLog(bot, `ENTRY_LIMIT UPDATED to ${entryLimit}`);
+        botLog(bot, `ENTRY_LIMIT UPDATED to ${entryLimit}`); */
     } else if (pos && order && !order.is_closed && strategy.sellCond(prevRow)) {
         botLog(bot, "ORDER NOT YET CLOSED, UPDATING EXIT_LIMIT");
 
@@ -97,10 +110,9 @@ export const afterOrderUpdate = async ({
 
         await order.save();
         botLog(bot, `EXIT_LIMIT UPDATED TO: ${exitLimit}`);
-        botLog(bot, "WATCHING FOR THE PX CHANGES")
-        await wsOkx.addBot(bot.id)
+        botLog(bot, "WATCHING FOR THE PX CHANGES");
+        await wsOkx.addBot(bot.id);
     }
-
 };
 
 export const updateOrderInDb = async (order: IOrder, res: any) => {

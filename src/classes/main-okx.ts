@@ -6,6 +6,7 @@ import {
     calcSL,
     calcTP,
     findBotOrders,
+    getInterval,
     heikinAshi,
     parseDate,
     parseKlines,
@@ -15,13 +16,12 @@ import { botLog, getPricePrecision } from "@/utils/functions";
 import { OKX } from "./okx";
 import { placeTrade } from "@/utils/orders/funcs";
 import { DEV, demo } from "@/utils/constants";
+import { IObj } from "@/utils/interfaces";
 configDotenv();
 
 interface IOpenBot {
     id: ObjectId;
     exitLimit: number;
-    entry: number;
-    ha_h: number;
 }
 
 let isSubed = false;
@@ -100,35 +100,45 @@ export class WsOKX {
             ws.on("update", async (e) => {
                 const { data, arg } = e;
                 
+                for (let botId of this.botsWithPos){
+                    const bot = await Bot.findById(botId.id).exec()
+                    if (!bot?.active) return;
 
-                if (arg.channel == "tickers") {
+                     if (arg.channel == this.getCandleChannelName(bot!)) {
                     /* HANDLE TICKERS */
   
-                    const ticker = data[0];
-                    const px = Number(ticker.last);
-                    const ts = parseDate(new Date(Number(ticker.ts)));
+                    const candle = heikinAshi( parseKlines(e.data) )[0]
                       if (DEV) {
                         console.log("WS UPDATE");
-                        console.log({ts, px});
+                        console.log(candle);
                     }
-                    for (let bot of this.botsWithPos) {
-                        console.log({ ...bot, h: px });
-                        updateOpenBot(bot, px);
+                    for (let openBot of this.botsWithPos) {
+                        updateOpenBot(bot, openBot, candle);
                     }
                 }
+                }
+
+               
             });
         }
     }
+
+    getCandleChannelName(bot: IBot){
+        const interval = getInterval(bot.interval, 'okx')
+        const channel = `candle${interval}` as any
+        return channel
+    }
     async sub(bot: IBot) {
         const symbol = this.getSymbol(bot);
+        
         for (let ws of this.wsList) {
-            ws.subscribe({ channel: "tickers", instId: symbol });
+            ws.subscribe({ channel: this.getCandleChannelName(bot), instId: symbol });
         }
     }
     async unsub(bot: IBot) {
         const symbol = this.getSymbol(bot);
         for (let ws of this.wsList) {
-            ws.unsubscribe({ channel: "tickers", instId: symbol });
+            ws.unsubscribe({ channel: this.getCandleChannelName(bot), instId: symbol });
         }
     }
     getSymbol(bot: IBot) {
@@ -138,24 +148,13 @@ export class WsOKX {
     async addBot(botId: ObjectId) {
         console.log(`[${parseDate(new Date())}] WS: ADDING BOT: ${botId} added`);
         const bot = await Bot.findById(botId).exec();
-        if (!bot) return console.log("BOT NOT FOUND");
-        const oid = bot.orders[bot.orders.length - 1];
-        const order = await Order.findById(oid).exec();
-        if (!order) return botLog(bot, `ORDER: ${oid} not found`);
-        const plat = new OKX(bot);
-        const klines = await plat.getKlines({});
-        const df = heikinAshi(parseKlines(klines));
-        const prevRow = df[df.length - 1];
-        console.log("WS OKX");
-        botLog(bot, { prevRow });
 
-        const entry = order.buy_price;
+        if (!bot) return console.log("BOT NOT FOUND");
+        const order = await Order.findById(bot.orders[bot.orders.length - 1]).exec()
         this.botsWithPos = this.botsWithPos.filter((el) => el.id != botId);
         this.botsWithPos.push({
             id: botId,
-            exitLimit: order.sell_price,
-            entry,
-            ha_h: prevRow.ha_h,
+            exitLimit: order!.sell_price,
         });
 
         await this.sub(bot)
@@ -171,24 +170,22 @@ export class WsOKX {
     }
 }
 
-const updateOpenBot = async (openBot: IOpenBot, px: number) => {
+const updateOpenBot = async (bot: IBot, openBot: IOpenBot, row: IObj) => {
+    let placed = false
     try {
-        wsOkx.rmvBot(openBot.id);
-        const bot = await Bot.findById(openBot.id).exec();
+        
+        await wsOkx.rmvBot(openBot.id);
 
-        if (!bot) return;
         const plat = new OKX(bot);
-        const orders = await findBotOrders(bot);
         const pricePrecision = getPricePrecision([bot.base, bot.ccy], bot.platform);
-        const order = orders[orders.length - 1];
+        const order = await Order.findById(bot.orders[bot.orders.length - 1]).exec()
+        if (!order) return
+
         if (bot && order.side == 'sell' && !order.is_closed && order.sell_price != 0) {
-            let { exitLimit, ha_h } = openBot;
-            const h = px;
+            let { exitLimit } = openBot;
             /* CHECK CONDITIONS */
-            let place = false;
-            // px == row.h
-            const isHaHit = openBot.exitLimit <= ha_h;
-            const eFromH = Number((((exitLimit - h) / h) * 100).toFixed(2));
+            const isHaHit = exitLimit <= row.ha_c /* THE CURRENT TICKER PX */;
+            const eFromH = Number((((exitLimit - row.c) / row.c) * 100).toFixed(2));
             botLog(bot, { isHaHit });
             if (isHaHit && eFromH < 0.5) {
                 exitLimit *= 1 - eFromH / 100;
@@ -197,7 +194,7 @@ const updateOpenBot = async (openBot: IOpenBot, px: number) => {
                 await order.save();
                 botLog(bot, `EXIT_LIMIT TO ${exitLimit} due to ha_h`);
             }
-            if (exitLimit <= h) {
+            if (exitLimit <= row.c) {
                 botLog(bot, `PLACING MARKET SELL ORDER AT ${exitLimit}`);
                 const amt = order.base_amt - order.buy_fee;
                 const r = await placeTrade({
@@ -208,11 +205,19 @@ const updateOpenBot = async (openBot: IOpenBot, px: number) => {
                     plat: plat,
                     price: 0,
                 });
-                if (!r) botLog(bot, "FAILED TO PLACE MARKET SELL ORDER");
-            }
+                if (!r) return botLog(bot, "FAILED TO PLACE MARKET SELL ORDER");
+                //await wsOkx.rmvBot(bot.id)
+                placed = true
+                botLog(bot, "WS: MARKET SELL PLACED. BOT REMOVED")
+            } 
         }
     } catch (e) {
         console.log(e);
+    }
+    finally{
+        if (!placed){
+            await wsOkx.addBot(bot.id)
+        }
     }
 };
 

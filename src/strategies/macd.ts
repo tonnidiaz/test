@@ -7,11 +7,11 @@ export class MACD_ONLY extends Strategy {
     desc: string = `Enters: macd > 0  \n  Exit:  macd < 0`;
 
     buyCond(row: IObj): boolean {
-        return row.macd > row.signal && row.c < row.bb_lower;
+        return row.hist > 0//row.macd > row.signal
     }
 
     sellCond(row: IObj): boolean {
-        return row.macd < row.signal && row.c > row.bb_upper;
+        return row.hist < 0//row.macd < row.signal 
     }
 }
 export class MACD_EXT extends Strategy {
@@ -47,11 +47,11 @@ export class MACD_MA extends Strategy {
     desc: string = `Enter: macd > 0 && sma20 >  sma50, Exit: oposite`;
 
     buyCond(row: IObj): boolean {
-        return MACD_EXT.prototype.buyCond(row) || MA_ONLY.prototype.buyCond(row)
+        return MACD_ONLY.prototype.buyCond(row) || MA_ONLY.prototype.buyCond(row)
     }
 
     sellCond(row: IObj): boolean {
-        return MACD_EXT.prototype.sellCond(row) || MA_ONLY.prototype.sellCond(row)
+        return MACD_ONLY.prototype.sellCond(row) && MA_ONLY.prototype.sellCond(row)
     }
 }
 export class MACD_HL_HA extends Strategy {

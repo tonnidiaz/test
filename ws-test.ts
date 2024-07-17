@@ -1,4 +1,5 @@
 import { botJobSpecs, demo } from "@/utils/constants";
+import { heikinAshi, parseDate, parseKlines } from "@/utils/funcs2";
 import { config } from "dotenv";
 import { scheduleJob } from "node-schedule";
 import { WebsocketClient, WsPrivateChannel } from "okx-api";
@@ -42,7 +43,7 @@ ws.on("response", (resp) => {
          /* SUBSCRIBE TO ORDERS CHANNEL */
 
         if (!subed) {
-            ws.subscribe({ channel: "tickers", instId: "SOL-USDT" });
+            ws.subscribe({ channel: "candle3m", instId: "SOL-USDT" });
             subed = true;
         }
     }
@@ -53,8 +54,13 @@ ws.on("response", (resp) => {
 });
 
 ws.on("update", (e) => {
-    console.log("WS UPDATE");
-    console.log(e);
+    if (e.arg.channel == "candle3m"){
+    console.log(`[${parseDate(new Date())}]`);
+    const candles = heikinAshi( parseKlines(e.data) )
+    console.log(candles);
+
+    }
+    
 });
 async function main() {
     while (true) {

@@ -111,7 +111,7 @@ export class TestOKX extends Platform {
 
         if (start) {
             start =
-                (isBybit ? start : start - interval * 60 * 1000) -
+                (isBybit ? start : start /* - interval * 60 * 1000 */) -
                 20 * interval * 60000; /* ACCORDING TO RETURNED DATA */
         }
 

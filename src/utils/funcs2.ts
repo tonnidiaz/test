@@ -73,9 +73,9 @@ export const heikinAshi = (df: IObj[]) => {
 
 const tuMacd2 = (df: IObj[]) => {
     const def = false;
-    const fast = def ? 12 : 5, //12, // 1,//12,
-        slow = def ? 26 : 12,//25, //26,
-        signal = def ? 9 : 5//10; //9;
+    const fast = def ? 12 : 1,// 5, //12, // 1,//12,
+        slow = def ? 26 : 3, //12,//25, //26,
+        signal = def ? 9 : 2//5//10; //9;
 
     const prices = df.map((el) => el[useHaClose ? "ha_c" : "c"]);
 
