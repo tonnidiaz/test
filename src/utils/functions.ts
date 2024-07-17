@@ -303,3 +303,9 @@ export const isBetween = (l: number, num: number, h: number)=>{
     }
     return ret
 }
+
+
+
+export function randomNum(min: number, max: number) {
+    return Math.random() * (max - min) + min;
+}

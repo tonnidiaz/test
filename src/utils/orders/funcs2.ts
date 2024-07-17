@@ -102,9 +102,9 @@ export const afterOrderUpdate = async ({
         await order.save();
         botLog(bot, `ENTRY_LIMIT UPDATED to ${entryLimit}`); */
     } else if (pos && order && !order.is_closed && strategy.sellCond(prevRow)) {
-        botLog(bot, "ORDER NOT YET CLOSED, UPDATING EXIT_LIMIT");
+        botLog(bot, "SELL ORDER NOT YET CLOSED, UPDATING EXIT_LIMIT");
 
-        const exitLimit = prevRow.ha_c;
+        const exitLimit = prevRow.ha_h;
         order.sell_timestamp = { i: parseDate(new Date()) };
         order.sell_price = exitLimit;
 
@@ -124,7 +124,7 @@ export const updateOrderInDb = async (order: IOrder, res: any) => {
     order.is_closed = true;
     order.sell_fee = fee;
     order.sell_timestamp = {
-        i: parseDate(new Date(res.cTime)),
+        ...order.sell_timestamp,
         o: parseDate(new Date(res.fillTime)),
     };
     /* order == currentOrder */
