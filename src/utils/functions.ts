@@ -218,6 +218,7 @@ export const botLog = (bot: IBot, data: any) => {
     console.log(`\n[${parseDate(new Date())}] [ ${bot.name} ]`, data, '\n');
 };
 
+export const timedLog = (...args)=>console.log(`[${parseDate(new Date())}]`, ...args)
 export function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }

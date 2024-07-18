@@ -10,7 +10,7 @@ import {
 } from "@/utils/constants";
 import { ensureDirExists } from "@/utils/orders/funcs";
 import {
-    chandelierExit,
+    tuCE,
     heikinAshi,
     parseDate,
     parseKlines,
@@ -23,9 +23,9 @@ import { existsSync, readdirSync, writeFileSync } from "fs";
 import { TestBinance } from "@/classes/test-binance";
 import { TestBybit, TestOKX } from "@/classes/test-platforms";
 import { ITrade } from "@/utils/interfaces";
-let years = [2021, 2023, 2024],
-    symbols = ["SOL", "NEAR", "MASK", "MINA"],
-    intervals = [60];
+let years = [2021, 2022, 2023, 2024],
+    symbols = ["NEAR", "MASK", "MINA", "UMA", "SUI", "AVAX", "SEI"],
+    intervals = [15, 60];
 symbols = symbols.map((el) => `${el}/USDT`);
 
 async function downloader({
@@ -116,7 +116,7 @@ const dld = async ({
                     savePath: klinesPath,
                 });
                 if (parse && klines) {
-                    const df = chandelierExit(
+                    const df = tuCE(
                         heikinAshi(parseKlines(klines))
                     );
                     ensureDirExists(dfsPath);
@@ -142,7 +142,7 @@ const createDf = async (year: number, interval: number, symb: string) => {
     }
 
     const klines = readJson(klinesPath);
-    const df = chandelierExit(heikinAshi(parseKlines(klines)));
+    const df = tuCE(heikinAshi(parseKlines(klines)));
     ensureDirExists(dfsPath);
     writeFileSync(dfsPath, JSON.stringify(df));
 };
@@ -153,7 +153,7 @@ const klinesToDf = async (fp: string, saveFp: string) => {
         return;
     }
     const klines = readJson(fp);
-    const df = chandelierExit(heikinAshi(parseKlines(klines)));
+    const df = tuCE(heikinAshi(parseKlines(klines)));
     ensureDirExists(saveFp);
     writeFileSync(saveFp, JSON.stringify(df));
     console.log("DONE WRITING DF");

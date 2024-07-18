@@ -93,7 +93,7 @@ export const fillSellOrder = ({
     isSl?: boolean;
 }) => {
 
-    const _isTp =  !isStopOrder ? exit >= entry : !isSl
+    const _isTp = !isStopOrder ? exit >= entry : !isSl
     console.log({ exitLimit, exit, entry, base });
     //console.log(`MIKA: ${exit >= entry ? "gain" : "loss"}`);
     console.log("FILL SELL ORDER");

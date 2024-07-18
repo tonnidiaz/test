@@ -1,6 +1,6 @@
 import { Strategy } from "@/classes/strategy";
 import { IObj } from "@/utils/interfaces";
-const fastRSI = 50
+const fastRSI = 20
 export class RSI_ONLY extends Strategy {
     name: string = "RSI ONLY";
     desc: string = `Enter: macd > 0 && sma20 >  sma50, Exit: oposite`;

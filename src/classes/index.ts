@@ -7,7 +7,6 @@ import { botJobSpecs, test } from "@/utils/constants";
 import { botLog } from "@/utils/functions";
 import { afterOrderUpdate } from "@/utils/orders/funcs2";
 import { findBotOrders } from "@/utils/funcs2";
-import { wsOkx } from "./main-okx";
 
 export class OrderPlacer {
     cnt: number = 0;

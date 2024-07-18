@@ -73,9 +73,10 @@ export const heikinAshi = (df: IObj[]) => {
 
 const tuMacd2 = (df: IObj[]) => {
     const def = false;
-    const fast = def ? 12 : 1,// 5, //12, // 1,//12,
-        slow = def ? 26 : 3, //12,//25, //26,
-        signal = def ? 9 : 2//5//10; //9;
+    const faster = true
+    const fast = def ? 12 :faster ?  1 : 5, //12, // 1,//12,
+        slow = def ? 26 : faster ? 2 : 12,//25, //26,
+        signal = def ? 9 : faster ? 2 : 5//10; //9;
 
     const prices = df.map((el) => el[useHaClose ? "ha_c" : "c"]);
 
@@ -84,27 +85,10 @@ const tuMacd2 = (df: IObj[]) => {
     for (let i = 0; i < _macd.macdLine.length; i++)
         histogram.push(_macd.macdLine[i] - _macd.signalLine[i]);
     return { ..._macd, histogram };
-    /* let shortEMA = ema(prices, { period: fast });
-    let longEMA = ema(prices, { period: slow });
-    let macdLine: number[] = [];
-
-    for (let i = 0; i < prices.length; i++) {
-        macdLine.push(shortEMA[i] - longEMA[i]);
-    }
-    let signalLine = ema(macdLine, { period: signal });
-    let histogram: number[] = [];
-    for (let i = 0; i < macdLine.length; i++) {
-        histogram.push(macdLine[i] - signalLine[i]);
-    }
-    return {
-        macdLine: macdLine,
-        signalLine: signalLine,
-        histogram: histogram,
-    }; */
 };
 
 //export const chandelierExit = (df: IObj[], mult = 1.8, atrLen = 1) => {
-export const chandelierExit = (df: IObj[]) => {
+export const tuCE = (df: IObj[]) => {
     const mult = 2,
         atrLen = 5;
     const highs = df.map((e) => e[useHaClose ? "ha_h" : "c"]);
@@ -127,6 +111,16 @@ export const chandelierExit = (df: IObj[]) => {
     const { histogram, macdLine, signalLine } = tuMacd2(df);
 
     for (let i = 0; i < df.length; i++) {
+
+        df[i].sma_20 = sma20[i];
+        df[i].sma_50 = sma50[i];
+        /* MACD */
+        df[i].hist = histogram[i];
+        df[i].macd = macdLine[i];
+        df[i].signal = signalLine[i];
+        /* END MACD */
+        df[i]["rsi"] = _rsi[i];
+        continue
         const ceClosings = closings.slice(i - atrLen, i);
         const long_stop = Math.max(...ceClosings) - _atr[i] * mult;
         const short_stop = Math.max(...ceClosings) + _atr[i] * mult;
@@ -134,16 +128,9 @@ export const chandelierExit = (df: IObj[]) => {
 
         const cdf = df[i],
             pdf = df[i - 1];
-        df[i].sma_20 = sma20[i];
-        df[i].sma_50 = sma50[i];
+        
 
-        df[i]["rsi"] = _rsi[i];
-
-        /* MACD */
-        df[i].hist = histogram[i];
-        df[i].macd = macdLine[i];
-        df[i].signal = signalLine[i];
-        /* END MACD */
+        
         if (i > 0) {
             const lsp = pdf.long_stop;
             const ssp = pdf.short_stop;
@@ -171,7 +158,6 @@ export const calcEntryPrice = (row: IObj, side: "buy" | "sell") => {
     return val;
 };
 
-//export const calcSL = (entry: number) => entry * (1 - 0.1 / 100);
 export const calcSL = (entry: number) => {
     return entry * (1 - SL / 100);
 };

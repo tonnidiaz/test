@@ -1,3 +1,34 @@
+/* const ddNum = (e: any) => {
+    e = `${e}`.trim();
+    return e.length == 1 ? `0${e}` : e;
+};
+const toISOString = (date: string) => {
+    let dateArr = date.split(",");
+    let time = dateArr[1];
+    time = time
+        .split(":")
+        .map((el) => ddNum(el))
+        .join(":");
+    dateArr = dateArr[0].split("/");
+    date = `${dateArr[0]}-${ddNum(dateArr[1])}-${ddNum(dateArr[2])}`;
+    return `${date} ${time}+02:00`;
+};
+const parseDate = (date: Date | string) =>
+    toISOString(
+        new Date(date).toLocaleString("en-ZA", {
+            timeZone: "Africa/Johannesburg",
+        })
+    );
+(function(){
+    if(console.log){
+        var old = console.log;
+        console.log = function(){
+            Array.prototype.unshift.call(arguments, `[${parseDate(new Date())}]`);
+            old.apply(this, arguments as any)
+        }
+    }  
+})(); */
+
 import createError from "http-errors";
 import express from "express";
 import path from "path";
@@ -16,7 +47,7 @@ import { DEV, setJobs } from "./utils/constants";
 import dotenv from "dotenv";
 import { Bot, Order } from "./models";
 import { addBotJob } from "./utils/orders/funcs";
-import { wsOkx } from "./classes/main-okx";
+//import { wsOkx } from "./classes/main-okx";
 import { botLog } from "./utils/functions";
 
 dotenv.config();
@@ -101,7 +132,7 @@ const main = async () => {
         await addBotJob(bot);
         botLog(bot, "INITIALIZING WS...");
         if (bot.orders.length) {
-            const lastOrder = await Order.findById(
+          /*   const lastOrder = await Order.findById(
                 bot.orders[bot.orders.length - 1]
             ).exec();
             if (
@@ -111,9 +142,9 @@ const main = async () => {
                 lastOrder.sell_price != 0
             ) {
                 await wsOkx.addBot(bot.id);
-            }
-        }
-        await wsOkx.sub(bot);
+            }*/
+        } 
+       // await wsOkx.sub(bot);
     }
     //new MainOKX()
 };

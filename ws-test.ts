@@ -1,5 +1,5 @@
 import { botJobSpecs, demo } from "@/utils/constants";
-import { heikinAshi, parseDate, parseKlines } from "@/utils/funcs2";
+import { heikinAshi, parseDate, parseKlines, tuCE } from "@/utils/funcs2";
 import { config } from "dotenv";
 import { scheduleJob } from "node-schedule";
 import { WebsocketClient, WsPrivateChannel } from "okx-api";
@@ -56,7 +56,7 @@ ws.on("response", (resp) => {
 ws.on("update", (e) => {
     if (e.arg.channel == "candle3m"){
     console.log(`[${parseDate(new Date())}]`);
-    const candles = heikinAshi( parseKlines(e.data) )
+    const candles = tuCE(heikinAshi( parseKlines(e.data) )) 
     console.log(candles);
 
     }

@@ -2,7 +2,7 @@ import { Server } from "socket.io";
 import { CorsOptions } from "cors";
 import { IObj } from "./interfaces";
 import {
-    chandelierExit,
+    tuCE,
     heikinAshi,
     parseDate,
     parseKlines,
@@ -159,20 +159,22 @@ io.on("connection", (client) => {
                 m: Number(klines[0][0]),
                 endTs: new Date(endTs),
             });
-            klines = klines.filter(
+            if (offline){
+                 klines = klines.filter(
                 (el) => startTs <= Number(el[0]) && Number(el[0]) <= endTs
             );
+            }
+           
             client.emit("backtest", "Analyzing data...");
             klines = isParsed && useFile ? klines : parseKlines(klines);
-            let df = chandelierExit(
+            let df = tuCE(
                 isHa && useFile ? klines : heikinAshi(klines)
             );
-            if (offline && !useFile) {
+
+
+            if (!useFile) {
                 // Return oly df from startTs to endTs
-                console.log(df[0]);
-                df = test
-                    ? df
-                    : df.filter(
+                df = df.filter(
                           (el) =>
                               Date.parse(el.ts) <= endTs &&
                               Date.parse(el.ts) >= startTs
@@ -298,10 +300,9 @@ io.on("connection", (client) => {
                     : klines;
             klines = parseKlines(klines);
 
-            let df = chandelierExit(heikinAshi(klines));
+            let df = tuCE(heikinAshi(klines));
             if (offline && !useFile) {
                 // Return oly df from startTs to endTs
-                console.log(df[0]);
                 df = test
                     ? df
                     : df.filter(

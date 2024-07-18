@@ -85,7 +85,6 @@ export const strategy = ({
         tp: number | null = null,
         base: number = 0,
         sl: number | null = null,
-        _sl: number | null = null,
         exit: number = 0,
         enterTs = "",
         exitTs = "",
@@ -108,7 +107,7 @@ export const strategy = ({
         //if (balance < 10) continue;
         const prevRow = df[i - 1],
             row = df[i];
-        const prePrevRow = i > 1 ? df[i - 2] : null;
+        const prePrevRow = df[i - 2];
         console.log(`\nTS: ${row.ts}`);
         _cnt += 1;
 
@@ -127,7 +126,6 @@ export const strategy = ({
             exitLimit = null;
             entryLimit = null;
             skip = true;
-            _sl = null;
             // (_bal = ret._bal);
         };
         const _fillBuyOrder = (ret: ReturnType<typeof fillBuyOrder>) => {
@@ -137,15 +135,15 @@ export const strategy = ({
                 (balance = ret.balance),
                 (_cnt = ret._cnt);
             enterTs = row.ts;
-            //tp = toFixed(entry * (1 + TP / 100), pricePrecision);
-            // sl = toFixed(entry * (1 - SL / 100), pricePrecision);
+            tp = toFixed(entry * (1 + TP / 100), pricePrecision);
+            sl = toFixed(entry * (1 - SL / 100), pricePrecision);
             buyFees += ret.fee;
             exitTs = row.ts;
         };
         const isGreen = prevRow.c >= prevRow.o;
         const isPreGreen = prePrevRow ? prePrevRow.c >= prePrevRow.o : false;
 
-        async function _fillSell(_exit: number, _row: IObj, isSl?: boolean) {
+        async function _fillSell(_exit: number, _row: IObj) {
             const ret = fillSellOrder({
                 exitLimit,
                 exit: _exit,
@@ -164,54 +162,151 @@ export const strategy = ({
                 tp,
                 entryLimit,
                 maker,
-                isSl,
             });
             _fillSellOrder(ret);
         }
 
-        if (pos && exitLimit) {
-            const slRow = row;
-            const exitRow = prevRow;
-            console.log("HAS POS");
-            const sl = exitLimit * (1 - SL2 / 100);
-
+        if (!pos && entryLimit) {
             let goOn = true,
                 isSl = false;
-            if (!_sl) {
-                console.log("CHECKING EXIT");
-            } else {
-                console.log("NOT CHECKING EXIT");
+            let _sl = entryLimit * (1 + SL2 / 100);
+            _sl = Number(_sl.toFixed(pricePrecision));
+
+            const isHitHa = isBetween(prevRow.ha_l, entryLimit, 0);
+            const eFromL = Number(
+                (((prevRow.l - prevRow.ha_l) / prevRow.ha_l) * 100).toFixed(2)
+            );
+            if (isHitHa) console.log({ eFromL });
+            if (isHitHa && eFromL < 0.5) {
+                //entryLimit *= (1 + eFromL / 100);
+                //entryLimit = Number(entryLimit.toFixed(pricePrecision))
             }
-            if (exitLimit < slRow.h) {
-                exit = exitLimit;
-            } else {
-            /*   else if (slRow.l < sl && sl < slRow.h) {
+            if (isBetween(prevRow.l, entryLimit, prevRow.h)) {
+                entry = entryLimit;
+            } else if (
+                isBetween(prevRow.ha_l, _sl, 0) //  && isGreen
+            ) {
+                entry = row.o;
                 isSl = true;
-                exit = sl;
-               
+            } else {
+                /* if (entryLimit && prevRow.l < entryLimit) {
+                entry = row.o;
+            } else if (prevRow.l <= sl) {
+                entry = row.o;
             } */
                 goOn = false;
-                console.log("NEITHER");
             }
-            _sl = sl;
+            //goOn = true
+            //entry = entryLimit
             if (goOn) {
-                const _row = isSl ? slRow : exitRow;
+                // entry = row.o;
+                console.log({
+                    entryLimit,
+                    entry,
+                    o: isSl ? row.o : prevRow.o,
+                    h: prevRow.h,
+                    l: prevRow.l,
+                    c: prevRow.c,
+                });
+                console.log("FILLING BUY ORDER..", isSl ? "SL" : "ENTRY");
 
-                const p = isSl ? "SL" : "EXIT";
-                console.log("\nFILLING SELL ORDER AT", p);
-                console.log({ exit, l: _row.l, h: _row.h }, "\n");
-                _fillSell(exit, exitRow, isSl);
+                const ret = fillBuyOrder({
+                    entry,
+                    prevRow: row,
+                    entryLimit,
+                    enterTs,
+                    taker,
+                    base,
+                    balance, //: _bal,
+                    basePrecision,
+                    mData: { ...mData },
+                    pos,
+                });
+                _fillBuyOrder(ret);
             }
+        } else if (pos && exitLimit) {
+            console.log("HAS POS");
+           
+            const exitRow = prevRow;
+           
+            const isHaHit = exitLimit <= exitRow.ha_h;
+            //const ha_c = (df[i].o + df[i].h + df[i].l + df[i].c) / 4;
+            let stdAtHaExit = !isHaHit
+                ? 0
+                : exitLimit * 4 - exitRow.o - exitLimit - exitRow.l;
+
+            const isStdHit = exitLimit <= exitRow.h;
+            const eFromH = Number(
+                (((exitLimit - exitRow.h) / exitRow.h) * 100).toFixed(2)
+            );
+            if (isHaHit && stdAtHaExit > exitRow.h) stdAtHaExit = exitLimit;
+            else if (!isHaHit && isStdHit) stdAtHaExit = exitLimit;
+            stdAtHaExit = toFixed(stdAtHaExit, pricePrecision);
+
+            let _ex = 0;
+            const _sl = Number(
+                (entry * (1 - SL2 / 100)).toFixed(pricePrecision)
+            );
+            if (isHaHit) {
+                console.log({ exitLimit, stdAtHaExit, h: exitRow.h });
+                console.log("BEFORE:", {
+                    exitLimit,
+                    h: exitRow.h,
+                    ha_h: exitRow.ha_h,
+                    eFromH,
+                });
+            }
+
+            /* if (isHaHit && !isStdHit) {
+                console.log({eFromH, isGreen});
+                const p = eFromH //isGreen ? -2.5 : 1.5
+                exitLimit *= (1 - (p/ 100) );
+                //exitLimit = Number(exitLimit.toFixed(pricePrecision))
+            } */
+            const _exit =
+                isHaHit && isStdHit
+                    ? stdAtHaExit
+                    : isHaHit && !isStdHit
+                    ? exitLimit * (1 - eFromH / 100)
+                    : null;
+
+            if (isHaHit)
+                console.log("AFTER", {
+                    isHaHit,
+                    isStdHit,
+                    exitLimit,
+                    h: exitRow.h,
+                });
+            exitLimit = _exit || exitLimit
+            if (exitLimit <= exitRow.h) {
+                exit = exitLimit; // (exitLimit + prevRow.c) / 2
+                //exit = exitLimit * (1 - randomNum(0.02, .5)/100); // (exitLimit + prevRow.c) / 2
+                console.log("FILLING SELL ORDER AT EXIT");
+                _fillSell(exit, exitRow);
+            }
+            /* else if (isGreen) {
+                exit = row.o;
+                //exit = row.o
+                console.log({
+                    entry,
+                    exitLimit,
+                    o: row.o,
+                    h: prevRow.h,
+                    l: row.l,
+                    sl,
+                    c: row.c,
+                });
+                console.log("FILLING SELL ORDER AT SL..");
+                _fillSell(exit, row);
+            } */
         }
 
-        if (!pos 
-            && buyCond(prevRow, df, i)
-        ) {
+        if (!pos && (buyCond(prevRow, df, i))) {
             if (entryLimit) {
                 console.log("BUY ORDER NOT FILLED, RE-CHECKING SIGNALS");
             }
             // Place limit buy order
-            entryLimit = prevRow.ha_l
+            entryLimit = prevRow.ha_c;
             enterTs = row.ts;
             console.log(
                 `[ ${row.ts} ] \t Limit buy order at ${entryLimit?.toFixed(2)}`
@@ -232,15 +327,17 @@ export const strategy = ({
                 });
                 _fillBuyOrder(ret);
             }
-        } else if ( 
+        } else if (
             pos
-            //&& !isGreen
-            && sellCond(prevRow, entry, df, i)
+               // && !exitLimit
+           && sellCond(prevRow, entry, df, i)
         ) {
             // Place limit sell order
-            exitLimit = prevRow.ha_h// * (1 + 2 / 100); //Math.min(prevRow.ha_o, prevRow.ha_c)
+            exitLimit = prevRow.ha_c; //Math.max(prevRow.ha_o, prevRow.ha_c)
             enterTs = row.ts;
-            console.log(`[ ${row.ts} ] \t Limit sell order at ${exitLimit}`);
+            console.log(
+                `[ ${row.ts} ] \t Limit sell order at ${exitLimit?.toFixed(2)}`)
+            
         }
 
         if (pos && exitLimit) {

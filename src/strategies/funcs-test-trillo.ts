@@ -1,6 +1,7 @@
 import { fillBuyOrder, fillSellOrder } from "./utils/functions";
 import {
     MAKER_FEE_RATE,
+    MAX_PEC_FROM_H,
     SL,
     SL2,
     TAKER_FEE_RATE,
@@ -23,6 +24,7 @@ import {
     getCoinPrecision,
     getPricePrecision,
     isBetween,
+    randomNum,
     toFixed,
 } from "@/utils/functions";
 import { IObj } from "@/utils/interfaces";
@@ -53,18 +55,20 @@ export const strategy = ({
     trades: IObj[];
     platNm: "binance" | "bybit" | "okx";
 }) => {
-if (rf){
-  return strCopy6({df,
-        balance,
-        buyCond,
-        sellCond,
-        pair,
-        maker,
-        taker,
-        trades,
-        platNm,})  
-}
-    
+    if (rf) {
+        return strCopy6({
+            df,
+            balance,
+            buyCond,
+            sellCond,
+            pair,
+            maker,
+            taker,
+            trades,
+            platNm,
+        });
+    }
+
     let pos = false;
     let cnt = 0,
         gain = 0,
@@ -166,7 +170,7 @@ if (rf){
             let goOn = true,
                 isSl = false;
             let _sl = entryLimit * (1 + SL2 / 100);
-            _sl = Number(_sl.toFixed(pricePrecision))
+            _sl = Number(_sl.toFixed(pricePrecision));
 
             const isHitHa = isBetween(prevRow.ha_l, entryLimit, 0);
             const eFromL = Number(
@@ -174,18 +178,30 @@ if (rf){
             );
             if (isHitHa) console.log({ eFromL });
             if (isHitHa && eFromL < 0.5) {
-                entryLimit *= (1 + eFromL / 100);
-                entryLimit = Number(entryLimit.toFixed(pricePrecision))
+                //entryLimit *= (1 + eFromL / 100);
+                //entryLimit = Number(entryLimit.toFixed(pricePrecision))
             }
-            if (isBetween(prevRow.l, entryLimit, 0) && isGreen) {
-                entry = row.o;
-            } else if (isBetween(prevRow.l, _sl, 0) && isGreen) {
+            if (
+                isBetween(prevRow.l, entryLimit, prevRow.h)
+            ) {
+                entry = entryLimit;
+            } else if (
+                isBetween(prevRow.ha_l, _sl, 0)//  && isGreen
+            ) {
                 entry = row.o;
                 isSl = true;
-            } else {goOn = false;
+            } else {
+                /* if (entryLimit && prevRow.l < entryLimit) {
+                entry = row.o;
+            } else if (prevRow.l <= sl) {
+                entry = row.o;
+            } */
+                goOn = false;
             }
-            if (goOn && entryLimit) {
-                // entry = row.o
+            //goOn = true
+            //entry = entryLimit
+            if (goOn) {
+               // entry = row.o;
                 console.log({
                     entryLimit,
                     entry,
@@ -209,38 +225,17 @@ if (rf){
                     pos,
                 });
                 _fillBuyOrder(ret);
-                
             }
         } else if (pos && exitLimit) {
             console.log("HAS POS");
-            let goOn = true,
-                isSl = false;
-            const _sl = Number((entry * (1 - SL2 / 100)).toFixed(pricePrecision));
-
-            if (isBetween(0, _sl, prevRow.h) && !isGreen) {
-                exit = row.o;
-                isSl = true;
-                //exit = row.o
-                console.log({
-                    entry,
-                    exitLimit,
-                    o: row.o,
-                    h: prevRow.h,
-                    l: row.l,
-                    sl,
-                    hit: !isSl || _sl <= row.h,
-                    c: row.c,
-                });
-                console.log("FILLING SELL ORDER AT SL..");
-                _fillSell(exit, row);
-            }
+          
         }
 
         if (
             !pos &&
             buyCond(prevRow, df, i)
         ) {
-            if (entryLimit){
+            if (entryLimit) {
                 console.log("BUY ORDER NOT FILLED, RE-CHECKING SIGNALS");
             }
             // Place limit buy order
@@ -266,12 +261,12 @@ if (rf){
                 _fillBuyOrder(ret);
             }
         } else if (
-            pos 
-             &&
+            pos &&
+            //    && !exitLimit
             sellCond(prevRow, entry, df, i)
         ) {
             // Place limit sell order
-            exitLimit = prevRow.ha_c;
+            exitLimit = prevRow.ha_h * (1 + .0/100)//Math.min(prevRow.ha_o, prevRow.ha_c)
             enterTs = row.ts;
             console.log(
                 `[ ${row.ts} ] \t Limit sell order at ${exitLimit?.toFixed(2)}`
@@ -279,23 +274,24 @@ if (rf){
         }
 
         if (pos && exitLimit) {
-            const isHaHit = true//exitLimit <= prevRow.ha_h;
-            const eFromH = Number(
-                (((exitLimit - row.h) / row.h) * 100).toFixed(2)
-            );
+            const isHaHit = exitLimit <= row.ha_h;
+            const isStdHit = exitLimit <= row.h;
+            const eFromH = Number(((exitLimit - row.h) / row.h* 100).toFixed(2));
             if (isHaHit) console.log({ eFromH });
             let _ex = 0;
-            if (isHaHit && eFromH < 0.5) {
-                exitLimit *= (1 - (eFromH) / 100);
+            if (isHaHit && !isStdHit) {
+                exitLimit *= (1 - (eFromH/ 100) );
                 exitLimit = Number(exitLimit.toFixed(pricePrecision))
             }
 
             if (exitLimit <= row.h) {
                 exit = exitLimit; // (exitLimit + prevRow.c) / 2
+                //exit = exitLimit * (1 - randomNum(0.02, .5)/100); // (exitLimit + prevRow.c) / 2
                 console.log("FILLING SELL ORDER AT EXIT");
                 _fillSell(exit, row);
             }
         }
+        
     }
 
     const oKeys = Object.keys(mData.data);

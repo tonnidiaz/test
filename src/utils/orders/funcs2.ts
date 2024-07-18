@@ -3,7 +3,7 @@ import {
     calcEntryPrice,
     calcSL,
     calcTP,
-    chandelierExit,
+    tuCE,
     findBotOrders,
     heikinAshi,
     parseDate,
@@ -33,7 +33,7 @@ export const afterOrderUpdate = async ({
 
     if (!klines) return console.log("FAILED TO GET KLINES");
 
-    const df =   heikinAshi(parseKlines(klines))
+    const df =   tuCE(heikinAshi(parseKlines(klines)))
     
     const row = df[df.length - 1];
     const prevRow = row
@@ -104,7 +104,7 @@ export const afterOrderUpdate = async ({
     } else if (pos && order && !order.is_closed && strategy.sellCond(prevRow)) {
         botLog(bot, "SELL ORDER NOT YET CLOSED, UPDATING EXIT_LIMIT");
 
-        const exitLimit = prevRow.ha_h;
+        const exitLimit = prevRow.ha_c;
         order.sell_timestamp = { i: parseDate(new Date()) };
         order.sell_price = exitLimit;
 

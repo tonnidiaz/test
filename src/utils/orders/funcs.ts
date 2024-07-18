@@ -17,7 +17,7 @@ import {
 import { Bybit } from "@/classes/bybit";
 import {
     calcSL,
-    chandelierExit,
+    tuCE,
     findBotOrders,
     heikinAshi,
     parseDate,
@@ -67,7 +67,7 @@ export const updateOrder = async (bot: IBot) => {
         const klines = await plat.getKlines({});
 
         if (!klines) return botLog(bot, "FAILED TO GET KLINES");
-        const df = heikinAshi(parseKlines(klines));
+        const df = tuCE(heikinAshi(parseKlines(klines)))
         const prevRow = df[df.length - 1];
         const isGreen = prevRow.c >= prevRow.o;
         if (!order) return { isClosed, lastOrder: null, prevRow, isGreen };

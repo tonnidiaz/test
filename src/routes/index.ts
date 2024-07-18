@@ -10,7 +10,7 @@ import {
 var router = express.Router();
 import os from "os";
 import { strategies } from "@/strategies";
-import { chandelierExit, parseDate, parseKlines } from "@/utils/funcs2";
+import { tuCE, parseDate, parseKlines } from "@/utils/funcs2";
 import fs, { writeFileSync } from "fs";
 import { heikinAshi } from "../utils/funcs2";
 import { Bot } from "@/models";
