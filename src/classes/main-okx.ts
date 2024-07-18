@@ -451,6 +451,6 @@ const updateOrder = async ({
 };
 
 console.log("WS OKX")
-export const wsOkx: WsOKX = new WsOKX();
-wsOkx.initWs();
+const wsOkx: WsOKX = new WsOKX();
+//wsOkx.initWs();
 
