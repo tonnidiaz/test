@@ -63,7 +63,7 @@ export const updateOrder = async (bot: IBot) => {
         let order: IOrder | null = orders[orders.length - 1];
         let isClosed = !order || order?.is_closed == true;
         if (!order || isClosed) return { isClosed, lastOrder: null };
-
+        let orderId = order._id
         const plat = new OKX(bot);
         /*  botLog(bot, "GETTING KLINES TO SEE IF BUY/SL SELL CAN BE FILLED...");
         const klines = await plat.getKlines({});
@@ -118,11 +118,11 @@ export const updateOrder = async (bot: IBot) => {
             });
             if (!r) botLog(bot, "FAILED TO PLACE MARKET SELL ORDER");
             if (r) {
-                order = r;
+                orderId = r;
                 botLog(bot, "OCO MARKET SELL ORDER PLACED");
             }
         }
-        return { isClosed, lastOrder: order.id };
+        return { isClosed, lastOrder: orderId };
     } catch (e) {
         console.log(e);
     }
@@ -276,7 +276,7 @@ export const placeTrade = async ({
                 if (res && res != "live") {
                     _filled = true;
                     await updateOrderInDb(order, res);
-                    return { isClosed: true, lastOrder: order };
+                    //return { isClosed: true, lastOrder: order };
                 }
             }
         } else {
@@ -291,7 +291,7 @@ export const placeTrade = async ({
         await order.save();
         await bot.save();
         botLog(bot, `${side} order placed, Bot updated`);
-        return order;
+        return order._id;
     } catch (error) {
         console.log(error);
         return;

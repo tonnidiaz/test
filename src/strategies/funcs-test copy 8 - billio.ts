@@ -278,7 +278,7 @@ export const strategy = ({
                     h: exitRow.h,
                 });
             exitLimit = _exit || exitLimit
-            if (exitLimit <= exitRow.h) {
+            if (exitLimit && exitLimit <= exitRow.h) {
                 exit = exitLimit; // (exitLimit + prevRow.c) / 2
                 //exit = exitLimit * (1 - randomNum(0.02, .5)/100); // (exitLimit + prevRow.c) / 2
                 console.log("FILLING SELL ORDER AT EXIT");
