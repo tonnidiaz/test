@@ -62,7 +62,7 @@ export const updateOrder = async (bot: IBot) => {
 
         let order: IOrder | null = orders[orders.length - 1];
         let isClosed = !order || order?.is_closed == true;
-        if (!order || isClosed) return { isClosed, lastOrder: null };
+        if (!order || isClosed) return { isClosed, lastOrder: "null" };
         let orderId = order._id
         const plat = new OKX(bot);
         /*  botLog(bot, "GETTING KLINES TO SEE IF BUY/SL SELL CAN BE FILLED...");
