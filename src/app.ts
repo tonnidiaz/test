@@ -49,7 +49,7 @@ import { Bot, Order } from "./models";
 import { addBotJob } from "./utils/orders/funcs";
 import { wsOkx } from "./classes/main-okx";
 import { botLog } from "./utils/functions";
-
+console.log(wsOkx.passphrase);
 dotenv.config();
 // view engine setup
 app.set("views", path.join(__dirname, "views"));

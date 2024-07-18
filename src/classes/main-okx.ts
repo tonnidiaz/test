@@ -412,10 +412,6 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, row: IObj) => {
     }
 };
 
-export const wsOkx: WsOKX = new WsOKX();
-wsOkx.initWs();
-
-
 const updateOrder = async ({
     order,
     isBuyOrder,
@@ -453,3 +449,8 @@ const updateOrder = async ({
         await order.save()
     }
 };
+
+console.log("WS OKX")
+export const wsOkx: WsOKX = new WsOKX();
+wsOkx.initWs();
+
