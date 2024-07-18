@@ -62,15 +62,16 @@ export const updateOrder = async (bot: IBot) => {
 
         let order: IOrder | null = orders[orders.length - 1];
         let isClosed = !order || order?.is_closed == true;
+        if (!order || isClosed) return { isClosed, lastOrder: null };
+
         const plat = new OKX(bot);
-        botLog(bot, "GETTING KLINES TO SEE IF BUY/SL SELL CAN BE FILLED...");
+        /*  botLog(bot, "GETTING KLINES TO SEE IF BUY/SL SELL CAN BE FILLED...");
         const klines = await plat.getKlines({});
 
         if (!klines) return botLog(bot, "FAILED TO GET KLINES");
         const df = tuCE(heikinAshi(parseKlines(klines)))
         const prevRow = df[df.length - 1];
-        const isGreen = prevRow.c >= prevRow.o;
-        if (!order) return { isClosed, lastOrder: null, prevRow, isGreen };
+        const isGreen = prevRow.c >= prevRow.o; */
 
         /* if (order.side == "sell" && !order.order_id.length) {
             return false;
@@ -80,50 +81,11 @@ export const updateOrder = async (bot: IBot) => {
             order &&
             order.side == "sell" &&
             !order.is_closed &&
-            order.buy_order_id.length;
+            order.buy_order_id.length != 0;
         let entryLimit = order.buy_price;
         let exitLimit = order.sell_price;
 
-        if (orders.length && !pos && entryLimit != 0) {
-            /* CHECK IF BUY CONDITIONS ARE MET */
-
-            // const sl = entryLimit * (1 + SL2 / 100);
-            // const isHaHit = prevRow.ha_l < entryLimit;
-            // const entryFromLow = Number(
-            //     (((prevRow.l - prevRow.ha_l) / prevRow.ha_l) * 100).toFixed(2)
-            // );
-            // botLog(bot, { entryLimit, sl, isHaHit, entryFromLow, prevRow });
-
-            // if (isHaHit && entryFromLow < 0.5) {
-            //     /* RE-ADJUST ENTRY LIMIT */
-            //     entryLimit *= 1 + entryFromLow / 100;
-            //     entryLimit = Number(entryLimit.toFixed(pxPr));
-            //     order.buy_price = entryLimit;
-            //     await order.save();
-            // }
-
-            // if (isGreen && (prevRow.l < entryLimit || prevRow.l < sl)) {
-            //     /* EITHER THE LIMIT OR THE SL WAS REACHED */
-            //     /* PLACE MARKET BUY */
-            //     const amt = order && order.buy_order_id.length
-            //         ? order.new_ccy_amt - Math.abs(order.sell_fee)
-            //         : bot.start_amt;
-
-            //     const ts = new Date();
-            //     const res = await placeTrade({
-            //         bot: bot,
-            //         ts: parseDate(ts),
-            //         amt,
-            //         side: "buy",
-            //         price: 0 /* 0 for market buy */,
-            //         plat: plat,
-            //     });
-            //     if (res) {
-            //         botLog(bot, "MARKET BUY ORDER PLACED. TO SIGNALS CHECK SEC");
-            //     }
-            // }
-            await order?.save();
-        } else if (pos && exitLimit != 0 && !order.is_closed) {
+        if (pos && exitLimit != 0 && !order.is_closed) {
             /* ORDER WAS  NOT FILLED AT EXIT */
             //const sl = entryLimit * (1 - SL2 / 100);
             //if (sl < prevRow.h && !isGreen) {
@@ -143,8 +105,24 @@ export const updateOrder = async (bot: IBot) => {
             //    botLog(bot, "ADD BOT TO WS")
             //    return false
             //}
+
+            botLog(bot, { exitLimit });
+            const amt = order.base_amt - order.buy_fee;
+            const r = await placeTrade({
+                bot: bot,
+                ts: parseDate(new Date()),
+                amt: Number(amt),
+                side: "sell",
+                plat: plat,
+                price: exitLimit,
+            });
+            if (!r) botLog(bot, "FAILED TO PLACE MARKET SELL ORDER");
+            if (r) {
+                order = r;
+                botLog(bot, "OCO MARKET SELL ORDER PLACED");
+            }
         }
-        return { isClosed, lastOrder: order.id, prevRow, isGreen };
+        return { isClosed, lastOrder: order.id };
     } catch (e) {
         console.log(e);
     }
@@ -313,7 +291,7 @@ export const placeTrade = async ({
         await order.save();
         await bot.save();
         botLog(bot, `${side} order placed, Bot updated`);
-        if (side == "buy") return order;
+        return order;
     } catch (error) {
         console.log(error);
         return;

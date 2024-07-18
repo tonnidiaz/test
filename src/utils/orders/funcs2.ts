@@ -18,7 +18,7 @@ import { botLog } from "../functions";
 import { objStrategies } from "@/strategies";
 import { trueRange } from "indicatorts";
 import { IObj } from "../interfaces";
-import { wsOkx } from "@/classes/main-okx";
+//import { wsOkx } from "@/classes/main-okx";
 
 export const afterOrderUpdate = async ({
     bot,
@@ -27,9 +27,7 @@ export const afterOrderUpdate = async ({
 }) => {
     const plat = new OKX(bot);
     botLog(bot, "SIM: GETTING KLINES...");
-    const klines = await plat.getKlines({
-        end: Date.now() - bot.interval * 60 * 1000,
-    });
+    const klines = await plat.getKlines({});
 
     if (!klines) return console.log("FAILED TO GET KLINES");
 
@@ -50,7 +48,7 @@ export const afterOrderUpdate = async ({
         order &&
         order.side == "sell" &&
         !order.is_closed &&
-        order.buy_order_id.length;
+        order.buy_order_id.length != 0;
     console.log({ pos });
 
     /* ------ START ---------- */
@@ -104,14 +102,14 @@ export const afterOrderUpdate = async ({
     } else if (pos && order && !order.is_closed && strategy.sellCond(prevRow)) {
         botLog(bot, "SELL ORDER NOT YET CLOSED, UPDATING EXIT_LIMIT");
 
-        const exitLimit = prevRow.ha_c;
+        const exitLimit = prevRow.ha_h;
         order.sell_timestamp = { i: parseDate(new Date()) };
         order.sell_price = exitLimit;
 
         await order.save();
         botLog(bot, `EXIT_LIMIT UPDATED TO: ${exitLimit}`);
         botLog(bot, "WATCHING FOR THE PX CHANGES");
-        await wsOkx.addBot(bot.id);
+        //await wsOkx.addBot(bot.id);
     }
 };
 

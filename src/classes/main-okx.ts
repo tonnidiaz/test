@@ -1,5 +1,5 @@
 import { IBot } from "@/models/bot";
-import { WebsocketClient } from "okx-api";
+import { AlgoOrderDetailsResult, OrderDetails, WebsocketClient } from "okx-api";
 import { configDotenv } from "dotenv";
 import { Bot, Order } from "@/models";
 import {
@@ -9,6 +9,7 @@ import {
     getInterval,
     heikinAshi,
     parseDate,
+    parseFilledOrder,
     parseKlines,
     tuCE,
 } from "@/utils/funcs2";
@@ -18,6 +19,7 @@ import { OKX } from "./okx";
 import { placeTrade } from "@/utils/orders/funcs";
 import { DEV, demo } from "@/utils/constants";
 import { IObj } from "@/utils/interfaces";
+import { IOrder } from "@/models/order";
 configDotenv();
 
 interface IOpenBot {
@@ -95,7 +97,13 @@ export class WsOKX {
                         return;
                     }
                     this.ok = true;
-                    console.log("WS AUTH SUCCESS");
+                    timedLog("WS AUTH SUCCESS");
+                    timedLog("SUBSCRIBING...");
+                    ws.subscribe({ channel: "orders", instType: "ANY" });
+                    ws.subscribe({
+                        channel: "orders-algo",
+                        instType: "ANY",
+                    });
                 }
             });
 
@@ -125,6 +133,129 @@ export class WsOKX {
                                 { ...openBot, klines: df as any },
                                 candle
                             );
+                        }
+                    }
+                    if (arg.channel == "orders") {
+                        /* HANDLE ORDERS */
+
+                        for (let ord of data as OrderDetails[]) {
+                            const ordLog = (arg: any) => {
+                                console.log(
+                                    `\n[ORDER: ${ord.ordId} ]\t${arg}\n`
+                                );
+                            };
+
+                            const isBuyOrder = ord.side == "buy";
+                            const filt = isBuyOrder
+                                ? { buy_order_id: ord.ordId }
+                                : { order_id: ord.ordId };
+
+                            const order = await Order.findOne(filt).exec();
+
+                            if (order) {
+                                const bot = await Bot.findOne({
+                                    orders: order._id,
+                                }).exec();
+                                if (!bot) {
+                                    ordLog("BOT CONTAINING ORDER NOT FOUND");
+                                    return;
+                                }
+                                if (ord.state == "filled") {
+                                    const orderDetails = parseFilledOrder(ord);
+                                    updateOrder({
+                                        orderDetails,
+                                        order,
+                                        isBuyOrder,
+                                        bot,
+                                    });
+                                } else if (ord.state == "canceled") {
+                                    if (isBuyOrder) {
+                                        /* DELETE BUY ORDER FROM DB */
+                                        await Order.findByIdAndDelete(
+                                            order._id
+                                        ).exec();
+                                        ordLog("DELETED FROM DB");
+                                        bot.orders = bot.orders.filter(
+                                            (el) =>
+                                                el.toString() !=
+                                                order._id.toString()
+                                        );
+                                        botLog(
+                                            bot,
+                                            `Orders: ${bot.orders.length}`
+                                        );
+                                        await Order.findByIdAndDelete(
+                                            order._id
+                                        );
+                                        await bot.save();
+                                        botLog(bot, "ORDER DELETED");
+                                    } else {
+                                        /* CLEAR SELL ORDER ID */
+
+                                        botLog(
+                                            bot,
+                                            "CLEARING SELL ORDER_ID..."
+                                        );
+                                        order.order_id = "";
+                                        order.sell_timestamp = undefined;
+                                        order.sell_price = 0;
+                                        await order.save();
+                                        botLog(bot, "ORDER_ID CLEARED");
+                                    }
+                                }
+                            } else {
+                                ordLog("NOT IN DB");
+                            }
+                        }
+                    }
+
+                    if (arg.channel == "orders-algo") {
+                        /* HANDLE ALGO ORDERS */
+                        for (let ord of data as AlgoOrderDetailsResult[]) {
+                            const ordLog = (arg: any) => {
+                                console.log(
+                                    `\nALGO: [ORDER: ${ord.algoId} ]\t${arg}\n`
+                                );
+                            };
+
+                            const isBuyOrder = ord.side == "buy";
+                            const order = await Order.findOne({
+                                cl_order_id: ord.algoClOrdId,
+                            }).exec();
+
+                            if (order) {
+                                const bot = await Bot.findOne({
+                                    orders: order._id,
+                                }).exec();
+                                if (!bot) {
+                                    ordLog("BOT CONTAINING ORDER NOT FOUND");
+                                    return;
+                                }
+                                /* GET REAL ORDER DETAILS */
+                                if (ord.state == "effective") {
+                                    ordLog("STATE == effective");
+                                    const plat = new OKX(bot);
+                                    const res = await plat.getOrderbyId(
+                                        ord.ordId,
+                                        false
+                                    );
+                                    if (!res)
+                                        botLog(
+                                            bot,
+                                            `FAILED TO CHECK [ALGO] ORDER: ${ord.ordId}`
+                                        );
+                                    else if (res != "live") {
+                                        await updateOrder({
+                                            orderDetails: res,
+                                            order,
+                                            isBuyOrder,
+                                            bot,
+                                        });
+
+                                        botLog(bot, "OCO SELL ORDER UPDATED");
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -230,7 +361,15 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, row: IObj) => {
                     ? exitLimit * (1 - eFromH / 100)
                     : null;
 
-            botLog(bot, { exitLimit, ha_h: row.ha_h, isHaHit, stdAtHaExit, isStdHit, eFromH, _exit });
+            botLog(bot, {
+                exitLimit,
+                ha_h: row.ha_h,
+                isHaHit,
+                stdAtHaExit,
+                isStdHit,
+                eFromH,
+                _exit,
+            });
             const { klines } = openBot;
             timedLog("WS: CANDLE: ", row);
             /* if (isHaHit) {
@@ -273,5 +412,44 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, row: IObj) => {
     }
 };
 
-let wsOkx: WsOKX = new WsOKX();
-//wsOkx.initWs();
+export const wsOkx: WsOKX = new WsOKX();
+wsOkx.initWs();
+
+
+const updateOrder = async ({
+    order,
+    isBuyOrder,
+    orderDetails,
+    bot,
+}: {
+    bot: IBot;
+    orderDetails: ReturnType<typeof parseFilledOrder>;
+    isBuyOrder: boolean;
+    order: IOrder;
+}) => {
+    if (isBuyOrder) {
+        /* UPDATE BUY ORDER */
+        botLog(bot, `WS: Updating buy order`);
+    } else {
+        botLog(bot, `WS: Updating sell order`);
+        /* UPDATE SELL ORDER */
+        /* THEN WHEN THE TIME COMES, A BUY ORDER WILL BE PLACED BASED ON SIGNALS */
+        const fee = Math.abs(orderDetails.fee); // In USDT
+
+        /* Buy/Base fee already removed when placing sell order  */
+        order.new_ccy_amt = orderDetails.fillSz * orderDetails.fillPx;
+        order.sell_price = orderDetails.fillPx;
+        order.is_closed = true;
+        order.sell_fee = fee;
+        order.sell_timestamp = {
+            ...order.sell_timestamp,
+            o: parseDate(new Date(orderDetails.fillTime)),
+        };
+        /* order == currentOrder */
+        const bal = order.new_ccy_amt - Math.abs(orderDetails.fee);
+        const profit = ((bal - order.ccy_amt) / order.ccy_amt) * 100;
+        order.profit = profit;
+        order.order_id = orderDetails.id;
+        await order.save()
+    }
+};

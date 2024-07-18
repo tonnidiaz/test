@@ -169,7 +169,23 @@ export const strategy = ({
             _fillSellOrder(ret);
         }
 
-        if (pos && exitLimit) {
+        if (!pos && entryLimit){
+            entry = row.o
+            const ret = fillBuyOrder({
+                entry,
+                prevRow: row,
+                entryLimit,
+                enterTs,
+                taker,
+                base,
+                balance, //: _bal,
+                basePrecision,
+                mData: { ...mData },
+                pos,
+            });
+            _fillBuyOrder(ret);
+        }
+        else if (pos && exitLimit) {
             const slRow = row;
             const exitRow = prevRow;
             console.log("HAS POS");

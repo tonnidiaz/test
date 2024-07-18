@@ -47,7 +47,7 @@ import { DEV, setJobs } from "./utils/constants";
 import dotenv from "dotenv";
 import { Bot, Order } from "./models";
 import { addBotJob } from "./utils/orders/funcs";
-//import { wsOkx } from "./classes/main-okx";
+import { wsOkx } from "./classes/main-okx";
 import { botLog } from "./utils/functions";
 
 dotenv.config();
