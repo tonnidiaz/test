@@ -63,7 +63,7 @@ export const updateOrder = async (bot: IBot) => {
         let order: IOrder | null = orders[orders.length - 1];
         let isClosed = !order || order?.is_closed == true;
         if (!order || isClosed) return { isClosed, lastOrder: "null" };
-        let orderId = order._id
+        let orderId = order._id;
         const plat = new OKX(bot);
         /*  botLog(bot, "GETTING KLINES TO SEE IF BUY/SL SELL CAN BE FILLED...");
         const klines = await plat.getKlines({});
@@ -106,20 +106,43 @@ export const updateOrder = async (bot: IBot) => {
             //    return false
             //}
 
-            botLog(bot, { exitLimit });
-            const amt = order.base_amt - order.buy_fee;
-            const r = await placeTrade({
-                bot: bot,
-                ts: parseDate(new Date()),
-                amt: Number(amt),
-                side: "sell",
-                plat: plat,
-                price: exitLimit,
-            });
-            if (!r) botLog(bot, "FAILED TO PLACE MARKET SELL ORDER");
-            if (r) {
-                orderId = r;
-                botLog(bot, "OCO MARKET SELL ORDER PLACED");
+            // CANCEL PREV ORDER IF ANY AND IT WAS NOT FILLED
+            let goOn = order.order_id == "";
+            if (!goOn) {
+                botLog(bot, "CHECKING PREV EXIT ORDER...");
+                const checkRes = await plat.getOrderbyId(order.order_id, true);
+                if (checkRes && checkRes != "live") {
+                    botLog(bot, "OCO SELL FILLED. UPDATING...");
+                    await updateOrderInDb(order, checkRes);
+                } else if (checkRes == "live") {
+                    botLog(bot, "OCO SELL NOT FILLED. CANCELLING...");
+                    const cancelRes = await plat.cancelOrder({
+                        ordId: order.order_id,
+                        isAlgo: true,
+                    });
+                    if (cancelRes) {
+                        goOn = true;
+                    }
+                }
+            }
+
+            if (goOn) {
+                botLog(bot, "PLACING NEW OCO SELL");
+                botLog(bot, { exitLimit });
+                const amt = order.base_amt - order.buy_fee;
+                const r = await placeTrade({
+                    bot: bot,
+                    ts: parseDate(new Date()),
+                    amt: Number(amt),
+                    side: "sell",
+                    plat: plat,
+                    price: exitLimit,
+                });
+                if (!r) botLog(bot, "FAILED TO PLACE MARKET SELL ORDER");
+                if (r) {
+                    orderId = r;
+                    botLog(bot, "OCO MARKET SELL ORDER PLACED");
+                }
             }
         }
         return { isClosed, lastOrder: orderId };

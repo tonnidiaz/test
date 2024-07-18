@@ -17,7 +17,7 @@ import { Bybit } from "@/classes/bybit";
 import { botLog } from "../functions";
 import { objStrategies } from "@/strategies";
 import { trueRange } from "indicatorts";
-import { IObj } from "../interfaces";
+import { IObj, IOrderDetails } from "../interfaces";
 //import { wsOkx } from "@/classes/main-okx";
 
 export const afterOrderUpdate = async ({
@@ -113,7 +113,7 @@ export const afterOrderUpdate = async ({
     }
 };
 
-export const updateOrderInDb = async (order: IOrder, res: any) => {
+export const updateOrderInDb = async (order: IOrder, res: IOrderDetails) => {
     const fee = Math.abs(res.fee); // In USDT
 
     /* Buy/Base fee already removed when placing sell order  */

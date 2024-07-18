@@ -17,3 +17,12 @@ export interface IAddress  {
 export interface ITrade {
     ts: string, symbol: string, px: number, sz: number
 }
+
+export interface IOrderDetails {
+    id: string;
+    fillTime: number;
+    cTime: number;
+    fillSz: number;
+    fillPx: number;
+    fee: number;
+}

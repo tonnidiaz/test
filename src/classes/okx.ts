@@ -7,6 +7,7 @@ import { RestClient, WebsocketClient } from "okx-api";
 import type { AlgoOrderResult, OrderDetails, OrderResult } from "okx-api";
 import { DEV } from "@/utils/constants";
 import { configDotenv } from "dotenv";
+import { IOrderDetails } from "@/utils/interfaces";
 configDotenv();
 
 export class OKX {
@@ -57,14 +58,18 @@ export class OKX {
         }
     }
 
-    async cancelOrder({ ordId, isAlgo }: { ordId: string, isAlgo?: boolean }) {
+    async cancelOrder({ ordId, isAlgo }: { ordId: string; isAlgo?: boolean }) {
         try {
             botLog(this.bot, "CANCELLING ORDER...");
-            const res = await ( isAlgo ? this.client.cancelAlgoOrder([{algoId: ordId, instId: this.getSymbol()}]) : this.client.cancelOrder({
-                ordId,
-                instId: this.getSymbol(),
-            }))
-            
+            const res = await (isAlgo
+                ? this.client.cancelAlgoOrder([
+                      { algoId: ordId, instId: this.getSymbol() },
+                  ])
+                : this.client.cancelOrder({
+                      ordId,
+                      instId: this.getSymbol(),
+                  }));
+
             if (res[0].sCode != "0") {
                 botLog(this.bot, "FAILED TO CANCEL ORDER");
                 console.log(res[0]);
@@ -116,8 +121,7 @@ export class OKX {
                                   : (sl * (1 - 0.0 / 100)).toString(), */
                         algoClOrdId: clOrderId,
                     });
-                }
-                else{
+                } else {
                     res = await this.client.submitOrder({
                         instId: this.getSymbol(),
                         tdMode: "cash",
@@ -136,23 +140,20 @@ export class OKX {
             }
             console.log(`\ORDER PLACED FOR BOT=${this.bot.name}\n`);
             const d: any = res[0];
-            const id: string = side == "buy" ? d.ordId : ( (price) ? d.algoId: d.ordId);
+            const id: string =
+                side == "buy" ? d.ordId : price ? d.algoId : d.ordId;
             return id;
         } catch (error) {
             console.log(error);
         }
     }
 
-    async getOrderbyId(orderId: string, isAlgo = false) {
+    async getOrderbyId(
+        orderId: string,
+        isAlgo = false
+    ): Promise<IOrderDetails | null | "live" | undefined> {
         try {
-            let data: {
-                id: string;
-                fillTime: number;
-                cTime: number;
-                fillSz: number;
-                fillPx: number;
-                fee: number;
-            } | null = null;
+            let data: IOrderDetails | null = null;
             let finalRes: OrderDetails | null = null;
             console.log(this.bot.name, `IS_ALGO: ${isAlgo}`, orderId);
 
@@ -265,17 +266,17 @@ export class OKX {
         }
 
         let d = [...klines];
-        const lastCandle = d[d.length - 1]
+        const lastCandle = d[d.length - 1];
         //console.log({lastCandle});
-        if (Number(lastCandle[8]) == 0){
-            botLog(this.bot, "LAST CANDLE NOT YET CLOSED")
+        if (Number(lastCandle[8]) == 0) {
+            botLog(this.bot, "LAST CANDLE NOT YET CLOSED");
             return await this.getKlines({
                 start,
                 end,
                 savePath,
                 interval,
                 symbol,
-            })
+            });
         }
         return d;
     }
@@ -284,5 +285,3 @@ export class OKX {
         return `${this.bot.base}-${this.bot.ccy}`;
     }
 }
-
-
