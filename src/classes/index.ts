@@ -44,28 +44,7 @@ export class OrderPlacer {
                 cancelJob(getJob(bot._id.toString())!.job);
 
                 if (bot.active) {
-                   const res = await updateOrder(bot);
-                   //botLog(bot, res);
-                   //if (res == false) {
-                   //    /* POS = TRUE -> ADD BOT TO LIST IN WS */
-                   //    await wsOkx.addBot(bot.id);
-                   //} else { 
-                       if (!res) {
-                           return botLog(
-                               bot,
-                               "DID NOT GO ON WITH PROCESS SINCE COULD NOT UPDATE ORDER"
-                           );
-                       } else if (res.lastOrder) {
-                           await afterOrderUpdate({
-                               bot: bot,
-                           });
-                       }
-                       // else {
-                   //        botLog(bot, "[LIVE] ORDER NOT YET FILLED");
-                   //    }
-                   //}
-                   /* NO NEED TO UPDATE. WILL BE UPDATED WHEN MARKET ORDERS GET PLACED */
-                   //await afterOrderUpdate({bot})
+                   await afterOrderUpdate({bot})
                 }
             }
         } catch (err) {

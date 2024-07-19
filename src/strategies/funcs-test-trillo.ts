@@ -261,12 +261,12 @@ export const strategy = ({
                 _fillBuyOrder(ret);
             }
         } else if (
-            pos &&
-            //    && !exitLimit
-            sellCond(prevRow, entry, df, i)
+            pos
+               && !exitLimit
+            && sellCond(prevRow, entry, df, i)
         ) {
             // Place limit sell order
-            exitLimit = prevRow.ha_h * (1 + .0/100)//Math.min(prevRow.ha_o, prevRow.ha_c)
+            exitLimit = prevRow.ha_c * (1 + .0/100)//Math.min(prevRow.ha_o, prevRow.ha_c)
             enterTs = row.ts;
             console.log(
                 `[ ${row.ts} ] \t Limit sell order at ${exitLimit?.toFixed(2)}`
@@ -279,12 +279,12 @@ export const strategy = ({
             const eFromH = Number(((exitLimit - row.h) / row.h* 100).toFixed(2));
             if (isHaHit) console.log({ eFromH });
             let _ex = 0;
-            if (isHaHit && !isStdHit) {
-                exitLimit *= (1 - (eFromH/ 100) );
-                exitLimit = Number(exitLimit.toFixed(pricePrecision))
+            if (isHaHit) {
+               // exitLimit *= (1 - (eFromH/ 100) );
+                //exitLimit = Number(exitLimit.toFixed(pricePrecision))
             }
 
-            if (exitLimit <= row.h) {
+            if (exitLimit <= row.ha_h) {
                 exit = exitLimit; // (exitLimit + prevRow.c) / 2
                 //exit = exitLimit * (1 - randomNum(0.02, .5)/100); // (exitLimit + prevRow.c) / 2
                 console.log("FILLING SELL ORDER AT EXIT");

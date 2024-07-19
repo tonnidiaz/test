@@ -85,6 +85,7 @@ const tuMacd2 = (df: IObj[]) => {
 };
 
 export const tuCE = (df: IObj[]) => {
+    //return df
     const mult = 2,
         atrLen = 5;
     const highs = df.map((e) => e[useHaClose ? "ha_h" : "c"]);

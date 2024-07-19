@@ -123,7 +123,7 @@ export const updateOrder = async (bot: IBot) => {
                     if (cancelRes) {
                         goOn = true;
                     }
-                }
+                } 
             }
 
             if (goOn) {

@@ -49,6 +49,7 @@ import { Bot, Order } from "./models";
 import { addBotJob } from "./utils/orders/funcs";
 //import { wsOkx } from "./classes/main-okx";
 import { botLog } from "./utils/functions";
+import { wsOkx } from "./classes/main-okx";
 
 dotenv.config();
 // view engine setup
@@ -132,7 +133,7 @@ const main = async () => {
         await addBotJob(bot);
         botLog(bot, "INITIALIZING WS...");
         if (bot.orders.length) {
-          /*   const lastOrder = await Order.findById(
+            const lastOrder = await Order.findById(
                 bot.orders[bot.orders.length - 1]
             ).exec();
             if (
@@ -142,7 +143,7 @@ const main = async () => {
                 lastOrder.sell_price != 0
             ) {
                 await wsOkx.addBot(bot.id);
-            }*/
+            }
         } 
        // await wsOkx.sub(bot);
     }

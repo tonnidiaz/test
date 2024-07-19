@@ -99,11 +99,11 @@ export class WsOKX {
                     this.ok = true;
                     timedLog("WS AUTH SUCCESS");
                     timedLog("SUBSCRIBING...");
-                    ws.subscribe({ channel: "orders", instType: "ANY" });
-                    ws.subscribe({
-                        channel: "orders-algo",
-                        instType: "ANY",
-                    });
+                    //ws.subscribe({ channel: "orders", instType: "ANY" });
+                    //ws.subscribe({
+                    //    channel: "orders-algo",
+                    //    instType: "ANY",
+                    //});
                 }
             });
 
@@ -126,7 +126,7 @@ export class WsOKX {
                             const candle = df[df.length - 1];
                             if (DEV) {
                                 timedLog("WS UPDATE");
-                                timedLog(candle);
+                                //timedLog(candle);
                             }
                             updateOpenBot(
                                 bot,
@@ -345,33 +345,32 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, row: IObj) => {
             order.sell_price != 0
         ) {
             let { exitLimit } = openBot;
+            const {h, c, ha_h, ha_c} = row
             /* CHECK CONDITIONS */
             const isHaHit =
                 exitLimit <=
-                row.ha_c; /* ASSUMING THAT THE CURRENT HA_C IS THE CURR HA_H */
-            const isStdHit = exitLimit <= row.h;
-            const stdAtHaExit = row.h;
+                ha_h; /* ASSUMING THAT THE CURRENT HA_C IS THE CURR HA_H */
+            const isStdHit = exitLimit <= h;
+            const stdAtHa = h;
             const eFromH = Number(
-                (((exitLimit - row.c) / row.c) * 100).toFixed(2)
+                (((exitLimit - stdAtHa) / stdAtHa) * 100).toFixed(2)
             );
-            const _exit =
-                isHaHit && isStdHit
-                    ? stdAtHaExit
-                    : isHaHit && !isStdHit
-                    ? exitLimit * (1 - eFromH / 100)
-                    : null;
 
-            botLog(bot, {
-                exitLimit,
-                ha_h: row.ha_h,
-                isHaHit,
-                stdAtHaExit,
-                isStdHit,
-                eFromH,
-                _exit,
-            });
+            const diff = ha_h - h
+            console.log({diff, h,c, ha_h, ha_c, exitLimit, isHaHit})
+
+            if (isHaHit && h < ha_h){
+                timedLog("REDUCING EXIT_LIMIT...")
+                exitLimit -= diff
+            }else if(stdAtHa >= exitLimit){
+                exitLimit *= (1 + 1.5/100)
+            }
+            order.sell_price = exitLimit
+            await order.save()
+            timedLog({exitLimit})
+
+         
             const { klines } = openBot;
-            timedLog("WS: CANDLE: ", row);
             /* if (isHaHit) {
                 exitLimit *= 1 - eFromH / 100;
                 exitLimit = Number(exitLimit.toFixed(pricePrecision));
@@ -380,13 +379,8 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, row: IObj) => {
                 botLog(bot, `EXIT_LIMIT TO ${exitLimit} due to ha_h`);
             } */
 
-            if (_exit) {
-                exitLimit = Number(_exit.toFixed(pricePrecision));
-                order.sell_price = exitLimit;
-                await order.save();
-                botLog(bot, `EXIT_LIMIT TO ${exitLimit} due to ha_h`);
-            }
-            if (exitLimit <= row.c) {
+         
+            if (exitLimit <= h) {
                 botLog(bot, `PLACING MARKET SELL ORDER AT ${exitLimit}`);
                 const amt = order.base_amt - order.buy_fee;
                 const r = await placeTrade({
@@ -451,6 +445,6 @@ const updateOrder = async ({
 };
 
 console.log("WS OKX")
-const wsOkx: WsOKX = new WsOKX();
-//wsOkx.initWs();
+export const wsOkx: WsOKX = new WsOKX();
+wsOkx.initWs();
 

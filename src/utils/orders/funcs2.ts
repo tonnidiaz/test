@@ -18,6 +18,7 @@ import { botLog } from "../functions";
 import { objStrategies } from "@/strategies";
 import { trueRange } from "indicatorts";
 import { IObj, IOrderDetails } from "../interfaces";
+import { wsOkx } from "@/classes/main-okx";
 //import { wsOkx } from "@/classes/main-okx";
 
 export const afterOrderUpdate = async ({
@@ -109,7 +110,7 @@ export const afterOrderUpdate = async ({
         await order.save();
         botLog(bot, `EXIT_LIMIT UPDATED TO: ${exitLimit}`);
         botLog(bot, "WATCHING FOR THE PX CHANGES");
-        //await wsOkx.addBot(bot.id);
+        await wsOkx.addBot(bot.id);
     }
 };
 
