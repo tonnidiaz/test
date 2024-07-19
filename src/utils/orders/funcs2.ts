@@ -103,7 +103,7 @@ export const afterOrderUpdate = async ({
     } else if (pos && order && !order.is_closed && strategy.sellCond(prevRow)) {
         botLog(bot, "SELL ORDER NOT YET CLOSED, UPDATING EXIT_LIMIT");
 
-        const exitLimit = prevRow.ha_h;
+        const exitLimit = Math.min(prevRow.ha_c, prevRow.ha_o)//prevRow.ha_h;
         order.sell_timestamp = { i: parseDate(new Date()) };
         order.sell_price = exitLimit;
 
