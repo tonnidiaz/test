@@ -1,11 +1,8 @@
-import fs from "fs";
 import { IObj } from "./interfaces";
-const fp = "src/data/klines/binance/2021/DOGEUSDT_15m.json";
-import { atr, ema, rsi, sma, bollingerBands, macd } from "indicatorts";
+import { atr, ema, rsi, macd } from "indicatorts";
 import path from "path";
-import { P_DIFF, SL, TP, isStopOrder, useHaClose } from "./constants";
+import { SL, TP, useHaClose } from "./constants";
 import { OrderDetails } from "okx-api";
-import pd from "node-pandas";
 import { IBot } from "@/models/bot";
 import { Order } from "@/models";
 
@@ -29,7 +26,7 @@ export const parseDate = (date: Date | string) =>
         new Date(date).toLocaleString("en-ZA", {
             timeZone: "Africa/Johannesburg",
         })
-    ); /* .replaceAll("/", "-").replaceAll(",", ""); */
+    ); 
 
 export const tuPath = (pth: string) => path.resolve(...pth.split("/"));
 export const parseKlines = (klines: [][]) => {
@@ -74,9 +71,9 @@ export const heikinAshi = (df: IObj[]) => {
 const tuMacd2 = (df: IObj[]) => {
     const def = false;
     const faster = true
-    const fast = def ? 12 :faster ?  1 : 5, //12, // 1,//12,
-        slow = def ? 26 : faster ? 2 : 12,//25, //26,
-        signal = def ? 9 : faster ? 2 : 5//10; //9;
+    const fast = def ? 12 :faster ?  1 : 5,
+        slow = def ? 26 : faster ? 2 : 12,
+        signal = def ? 9 : faster ? 2 : 5
 
     const prices = df.map((el) => el[useHaClose ? "ha_c" : "c"]);
 
@@ -87,14 +84,13 @@ const tuMacd2 = (df: IObj[]) => {
     return { ..._macd, histogram };
 };
 
-//export const chandelierExit = (df: IObj[], mult = 1.8, atrLen = 1) => {
 export const tuCE = (df: IObj[]) => {
     const mult = 2,
         atrLen = 5;
     const highs = df.map((e) => e[useHaClose ? "ha_h" : "c"]);
     const lows = df.map((e) => e[useHaClose ? "ha_l" : "c"]);
     const closings = df.map((e) => e[useHaClose ? "ha_c" : "c"]);
-    // Function to calculate Chandelier Exit
+
     console.log("BEGIN CE...");
 
     const ATR = atr(highs, lows, closings, { period: atrLen });
