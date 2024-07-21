@@ -144,7 +144,7 @@ export const strategy = ({
             _fillSellOrder(ret);
         }
         function _fillBuy(_entry: number, _row: IObj) {
-            if (!entryLimit) entryLimit = _entry;
+            if (!entryLimit) return;
             const ret = fillBuyOrder({
                 entry: _entry,
                 prevRow: _row,
@@ -165,7 +165,7 @@ export const strategy = ({
 
             let goOn = true,
                 isSl = false;
-                const {o, h, l, c, ha_o, ha_c, ha_l, ha_h} = prevRow
+
             const _exitLimit = exitLimit;
             const exitRow = prevRow;
             const isStdHit = exitLimit <= exitRow.h;
@@ -173,38 +173,31 @@ export const strategy = ({
                 (((exitLimit - exitRow.h) / exitRow.h) * 100).toFixed(2)
             );
 
-            exit = o
-            if (base != 0)
-            {
-                
-                _fillSell(o, exitRow)
-            pos = true
-        exitLimit = _exitLimit
-        }
-            if (h > o){
-                entry = o * (1 + .1/100)
-                if (balance !=0)
-                _fillBuy(entry, exitRow)
 
-                if (isStdHit){
-                    exitLimit *= (1 + 1.5/100)
-                }
-
-                if (exitLimit <= h){
-                    exit = exitLimit
-                    _fillSell(exit, exitRow)
-                }
-                else{
-                    exit = c < o ? o : c
-                    _fillSell(exit, exitRow)
-                }
-            }else{
-                pos = false
+            if (exitLimit >= exitRow.o) {
+                exitLimit = exitRow.o;
             }
-    
-            
-        }
 
+            if (exitLimit) {
+                if (isStdHit) {
+                    console.log("STD HIT");
+                    exitLimit *= 1 + 3 / 100; // ok
+                }
+                exitLimit = exitLimit;
+                if (exitLimit < exitRow.h) {
+                    exit = exitLimit;
+                } else {
+                    goOn = false;
+                    console.log("NEITHER");
+                }
+                if (goOn) {
+                    const p = "EXIT";
+                    console.log("\nFILLING SELL ORDER AT", p);
+                    _fillSell(exit, exitRow, isSl);
+                //    continue
+                }
+            }
+        }
 
         if (!pos && (useAnyBuy || buyCond(prevRow, df, i))) {
             if (entryLimit) {

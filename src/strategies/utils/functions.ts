@@ -98,7 +98,7 @@ export const fillSellOrder = ({
     console.log({ exitLimit, exit, entry, base });
     //console.log(`MIKA: ${exit >= entry ? "gain" : "loss"}`);
     console.log("\nFILL SELL ORDER", {exit, base});
-    let balance = base * exit
+    let balance = base * exit 
     console.log("BALANCE")
     const fee = balance * maker
     console.log(`B4 FEE: ${balance}`)
