@@ -47,7 +47,7 @@ export class MACD_MA extends Strategy {
     desc: string = `Enter: macd > 0 && sma20 >  sma50, Exit: oposite`;
 
     buyCond(row: IObj): boolean {
-        return true//MACD_ONLY.prototype.buyCond(row) && MA_ONLY.prototype.buyCond(row)
+        return MACD_ONLY.prototype.buyCond(row) && MA_ONLY.prototype.buyCond(row)
     }
 
     sellCond(row: IObj): boolean {

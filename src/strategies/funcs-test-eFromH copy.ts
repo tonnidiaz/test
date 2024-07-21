@@ -161,12 +161,6 @@ export const strategy = ({
         const isGreen = prevRow.c >= prevRow.o;
 
         if (pos && exitLimit) {
-            console.log("HAS POS");
-
-            let goOn = true,
-                isSl = false;
-
-            const _exitLimit = exitLimit;
             const exitRow = prevRow;
             const isHaHit = exitLimit <= exitRow.ha_h;
             const isStdHit = exitLimit <= exitRow.h;
@@ -179,43 +173,41 @@ export const strategy = ({
             );
             const stdAtHa = exitLimit * (1 - stdFromHa / 100);
 
-            const { h, ha_h, c, ha_c, ha_o } = exitRow;
-            /* if (isHaHit && ha_c > ha_o //&& !isStdHit
-
-            ) {
+            const { h, ha_h } = exitRow;
+            if (isHaHit && h < ha_h) {
                 console.log("STD NOT HIT");
                 console.log({ stdAtHa });
 
-                exitLimit *= (1-eFromH/100);
-               // if (!isGreen){continue}
-            } else */
-            if (exitLimit >= exitRow.o) {
-                exitLimit = exitRow.o;
+                exitLimit -= exitLimit - stdAtHa;
+            } else if (stdAtHa >= exitLimit) {
+                console.log("STD HIT");
+                console.log({ stdAtHa });
+                exitLimit *= 1 + 5 / 100;
             }
+            console.log("HAS POS");
 
-            if (exitLimit) {
-                if (isStdHit) {
-                    console.log("STD HIT");
-                    console.log({ stdAtHa });
-                    exitLimit *= 1 + 3 / 100; // ok
-                }
-                exitLimit = exitLimit;
-                if (exitLimit < exitRow.h) {
-                    exit = exitLimit;
-                } else {
-                    goOn = false;
-                    console.log("NEITHER");
-                }
-                if (goOn) {
-                    const p = "EXIT";
-                    console.log("\nFILLING SELL ORDER AT", p);
-                    _fillSell(exit, exitRow, isSl);
-                //    continue
-                }
+            let goOn = true,
+                isSl = false;
+
+            exitLimit = exitLimit;
+            if (exitLimit < exitRow.h) {
+                exit = exitLimit;
+            } else {
+                /*  else if ( isGreen){
+                exit = row.o
+            } */
+                goOn = false;
+                console.log("NEITHER");
+            }
+            if (goOn) {
+                const p = "EXIT";
+                console.log("\nFILLING SELL ORDER AT", p);
+                _fillSell(exit, exitRow, isSl);
+                //continue
             }
         }
 
-        if (!pos && (useAnyBuy || buyCond(prevRow, df, i))) {
+        if (!pos && ( useAnyBuy || buyCond(prevRow, df, i))) {
             if (entryLimit) {
                 console.log("BUY ORDER NOT FILLED, RE-CHECKING SIGNALS");
             }
@@ -230,13 +222,11 @@ export const strategy = ({
                 `[ ${row.ts} ] \t Limit buy order at ${entryLimit?.toFixed(2)}`
             );
         } else if (pos && sellCond(prevRow, entry, df, i)) {
-            const rf = true;
-            exitLimit = rf
-                ? Math.max(prevRow.sma_50, prevRow.sma_20, prevRow.ha_c)
-                : Math.min(prevRow.ha_c, prevRow.ha_o);
-            const perc = .1// rf ? 1.3 : 0;
+            const rf = false;
+            exitLimit = rf ? Math.max(prevRow.ha_h, prevRow.h) : Math.min(prevRow.ha_c, prevRow.ha_o);
+            const perc = rf ? 1.3 : 0;
             if (exitLimit) exitLimit *= 1 + perc / 100;
-            // exitLimit = Math.min(prevRow.ha_c, prevRow.ha_o); //* (1-.5/100)
+           // exitLimit = Math.min(prevRow.ha_c, prevRow.ha_o); //* (1-.5/100)
             enterTs = row.ts;
             console.log(`[ ${row.ts} ] \t Limit sell order at ${exitLimit}`);
         }

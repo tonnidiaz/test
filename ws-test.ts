@@ -1,5 +1,7 @@
+import { TestOKX } from "@/classes/test-platforms";
 import { botJobSpecs, demo } from "@/utils/constants";
 import { heikinAshi, parseDate, parseKlines, tuCE } from "@/utils/funcs2";
+import { ensureDirExists } from "@/utils/orders/funcs";
 import { config } from "dotenv";
 import { scheduleJob } from "node-schedule";
 import { WebsocketClient, WsPrivateChannel } from "okx-api";
@@ -43,7 +45,7 @@ ws.on("response", (resp) => {
          /* SUBSCRIBE TO ORDERS CHANNEL */
 
         if (!subed) {
-            ws.subscribe({ channel: "candle3m", instId: "SOL-USDT" });
+            ws.subscribe({ channel: "candle5m", instId: "SOL-USDT" });
             subed = true;
         }
     }
@@ -53,15 +55,39 @@ ws.on("response", (resp) => {
     //if (resp.)
 });
 
-ws.on("update", (e) => {
-    if (e.arg.channel == "candle3m"){
-    console.log(`[${parseDate(new Date())}]`);
-    const candles = tuCE(heikinAshi( parseKlines(e.data) )) 
-    console.log(candles);
-
+import {writeFileSync} from 'fs'
+async function init(){
+    const plat = new TestOKX()
+let ts = 0
+let klines: any[] = []
+const data: any[] = []
+ws.on("update", async(e) => {
+    if (e.arg.channel == "candle5m"){
+        const now = parseDate(new Date())
+    console.log(`[${now}]`);
+    const _ts = Number(e.data[0][0])
+    if (_ts != ts){
+        console.log({_ts, ts});
+        klines = await plat.getKlines({interval: 5, symbol: "SOL-USDT"})
+        ts = _ts
+    }
+    const candles = tuCE(heikinAshi( parseKlines([...klines, ...e.data]) )) 
+    const prevRow = candles[candles.length - 2]
+    const row = candles[candles.length - 1]
+    data.push({at: now, ...row})
+    console.log("SAVING...")
+    const fp = "data/rf/klines/live/sol-usdt_5m.json"
+    ensureDirExists(fp)
+    writeFileSync(fp, JSON.stringify(data))
+    console.log("SAVED");
+    
+    
     }
     
 });
+}
+
+init()
 async function main() {
     while (true) {
         //await Promise.resolve(()=>{setTimeout(()=>{console.log('TIMEOUT');}, 1000)})

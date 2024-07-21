@@ -7,26 +7,26 @@ export function fillBuyOrder({
     prevRow,
     taker,
     enterTs,
-    base,
     balance,
     mData,
     entryLimit,
     basePrecision,
     pos,
+    isA = true
 }: {
     entry: number;
     prevRow: any;
     taker: number;
     enterTs: string;
-    base: number;
     balance: number;
     basePrecision: number;
     mData: IObj;
     entryLimit: number;
     pos: boolean;
+    isA?: boolean
 }) {
-    console.log('FILL BUY ORDER');
-    base = balance / entry// * (1 - taker);
+    console.log('\nFILL BUY ORDER', {entry, balance});
+    let base = balance / entry// * (1 - taker);
     const fee = base * taker
     console.log("BASE:")
     console.log(`B4 FEE: ${base}`)
@@ -39,28 +39,29 @@ export function fillBuyOrder({
 
     const data = { ...mData };
     const ts = prevRow.ts;
+    const part = isA ? "A" : "B"
+
     data.data.push({
         side: `buy \t {h:${prevRow.h}, l: ${prevRow.l}}`,
         fill: entryLimit,
         base,
         enterTs,
         ts,
-        c: entry,
+        c: `[${part}] ${entry}`,
+        _c: entry,
         balance: `[${balance}] \t ${base} \t fee: ${fee}`,
     })
     pos = true;
-    return { pos, base, balance, mData: data, _cnt: 0, fee: fee * entry };
+    return { pos, base, mData: data, _cnt: 0, fee: fee * entry };
 }
 export const fillSellOrder = ({
     prevRow,
     exit,
     exitLimit,
-   // _bal,
     base,
     enterTs,
     pricePrecision,
     mData,
-    balance,
     entry,
     cnt,
     gain,
@@ -70,17 +71,16 @@ export const fillSellOrder = ({
     pos,
     maker,
     entryLimit,
-    isSl = false
+    isSl = false,
+    isA = true,
 }: {
     exitLimit: number | null;
     exit: number;
     prevRow: IObj;
-  //  _bal: number;
     base: number;
     enterTs: string;
     pricePrecision: number;
     mData: IObj;
-    balance: number;
     entry: number;
     cnt: number;
     loss: number;
@@ -91,13 +91,14 @@ export const fillSellOrder = ({
     entryLimit: number | null;
     pos: boolean;
     isSl?: boolean;
+    isA?: boolean
 }) => {
 
     const _isTp = !isStopOrder ? exit >= entry : !isSl
     console.log({ exitLimit, exit, entry, base });
     //console.log(`MIKA: ${exit >= entry ? "gain" : "loss"}`);
-    console.log("FILL SELL ORDER");
-    balance = base * exit
+    console.log("\nFILL SELL ORDER", {exit, base});
+    let balance = base * exit
     console.log("BALANCE")
     const fee = balance * maker
     console.log(`B4 FEE: ${balance}`)
@@ -106,12 +107,15 @@ export const fillSellOrder = ({
     balance = toFixed(balance, ( pricePrecision));
     console.log(`AFTER FEE: ${balance}\n`)
     const ts = prevRow["ts"];
+    
+    const part = isA ? "A" : "B"
     mData["data"].push({
         side: `sell \t {h:${prevRow.h}, l: ${prevRow.l}}`,
         fill: exitLimit,
         enterTs,
         ts,
-        c: `${!_isTp ? 'SL' : 'TP'}: ${exit}`,
+        c: `[${part}] ${!_isTp ? 'SL' : 'TP'}: ${exit}`,
+        _c: exit,
         balance: `[${base}] \t ${balance} { ${((exit - entry)/entry * 100).toFixed(2)}% } fee: ${fee}`,
     });
     /* Position now filled */
@@ -128,7 +132,6 @@ export const fillSellOrder = ({
 
     return {
         entryLimit,
-        base,
         pos,
         balance,
         cnt,

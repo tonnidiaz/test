@@ -45,13 +45,13 @@ export const afterOrderUpdate = async ({
 
     let order = orders.length ? orders[orders.length - 1] : null;
 
-    const pos =
+    let pos =
         order &&
         order.side == "sell" &&
         !order.is_closed &&
         order.buy_order_id.length != 0;
     console.log({ pos });
-
+    
     /* ------ START ---------- */
     if (!pos && strategy.buyCond(prevRow)) {
         // Place buy order
@@ -79,6 +79,8 @@ export const afterOrderUpdate = async ({
         });
         if (res) {
             botLog(bot, "MARKET BUY ORDER PLACED. TO WS SELL CHECK");
+            pos = true
+            order = await Order.findById(res).exec()
         }
         /* CREATE NEW ORDER */
         /* if (!order || order.is_closed) {
@@ -100,7 +102,8 @@ export const afterOrderUpdate = async ({
 
         await order.save();
         botLog(bot, `ENTRY_LIMIT UPDATED to ${entryLimit}`); */
-    } else if (pos && order && !order.is_closed && strategy.sellCond(prevRow)) {
+    } 
+    else if (pos && order && !order.is_closed && strategy.sellCond(prevRow)) {
         botLog(bot, "SELL ORDER NOT YET CLOSED, UPDATING EXIT_LIMIT");
 
         const exitLimit = Math.min(prevRow.ha_c, prevRow.ha_o)//prevRow.ha_h;
