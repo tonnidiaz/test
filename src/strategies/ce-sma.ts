@@ -1,6 +1,6 @@
 import { Strategy } from "@/classes/strategy";
 import { IObj } from "@/utils/interfaces";
-const fastRSI = 20
+const fastRSI = 30
 export class RSI_ONLY extends Strategy {
     name: string = "RSI ONLY";
     desc: string = `Enter: macd > 0 && sma20 >  sma50, Exit: oposite`;
@@ -56,4 +56,4 @@ class ThreeSum extends Strategy {
     }
 }
 
-export const strategies = [new RSI_ONLY(), new ANY()]// [ new BB_SMA(), new ThreeSum()];
+export const strategies = [new RSI_ONLY(), new ANY(), new ThreeSum()]// [ new BB_SMA(), new ThreeSum()];

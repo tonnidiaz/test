@@ -207,7 +207,11 @@ io.on("connection", (client) => {
 
             console.log(`TRADES: ${retData.trades}`);
             console.log(`PROFIT: ${retData.profit}\n`);
-            retData = { data: retData, clId };
+            const str_name = objStrategies[strNum - 1].name
+            console.log({str_name});
+
+            
+            retData = { data: {...retData,str_name }, clId };
             prevData = retData;
             io.emit("backtest", retData);
             return retData;

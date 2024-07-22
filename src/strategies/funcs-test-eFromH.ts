@@ -100,7 +100,7 @@ export const strategy = ({
             (pos = ret.pos),
                 (mData = ret.mData),
                 (sl = ret.sl),
-                (balance = ret.balance),
+                (balance += ret.balance),
                 (tp = ret.tp),
                 (entryLimit = ret.entryLimit),
                 (cnt = ret.cnt),
@@ -112,7 +112,7 @@ export const strategy = ({
         };
         const _fillBuyOrder = (ret: ReturnType<typeof fillBuyOrder>) => {
             (pos = ret.pos),
-                (base = ret.base),
+                (base += ret.base),
                 (mData = ret.mData),
                 (_cnt = ret._cnt);
             enterTs = row.ts;
@@ -121,13 +121,14 @@ export const strategy = ({
             sl = toFixed(entry * (1 - SL / 100), pricePrecision);
         };
 
-        async function _fillSell(_exit: number, _row: IObj, isSl?: boolean) {
+        async function _fillSell({_exit, _row, isSl, _base}:{_exit: number, _row: IObj, isSl?: boolean, _base: number}) {
+            base -= _base
             const ret = fillSellOrder({
                 exitLimit,
                 exit: _exit,
                 prevRow: _row,
                 entry: entry,
-                base,
+                base: _base,
                 pricePrecision,
                 enterTs,
                 gain,
@@ -143,15 +144,16 @@ export const strategy = ({
             });
             _fillSellOrder(ret);
         }
-        function _fillBuy(_entry: number, _row: IObj) {
-            if (!entryLimit) entryLimit = _entry;
+        function _fillBuy({_amt, _entry, _row}:{_amt: number,_entry: number, _row: IObj}) {
+            if (!entryLimit) entryLimit = _entry
+            balance -= _amt;
             const ret = fillBuyOrder({
                 entry: _entry,
                 prevRow: _row,
                 entryLimit,
                 enterTs,
                 taker,
-                balance, //: _bal,
+                balance: _amt, //: _bal,
                 basePrecision,
                 mData: { ...mData },
                 pos,
@@ -160,73 +162,81 @@ export const strategy = ({
         }
         const isGreen = prevRow.c >= prevRow.o;
 
-        if (pos && exitLimit) {
+       /*  if (pos && exitLimit) {
             console.log("HAS POS");
 
             let goOn = true,
                 isSl = false;
-                const {o, h, l, c, ha_o, ha_c, ha_l, ha_h} = prevRow
-            const _exitLimit = exitLimit;
+
             const exitRow = prevRow;
-            const isStdHit = exitLimit <= exitRow.h;
-            const eFromH = Number(
-                (((exitLimit - exitRow.h) / exitRow.h) * 100).toFixed(2)
-            );
 
-            exit = o
-            if (base != 0)
-            {
+            const {o,h,l,c, ha_c, ha_o, ha_h} = exitRow
+     
+
+            if (exitLimit) {
                 
-                _fillSell(o, exitRow)
-            pos = true
-        exitLimit = _exitLimit
-        }
-            if (h > o){
-                entry = o * (1 + .1/100)
-                if (balance !=0)
-                _fillBuy(entry, exitRow)
-
-                if (isStdHit){
-                    exitLimit *= (1 + 1.5/100)
+                if (exitLimit < h) {
+                    console.log("STD HIT");
+                    exitLimit *= (1 + 4.5 / 100); // ok
+                }
+                if (exitLimit < h) {
+                    exit = exitLimit;
+                } 
+                 else {
+                    goOn = false;
+                    console.log("NEITHER");
+                }
+                if (goOn) {
+                    const p = "EXIT";
+                    console.log("\nFILLING SELL ORDER AT", p);
+                    _fillSell({_exit: exit, _row: exitRow, _base: base });
+                
+                }else{
+                    
                 }
 
-                if (exitLimit <= h){
-                    exit = exitLimit
-                    _fillSell(exit, exitRow)
-                }
-                else{
-                    exit = c < o ? o : c
-                    _fillSell(exit, exitRow)
-                }
-            }else{
-                pos = false
             }
-    
-            
+            console.log(`AFTER SELL SEC:`, {pos}, "\n");
         }
+ */
+        if (pos && tp && sl){
+            const erow = prevRow
+            const {o,h,l,c , ha_o, ha_h, ha_l, ha_c} = erow
+            let _exit = 0
+            let go = true
+            if (tp <= h){
+              _exit = tp
+            } else if (sl > h){
+                //_exit = sl
+                tp = ha_h * (1+5.75/100)
+                go = false
+            }else {go = false}
 
+            if (go){
+                  _fillSell({_exit, _row: erow, _base: base });  
+            }
+        }
 
         if (!pos && (useAnyBuy || buyCond(prevRow, df, i))) {
-            if (entryLimit) {
-                console.log("BUY ORDER NOT FILLED, RE-CHECKING SIGNALS");
-            }
+            console.log(
+                `[ ${row.ts} ] \t Limit buy order at ${entryLimit?.toFixed(2)}`
+            );
             // Place limit buy order
             entryLimit = isMarket ? row.o : prevRow.ha_o;
             enterTs = row.ts;
 
             if (entryLimit && isMarket) {
                 entry = row.o
-                _fillBuy(entry, row);
+                _fillBuy({_entry: entry, _row: row, _amt: balance});
             }
-            console.log(
-                `[ ${row.ts} ] \t Limit buy order at ${entryLimit?.toFixed(2)}`
-            );
-        }  if (pos && sellCond(prevRow, entry, df, i)) {
+            
+        }  
+        if (pos && sellCond(prevRow, entry, df, i)) {
             const rf = true;
             exitLimit = rf
                 ? Math.max(prevRow.sma_50, prevRow.sma_20, prevRow.ha_c)
                 : Math.min(prevRow.ha_c, prevRow.ha_o);
-            const perc = .15// rf ? 1.3 : 0;
+            const perc = 1.5//.15// rf ? 1.3 : 0;
             if (exitLimit) exitLimit *= 1 + perc / 100;
             // exitLimit = Math.min(prevRow.ha_c, prevRow.ha_o); //* (1-.5/100)
             enterTs = row.ts;

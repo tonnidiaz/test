@@ -191,5 +191,5 @@ export const strategies = [
     new MACD_MA(),
     new MACD_MA_RSI(),
     new MA_ONLY(),
-    new HL(), new HL_HA(), new MACD_HL_HA()
+    new HL(), new HL_HA(), new MACD_HL_HA(), new CE_ONLY(), new CE_MA(), new CE_MACD()
 ];

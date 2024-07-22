@@ -27,22 +27,34 @@ export const parseDate = (date: Date | string) =>
             timeZone: "Africa/Johannesburg",
         })
     );
-
-const tuMacd = (df: IObj[]) => {
-    const def = false;
-    const faster = true;
-    const fast = def ? 12 : faster ? 1 : 5,
-        slow = def ? 26 : faster ? 2 : 12,
-        signal = def ? 9 : faster ? 2 : 5;
-
-    const prices = df.map((el) => el[useHaClose ? "ha_c" : "c"]);
-
-    const _macd = macd(prices, { slow, signal, fast });
-    const histogram: number[] = [];
-    for (let i = 0; i < _macd.macdLine.length; i++)
-        histogram.push(_macd.macdLine[i] - _macd.signalLine[i]);
-    return { ..._macd, histogram };
-};
+    export const tuMacd = (df: IObj[]) => { 
+        const closings = df.map((el) => el.c);
+        const fastLen = 1,//2,//5, //26
+            slowLen = 3,//7//13,//100
+            signalLen =2//6
+        const smaSrc: string = "ema";
+        const smaSignal: string = "ema";
+    
+        const fastMa =
+            smaSrc == "sma"
+                ? sma(closings, { period: fastLen })
+                : ema(closings, { period: fastLen });
+        const slowMa =
+            smaSrc == "sma"
+                ? sma(closings, { period: slowLen })
+                : ema(closings, { period: slowLen });
+        const md = fastMa.map((e, i) => e - slowMa[i]);
+        const signal =
+            smaSignal == "sma"
+                ? sma(md, { period: signalLen })
+                : ema(md, { period: signalLen });
+    
+        for (let i = 0; i < df.length; i++) {
+            const hist = md[i] - signal[i];
+            df[i].macd = hist
+        }
+        return df
+    };
 export const tuPath = (pth: string) => path.resolve(...pth.split("/"));
 
 export const parseKlines = (klines: [][]) => {
@@ -84,66 +96,10 @@ export const heikinAshi = (df: IObj[]) => {
     })) as IObj[];
 };
 
+
 export const tuCE = (df: IObj[]) => {
-    const mult = 1.8,
-        atrLen = 1;
-    const highs = df.map((e) => e[useHaClose ? "ha_h" : "c"]);
-    const lows = df.map((e) => e[useHaClose ? "ha_l" : "c"]);
-    const closings = df.map((e) => e[useHaClose ? "ha_c" : "c"]);
+    return df;
 
-    console.log("BEGIN CE...");
-
-    const ATR = atr(highs, lows, closings, { period: atrLen });
-    const _atr = ATR.atrLine;
-    const rsiLen = 2,
-        fastLen = 1 /* 15 */,
-        slowLen = 2; /* 50 */
-
-    const sma20 = ema(closings, { period: fastLen });
-    const sma50 = ema(closings, { period: slowLen });
-    const _rsi = rsi(closings, { period: rsiLen });
-    let sir = 1;
-
-    const { histogram, macdLine, signalLine } = tuMacd(df);
-
-    for (let i = 0; i < df.length; i++) {
-        df[i].sma_20 = sma20[i];
-        df[i].sma_50 = sma50[i];
-        /* MACD */
-        df[i].hist = histogram[i];
-        df[i].macd = macdLine[i];
-        df[i].signal = signalLine[i];
-        /* END MACD */
-        df[i]["rsi"] = _rsi[i];
-        //continue
-        const ceClosings = closings.slice(i - atrLen, i);
-        const long_stop = Math.max(...ceClosings) - _atr[i] * mult;
-        const short_stop = Math.max(...ceClosings) + _atr[i] * mult;
-        df[i] = { ...df[i], long_stop, short_stop };
-
-        const cdf = df[i],
-            pdf = df[i - 1];
-
-        if (i > 0) {
-            const lsp = pdf.long_stop;
-            const ssp = pdf.short_stop;
-
-            if (pdf[useHaClose ? "ha_c" : "c"] > lsp)
-                df[i].long_stop = Math.max(cdf.long_stop, pdf.long_stop);
-            if (pdf.ha_c < ssp)
-                df[i].short_stop = Math.min(cdf.short_stop, pdf.short_stop);
-
-            if (cdf[useHaClose ? "ha_c" : "c"] > ssp) sir = 1;
-            else if (cdf[useHaClose ? "ha_c" : "c"] < lsp) sir = -1;
-
-            df[i].sir = sir;
-            df[i].buy_signal = Number(cdf.sir == 1 && pdf.sir == -1);
-            df[i].sell_signal = Number(cdf.sir == -1 && pdf.sir == 1);
-        }
-    }
-
-    console.log("CE DONE");
-    return df.map((el) => el);
 };
 
 export const calcEntryPrice = (row: IObj, side: "buy" | "sell") => {

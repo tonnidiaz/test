@@ -1,8 +1,3 @@
-/**
- * #MISTAKES:
- * - ASSUMED THAT THE HALVES ARE BOUT WHEN THE POS IS CLOSED
- */
-
 import { fillBuyOrder, fillSellOrder } from "./utils/functions";
 import {
     MAKER_FEE_RATE,
@@ -97,19 +92,16 @@ export const strategy = ({
             (pos = ret.pos),
                 (mData = ret.mData),
                 (sl = ret.sl),
-                ///(balance += ret.balance),
                 (tp = ret.tp),
                 (entryLimit = ret.entryLimit),
                 (cnt = ret.cnt),
                 (gain = ret.gain),
-                //(base -= ret.base),
                 (loss = ret.loss);
             sellFees += ret.fee;
             exitLimit = null;
             entryLimit = null;
             if (isA) balA += ret.balance;
             else balB += ret.balance;
-            //balance += ret.balance;
             console.log({ retBal: ret.balance, isA });
         };
         const _fillBuyOrder = (
@@ -118,7 +110,6 @@ export const strategy = ({
         ) => {
             (pos = ret.pos),
                 (mData = ret.mData),
-                //(balance -= ret.balance),
                 (_cnt = ret._cnt);
             enterTs = row.ts;
             buyFees += ret.fee;
@@ -206,9 +197,10 @@ export const strategy = ({
                 isB = balB == 0 && baseB != 0;
             const exitRow = row;
             const _exitLimit = exitLimit;
+            const e = exitLimit
             //_fillBuy(row.o, balance)
             console.log("HAS POS");
-
+            const {o, h, l, c} = exitRow
             let goOn = true,
                 isSl = false;
 
@@ -219,7 +211,7 @@ export const strategy = ({
                 console.log("NEITHER");
             }
 
-            if (goOn) {
+            if (true) {
                 if (isA) {
                     _fillBuy({
                         _entry: row.o,
@@ -276,7 +268,7 @@ export const strategy = ({
                     { pos, isA, isB, baseA, baseB, balA, balB },
                     "\n"
                 );
-                const _exit = nextRow?.o || row.c;
+                const _exit = c >= o ? c : nextRow?.c || c * (1+5/100)
 
                 if (isA && baseB != 0) {
                     _fillSell({
