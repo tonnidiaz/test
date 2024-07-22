@@ -225,14 +225,27 @@ export const strategy = ({
                 exit = isGreen ? prevRow.c : row.c
             } */
            
-             else if (prevRow.l <= _sl) {
+             /* else if (prevRow.l <= _sl) {
                 exit = prevRow.o > _sl ? prevRow.o : prevRow.c;
-            } else if (prevRow.h <= _sl){
+            } */ 
+          /*  else if (prevRow.l <= _sl && isGreen ){
+            exit = row.o
+
+
+           } */
+          
+            else if (prevRow.ha_o >= exitLimit){
+                exit = prevRow.o
+            }else if (exitLimit <= exitRow.h){
+                exit = exitLimit
+            }
+          /*   else if (exitLimit < exitRow.h) {
+                exit = prevRow.o >= exitLimit ? prevRow.o : exitLimit//!isGreen ? prevRow.c : row.o ;
+            } */
+                else if (prevRow.h <= _sl){
                 exit = isGreen ? prevRow.c : row.o
             }
-            else if (exitLimit < exitRow.h) {
-                exit = row.o//prevRow.o >= exitLimit ? prevRow.o : exitLimit//!isGreen ? prevRow.c : row.o ;
-            }
+           
             else if (Math.min(prevRow.l, prevRow.ha_l) >= _tp && isGreen){
                 exit = row.o
             }
@@ -267,7 +280,7 @@ export const strategy = ({
             }
         } else if (pos && sellCond(prevRow, entry, df, i)) {
             const rf = false;
-            exitLimit = rf ? Math.min(prevRow.ha_h, prevRow.h) : row.o;
+            exitLimit = rf ? Math.max(prevRow.ha_h, prevRow.h) : row.c;
             const perc = rf ? 1.3 : 10;
             if (exitLimit) exitLimit *= 1 + perc / 100;
             //exitLimit = prevRow.ha_c

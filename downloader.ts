@@ -25,7 +25,7 @@ import { TestBybit, TestOKX } from "@/classes/test-platforms";
 import { ITrade } from "@/utils/interfaces";
 let years = [2021, 2022, 2023, 2024],
     symbols = ["NEAR", "MASK", "MINA", "UMA", "SUI", "AVAX", "SEI"],
-    intervals = [15, 60];
+    intervals = [120];
 symbols = symbols.map((el) => `${el}/USDT`);
 
 async function downloader({
