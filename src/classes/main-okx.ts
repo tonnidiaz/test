@@ -17,7 +17,7 @@ import { ObjectId } from "mongoose";
 import { botLog, getPricePrecision, timedLog } from "@/utils/functions";
 import { OKX } from "./okx";
 import { placeTrade } from "@/utils/orders/funcs";
-import { DEV, demo } from "@/utils/constants";
+import { DEV, TRAILING_STOP_PERC, demo } from "@/utils/constants";
 import { IObj } from "@/utils/interfaces";
 import { IOrder } from "@/models/order";
 configDotenv();
@@ -123,16 +123,11 @@ export class WsOKX {
                                     parseKlines([...openBot.klines, ...e.data])
                                 )
                             );
-                            const candle = df[df.length - 1];
                             if (DEV) {
                                 timedLog("WS UPDATE");
                                 //timedLog(candle);
                             }
-                            updateOpenBot(
-                                bot,
-                                { ...openBot, klines: df as any },
-                                candle
-                            );
+                            updateOpenBot(bot, openBot, df);
                         }
                     }
                     if (arg.channel == "orders") {
@@ -323,8 +318,9 @@ export class WsOKX {
     }
 }
 
-const updateOpenBot = async (bot: IBot, openBot: IOpenBot, row: IObj) => {
-    let placed = false;
+const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
+    let placed = false,
+        rmvd = false;
     try {
         await wsOkx.rmvBot(openBot.id);
 
@@ -345,43 +341,64 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, row: IObj) => {
             order.sell_price != 0
         ) {
             let { exitLimit } = openBot;
-            const {h, c, ha_h, ha_c} = row
+            const row = klines[klines.length - 1];
+            const prevRow = klines[klines.length - 2];
+
+            const { o, l, h, c, ha_h, ts } = row;
+            const _isGreen = prevRow.c >= o;
+            let { stop_price, sell_price } = order;
             /* CHECK CONDITIONS */
-            const isHaHit =
-                exitLimit <=
-                ha_h; /* ASSUMING THAT THE CURRENT HA_C IS THE CURR HA_H */
-            const isStdHit = exitLimit <= h;
-            const stdAtHa = h;
-            const eFromH = Number(
-                (((exitLimit - stdAtHa) / stdAtHa) * 100).toFixed(2)
-            );
 
-            const diff = ha_h - h
-            console.log({diff, h,c, ha_h, ha_c, exitLimit, isHaHit})
+            // STOP LISTENING IF L <= O TRAILING STOP
+            const lFromO = ((o - l) / l) * 100;
 
-            if (isHaHit && h < ha_h){
-                timedLog("REDUCING EXIT_LIMIT...")
-                exitLimit -= diff
-            }else if(stdAtHa >= exitLimit){
-                exitLimit *= (1 + 1.5/100)
+            if (!_isGreen && lFromO >= TRAILING_STOP_PERC) {
+                timedLog("LOW REACHED O TRAILER...SKIPPING");
+                await wsOkx.rmvBot(bot.id);
+                rmvd = true;
+                return;
             }
-            order.sell_price = exitLimit
-            await order.save()
-            timedLog({exitLimit})
 
-         
-            const { klines } = openBot;
-            /* if (isHaHit) {
-                exitLimit *= 1 - eFromH / 100;
-                exitLimit = Number(exitLimit.toFixed(pricePrecision));
-                order.sell_price = exitLimit;
+            // ADJUST STOP_PRICE IF HIGH IS HIGHER THAN ORDER HIGHS
+            const highs = order.highs.map((el) => el.val!);
+
+            if (highs.every((el) => el < h)) {
+                timedLog("ADJUSTING THE STOP_PRICE");
+                stop_price = h * (1 - TRAILING_STOP_PERC);
+                order.stop_price = stop_price;
+
+                // ADJUST _EXIT
+                sell_price = h * (1 - TRAILING_STOP_PERC / 100);
+                order.sell_price = sell_price;
                 await order.save();
-                botLog(bot, `EXIT_LIMIT TO ${exitLimit} due to ha_h`);
-            } */
+            }
 
-         
-            if (exitLimit <= h) {
-                botLog(bot, `PLACING MARKET SELL ORDER AT ${exitLimit}`);
+            const now = Date.now(),
+                closeTime = Date.parse(ts) + bot.interval * 60000;
+
+            if (c < sell_price * (1 + 0.05 / 100)) {
+                botLog(bot, `PLACING MARKET SELL ORDER AT ${sell_price}`);
+                const amt = order.base_amt - order.buy_fee;
+                const r = await placeTrade({
+                    bot: bot,
+                    ts: parseDate(new Date()),
+                    amt: Number(amt),
+                    side: "sell",
+                    plat: plat,
+                    price: 0,
+                });
+                if (!r) return botLog(bot, "FAILED TO PLACE MARKET SELL ORDER");
+                //await wsOkx.rmvBot(bot.id)
+                placed = true;
+                botLog(bot, "WS: MARKET SELL PLACED. BOT REMOVED");
+            } else if (now >= closeTime - 5 * 1000 && c > sell_price) {
+                // 5 SECS FROM CLOSING
+
+                botLog(
+                    bot,
+                    `PLACING MARKET SELL ORDER AT CLOSE SINCE IT IS > STOP_PX`,
+                    { close: parseDate(new Date(closeTime)) }
+                );
                 const amt = order.base_amt - order.buy_fee;
                 const r = await placeTrade({
                     bot: bot,
@@ -400,7 +417,7 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, row: IObj) => {
     } catch (e) {
         console.log(e);
     } finally {
-        if (!placed) {
+        if (!placed && !rmvd) {
             await wsOkx.addBot(bot.id);
         }
     }
@@ -440,11 +457,10 @@ const updateOrder = async ({
         const profit = ((bal - order.ccy_amt) / order.ccy_amt) * 100;
         order.profit = profit;
         order.order_id = orderDetails.id;
-        await order.save()
+        await order.save();
     }
 };
 
-console.log("WS OKX")
+console.log("WS OKX");
 export const wsOkx: WsOKX = new WsOKX();
 wsOkx.initWs();
-

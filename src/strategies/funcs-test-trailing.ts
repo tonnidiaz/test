@@ -7,7 +7,7 @@ import {
     TP,
     isMarket,
     rf,
-    useAnyBuy,
+    TRAILING_STOP_PERC,
     useSwindLow,
 } from "@/utils/constants";
 
@@ -215,20 +215,20 @@ export const strategy = ({
             let _exit = 0;
             let go = true;
             const _isGreen = prevRow.c >= o;
-            const trailingStop = 0.5;
+            const trailingStop = TRAILING_STOP_PERC;
 
             if (true) {
                 _exit = h * (1 - trailingStop / 100); // Increase the trailing stop with the price
                 const _stopFromO = o * (1 - trailingStop / 100);
-
+                const lFromO = (o - l) / l * 100
                 if (c > _exit) {
                     _exit = c;
                 }
-                if (!_isGreen && l <= _stopFromO) {
-                    _exit = _stopFromO;
-                    continue;
+                console.log("\nPOS:", {o, l, lFromO, trailingStop}, "\n");
+                if (!_isGreen && lFromO >= trailingStop) {
+                     continue
                 }
-                if (l <= _exit) {
+                if (l <= _exit || true) {
                     const _slip = 0.0;
                     _exit *= 1 - _slip / 100;
                 } else {

@@ -20,7 +20,7 @@ import {
 import { IObj } from "@/utils/interfaces";
 import { strategy as strExp } from "./funcs-test-eFromH";
 import { strategy as strBillo } from "./funcs-test-billo";
-import { strategy as strSLTP } from "./funcs-test-sltp";
+import { strategy as strSLTP } from "./funcs-test-billo";
 import { strategy as strTrailing } from "./funcs-test-trailing";
 let _cnt = 0;
 

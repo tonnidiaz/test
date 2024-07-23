@@ -214,8 +214,8 @@ export const readJson = (fp: string) => {
     return JSON.parse(data);
 };
 
-export const botLog = (bot: IBot, data: any) => {
-    console.log(`\n[${parseDate(new Date())}] [ ${bot.name} ]`, data, "\n");
+export const botLog = (bot: IBot, ...data: any) => {
+    console.log(`\n[${parseDate(new Date())}] [ ${bot.name} ]`, ...data, "\n");
 };
 
 export const timedLog = (...args) =>

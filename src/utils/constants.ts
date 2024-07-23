@@ -9165,3 +9165,5 @@ export const checkGreen = false, rf = false,
     slFirstAlways = true; 
 
 export const useAnyBuy = true
+
+export const TRAILING_STOP_PERC = .5
