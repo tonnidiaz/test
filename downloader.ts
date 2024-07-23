@@ -24,7 +24,7 @@ import { TestBinance } from "@/classes/test-binance";
 import { TestBybit, TestOKX } from "@/classes/test-platforms";
 import { ITrade } from "@/utils/interfaces";
 let years = [2021, 2022, 2023, 2024],
-    symbols = ["NEAR", "MASK", "MINA", "UMA", "SUI", "AVAX", "SEI"],
+    symbols = ["SOL", "DOGE", "NEAR", "MASK", "MINA", "UMA", "SUI", "AVAX", "SEI"],
     intervals = [120];
 symbols = symbols.map((el) => `${el}/USDT`);
 

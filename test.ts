@@ -1,4 +1,5 @@
 import { parseDate } from "@/utils/funcs2";
+import { randomNum } from "@/utils/functions";
 
 (function(){
     if(console.log){
@@ -10,4 +11,4 @@ import { parseDate } from "@/utils/funcs2";
     }  
 })();
 
-console.log("HELLO")
+console.log(randomNum(-7, 2))

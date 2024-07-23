@@ -69,7 +69,7 @@ export const strategy = ({
     //df = df.slice(20);
 
     console.log(trades);
-    let balA = balance * (1 - 50 / 100);
+    let balA = balance * (1 - 10 / 100);
     let balB = balance - balA;
     balance = 0;
     base = 0;
@@ -204,7 +204,7 @@ export const strategy = ({
             let goOn = true,
                 isSl = false;
 
-            if (exitLimit < exitRow.h && row.o <= exitLimit) {
+            if (exitLimit < exitRow.h ) {
                 exit = exitLimit;
             } else {
                 goOn = false;
@@ -268,7 +268,8 @@ export const strategy = ({
                     { pos, isA, isB, baseA, baseB, balA, balB },
                     "\n"
                 );
-                const _exit = c >= o ? c : nextRow?.c || c * (1+5/100)
+               // const _exit = c >= o ? c : nextRow?.c || c * (1+5/100)
+               const _exit = _exitLimit! > h && h > o * (1 + .05/100) && c < o ? o : c
 
                 if (isA && baseB != 0) {
                     _fillSell({

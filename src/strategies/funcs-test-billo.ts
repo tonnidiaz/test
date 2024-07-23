@@ -42,7 +42,7 @@ export const strategy = ({
     trades: IObj[];
     platNm: "binance" | "bybit" | "okx";
 }) => {
-    const useBuy = true;
+    const useBuy = false;
 
     const str = useBuy ? strBillioBuy : strBillioSell;
 

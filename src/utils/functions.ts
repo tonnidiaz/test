@@ -215,17 +215,18 @@ export const readJson = (fp: string) => {
 };
 
 export const botLog = (bot: IBot, data: any) => {
-    console.log(`\n[${parseDate(new Date())}] [ ${bot.name} ]`, data, '\n');
+    console.log(`\n[${parseDate(new Date())}] [ ${bot.name} ]`, data, "\n");
 };
 
-export const timedLog = (...args)=>console.log(`[${parseDate(new Date())}]`, ...args)
+export const timedLog = (...args) =>
+    console.log(`[${parseDate(new Date())}]`, ...args);
 export function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 export function toFixed(num: number, dec: number) {
     const re = new RegExp("^-?\\d+(?:.\\d{0," + (dec || -1) + "})?");
-    return `${num}`.includes('e') ? num : Number(num.toString().match(re)![0]);
+    return `${num}`.includes("e") ? num : Number(num.toString().match(re)![0]);
 }
 
 export function precision(a: number) {
@@ -241,72 +242,94 @@ export function precision(a: number) {
 
 export function getCoinPrecision(
     pair: string[],
-    oType: 'limit' | 'market',
+    oType: "limit" | "market",
     plat: "bybit" | "okx" | "binance"
 ) {
     const instru: IObj | undefined =
-        plat == "binance" ? binanceInfo.symbols.find(el=> el.baseAsset == pair[0] && el.quoteAsset == pair[1]) : (plat == "bybit"
+        plat == "binance"
+            ? binanceInfo.symbols.find(
+                  (el) => el.baseAsset == pair[0] && el.quoteAsset == pair[1]
+              )
+            : plat == "bybit"
             ? instruments.find(
-                  (el) =>
-                      el.baseCoin == pair[0] && el.quoteCoin == pair[1]
+                  (el) => el.baseCoin == pair[0] && el.quoteCoin == pair[1]
               )
             : okxInstrus.find(
                   (el) => el.baseCcy == pair[0] && el.quoteCcy == pair[1]
-              ));
+              );
     if (!instru) return 0;
-    if (plat == "binance"){return Number(oType == "market" ? instru.quoteAssetPrecision : instru.baseAssetPrecision)}
-    const pr = (plat == "bybit"
+    if (plat == "binance") {
+        return Number(
+            oType == "market"
+                ? instru.quoteAssetPrecision
+                : instru.baseAssetPrecision
+        );
+    }
+    const pr =
+        plat == "bybit"
             ? oType == "market"
                 ? instru.quotePrecision
                 : instru?.basePrecision
             : oType == "market"
             ? instru.tickSz
-            : instru.lotSz);
+            : instru.lotSz;
     return precision(Number(pr));
 }
-export function getPricePrecision(pair: string[], plat: "binance" | "bybit" | "okx") {
+export function getPricePrecision(
+    pair: string[],
+    plat: "binance" | "bybit" | "okx"
+) {
     const instru: IObj | undefined =
-        plat == "binance" ? binanceInfo.symbols.find(el=> el.baseAsset == pair[0] && el.quoteAsset == pair[1]) : ( plat == "bybit"
+        plat == "binance"
+            ? binanceInfo.symbols.find(
+                  (el) => el.baseAsset == pair[0] && el.quoteAsset == pair[1]
+              )
+            : plat == "bybit"
             ? instruments.find(
-                  (el) =>
-                      el.baseCoin == pair[0] && el.quoteCoin == pair[1]
+                  (el) => el.baseCoin == pair[0] && el.quoteCoin == pair[1]
               )
             : okxInstrus.find(
                   (el) => el.baseCcy == pair[0] && el.quoteCcy == pair[1]
-              ));
+              );
     if (!instru) return 0;
-    
-    return plat == 'binance' ? Number(instru.quoteAssetPrecision) :  precision(
-        Number(instru[plat == "bybit" ? "minPricePrecision" : "tickSz"])
-    );
+
+    return plat == "binance"
+        ? Number(instru.quoteAssetPrecision)
+        : precision(
+              Number(instru[plat == "bybit" ? "minPricePrecision" : "tickSz"])
+          );
 }
 export const sleep = async (ms: number) => {
     await new Promise((res) => setTimeout(res, ms));
 };
 
+export const isSameDate = (d1: Date, d2: Date) => {
+    const _d1 = d1.toISOString().split("T");
+    const _d1Date = _d1[0],
+        _d1Time = _d1[1].slice(0, 5);
 
+    const _d2 = d2.toISOString().split("T");
+    const _d2Date = _d2[0],
+        _d2Time = _d2[1].slice(0, 5);
+    return _d1Date == _d2Date && _d1Time == _d2Time;
+};
 
-export const isSameDate = (d1: Date, d2: Date)=>{
-    const _d1 = d1.toISOString().split('T')
-    const _d1Date = _d1[0], _d1Time = _d1[1].slice(0, 5)
-
-    const _d2 = d2.toISOString().split('T')
-    const _d2Date = _d2[0], _d2Time = _d2[1].slice(0, 5)
-    return _d1Date == _d2Date && _d1Time == _d2Time
-}
-
-export const isBetween = (l: number, num: number, h: number)=>{
-    let ret = false
-    if (h == 0 || l == 0 ){
-        ret = h == 0 ? l < num : num < h
-    }else{
-        ret = l < num && num < h
+export const isBetween = (l: number, num: number, h: number) => {
+    let ret = false;
+    if (h == 0 || l == 0) {
+        ret = h == 0 ? l < num : num < h;
+    } else {
+        ret = l < num && num < h;
     }
-    return ret
-}
-
-
+    return ret;
+};
 
 export function randomNum(min: number, max: number) {
     return Math.random() * (max - min) + min;
 }
+
+export const findAve = (numbers: number[]) => {
+    const sum = numbers.reduce((a, c) => a + c, 0);
+    const avg = sum / numbers.length;
+    return avg;
+};

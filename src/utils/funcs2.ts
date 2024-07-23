@@ -30,10 +30,10 @@ export const parseDate = (date: Date | string) =>
 
 const tuMacd = (df: IObj[]) => {
     const def = false;
-    const faster = true;
-    const fast = def ? 12 : faster ? 1 : 5,
-        slow = def ? 26 : faster ? 2 : 12,
-        signal = def ? 9 : faster ? 2 : 5;
+    const faster = false;
+    const fast = def ? 12 : faster ? 1 : 12/* 5 */,
+        slow = def ? 26 : faster ? 2 : 26/* 12 */,
+        signal = def ? 9 : faster ? 2 : 9/* 5 */;
 
     const prices = df.map((el) => el[useHaClose ? "ha_c" : "c"]);
 
@@ -96,8 +96,8 @@ export const tuCE = (df: IObj[]) => {
     const ATR = atr(highs, lows, closings, { period: atrLen });
     const _atr = ATR.atrLine;
     const rsiLen = 2,
-        fastLen = 1 /* 15 */,
-        slowLen = 2; /* 50 */
+        fastLen = 15 /* 15 */,
+        slowLen = 20; /* 50 */
 
     const sma20 = ema(closings, { period: fastLen });
     const sma50 = ema(closings, { period: slowLen });
