@@ -104,7 +104,6 @@ export const strategy = ({
                 (entryLimit = ret.entryLimit),
                 (cnt = ret.cnt),
                 (gain = ret.gain),
-                (base = ret.base),
                 (loss = ret.loss);
             sellFees += ret.fee;
             exitLimit = null;
@@ -116,7 +115,6 @@ export const strategy = ({
             (pos = ret.pos),
                 (base = ret.base),
                 (mData = ret.mData),
-                (balance = ret.balance),
                 (_cnt = ret._cnt);
             enterTs = row.ts;
             tp = toFixed(entry * (1 + TP / 100), pricePrecision);
@@ -134,7 +132,6 @@ export const strategy = ({
                 prevRow: _row,
                 entry: entry,
                 base,
-                balance,
                 pricePrecision,
                 enterTs,
                 gain,
@@ -202,7 +199,6 @@ export const strategy = ({
                     entryLimit,
                     enterTs,
                     taker,
-                    base,
                     balance, //: _bal,
                     basePrecision,
                     mData: { ...mData },
@@ -236,7 +232,6 @@ export const strategy = ({
                     entryLimit,
                     enterTs,
                     taker,
-                    base,
                     balance, //: _bal,
                     basePrecision,
                     mData: { ...mData },
