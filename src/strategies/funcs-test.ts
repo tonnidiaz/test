@@ -48,7 +48,8 @@ export const strategy = ({
     trades: IObj[];
     platNm: "binance" | "bybit" | "okx";
 }) => {
-    const useExp = false, useTrailing = true,
+    const useExp = false,
+        useTrailing = true,
         useBillo = false,
         useSLTP = false;
 
@@ -90,6 +91,8 @@ export const strategy = ({
             pair,
             maker,
             taker,
+            platNm,
+            trades,
         });
     }
     if (useExp) {
@@ -220,7 +223,7 @@ export const strategy = ({
                 isSl = false;
 
             if (entryRow.l < entryLimit) {
-                entry = entryLimit
+                entry = entryLimit;
             } else {
                 goOn = false;
                 console.log("NEITHER");
@@ -242,12 +245,10 @@ export const strategy = ({
             const _tp = entry * (1 + TP / 100);
 
             if (false) {
-            }
-            else if (exitLimit <= prevRow.h){
-                exit = exitLimit * (1+0/100)
-                is_curr = true
-            }
-            else if (prevRow.ha_o >= exitLimit * (1 + 0 / 100)) {
+            } else if (exitLimit <= prevRow.h) {
+                exit = exitLimit * (1 + 0 / 100);
+                is_curr = true;
+            } else if (prevRow.ha_o >= exitLimit * (1 + 0 / 100)) {
                 exit = row.o;
             } else if (prevRow.h <= _sl) {
                 exit = row.o;
@@ -258,7 +259,7 @@ export const strategy = ({
                 goOn = false;
             }
 
-               /*  const tpCond = pos && tp && prevRow.h >= tp, slCond = pos && sl && sl <= entry && prevRow.l <= sl  && prevRow.h > sl
+            /*  const tpCond = pos && tp && prevRow.h >= tp, slCond = pos && sl && sl <= entry && prevRow.l <= sl  && prevRow.h > sl
 
                 if (tp && sl){
                    if (!isGreen) {
@@ -275,9 +276,7 @@ export const strategy = ({
                     _fillSell(exit, row)
                 }
                 } */
-                
-               
-                
+
             if (goOn) {
                 const p = "EXIT";
                 console.log("\nFILLING SELL ORDER AT", p);
@@ -285,12 +284,12 @@ export const strategy = ({
                 console.log({ is_curr });
                 if (is_curr) {
                     console.log("FILL BUY");
-                    //entryLimit =prevRow.c * (1-1.5/100) 
+                    //entryLimit =prevRow.c * (1-1.5/100)
                     //_fillBuy(entry, row)
-                 //   i += 5
+                    //   i += 5
                     //continue
-                   // _fillSell()
-                   //exitLimit = row.o * (1 + 1.5/100)
+                    // _fillSell()
+                    //exitLimit = row.o * (1 + 1.5/100)
                     /* if (row.c <= row.o || row.c < row.o * (1 + .05/100)){
                         entry = row.c
                         _fillBuy(entry, row)
@@ -304,40 +303,39 @@ export const strategy = ({
         if (!pos && (useAnyBuy || buyCond(prevRow, df, i))) {
             console.log("\nKAYA RA BUY\n");
             // Place limit buy order
-            entryLimit = prevRow.c * (1-2.5/100);
+            entryLimit = prevRow.c * (1 - 2.5 / 100);
             enterTs = row.ts;
             console.log(
                 `[ ${row.ts} ] \t Limit buy order at ${entryLimit?.toFixed(2)}`
             );
-            if (entryLimit && (isMarket)) {
+            if (entryLimit && isMarket) {
                 entry = row.o;
                 _fillBuy(entry, row);
             }
         } else if (pos && sellCond(prevRow, entry, df, i)) {
-            
-            const _data = { 
-            greenAve: 1.5825079162609252,
-            redAve: 1.593068389674336,
-            green_max: 7.882519913106428,
-            green_min: -7.151344903220851,
-            red_max: 18.78912783751492,
-            red_min: -14.144885258654233
-          } 
+            const _data = {
+                greenAve: 1.5825079162609252,
+                redAve: 1.593068389674336,
+                green_max: 7.882519913106428,
+                green_min: -7.151344903220851,
+                red_max: 18.78912783751492,
+                red_min: -14.144885258654233,
+            };
             const rf = true;
             const p = isGreen ? 0.11 : 0.06;
             exitLimit = row.o; //row.o * (1 + p * 3.5 /100)// Math.max(entry, row.o, prevRow.c) * (1 - p / 100);
-            const ave = ((row.c *(1+ 1.5/100) - row.o) / row.o) * 100;
+            const ave = ((row.c * (1 + 1.5 / 100) - row.o) / row.o) * 100;
 
-            const t1 = Math.max(prevRow.h, prevRow.l)
-            const t2 = Math.min(prevRow.h, prevRow.l)
+            const t1 = Math.max(prevRow.h, prevRow.l);
+            const t2 = Math.min(prevRow.h, prevRow.l);
 
-            const perc = (t1 - t2)/t2 * 100 //1.5 // rf ? 1.3 : 2.5;
+            const perc = ((t1 - t2) / t2) * 100; //1.5 // rf ? 1.3 : 2.5;
             if (exitLimit) exitLimit *= 1 + perc / 100;
             //exitLimit = prevRow.ha_c
             enterTs = row.ts;
             console.log(`[ ${row.ts} ] \t Limit sell order at ${exitLimit}`);
-            
-            console.log({ave});
+
+            console.log({ ave });
             if (isGreen) greenAves.push(ave);
             else redAves.push(ave);
             //console.log("\n",{isGreen, cFromE: ,"\n");
@@ -359,10 +357,18 @@ export const strategy = ({
     const greenAve = findAve(greenAves);
     const redAve = findAve(redAves);
 
-    console.log("\n", { greenAve, redAve, 
-        green_max: Math.max(...greenAves), green_min: Math.min(...greenAves),
-        red_max: Math.max(...redAves), red_min: Math.min(...redAves),
-     }, "\n");
+    console.log(
+        "\n",
+        {
+            greenAve,
+            redAve,
+            green_max: Math.max(...greenAves),
+            green_min: Math.min(...greenAves),
+            red_max: Math.max(...redAves),
+            red_min: Math.min(...redAves),
+        },
+        "\n"
+    );
 
     console.log(`\nBUY_FEES: ${pair[1]} ${buyFees}`);
     console.log(`SELL_FEES: ${pair[1]} ${sellFees}\n`);

@@ -1,5 +1,5 @@
 import { IObj } from "./interfaces";
-import { atr, ema, rsi, macd } from "indicatorts";
+import { atr, ema, rsi, sma } from "indicatorts";
 import path from "path";
 import { SL, TP, useHaClose } from "./constants";
 import { OrderDetails } from "okx-api";
