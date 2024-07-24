@@ -467,7 +467,7 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
                 await order.save();
             }
 
-            if (c < sell_price * (1 + 0.0015 / 100) && c >= _sl) {
+            if (c <= sell_price * (1 + 0.0015 / 100) && c >= _sl) {
                 botLog(bot, `PLACING MARKET SELL ORDER AT EXIT`, {
                     h,
                     sell_price,

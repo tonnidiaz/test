@@ -89,7 +89,7 @@ export const strategy = ({
 
     console.log(trades);
 
-    for (let i = d + 2; i < df.length; i++) {
+    for (let i = d + 1; i < df.length; i++) {
         //if (balance < 10) continue;
         const prevRow = df[i - 1],
             row = df[i];
@@ -181,6 +181,13 @@ export const strategy = ({
         }
         const isGreen = prevRow.c >= prevRow.o;
 
+        if (!pos && entryLimit) {
+            if (row.l <= entryLimit) {
+                entry = entryLimit;
+                _fillBuy({ _amt: balance, _entry: entry, _row: row });
+                continue;
+            }
+        }
         if (pos && exitLimit) {
             let _e = exitLimit;
 
@@ -189,6 +196,7 @@ export const strategy = ({
         }
 
         if (!pos) {
+            /* BUY SEC */
             console.log(
                 `[ ${row.ts} ] \t MARKET buy order at ${entryLimit?.toFixed(2)}`
             );
@@ -204,7 +212,7 @@ export const strategy = ({
         if (pos && buyCond(prevRow)) {
             /* SELL SECTION */
             const rf = true;
-            exitLimit = entry * (1 + 8/100);
+            exitLimit = entry * (1 + 20 / 100);
             enterTs = row.ts;
             console.log(`[ ${row.ts} ] \t Limit sell order at ${exitLimit}`);
         }
@@ -213,48 +221,40 @@ export const strategy = ({
             const erow = row;
             const { o, h, l, c, ha_o, ha_h, ha_l, ha_c } = erow;
             let _exit = 0;
-            let go = true;
+            let go = true,
+                isExit = false;
             const _isGreen = prevRow.c >= o;
             const trailingStop = TRAILING_STOP_PERC;
             const _sl = entry * (1 - SL / 100);
             const _tp = entry * (1 + TP / 100);
-            if (true) {
-                _exit = h * (1 - trailingStop / 100); // Increase the trailing stop with the price
-                const _stopFromO = o * (1 - trailingStop / 100);
-                const lFromO = ((o - l) / l) * 100;
+            const _stopFromO = o * (1 - trailingStop / 100);
+            const lFromO = ((o - l) / l) * 100;
+            _exit = h * (1 - trailingStop / 100); // Increase the trailing stop with the price
 
-                console.log(
-                    "\nPOS:",
-                    { o, l, lFromO, trailingStop, c, h },
-                    "\n"
-                );
-            
-              
-                /* if (exitLimit <= h){
-                    _exit = exitLimit
-                } */
-                if (c > _exit) {
-                    console.log("SELLING AT CLOSE");
-                    _exit = c;
-                } else {
-                    console.log("SELLING AT STOP");
-                }
-                if (l <= _exit && _exit >= _sl) {
-                    const _slip = 0; //0.05;
-                    _exit *= 1 - _slip / 100;
-                } else {
-                    go = false;
-                }
+            console.log("\nPOS:", { o, l, lFromO, trailingStop, c, h }, "\n");
+
+            if (c > _exit) {
+                console.log("SELLING AT CLOSE");
+                _exit = c;
             } else {
-                go = false;
+                console.log("SELLING AT STOP");
+                isExit = true;
             }
 
-            /* if (Math.max(prevRow.l, prevRow.ha_l) <= _sl) {
-                _exit = c//!isGreen ? o : c
-                go = false;
-            } */
+            let _slip = 0;
 
-            if (go) {
+            /*  if (isExit) {
+                        if (c < o) {
+                            if (lFromO >= trailingStop) {
+                                _slip = 0;
+                                _exit = _stopFromO;
+                            }else {_slip = .0}
+                        }
+                    } */
+            _exit *= 1 - _slip / 100;
+
+
+            if (go && _exit >= _sl) {
                 _fillSell({ _exit, _row: erow, _base: base });
             }
         }
