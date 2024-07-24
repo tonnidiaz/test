@@ -47,6 +47,8 @@ export const strategy = ({
     trades: IObj[];
     platNm: "binance" | "bybit" | "okx";
 }) => {
+
+    console.log(df[0]);
     const useTrillo = false;
     if (useTrillo)
         return strTrillo({
@@ -226,7 +228,7 @@ export const strategy = ({
             const _isGreen = prevRow.c >= o;
             const trailingStop = TRAILING_STOP_PERC;
             const _sl = entry * (1 - SL / 100);
-            const _tp = entry * (1 + TP / 100);
+            const _tp = o * (1 + TP / 100);
             const _stopFromO = o * (1 - trailingStop / 100);
             const lFromO = ((o - l) / l) * 100;
             _exit = h * (1 - trailingStop / 100); // Increase the trailing stop with the price
@@ -255,6 +257,10 @@ export const strategy = ({
 
 
             if (go && _exit >= _sl) {
+
+                if (/* isExit && */ _exit >= entry && _exit < _tp) {
+                    console.log("EXIT LESS THAN TP");
+                    continue}
                 _fillSell({ _exit, _row: erow, _base: base });
             }
         }

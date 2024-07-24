@@ -184,6 +184,17 @@ export class HL_HA extends Strategy {
         return row.ha_c < row.ha_o// || RSI_ONLY.prototype.sellCond(row)
     }
 }
+export class STOCHIE extends Strategy {
+    name: string = "STOCHIE";
+    desc: string = "JUST A CE";
+    buyCond(row: IObj): boolean {
+        return row.stoch_k > row.stoch_d// || RSI_ONLY.prototype.buyCond(row)
+    }
+
+    sellCond(row: IObj): boolean {
+        return row.stoch_k < row.stoch_d// || RSI_ONLY.prototype.sellCond(row)
+    }
+}
 
 export const strategies = [
     new MACD_ONLY(),
@@ -192,5 +203,5 @@ export const strategies = [
     new MACD_MA_RSI(),
     new MA_ONLY(),
     new SMA_EXT(),
-    new HL(), new HL_HA(), new MACD_HL_HA(), new CE_ONLY(), new CE_MA(), new CE_MACD()
+    new HL(), new HL_HA(), new MACD_HL_HA(), new STOCHIE()
 ];

@@ -1,5 +1,5 @@
 import { IObj } from "./interfaces";
-import { atr, ema, rsi, macd } from "indicatorts";
+import { atr, ema, rsi, macd, stochasticOscillator, stoch } from "indicatorts";
 import path from "path";
 import { SL, TP, useHaClose } from "./constants";
 import { OrderDetails } from "okx-api";
@@ -101,6 +101,7 @@ export const tuCE = (df: IObj[]) => {
 
     const sma20 = ema(closings, { period: fastLen });
     const sma50 = ema(closings, { period: slowLen });
+   
     const _rsi = rsi(closings, { period: rsiLen });
     let sir = 1;
 
