@@ -156,7 +156,7 @@ router.post("/:id/edit", authMid, async (req, res) => {
             if (bot.orders.length){
                 const order = await Order.findById(bot.orders[bot.orders.length - 1]).exec()
                 if (order && order.side == 'sell' && !order.is_closed && order.sell_price != 0){
-                  await wsOkx.addBot(bot.id)  
+                  await wsOkx.addBot(bot.id, true)  
                 }
             }
             

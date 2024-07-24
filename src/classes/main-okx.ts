@@ -17,9 +17,10 @@ import { ObjectId } from "mongoose";
 import { botLog, getPricePrecision, timedLog } from "@/utils/functions";
 import { OKX } from "./okx";
 import { placeTrade } from "@/utils/orders/funcs";
-import { DEV, TRAILING_STOP_PERC, demo } from "@/utils/constants";
+import { DEV, getTrailingStop, stops, demo, platforms } from "@/utils/constants";
 import { IObj } from "@/utils/interfaces";
 import { IOrder } from "@/models/order";
+import { scheduleJob } from "node-schedule";
 configDotenv();
 
 interface IOpenBot {
@@ -286,43 +287,116 @@ export class WsOKX {
         return `${bot.base}-${bot.ccy}`;
     }
 
-    async addBot(botId: ObjectId) {
-        timedLog(`\WS: ADDING BOT: ${botId}...`);
+    async pauseBot(botId: ObjectId) {
+        timedLog(`\WS: PAUSING BOT: ${botId}...`);
         const bot = await Bot.findById(botId).exec();
+        if (bot) {
+            await this._unsubBot(bot);
+            timedLog("WS: PAUSED...");
+        }
+    }
+    async resumeBot(botId: ObjectId) {
+        timedLog(`\WS: RESUMING BOT: ${botId}...`);
+        const bot = await Bot.findById(botId).exec();
+        if (bot) {
+            await this.sub(bot);
+            timedLog("WS: BOT RESUMED...");
+        }
+    }
+    async addBot(botId: ObjectId, first = false) {
+        timedLog(`\WS: ADDING BOT: ${botId}...`);
 
-        if (!bot) return console.log("BOT NOT FOUND");
-        const order = await Order.findById(
-            bot.orders[bot.orders.length - 1]
-        ).exec();
-        const plat = new OKX(bot);
-        const klines = await plat.getKlines({});
-        this.botsWithPos = this.botsWithPos.filter((el) => el.id != botId);
-        this.botsWithPos.push({
-            id: botId,
-            exitLimit: order!.sell_price,
-            klines,
-        });
+        try{
+            const bot = await Bot.findById(botId).exec();
 
-        await this.sub(bot);
-        timedLog(`WS: BOT: ${botId} added`);
+            if (!bot) return console.log("BOT NOT FOUND");
+            const order = await Order.findById(
+                bot.orders[bot.orders.length - 1]
+            ).exec();
+            const plat = new OKX(bot);
+            const klines = await plat.getKlines({});
+            this.botsWithPos = this.botsWithPos.filter((el) => el.id != botId);
+            this.botsWithPos.push({
+                id: botId,
+                exitLimit: order!.sell_price,
+                klines,
+            });
+    
+            await this.sub(bot);
+    
+            // SCHEDULE A ONCE OFF JOB TO BE EXEC AT 10 SECS B4 THE NEXT CANDLE
+            if (first) {
+                const prev = klines[klines.length - 1];
+                const ts = Number(prev[0]);
+                const closeTime = ts + 2 * bot.interval * 60000;
+                const at = new Date(closeTime - 30 * 1000);
+                timedLog("SCHEDULING TIMED:", parseDate(at));
+                scheduleJob(at, () => updateBotAtClose(bot));
+            }
+            timedLog(`WS: BOT: ${botId} added`);
+        }
+        catch(e){
+            console.log(e);
+        }
     }
     async rmvBot(botId: ObjectId) {
         this.botsWithPos = this.botsWithPos.filter((el) => el.id != botId);
         const bot = await Bot.findById(botId).exec();
+        if (bot) await this._unsubBot(bot);
+        timedLog(`WS: BOT: ${botId} removed`);
+    }
+
+    async _unsubBot(bot: IBot) {
         if (
             !(await Bot.find({ base: bot?.base, ccy: bot?.ccy }).exec()).length
         ) {
             await this.unsub(bot!);
         }
-        timedLog(`WS: BOT: ${botId} removed`);
     }
 }
 
+const updateBotAtClose = async (_bot: IBot) => {
+    timedLog("TIMED: UPDATE AT CLOSE");
+    const bot = await Bot.findById(_bot.id).exec();
+
+    if (!bot) return;
+    const order = await Order.findById(bot.orders[bot.orders.length - 1]).exec();
+
+    const pos = order && order.side == "sell" && !order.is_closed;
+    timedLog("TIMED: ", { sell_px: order?.sell_price, pos });
+    if (!pos) return;
+
+    const { sell_price } = order;
+    const plat = new OKX(bot);
+    const c = await plat.getTicker();
+    timedLog({ticker: c})
+    const _sl = order.buy_price * (1- stops[bot.interval]/100)
+    if (sell_price < c && c >= _sl) {
+        botLog(
+            bot,
+            `TIMED: PLACING MARKET SELL ORDER AT CLOSE SINCE IT IS > STOP_PX`,
+            { ts: parseDate(new Date()), c, sell_price, _sl }
+        );
+        const amt = order.base_amt - order.buy_fee;
+        const r = await placeTrade({
+            bot: bot,
+            ts: parseDate(new Date()),
+            amt: Number(amt),
+            side: "sell",
+            plat: plat,
+            price: 0,
+        });
+        if (!r) return botLog(bot, "TIMED: FAILED TO PLACE MARKET SELL ORDER");
+        //await wsOkx.rmvBot(bot.id)
+        await wsOkx.rmvBot(bot.id);
+        botLog(bot, "TIMED: MARKET SELL PLACED. BOT REMOVED");
+    }
+};
 const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
     let placed = false,
         rmvd = false;
     try {
-        await wsOkx.rmvBot(openBot.id);
+        await wsOkx.pauseBot(openBot.id);
 
         const plat = new OKX(bot);
         const pricePrecision = getPricePrecision(
@@ -340,6 +414,10 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
             !order.is_closed &&
             order.sell_price != 0
         ) {
+
+            const trailingStop = getTrailingStop(bot.interval)
+            const _sl = order.buy_price * (1- stops[bot.interval]/100)
+
             let { exitLimit } = openBot;
             const row = klines[klines.length - 1];
             const prevRow = klines[klines.length - 2];
@@ -347,58 +425,55 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
             const { o, l, h, c, ha_h, ts } = row;
             const _isGreen = prevRow.c >= o;
             let { stop_price, sell_price } = order;
-            /* CHECK CONDITIONS */
+            const initHighs = order.highs.map((el) => el.val!);
+
+
+            if (c != initHighs[initHighs.length - 1]) {
+                order.highs.push({ ts: parseDate(new Date()), val: c });
+                await order.save();
+            }
+            if (c != initHighs[initHighs.length - 1]) {
+                order.all_highs.push({ ts: parseDate(new Date()), val: c });
+                await order.save();
+            }
+
 
             // STOP LISTENING IF L <= O TRAILING STOP
             const lFromO = ((o - l) / l) * 100;
 
-            if (!_isGreen && lFromO >= TRAILING_STOP_PERC) {
-                timedLog("LOW REACHED O TRAILER...SKIPPING");
+            
+            /* if (!_isGreen && lFromO >= trailingStop) {
+                timedLog("LOW REACHED O TRAILER...SKIPPING", {
+                    o,
+                    l,
+                    lFromO,
+                    c,
+                });
                 await wsOkx.rmvBot(bot.id);
                 rmvd = true;
                 return;
             }
-
+ */
             // ADJUST STOP_PRICE IF HIGH IS HIGHER THAN ORDER HIGHS
-            const highs = order.highs.map((el) => el.val!);
 
-            if (highs.every((el) => el < h)) {
+            if (initHighs.every((el) => el < h)) {
                 timedLog("ADJUSTING THE STOP_PRICE");
-                stop_price = h * (1 - TRAILING_STOP_PERC);
+                stop_price = h * (1 - trailingStop / 100);
                 order.stop_price = stop_price;
 
                 // ADJUST _EXIT
-                sell_price = h * (1 - TRAILING_STOP_PERC / 100);
+                sell_price = h * (1 - trailingStop / 100);
                 order.sell_price = sell_price;
                 await order.save();
             }
 
-            const now = Date.now(),
-                closeTime = Date.parse(ts) + bot.interval * 60000;
-
-            if (c < sell_price * (1 + 0.05 / 100)) {
-                botLog(bot, `PLACING MARKET SELL ORDER AT ${sell_price}`);
-                const amt = order.base_amt - order.buy_fee;
-                const r = await placeTrade({
-                    bot: bot,
-                    ts: parseDate(new Date()),
-                    amt: Number(amt),
-                    side: "sell",
-                    plat: plat,
-                    price: 0,
+            if (c < sell_price * (1 + 0.0015 / 100) && c >= _sl) {
+                botLog(bot, `PLACING MARKET SELL ORDER AT EXIT`, {
+                    h,
+                    sell_price,
+                    c,
+                    _sl
                 });
-                if (!r) return botLog(bot, "FAILED TO PLACE MARKET SELL ORDER");
-                //await wsOkx.rmvBot(bot.id)
-                placed = true;
-                botLog(bot, "WS: MARKET SELL PLACED. BOT REMOVED");
-            } else if (now >= closeTime - 5 * 1000 && c > sell_price) {
-                // 5 SECS FROM CLOSING
-
-                botLog(
-                    bot,
-                    `PLACING MARKET SELL ORDER AT CLOSE SINCE IT IS > STOP_PX`,
-                    { close: parseDate(new Date(closeTime)) }
-                );
                 const amt = order.base_amt - order.buy_fee;
                 const r = await placeTrade({
                     bot: bot,
@@ -418,7 +493,9 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
         console.log(e);
     } finally {
         if (!placed && !rmvd) {
-            await wsOkx.addBot(bot.id);
+            await wsOkx.resumeBot(bot.id);
+        } else if (placed) {
+            await wsOkx.rmvBot(bot.id);
         }
     }
 };
@@ -463,4 +540,11 @@ const updateOrder = async ({
 
 console.log("WS OKX");
 export const wsOkx: WsOKX = new WsOKX();
+try{
+    wsOkx.initWs()
+}
+catch(e){
+    timedLog("FAILED TO INIT WS")
+    console.log(e);
+}
 wsOkx.initWs();

@@ -125,7 +125,6 @@ export const onBacktest = async (data: IObj, client?: Socket, io?:Server) => {
                 : offline
                 ? await require(klinesPath!)
                 : klines;
-
         console.log({ startTs, m: Number(klines[0][0]), endTs });
         console.log({
             startTs: new Date(startTs),
@@ -186,7 +185,7 @@ export const onBacktest = async (data: IObj, client?: Socket, io?:Server) => {
         
         retData = { data: {...retData,str_name }, clId };
         prevData = retData;
-        io?.emit("backtest", retData);
+        client?.emit("backtest", retData);
         return retData;
     } catch (e: any) {
         console.log(e.response?.data ?? e);

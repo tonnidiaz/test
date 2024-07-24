@@ -107,7 +107,7 @@ export const updateOrder = async (bot: IBot) => {
             //}
 
             // CANCEL PREV ORDER IF ANY AND IT WAS NOT FILLED
-            let goOn = order.order_id == "";
+            /* let goOn = order.order_id == "";
             if (!goOn) {
                 botLog(bot, "CHECKING PREV EXIT ORDER...");
                 const checkRes = await plat.getOrderbyId(order.order_id, true);
@@ -124,9 +124,9 @@ export const updateOrder = async (bot: IBot) => {
                         goOn = true;
                     }
                 } 
-            }
+            } */
 
-            if (goOn) {
+            /* if (goOn) {
                 botLog(bot, "PLACING NEW OCO SELL");
                 botLog(bot, { exitLimit });
                 const amt = order.base_amt - order.buy_fee;
@@ -143,7 +143,7 @@ export const updateOrder = async (bot: IBot) => {
                     orderId = r;
                     botLog(bot, "OCO MARKET SELL ORDER PLACED");
                 }
-            }
+            } */
         }
         return { isClosed, lastOrder: orderId };
     } catch (e) {

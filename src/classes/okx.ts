@@ -1,7 +1,7 @@
 import { IBot } from "@/models/bot";
 import { ensureDirExists } from "@/utils/orders/funcs";
 import { getInterval, parseDate, parseFilledOrder } from "@/utils/funcs2";
-import { botLog } from "@/utils/functions";
+import { botLog, timedLog } from "@/utils/functions";
 import { writeFileSync } from "fs";
 import { RestClient, WebsocketClient } from "okx-api";
 import type { AlgoOrderResult, OrderDetails, OrderResult } from "okx-api";
@@ -56,6 +56,14 @@ export class OKX {
         } catch (error) {
             console.log(error);
         }
+    }
+
+    async getTicker(){
+        botLog(this.bot, "GETTING TICKER...")
+        const res = await this.client.getTicker(this.getSymbol())
+        const ticker = Number(res[0].last)
+        console.log({ticker});
+        return ticker
     }
 
     async cancelOrder({ ordId, isAlgo }: { ordId: string; isAlgo?: boolean }) {

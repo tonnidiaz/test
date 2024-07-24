@@ -89,7 +89,7 @@ export const strategy = ({
 
     console.log(trades);
 
-    for (let i = d + 1; i < df.length; i++) {
+    for (let i = d + 2; i < df.length; i++) {
         //if (balance < 10) continue;
         const prevRow = df[i - 1],
             row = df[i];
@@ -204,7 +204,7 @@ export const strategy = ({
         if (pos && buyCond(prevRow)) {
             /* SELL SECTION */
             const rf = true;
-            exitLimit = 5;
+            exitLimit = entry * (1 + 8/100);
             enterTs = row.ts;
             console.log(`[ ${row.ts} ] \t Limit sell order at ${exitLimit}`);
         }
@@ -216,20 +216,31 @@ export const strategy = ({
             let go = true;
             const _isGreen = prevRow.c >= o;
             const trailingStop = TRAILING_STOP_PERC;
-
+            const _sl = entry * (1 - SL / 100);
+            const _tp = entry * (1 + TP / 100);
             if (true) {
                 _exit = h * (1 - trailingStop / 100); // Increase the trailing stop with the price
                 const _stopFromO = o * (1 - trailingStop / 100);
-                const lFromO = (o - l) / l * 100
+                const lFromO = ((o - l) / l) * 100;
+
+                console.log(
+                    "\nPOS:",
+                    { o, l, lFromO, trailingStop, c, h },
+                    "\n"
+                );
+            
+              
+                /* if (exitLimit <= h){
+                    _exit = exitLimit
+                } */
                 if (c > _exit) {
+                    console.log("SELLING AT CLOSE");
                     _exit = c;
+                } else {
+                    console.log("SELLING AT STOP");
                 }
-                console.log("\nPOS:", {o, l, lFromO, trailingStop}, "\n");
-                if (!_isGreen && lFromO >= trailingStop) {
-                     continue
-                }
-                if (l <= _exit || true) {
-                    const _slip = 0.0;
+                if (l <= _exit && _exit >= _sl) {
+                    const _slip = 0; //0.05;
                     _exit *= 1 - _slip / 100;
                 } else {
                     go = false;
@@ -237,6 +248,11 @@ export const strategy = ({
             } else {
                 go = false;
             }
+
+            /* if (Math.max(prevRow.l, prevRow.ha_l) <= _sl) {
+                _exit = c//!isGreen ? o : c
+                go = false;
+            } */
 
             if (go) {
                 _fillSell({ _exit, _row: erow, _base: base });

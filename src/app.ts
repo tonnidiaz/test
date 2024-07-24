@@ -142,7 +142,7 @@ const main = async () => {
                 !lastOrder.is_closed &&
                 lastOrder.sell_price != 0
             ) {
-                await wsOkx.addBot(bot.id);
+                await wsOkx.addBot(bot.id, true);
             }
         } 
        // await wsOkx.sub(bot);

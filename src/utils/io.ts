@@ -22,7 +22,7 @@ import {onBacktest} from './functions/io-funcs'
 
 const corsOptions: CorsOptions = { origin: "*" };
 const io = new Server({ cors: corsOptions }); // yes, no server arg here; it's not required
-let prevData: IObj | null = null;
+let prevData: any = null;
 // attach stuff to io
 io.on("connection", (client) => {
     console.log(`${client.id} CONNECTED`);
@@ -48,7 +48,7 @@ io.on("connection", (client) => {
         }, 1500);
     });
 
-    client.on("backtest", async (d)=>await onBacktest(d, client, io)
+    client.on("backtest", async (d)=>prevData = await onBacktest(d, client)
         );
 
     client.on("strategies", (e) => {

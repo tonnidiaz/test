@@ -96,8 +96,8 @@ export const tuCE = (df: IObj[]) => {
     const ATR = atr(highs, lows, closings, { period: atrLen });
     const _atr = ATR.atrLine;
     const rsiLen = 2,
-        fastLen = 15 /* 15 */,
-        slowLen = 20; /* 50 */
+        fastLen = 40 /* 15 */,
+        slowLen = 90; /* 50 */
 
     const sma20 = ema(closings, { period: fastLen });
     const sma50 = ema(closings, { period: slowLen });

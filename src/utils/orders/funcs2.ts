@@ -53,7 +53,7 @@ export const afterOrderUpdate = async ({
     console.log({ pos });
     
     /* ------ START ---------- */
-    if (!pos && strategy.buyCond(prevRow)) {
+    if (!pos) {
         // Place buy order
         botLog(bot, "BUY ORDER NOT YET PLACED, UPDATING ENTRY_LIMIT");
 
@@ -103,17 +103,23 @@ export const afterOrderUpdate = async ({
         await order.save();
         botLog(bot, `ENTRY_LIMIT UPDATED to ${entryLimit}`); */
     } 
-    else if (pos && order && !order.is_closed && strategy.sellCond(prevRow)) {
+    
+    if (pos && order && !order.is_closed && strategy.buyCond(prevRow)) {
         botLog(bot, "SELL ORDER NOT YET CLOSED, UPDATING EXIT_LIMIT");
 
-        const exitLimit = Math.min(prevRow.ha_c, prevRow.ha_o)//prevRow.ha_h;
+        const exitLimit = 1//Math.min(prevRow.ha_c, prevRow.ha_o)//prevRow.ha_h;
         order.sell_timestamp = { i: parseDate(new Date()) };
-        order.sell_price = exitLimit;
+        if (order.sell_price == 0)
+        {order.sell_price = exitLimit;
+           
+        botLog(bot, `EXIT_LIMIT UPDATED TO: ${exitLimit}`)
+        }
 
+        botLog(bot, "CLEARING BOT HIGHS...")
+        order.highs = []
         await order.save();
-        botLog(bot, `EXIT_LIMIT UPDATED TO: ${exitLimit}`);
         botLog(bot, "WATCHING FOR THE PX CHANGES");
-        await wsOkx.addBot(bot.id);
+        await wsOkx.addBot(bot.id, true);
     }
 };
 

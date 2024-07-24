@@ -9155,7 +9155,11 @@ export const isMarket = true,
     useCurrRow = true,
     useProdPercs = false;
 
-export let SL = 20.5//7//.01//1//.25//7//3; //.002//.02//.015//.05//useProdPercs ? .03 : .01//0.03//0.05; //.25//.5,
+
+export const stops = {
+    60: 15, 30: .8, 15: .25, 5: .1
+}
+export let SL = stops[60]//7//.01//1//.25//7//3; //.002//.02//.015//.05//useProdPercs ? .03 : .01//0.03//0.05; //.25//.5,
 export let TP = 3.5//5//1.7//10//15//5.5//9.5//1; //.2//.3//1.1//1.7//useProdPercs ? 1.5 : 1.7//1.5//2//1.5; // 3.5//5.3
 export const SL2 = .25//1
 export const setSL = (v: number) => (SL = v);
@@ -9165,5 +9169,9 @@ export const checkGreen = false, rf = false,
     slFirstAlways = true; 
 
 export const useAnyBuy = true
+const largeStop = true
+export const TRAILING_STOP_PERC = largeStop ?.5 : .25//.5
 
-export const TRAILING_STOP_PERC = .5
+export const getTrailingStop = (interval: number)=>{
+    return interval < 30 ? .25 : .5
+}

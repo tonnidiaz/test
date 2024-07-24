@@ -12,6 +12,7 @@ export const OrderSchema = new Schema(
         buy_timestamp: { type: Object},
         sell_timestamp: { type: Object},
         highs: { type: [{ts: String, val: Number}], default: []},
+        all_highs: { type: [{ts: String, val: Number}], default: []},
         base: { type: String, default: "" },
         ccy: { type: String, default: "" },
         buy_fee: { type: Number, default: 0 },
