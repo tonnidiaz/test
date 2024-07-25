@@ -23,9 +23,9 @@ import { existsSync, readdirSync, writeFileSync } from "fs";
 import { TestBinance } from "@/classes/test-binance";
 import { TestBybit, TestOKX } from "@/classes/test-platforms";
 import { ITrade } from "@/utils/interfaces";
-let years = [2021, 2022, 2023, 2024],
-    symbols = ["SOL", "DOGE", "NEAR", "MASK", "MINA", "UMA", "SUI", "AVAX", "SEI"],
-    intervals = [120];
+let years = [ 2023, 2024],
+    symbols = ["PEPE", "PEOPLE", "SPELL", "SHIB", "SAND", "PENDLE"],
+    intervals = [15];
 symbols = symbols.map((el) => `${el}/USDT`);
 
 async function downloader({
@@ -124,9 +124,9 @@ const dld = async ({
                 }
                 console.log(`Done with interval=${interval}\n`);
             }
-            console.log(`Done with symbol=${symb}\n`);
+            console.log(`[ ${symb} ] Done with symbol=${symb}\n`);
         }
-        console.log(`Done with year=${year}\n`);
+        console.log(` Done with year=${year}\n`);
     }
 };
 

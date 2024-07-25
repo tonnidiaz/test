@@ -197,7 +197,7 @@ export const strategy = ({
             const _tp = entry * (1 + TP / 100);
         }
 
-        if (!pos) {
+        if (!pos && buyCond(prevRow)) {
             /* BUY SEC */
             console.log(
                 `[ ${row.ts} ] \t MARKET buy order at ${entryLimit?.toFixed(2)}`
