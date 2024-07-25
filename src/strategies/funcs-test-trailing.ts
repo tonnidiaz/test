@@ -12,6 +12,7 @@ import {
 } from "@/utils/constants";
 
 import {
+    findAve as calcAve,
     getCoinPrecision,
     getPricePrecision,
     isBetween,
@@ -81,7 +82,8 @@ export const strategy = ({
         sl: number | null = null,
         exit: number = 0,
         enterTs = "";
-
+    
+        const prAve : number[] = []
     const pricePrecision = getPricePrecision(pair, "okx");
     const basePrecision = getCoinPrecision(pair, "limit", "okx");
 
@@ -183,18 +185,19 @@ export const strategy = ({
         }
         const isGreen = prevRow.c >= prevRow.o;
 
-        if (!pos && entryLimit) {
+        /* if (!pos && entryLimit) {
             if (row.l <= entryLimit) {
                 entry = entryLimit;
                 _fillBuy({ _amt: balance, _entry: entry, _row: row });
                 continue;
             }
-        }
+        } */
         if (pos && exitLimit) {
             let _e = exitLimit;
 
             const _sl = entry * (1 - SL / 100);
             const _tp = entry * (1 + TP / 100);
+           
         }
 
         if (!pos && buyCond(prevRow)) {
@@ -211,10 +214,10 @@ export const strategy = ({
                 _fillBuy({ _entry: entry, _row: row, _amt: balance });
             }
         }
-        if (pos && buyCond(prevRow)) {
+        if (pos) {
             /* SELL SECTION */
             const rf = true;
-            exitLimit = entry * (1 + 20 / 100);
+            exitLimit = prevRow.ha_h * (1 + 1.5/100) //entry * (1 + 20 / 100);
             enterTs = row.ts;
             console.log(`[ ${row.ts} ] \t Limit sell order at ${exitLimit}`);
         }
@@ -257,10 +260,13 @@ export const strategy = ({
 
 
             if (go && _exit >= _sl) {
-
+                if (_exit > o){
+                    prAve.push((_exit - o) / o * 100)
+                }
                 if (/* isExit && */ _exit >= entry && _exit < _tp) {
                     console.log("EXIT LESS THAN TP");
-                    continue}
+                    continue
+                }
                 _fillSell({ _exit, _row: erow, _base: base });
             }
         }
@@ -276,6 +282,7 @@ export const strategy = ({
     loss = Number(((loss / cnt) * 100).toFixed(2));
     _data = { ...mData, balance, trades: cnt, gain, loss };
     console.log(`\nBUY_FEES: ${pair[1]} ${buyFees}`);
+    console.log({profits: calcAve(prAve)});
     console.log(`SELL_FEES: ${pair[1]} ${sellFees}\n`);
     return _data;
 };

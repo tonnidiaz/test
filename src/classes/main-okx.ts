@@ -17,7 +17,7 @@ import { ObjectId } from "mongoose";
 import { botLog, getPricePrecision, timedLog } from "@/utils/functions";
 import { OKX } from "./okx";
 import { placeTrade } from "@/utils/orders/funcs";
-import { DEV, getTrailingStop, stops, demo, platforms } from "@/utils/constants";
+import { DEV, getTrailingStop, stops, demo, platforms, TP } from "@/utils/constants";
 import { IObj } from "@/utils/interfaces";
 import { IOrder } from "@/models/order";
 import { scheduleJob } from "node-schedule";
@@ -371,7 +371,12 @@ const updateBotAtClose = async (_bot: IBot) => {
     const c = await plat.getTicker();
     timedLog({ticker: c})
     const _sl = order.buy_price * (1- stops[bot.interval]/100)
+    const _tp = order.tp
+
     if (sell_price < c && c >= _sl) {
+        if (c >= order.buy_price && c < _tp){
+            return botLog(bot, "TIMED: PRICE BELOW MIN TP")
+        }
         botLog(
             bot,
             `TIMED: PLACING MARKET SELL ORDER AT CLOSE SINCE IT IS > STOP_PX`,
@@ -416,7 +421,7 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
         ) {
 
             const trailingStop = getTrailingStop(bot.interval)
-            const _sl = order.buy_price * (1- stops[bot.interval]/100)
+           
 
             let { exitLimit } = openBot;
             const row = klines[klines.length - 1];
@@ -425,9 +430,13 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
             const { o, l, h, c, ha_h, ts } = row;
             const _isGreen = prevRow.c >= o;
             let { stop_price, sell_price } = order;
+            const entry = order.buy_price
+             const _sl = entry * (1- stops[bot.interval]/100)
+             const _tp = o * (1 + TP/100)
             const initHighs = order.highs.map((el) => el.val!);
 
-
+            order.tp = _tp
+            await order.save()
             if (c != initHighs[initHighs.length - 1]) {
                 order.highs.push({ ts: parseDate(new Date()), val: c });
                 await order.save();
@@ -468,6 +477,10 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
             }
 
             if (c <= sell_price * (1 + 0.0015 / 100) && c >= _sl) {
+
+                if (c >= entry && c < _tp){
+                    return botLog(bot, "WS: PRICE BELOW MIN TP", {_tp, c})
+                }
                 botLog(bot, `PLACING MARKET SELL ORDER AT EXIT`, {
                     h,
                     sell_price,

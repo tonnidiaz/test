@@ -20,6 +20,7 @@ export const OrderSchema = new Schema(
         stop_price: { type: Number, default: 0 },
         profit: { type: Number, default: 0 },
         buy_price: { type: Number, default: 0 },
+        tp: { type: Number, default: 0 },
         sell_price: { type: Number, default: 0 },
         ccy_amt: { type: Number, default: 0 },
         new_ccy_amt: { type: Number, default: 0 },
