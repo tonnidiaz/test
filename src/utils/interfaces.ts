@@ -1,3 +1,4 @@
+import { ObjectId } from "mongoose";
 
 export interface IObj {[key: string]: any}
 export interface IAddress  {
@@ -25,4 +26,10 @@ export interface IOrderDetails {
     fillSz: number;
     fillPx: number;
     fee: number;
+}
+
+export interface IOpenBot {
+    id: ObjectId;
+    exitLimit: number;
+    klines: any[][];
 }

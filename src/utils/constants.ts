@@ -9163,16 +9163,16 @@ export const stops = {
     5: 0.25,
 };
 export let SL = stops[interval]; //7//.01//1//.25//7//3; //.002//.02//.015//.05//useProdPercs ? .03 : .01//0.03//0.05; //.25//.5,
-export let TP = .5//0.5; //5//1.7//10//15//5.5//9.5//1; //.2//.3//1.1//1.7//useProdPercs ? 1.5 : 1.7//1.5//2//1.5; // 3.5//5.3
+export let TP = 3.5//.5//0.5; //5//1.7//10//15//5.5//9.5//1; //.2//.3//1.1//1.7//useProdPercs ? 1.5 : 1.7//1.5//2//1.5; // 3.5//5.3
 export const SL2 = 0.25; //1
 export const setSL = (v: number) => (SL = v);
 export const setTP = (v: number) => (TP = v);
 export const MAX_PEC_FROM_H = 0.5;
 export const checkGreen = false,
     rf = false,
-    slFirstAlways = true;
+    slFirstAlways = true, worstCaseScenario = true;
 
-export const useAnyBuy = true;
+export const useAnyBuy = false;
 const largeStop = false;
 
 const trails = {
@@ -9189,3 +9189,5 @@ export const getTrailingStop = (interval: number) => {
 };
 
 export const TRAILING_STOP_PERC = getTrailingStop(interval);
+
+

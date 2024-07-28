@@ -6,3 +6,7 @@ export const platforms: { name: string; obj: Platform }[] = [
     { name: "bybit", obj: new TestBybit() },
     { name: "okx", obj: new TestOKX() },
 ];
+
+
+export const WS_URL_SPOT_PUBLIC = "wss://stream.bybit.com/v5/public/spot";
+

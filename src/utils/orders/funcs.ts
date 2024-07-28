@@ -166,7 +166,7 @@ export const placeTrade = async ({
     sl?: number;
     side: "buy" | "sell";
     price: number;
-    plat: OKX;
+    plat: OKX | Bybit;
 }) => {
     try {
         const orders = await findBotOrders(bot);

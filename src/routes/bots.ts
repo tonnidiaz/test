@@ -8,6 +8,7 @@ import { IObj } from "@/utils/interfaces";
 import express from "express";
 import schedule from "node-schedule";
 import { wsOkx } from "@/classes/main-okx";
+import { wsBybit } from "@/classes/main-bybit";
 
 const router = express.Router();
 
@@ -104,7 +105,8 @@ router.post("/:id/edit", authMid, async (req, res) => {
         const bool = jobs.find((el) => el.id == jobId);
         botLog(bot, "UNSUB TO PREV SYMBOL TICKERS...");
 
-        await wsOkx.rmvBot(bot.id)
+        const ws = bot.platform == 'bybit' ? wsBybit : wsOkx
+        await ws.rmvBot(bot.id)
         if (key == "active") {
             if (bool && !val) {
                 // Deactivate JOB
@@ -156,13 +158,13 @@ router.post("/:id/edit", authMid, async (req, res) => {
             if (bot.orders.length){
                 const order = await Order.findById(bot.orders[bot.orders.length - 1]).exec()
                 if (order && order.side == 'sell' && !order.is_closed && order.sell_price != 0){
-                  await wsOkx.addBot(bot.id, true)  
+                  await ws.addBot(bot.id, true)  
                 }
             }
             
         }
         else{
-            //await wsOkx.rmvBot(bot.id)
+            //await ws.rmvBot(bot.id)
         }
 
         res.json((await bot.populate("orders")).toJSON());

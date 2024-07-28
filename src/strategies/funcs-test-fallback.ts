@@ -131,8 +131,8 @@ export const strategy = ({
         exit: number = 0,
         enterTs = "";
 
-    const pricePrecision = getPricePrecision(pair, "bybit");
-    const basePrecision = getCoinPrecision(pair, "limit", "bybit");
+    const pricePrecision = getPricePrecision(pair, "okx");
+    const basePrecision = getCoinPrecision(pair, "limit", "okx");
 
     console.log({ pricePrecision, basePrecision });
     balance = toFixed(balance, pricePrecision);
@@ -238,59 +238,37 @@ export const strategy = ({
                 //continue
             }
         } else if (pos && exitLimit) {
-            exit = 0;
+            exit = 0
             const exitRow = prevRow;
             console.log("HAS POS");
 
             let goOn = true,
                 isSl = false,
                 is_curr = false;
-
+            const _sl = entry * (1 - 0.1 / 100);
+            let _tp = prevRow.o * (1 + 3.5 / 100);
             const { h, l, c, o, ha_o, ha_h, ha_l, ha_c } = prevRow;
-
-            const fast = false;
-
-            const SL = fast ? 0.15 : 1;
-            const TP1 = fast ? 1.5 : 3.5;
-            const TP2 = fast ? 0.5 : 2;
-
-            const _sl = entry * (1 - SL / 100); //.25
-
-            const _tp = o * (1 + TP1 / 100); //3.5
-            const _tp2 = _tp * (1 + TP2 / 100); //1.5
-            const _tp3 = _tp * (1 - TP2 / 100); //1.5
-
             if (false) {
-            } else if (l <= _sl && h > _sl) {
-                exit = _sl;
-                _fillSell(exit, prevRow, true);
-                exit = 0;
-                //   if (c < _sl) continue;
-                //continue
-                if (c >= o) {
-                    entry = o;
-                    _fillBuy(entry, prevRow);
-                    exit = c;
-                    if (c < _tp3) continue;
-                }
             } else if (prevRow.h >= _tp) {
-                
-                if (prevRow.h >= _tp2) {
-                    exit = _tp2;
+                const tp2 = _tp * (1 + 1.5 / 100)
+                if (prevRow.h >= tp2) {
+                    exit = tp2;
                 } else if (c >= entry) exit = c;
-                else {goOn = false; exit = 0};
+                else goOn = false;
+            } else if (l <= _sl && c < o && h > _sl) {
+                exit = _sl;
             } else if (isGreen && h < _sl) {
                 exit = row.o;
-            }
-            if (!goOn && prevRow.h >= _tp && isGreen) {
-                exit = row.o;
+            } 
+            if(!goOn && prevRow.h >= _tp && isGreen){
+                exit = row.o
             }
             if (exit == 0) {
                 console.log("NEITHER");
                 goOn = false;
             }
 
-            if (goOn && exit >= _sl) {
+            if (goOn) {
                 const p = "EXIT";
                 console.log("\nFILLING SELL ORDER AT", p);
                 _fillSell(exit, exitRow, isSl);

@@ -1,10 +1,11 @@
-import { IObj } from "./interfaces";
+import { IObj, IOrderDetails } from "./interfaces";
 import { atr, ema, rsi, macd, stochasticOscillator, stoch } from "indicatorts";
 import path from "path";
 import { SL, TP, useHaClose } from "./constants";
 import { OrderDetails } from "okx-api";
 import { IBot } from "@/models/bot";
 import { Order } from "@/models";
+import { AccountOrderV5 } from "bybit-api";
 
 const ddNum = (e: any) => {
     e = `${e}`.trim();
@@ -30,10 +31,10 @@ export const parseDate = (date: Date | string) =>
 
 const tuMacd = (df: IObj[]) => {
     const def = false;
-    const faster = false;
-    const fast = def ? 12 : faster ? 1 : 26/* 5 */,
-        slow = def ? 26 : faster ? 2 : 90/* 12 */,
-        signal = def ? 9 : faster ? 2 : 26/* 5 */;
+    const faster = true;
+    const fast = def ? 12 : faster ? 1 : 26 /* 5 */,
+        slow = def ? 26 : faster ? 2 : 90 /* 12 */,
+        signal = def ? 9 : faster ? 2 : 26; /* 5 */
 
     const prices = df.map((el) => el[useHaClose ? "ha_c" : "c"]);
 
@@ -96,12 +97,12 @@ export const tuCE = (df: IObj[]) => {
     const ATR = atr(highs, lows, closings, { period: atrLen });
     const _atr = ATR.atrLine;
     const rsiLen = 2,
-        fastLen = 1,//89 /* 15 */,
-        slowLen = 2//90; /* 50 */
+        fastLen = 1, //89 /* 15 */,
+        slowLen = 2; //90; /* 50 */
 
     const sma20 = ema(closings, { period: fastLen });
     const sma50 = ema(closings, { period: slowLen });
-   
+
     const _rsi = rsi(closings, { period: rsiLen });
     let sir = 1;
 
@@ -161,18 +162,32 @@ export const getInterval = (m: number, plt: "bybit" | "okx" | "binance") => {
         ? m >= 60
             ? `${Math.floor(m / 60)}H`
             : `${m}m`
-        : `${m}m`;
+        : `${m}`;
 };
 
-export const parseFilledOrder = (finalRes: OrderDetails) => {
-    return {
-        id: finalRes.ordId,
-        fillPx: Number(finalRes.avgPx),
-        fillSz: Number(finalRes.accFillSz),
-        fee: Number(finalRes.fee),
-        fillTime: Number(finalRes.fillTime),
-        cTime: Number(finalRes.cTime),
-    };
+export const parseFilledOrder = (res: OrderDetails | AccountOrderV5) => {
+    let data: IOrderDetails;
+
+    if ((res as any).ordId) {
+        res = res as OrderDetails
+        data = { id: res.ordId,
+            fillPx: Number(res.avgPx),
+            fillSz: Number(res.accFillSz),
+            fee: Number(res.fee),
+            fillTime: Number(res.fillTime),
+            cTime: Number(res.cTime),};
+    }
+    else {
+        res = res as AccountOrderV5
+        data = {id: res.orderId,
+            fillPx: Number(res.avgPrice),
+            fillSz: Number(res.cumExecQty),
+            fee: Number(res.cumExecFee),
+            fillTime: Number(res.updatedTime),
+            cTime: Number(res.createType)}
+    }
+
+    return data
 };
 
 export const findBotOrders = async (bot: IBot) => {

@@ -1,6 +1,6 @@
 import { IBot } from "@/models/bot";
 import { ensureDirExists } from "@/utils/orders/funcs";
-import { parseDate } from "@/utils/funcs2";
+import { parseDate, parseFilledOrder } from "@/utils/funcs2";
 import {
     botLog,
     capitalizeFirstLetter,
@@ -8,6 +8,7 @@ import {
 import { RestClientV5 } from "bybit-api";
 import { writeFileSync } from "fs";
 import { DEV, isStopOrder } from "@/utils/constants";
+import { IOrderDetails } from "@/utils/interfaces";
 
 export class Bybit {
     bot: IBot;
@@ -97,13 +98,8 @@ export class Bybit {
 
     async getOrderbyId(orderId?: string) {
         try {
-            let data: {
-                id: string;
-                fillTime: number;
-                fillSz: number;
-                fillPx: number;
-                fee: number;
-            } | null = null;
+            let data: IOrderDetails | null = null;
+
             botLog(this.bot, "GETTING ORDER...");
             const res = await this.client.getActiveOrders({
                 symbol: this.getSymbol(),
@@ -130,19 +126,21 @@ export class Bybit {
                 return "live";
             }
 
-            data = {
-                id: d.orderId,
-                fillTime: Number(d.updatedTime),
-                fillSz: Number(d.cumExecQty),
-                fillPx: Number(d.avgPrice),
-                fee: Number(d.cumExecFee),
-            };
+            data = parseFilledOrder(d);
             return data;
         } catch (error) {
             console.log(error);
         }
     }
-
+    async getTicker(){
+        botLog(this.bot, "GETTING TICKER...")
+        const res = await this.client.getTickers({
+            symbol: this.getSymbol(), category: 'spot'
+        })
+        const ticker = Number(res.result.list[0].lastPrice)
+        console.log({ticker});
+        return ticker
+    }
     async getKlines({
         start,
         end,
@@ -156,7 +154,7 @@ export class Bybit {
         symbol?: string;
         savePath?: string;
     }) {
-        end = end ?? Date.now();
+        end = end ?? Date.now() - this.bot.interval * 60 * 1000; 
         let klines: any[] = [];
         let cnt = 0;
         interval = interval ?? this.bot.interval;
@@ -193,7 +191,7 @@ export class Bybit {
                 symbol: this.getSymbol(),
                 interval: this.bot.interval as any,
                 end: end,
-                start: start,
+                //start: start,
                 limit: 1000,
                 category: this.bot.category as any,
             });

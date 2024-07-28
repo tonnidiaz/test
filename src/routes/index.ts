@@ -21,6 +21,7 @@ import { ensureDirExists } from "@/utils/orders/funcs";
 import { platforms } from "@/utils/constants";
 import { TestBybit, TestOKX } from "@/classes/test-platforms";
 import { Phemex } from "@/classes/phemex";
+import { onBacktest } from "@/utils/functions/io-funcs";
 
 const fp = false
     ? "src/data/klines/binance/2021/DOGEUSDT_15m.json"
@@ -107,4 +108,9 @@ router.post("/lev", async (req, res) => {
         return tunedErr(res, 500, "Something went wrong");
     }
 });
+
+router.get('/backtest', async (req, res)=>{
+    const _res = await onBacktest(req.body)
+    res.json(_res)
+})
 export default router;

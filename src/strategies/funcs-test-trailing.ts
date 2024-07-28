@@ -9,6 +9,7 @@ import {
     rf,
     TRAILING_STOP_PERC,
     useSwindLow,
+    worstCaseScenario,
 } from "@/utils/constants";
 
 import {
@@ -257,7 +258,7 @@ export const strategy = ({
                         }
                     } */
             _exit *= 1 - _slip / 100;
-
+           
 
             if (go && _exit >= _sl) {
                 if (_exit > o){
@@ -267,6 +268,8 @@ export const strategy = ({
                     console.log("EXIT LESS THAN TP");
                     continue
                 }
+ if (worstCaseScenario && _exit >= entry && _exit >= _tp){_exit = _tp}
+                
                 _fillSell({ _exit, _row: erow, _base: base });
             }
         }

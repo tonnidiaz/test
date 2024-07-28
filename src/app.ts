@@ -50,6 +50,10 @@ import { addBotJob } from "./utils/orders/funcs";
 //import { wsOkx } from "./classes/main-okx";
 import { botLog } from "./utils/functions";
 import { wsOkx } from "./classes/main-okx";
+import { wsBybit } from "./classes/main-bybit";
+import { platforms } from "./utils/consts";
+import { Bybit } from "./classes/bybit";
+import { OKX } from "./classes/okx";
 
 dotenv.config();
 // view engine setup
@@ -129,12 +133,15 @@ jobs.push({job, id: "1"}) */
 const main = async () => {
     const activeBots = await Bot.find({ active: true }).exec();
     setJobs([]);
+    console.log(wsBybit.TAG);
     for (let bot of activeBots) {
+        const plat = bot.platform == 'bybit' ? wsBybit : wsOkx
         await addBotJob(bot);
         botLog(bot, "INITIALIZING WS...");
-        if (bot.orders.length) {
+    
+             if (bot.orders.length) {
             const lastOrder = await Order.findById(
-                bot.orders[bot.orders.length - 1]
+                bot.orders[bot.orders.length - 1 ]
             ).exec();
             if (
                 lastOrder &&
@@ -142,12 +149,13 @@ const main = async () => {
                 !lastOrder.is_closed &&
                 lastOrder.sell_price != 0
             ) {
-                await wsOkx.addBot(bot.id, true);
+                await plat.addBot(bot.id, true);
+                
             }
-        } 
-       // await wsOkx.sub(bot);
+        }  
+        
+      
     }
-    //new MainOKX()
 };
 
 main();

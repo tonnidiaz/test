@@ -34,8 +34,9 @@ export const onBacktest = async (data: IObj, client?: Socket, io?:Server) => {
             file,
             isParsed,
             clId,
-            T
+            T, save
         } = data;
+
         console.log("ON BACKTEST");
         prevData = null;
         const startTs = Date.parse(start),
@@ -57,9 +58,7 @@ export const onBacktest = async (data: IObj, client?: Socket, io?:Server) => {
             client?.emit("backtest", { err: "File required" });
             return;
         }
-        if (offline && !useFile) {
-            console.log("IS OFFLINE");
-            start = start ?? parseDate(new Date());
+        start = start ?? parseDate(new Date());
             const year = start.split("-")[0];
             const pth =
                 "src/data/klines/binance/SOL-USDT_5m_2023-01-01 00 00 00+02:00_2023-10-31 23 59 00+02:00.json";
@@ -68,6 +67,9 @@ export const onBacktest = async (data: IObj, client?: Socket, io?:Server) => {
                 : tuPath(
                       `${klinesRootDir}/${platName.toLowerCase()}/${year}/${symbol}_${interval}m.json`
                   );
+        if (offline && !useFile) {
+            console.log("IS OFFLINE");
+            
             const tradesPath = tuPath(
                 `${tradesRootDir}/${platName.toLocaleLowerCase()}/${year}/trades.json`
             );
@@ -96,6 +98,7 @@ export const onBacktest = async (data: IObj, client?: Socket, io?:Server) => {
                 end: endTs,
                 interval,
                 symbol,
+                savePath: save ? klinesPath : undefined 
             });
             if (!r) {
                 client?.emit("err", "Failed to get klines");

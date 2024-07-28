@@ -156,7 +156,7 @@ export class OKX {
         }
     }
 
-    async getOrderbyId(
+    async getOrderbyId( 
         orderId: string,
         isAlgo = false
     ): Promise<IOrderDetails | null | "live" | undefined> {
