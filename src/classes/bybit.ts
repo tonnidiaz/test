@@ -6,6 +6,7 @@ import {
     capitalizeFirstLetter,
 } from "@/utils/functions";
 import { RestClientV5 } from "bybit-api";
+import type { OrderResultV5 } from "bybit-api";
 import { writeFileSync } from "fs";
 import { DEV, isStopOrder } from "@/utils/constants";
 import { IOrderDetails } from "@/utils/interfaces";
@@ -59,30 +60,29 @@ export class Bybit {
     }
     async placeOrder(
         amt: number,
-        price: number,
+        price?: number,
         side: "buy" | "sell" = "buy",
-        sl: number,
-        clOrderId: string
+        sl?: number,
+        clOrderId?: string
     ) {
         const od = { price, sl, amt, side };
         botLog(this.bot, `PLACING ORDER: ${JSON.stringify(od)}`);
         try {
             const { order_type } = this.bot;
-            console.log(!isStopOrder && side == 'buy' ? undefined : sl.toString(),);
-            const res = await this.client.submitOrder({
+          
+          const  res = await this.client.submitOrder({
                 symbol: this.getSymbol(),
                 orderType: side == 'buy' ? 'Market' : 'Limit',
                 side: capitalizeFirstLetter(side),
                 qty: amt.toString(),
-                price: price.toString(),
+                price: price?.toString(),
                 category: this.bot.category as any,
                 timeInForce: "GTC",
-                tpLimitPrice: !isStopOrder && side == 'buy' ? undefined : price.toString(),
-                slLimitPrice: !isStopOrder && side == 'buy' ? undefined : sl.toString(),
                 closeOnTrigger: false, reduceOnly: false,
+                orderLinkId: clOrderId
                /*  triggerPrice:
                     order_type == "Market" ? undefined : sl.toString(),*/
-                orderFilter: order_type == "Market" && side == 'buy' ? undefined : 'tpslOrder', 
+            //    orderFilter: order_type == "Market" && side == 'buy' ? undefined : 'tpslOrder', 
             });
             if (res.retCode != 0) {
                 console.log(res);
@@ -96,7 +96,7 @@ export class Bybit {
         }
     }
 
-    async getOrderbyId(orderId?: string) {
+    async getOrderbyId(orderId: string, isAlgo = false) {
         try {
             let data: IOrderDetails | null = null;
 

@@ -19,23 +19,21 @@ import { objStrategies } from "@/strategies";
 import { trueRange } from "indicatorts";
 import { IObj, IOrderDetails } from "../interfaces";
 import { wsOkx } from "@/classes/main-okx";
+import { objPlats } from "../consts";
 //import { wsOkx } from "@/classes/main-okx";
 
-export const afterOrderUpdate = async ({
-    bot,
-}: {
-    bot: IBot;
-}) => {
-    const plat = new OKX(bot);
+export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
+    const plat = new objPlats[bot.platform](bot);
+
     botLog(bot, "SIM: GETTING KLINES...");
     const klines = await plat.getKlines({});
 
     if (!klines) return console.log("FAILED TO GET KLINES");
 
-    const df =   tuCE(heikinAshi(parseKlines(klines)))
-    
+    const df = tuCE(heikinAshi(parseKlines(klines)));
+
     const row = df[df.length - 1];
-    const prevRow = row
+    const prevRow = row;
     botLog(bot, "CANDLE");
     console.log(row);
 
@@ -51,7 +49,7 @@ export const afterOrderUpdate = async ({
         !order.is_closed &&
         order.buy_order_id.length != 0;
     console.log({ pos });
-    
+
     /* ------ START ---------- */
     if (!pos) {
         // Place buy order
@@ -79,8 +77,8 @@ export const afterOrderUpdate = async ({
         });
         if (res) {
             botLog(bot, "MARKET BUY ORDER PLACED. TO WS SELL CHECK");
-            pos = true
-            order = await Order.findById(res).exec()
+            pos = true;
+            order = await Order.findById(res).exec();
         }
         /* CREATE NEW ORDER */
         /* if (!order || order.is_closed) {
@@ -102,21 +100,21 @@ export const afterOrderUpdate = async ({
 
         await order.save();
         botLog(bot, `ENTRY_LIMIT UPDATED to ${entryLimit}`); */
-    } 
-    
+    }
+
     if (pos && order && !order.is_closed && strategy.buyCond(prevRow)) {
         botLog(bot, "SELL ORDER NOT YET CLOSED, UPDATING EXIT_LIMIT");
 
-        const exitLimit = 1//Math.min(prevRow.ha_c, prevRow.ha_o)//prevRow.ha_h;
+        const exitLimit = 1; //Math.min(prevRow.ha_c, prevRow.ha_o)//prevRow.ha_h;
         order.sell_timestamp = { i: parseDate(new Date()) };
-        if (order.sell_price == 0)
-        {order.sell_price = exitLimit;
-           
-        botLog(bot, `EXIT_LIMIT UPDATED TO: ${exitLimit}`)
+        if (order.sell_price == 0) {
+            order.sell_price = exitLimit;
+
+            botLog(bot, `EXIT_LIMIT UPDATED TO: ${exitLimit}`);
         }
 
-        botLog(bot, "CLEARING BOT HIGHS...")
-        order.highs = []
+        botLog(bot, "CLEARING BOT HIGHS...");
+        order.highs = [];
         await order.save();
         botLog(bot, "WATCHING FOR THE PX CHANGES");
         await wsOkx.addBot(bot.id, true);

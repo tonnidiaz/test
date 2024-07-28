@@ -64,19 +64,7 @@ export const updateOrder = async (bot: IBot) => {
         let isClosed = !order || order?.is_closed == true;
         if (!order || isClosed) return { isClosed, lastOrder: "null" };
         let orderId = order._id;
-        const plat = new OKX(bot);
-        /*  botLog(bot, "GETTING KLINES TO SEE IF BUY/SL SELL CAN BE FILLED...");
-        const klines = await plat.getKlines({});
-
-        if (!klines) return botLog(bot, "FAILED TO GET KLINES");
-        const df = tuCE(heikinAshi(parseKlines(klines)))
-        const prevRow = df[df.length - 1];
-        const isGreen = prevRow.c >= prevRow.o; */
-
-        /* if (order.side == "sell" && !order.order_id.length) {
-            return false;
-        } */
-
+  
         const pos =
             order &&
             order.side == "sell" &&
@@ -86,64 +74,7 @@ export const updateOrder = async (bot: IBot) => {
         let exitLimit = order.sell_price;
 
         if (pos && exitLimit != 0 && !order.is_closed) {
-            /* ORDER WAS  NOT FILLED AT EXIT */
-            //const sl = entryLimit * (1 - SL2 / 100);
-            //if (sl < prevRow.h && !isGreen) {
-            //   botLog(bot, "FILL SELL AT SL");
-            //   botLog(bot, { exitLimit, sl, prevRow });
-            //   const amt = order.base_amt - order.buy_fee;
-            //   const r = await placeTrade({
-            //       bot: bot,
-            //       ts: parseDate(new Date()),
-            //       amt: Number(amt),
-            //       side: "sell",
-            //       plat: plat,
-            //       price: 0,
-            //   });
-            //   if (!r) botLog(bot, "FAILED TO PLACE MARKET SELL ORDER");
-            //}else{
-            //    botLog(bot, "ADD BOT TO WS")
-            //    return false
-            //}
-
-            // CANCEL PREV ORDER IF ANY AND IT WAS NOT FILLED
-            /* let goOn = order.order_id == "";
-            if (!goOn) {
-                botLog(bot, "CHECKING PREV EXIT ORDER...");
-                const checkRes = await plat.getOrderbyId(order.order_id, true);
-                if (checkRes && checkRes != "live") {
-                    botLog(bot, "OCO SELL FILLED. UPDATING...");
-                    await updateOrderInDb(order, checkRes);
-                } else if (checkRes == "live") {
-                    botLog(bot, "OCO SELL NOT FILLED. CANCELLING...");
-                    const cancelRes = await plat.cancelOrder({
-                        ordId: order.order_id,
-                        isAlgo: true,
-                    });
-                    if (cancelRes) {
-                        goOn = true;
-                    }
-                } 
-            } */
-
-            /* if (goOn) {
-                botLog(bot, "PLACING NEW OCO SELL");
-                botLog(bot, { exitLimit });
-                const amt = order.base_amt - order.buy_fee;
-                const r = await placeTrade({
-                    bot: bot,
-                    ts: parseDate(new Date()),
-                    amt: Number(amt),
-                    side: "sell",
-                    plat: plat,
-                    price: exitLimit,
-                });
-                if (!r) botLog(bot, "FAILED TO PLACE MARKET SELL ORDER");
-                if (r) {
-                    orderId = r;
-                    botLog(bot, "OCO MARKET SELL ORDER PLACED");
-                }
-            } */
+          
         }
         return { isClosed, lastOrder: orderId };
     } catch (e) {
@@ -296,7 +227,7 @@ export const placeTrade = async ({
                     _filled = true;
                     return botLog(bot, "FAILED TO CHECK MARKET SELL ORDER");
                 }
-                if (res && res != "live") {
+                if (res && res != "live") { 
                     _filled = true;
                     await updateOrderInDb(order, res);
                     //return { isClosed: true, lastOrder: order };
