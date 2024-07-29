@@ -18,7 +18,7 @@ import { ObjectId } from "mongoose";
 import { botLog, getPricePrecision, timedLog } from "@/utils/functions";
 import { Bybit } from "./bybit";
 import { placeTrade } from "@/utils/orders/funcs";
-import { DEV, getTrailingStop, stops, demo, platforms, TP } from "@/utils/constants";
+import { DEV, getTrailingStop, stops, demo, platforms, TP, TRAILING_STOP_PERC } from "@/utils/constants";
 import { IObj, IOpenBot } from "@/utils/interfaces";
 import { IOrder } from "@/models/order";
 import { scheduleJob } from "node-schedule";
@@ -245,7 +245,7 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
             order.sell_price != 0
         ) {
 
-            const trailingStop = getTrailingStop(bot.interval)
+            const trailingStop = TRAILING_STOP_PERC// getTrailingStop(bot.interval)
            
 
             let { exitLimit } = openBot;
@@ -338,43 +338,6 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
     }
 };
 
-const updateOrder = async ({
-    order,
-    isBuyOrder,
-    orderDetails,
-    bot,
-}: {
-    bot: IBot;
-    orderDetails: ReturnType<typeof parseFilledOrder>;
-    isBuyOrder: boolean;
-    order: IOrder;
-}) => {
-    if (isBuyOrder) {
-        /* UPDATE BUY ORDER */
-        botLog(bot, `WS: Updating buy order`);
-    } else {
-        botLog(bot, `WS: Updating sell order`);
-        /* UPDATE SELL ORDER */
-        /* THEN WHEN THE TIME COMES, A BUY ORDER WILL BE PLACED BASED ON SIGNALS */
-        const fee = Math.abs(orderDetails.fee); // In USDT
-
-        /* Buy/Base fee already removed when placing sell order  */
-        order.new_ccy_amt = orderDetails.fillSz * orderDetails.fillPx;
-        order.sell_price = orderDetails.fillPx;
-        order.is_closed = true;
-        order.sell_fee = fee;
-        order.sell_timestamp = {
-            ...order.sell_timestamp,
-            o: parseDate(new Date(orderDetails.fillTime)),
-        };
-        /* order == currentOrder */
-        const bal = order.new_ccy_amt - Math.abs(orderDetails.fee);
-        const profit = ((bal - order.ccy_amt) / order.ccy_amt) * 100;
-        order.profit = profit;
-        order.order_id = orderDetails.id;
-        await order.save();
-    }
-};
 
 console.log("WS Bybit");
 export const wsBybit: WsBybit = new WsBybit();

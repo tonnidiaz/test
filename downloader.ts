@@ -24,8 +24,8 @@ import { TestBinance } from "@/classes/test-binance";
 import { TestBybit, TestOKX } from "@/classes/test-platforms";
 import { ITrade } from "@/utils/interfaces";
 let years = [ 2021, 2023, 2024],
-    symbols = ["GSTS", "PLY"],
-    intervals = [60, 30, 15];
+    symbols = ["PLY"],//["GSTS", "PLY", "SOL", "ELT"],
+    intervals = [5];
 symbols = symbols.map((el) => el.includes('/') ? el : `${el}/USDT`);
 
 async function downloader({

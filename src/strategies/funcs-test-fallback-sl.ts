@@ -49,7 +49,7 @@ export const strategy = ({
     platNm: "binance" | "bybit" | "okx";
 }) => {
     const useExp = false,
-        useTrailing = true,
+        useTrailing = false,
         useBillo = false,
         useSLTP = false;
 
@@ -262,26 +262,26 @@ export const strategy = ({
 
             if (false) {
             } else if (l <= _sl && h > _sl) {
-                if (o <= _sl){
-                    exit = h * (1 - .5/100)
-                }else{
-                  exit =  _sl;
+                exit = _sl;
                 _fillSell(exit, prevRow, true);
                 exit = 0;
+                //   if (c < _sl) continue;
+                //continue
                 if (c >= o) {
                     entry = o;
                     _fillBuy(entry, prevRow);
                     exit = c;
                     if (c < entry * (1 + TP1 / 100)) continue;
-                }  
                 }
-                
-            }/*  else if (o <= _sl && h > _sl) {
-                exit = _sl;
-            } */
-           else if (h >= _tp) {
-                exit = row.o;
-            } else if (h < _sl) {
+            } else if (h >= _tp) {
+                /* if (h >= _tp2) {
+                    exit = _tp2;
+                } else if (c >= entry) exit = c;
+                else {
+                    continue
+                } */
+               exit = row.o
+            } else if (isGreen && h < _sl) {
                 exit = row.o;
             }
 
@@ -311,7 +311,7 @@ export const strategy = ({
                 _fillBuy(entry, row);
             }
         } else if (pos) {
-            exitLimit = 1;
+            exitLimit = prevRow.c;
             //console.log("\n",{isGreen, cFromE: ,"\n");
         }
 

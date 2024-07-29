@@ -49,7 +49,6 @@ export const strategy = ({
     trades: IObj[];
     platNm: "binance" | "bybit" | "okx";
 }) => {
-
     console.log(df[0]);
     const useTrillo = false;
     if (useTrillo)
@@ -83,8 +82,8 @@ export const strategy = ({
         sl: number | null = null,
         exit: number = 0,
         enterTs = "";
-    
-        const prAve : number[] = []
+
+    const prAve: number[] = [];
     const pricePrecision = getPricePrecision(pair, "okx");
     const basePrecision = getCoinPrecision(pair, "limit", "okx");
 
@@ -198,7 +197,6 @@ export const strategy = ({
 
             const _sl = entry * (1 - SL / 100);
             const _tp = entry * (1 + TP / 100);
-           
         }
 
         if (!pos && buyCond(prevRow)) {
@@ -218,7 +216,7 @@ export const strategy = ({
         if (pos) {
             /* SELL SECTION */
             const rf = true;
-            exitLimit = prevRow.ha_h * (1 + 1.5/100) //entry * (1 + 20 / 100);
+            exitLimit = prevRow.ha_h * (1 + 1.5 / 100); //entry * (1 + 20 / 100);
             enterTs = row.ts;
             console.log(`[ ${row.ts} ] \t Limit sell order at ${exitLimit}`);
         }
@@ -233,19 +231,19 @@ export const strategy = ({
             const trailingStop = TRAILING_STOP_PERC;
             const _sl = entry * (1 - SL / 100);
             const _tp = o * (1 + TP / 100);
-            const _stopFromO = o * (1 - trailingStop / 100);
             const lFromO = ((o - l) / l) * 100;
-            _exit = h * (1 - trailingStop / 100); // Increase the trailing stop with the price
 
             console.log("\nPOS:", { o, l, lFromO, trailingStop, c, h }, "\n");
-
+    
+           _exit = h * (1 - trailingStop / 100); // Increase the trailing stop with the price
+            
             if (c > _exit) {
                 console.log("SELLING AT CLOSE");
                 _exit = c;
             } else {
                 console.log("SELLING AT STOP");
                 isExit = true;
-            }
+                 }
 
             let _slip = 0;
 
@@ -258,18 +256,19 @@ export const strategy = ({
                         }
                     } */
             _exit *= 1 - _slip / 100;
-           
 
             if (go && _exit >= _sl) {
-                if (_exit > o){
-                    prAve.push((_exit - o) / o * 100)
+                if (_exit > o) {
+                    prAve.push(((_exit - o) / o) * 100);
                 }
                 if (/* isExit && */ _exit >= entry && _exit < _tp) {
                     console.log("EXIT LESS THAN TP");
-                    continue
+                    continue;
                 }
- if (worstCaseScenario && _exit >= entry && _exit >= _tp){_exit = _tp}
-                
+                if (worstCaseScenario && _exit >= entry) {
+                    _exit = _tp;
+                }
+
                 _fillSell({ _exit, _row: erow, _base: base });
             }
         }
@@ -285,7 +284,7 @@ export const strategy = ({
     loss = Number(((loss / cnt) * 100).toFixed(2));
     _data = { ...mData, balance, trades: cnt, gain, loss };
     console.log(`\nBUY_FEES: ${pair[1]} ${buyFees}`);
-    console.log({profits: calcAve(prAve)});
+    console.log({ profits: calcAve(prAve) });
     console.log(`SELL_FEES: ${pair[1]} ${sellFees}\n`);
     return _data;
 };
