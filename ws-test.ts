@@ -68,7 +68,7 @@ ws.on("update", async(e) => {
     const _ts = Number(e.data[0][0])
     if (_ts != ts){
         console.log({_ts, ts});
-        klines = await plat.getKlines({interval: 5, symbol: "SOL-USDT"})
+        klines = await plat.getKlines({interval: 5, symbol: "SOL-USDT"}) ?? []
         ts = _ts
     }
     const candles = tuCE(heikinAshi( parseKlines([...klines, ...e.data]) )) 
