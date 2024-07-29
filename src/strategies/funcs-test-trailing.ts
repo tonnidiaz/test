@@ -246,15 +246,6 @@ export const strategy = ({
                  }
 
             let _slip = 0;
-
-            /*  if (isExit) {
-                        if (c < o) {
-                            if (lFromO >= trailingStop) {
-                                _slip = 0;
-                                _exit = _stopFromO;
-                            }else {_slip = .0}
-                        }
-                    } */
             _exit *= 1 - _slip / 100;
 
             if (go && _exit >= _sl) {

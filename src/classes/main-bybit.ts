@@ -22,7 +22,9 @@ import { DEV, getTrailingStop, stops, demo, platforms, TP, TRAILING_STOP_PERC } 
 import { IObj, IOpenBot } from "@/utils/interfaces";
 import { IOrder } from "@/models/order";
 import { scheduleJob } from "node-schedule";
-import { WS_URL_SPOT_PUBLIC } from "@/utils/consts";
+
+const WS_URL_SPOT_PUBLIC = "wss://stream.bybit.com/v5/public/spot";
+
 
 
 configDotenv();

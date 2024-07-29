@@ -10,5 +10,3 @@ export const platforms: { name: string; obj: Platform }[] = [
 
 
 
-export const WS_URL_SPOT_PUBLIC = "wss://stream.bybit.com/v5/public/spot";
-
