@@ -3,7 +3,7 @@ import { ensureDirExists } from "@/utils/orders/funcs";
 import { getInterval, parseDate } from "@/utils/funcs2";
 import { botLog } from "@/utils/functions";
 import axios, { AxiosResponse } from "axios";
-import crypto from "crypto"
+import crypto from "crypto";
 
 import { writeFileSync } from "fs";
 import {
@@ -50,7 +50,9 @@ export class Platform {
         savePath?: string;
     }): Promise<ITrade[] | undefined> {
         console.log(`\nGETTING TRADES FOR ${symbol}...\n`);
-        if (savePath){ensureDirExists(savePath)}
+        if (savePath) {
+            ensureDirExists(savePath);
+        }
         return;
     }
 }
@@ -100,88 +102,95 @@ export class TestOKX extends Platform {
         savePath?: string | undefined;
         isBybit?: boolean;
     }) {
-        const client = new RestClientV5();
-        end = end ?? Date.now();
-        let klines: any[] = [];
-        let cnt = 0;
-        console.log(
-            `[ ${isBybit ? "ByBit" : this.name} ] \t GETTING KLINES.. FOR ` +
-                symbol
-        );
+        try {
+            const client = new RestClientV5();
+            end = end ?? Date.now();
+            let klines: any[] = [];
+            let cnt = 0;
+            console.log(
+                `[ ${
+                    isBybit ? "ByBit" : this.name
+                } ] \t GETTING KLINES.. FOR ` + symbol
+            );
 
-        if (start) {
-            start =
-                (isBybit ? start : start /* - interval * 60 * 1000 */) -
-                20 * interval * 60000; /* ACCORDING TO RETURNED DATA */
-        }
+            if (start) {
+                start =
+                    (isBybit ? start : start) /* - interval * 60 * 1000 */ -
+                    20 * interval * 60000; /* ACCORDING TO RETURNED DATA */
+            }
 
-        if (start) {
-            let firstTs = start;
-            while (firstTs <= end) {
-                console.log(`GETTING ${cnt + 1} KLINES...`);
-                const limit = 100;
-                const after = firstTs + (limit - 1) * interval * 60 * 1000;
-                console.log(
-                    `Before: ${parseDate(
-                        new Date(firstTs)
-                    )} \t After: ${parseDate(new Date(after))}`
-                );
-                console.log("GETTING MARK PRICE");
-                const res = isBybit
-                    ? await client.getKline({
+            if (start) {
+                let firstTs = start;
+                while (firstTs <= end) {
+                    console.log(`GETTING ${cnt + 1} KLINES...`);
+                    const limit = 100;
+                    const after = firstTs + (limit - 1) * interval * 60 * 1000;
+                    console.log(
+                        `Before: ${parseDate(
+                            new Date(firstTs)
+                        )} \t After: ${parseDate(new Date(after))}`
+                    );
+                    console.log("GETTING MARK PRICE");
+                    const res = isBybit
+                        ? await client.getKline({
+                              category: "spot",
+                              symbol,
+                              interval: interval as any,
+                              start: firstTs,
+                          })
+                        : await this.client.getHistoricCandles(
+                              symbol,
+                              getInterval(interval, "okx"),
+                              {
+                                  before: `${firstTs}`,
+                                  after: `${after}`,
+                                  limit: `${limit}`,
+                              }
+                          );
+                    const data = isBybit
+                        ? (res as any).result.list
+                        : (res as Candle[]);
+                    if (!data.length) break;
+                    klines.push(...[...data].reverse());
+
+                    firstTs = Number(data[0][0]) + interval * 60 * 1000;
+                    console.log(new Date(firstTs).toISOString());
+                    if (savePath) {
+                        ensureDirExists(savePath);
+                        writeFileSync(savePath, JSON.stringify(klines));
+                        console.log("Saved");
+                    }
+                    cnt += 1;
+                }
+            } else {
+                const res = await (isBybit
+                    ? client.getKline({
                           category: "spot",
                           symbol,
                           interval: interval as any,
-                          start: firstTs,
+                          start,
+                          end,
                       })
-                    : await this.client.getHistoricCandles(
+                    : this.client.getHistoricCandles(
                           symbol,
                           getInterval(interval, "okx"),
                           {
-                              before: `${firstTs}`,
-                              after: `${after}`,
-                              limit: `${limit}`,
+                              before: start ? `${start}` : undefined,
+                              after: end ? `${end}` : undefined,
                           }
-                      );
+                      ));
                 const data = isBybit
                     ? (res as any).result.list
                     : (res as Candle[]);
-                if (!data.length) break;
-                klines.push(...[...data].reverse());
-
-                firstTs = Number(data[0][0]) + interval * 60 * 1000;
-                console.log(new Date(firstTs).toISOString());
-                if (savePath) {
-                    ensureDirExists(savePath);
-                    writeFileSync(savePath, JSON.stringify(klines));
-                    console.log("Saved");
-                }
-                cnt += 1;
+                klines = [...data].reverse();
             }
-        } else {
-            const res = await (isBybit
-                ? client.getKline({
-                      category: "spot",
-                      symbol,
-                      interval: interval as any,
-                      start,
-                      end,
-                  })
-                : this.client.getHistoricCandles(
-                      symbol,
-                      getInterval(interval, "okx"),
-                      {
-                          before: start ? `${start}` : undefined,
-                          after: end ? `${end}` : undefined,
-                      }
-                  ));
-            const data = isBybit ? (res as any).result.list : (res as Candle[]);
-            klines = [...data].reverse();
-        }
 
-        let d = [...klines];
-        console.log(d[d.length - 1]);
-        return d;
+            let d = [...klines];
+            console.log(d[d.length - 1]);
+            return d;
+        } catch (err) {
+            console.log("FAILED TO GET KLINES", err);
+        }
     }
     async getTrades({
         start,
@@ -229,7 +238,7 @@ export class TestOKX extends Platform {
                     const data = isBybit
                         ? (res as any).result.list
                         : (res as Trade[]);
-                        console.log(data);
+                    console.log(data);
                     if (!data.length) break;
                     trades = [...trades, ...data];
 
@@ -302,23 +311,26 @@ export class TestBybit extends Platform {
             isBybit: true,
         });
     }
-     createSignature(apiKey, apiSecret, params) {
+    createSignature(apiKey, apiSecret, params) {
         const paramString = Object.keys(params)
-          .sort()
-          .map(key => `${key}=${params[key]}`)
-          .join('&');
+            .sort()
+            .map((key) => `${key}=${params[key]}`)
+            .join("&");
 
-          const timestamp = Date.now().toString()
+        const timestamp = Date.now().toString();
         const prehashString = `${timestamp}${apiKey}${paramString}`;
-        const signature =  crypto.createHmac('sha256', apiSecret).update(prehashString).digest('hex');
+        const signature = crypto
+            .createHmac("sha256", apiSecret)
+            .update(prehashString)
+            .digest("hex");
         const headers = {
-            'X-BYBIT-API-KEY': apiKey,
-            'X-BYBIT-SIGNATURE': signature,
-            'X-BYBIT-TIMESTAMP': timestamp,
-            'Content-Type': 'application/json'
-          };
-          return headers
-      }
+            "X-BYBIT-API-KEY": apiKey,
+            "X-BYBIT-SIGNATURE": signature,
+            "X-BYBIT-TIMESTAMP": timestamp,
+            "Content-Type": "application/json",
+        };
+        return headers;
+    }
     async getTrades({
         start,
         end,
@@ -350,22 +362,30 @@ export class TestBybit extends Platform {
                         )} \t END: ${parseDate(new Date(endTs))}`
                     );
                     const res = await this.client.getPublicTradingHistory({
-                        
                         category: "spot",
-                       symbol,
-                        
-                       limit:10,
+                        symbol,
+
+                        limit: 10,
                     });
-                    if (res.retCode == 0){
+                    if (res.retCode == 0) {
                         console.log(res.result.list);
-                    }else{
+                    } else {
                         console.log(res);
                     }
 
                     const data = res.result.list;
 
                     if (!data.length) break;
-                    trades = [...trades, ...data.map(el=>({ts: el.time, px: Number(el.price), sz: Number(el.price), side: el.side, symbol: el.symbol}))];
+                    trades = [
+                        ...trades,
+                        ...data.map((el) => ({
+                            ts: el.time,
+                            px: Number(el.price),
+                            sz: Number(el.price),
+                            side: el.side,
+                            symbol: el.symbol,
+                        })),
+                    ];
 
                     endTs = Number(data[data.length - 1].time);
                     console.log("START_TS:");

@@ -1,4 +1,4 @@
-import { WsOKX } from "@/classes/main-okx";
+
 import { configDotenv } from "dotenv";
 import { Job } from "node-schedule";
 configDotenv();

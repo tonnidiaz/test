@@ -11,9 +11,7 @@ import {
     isStopOrder,
     noFees,
     rf,
-    slFirstAlways,
-    useSwindLow,
-} from "@/utils/constants";
+    slFirstAlways,} from "@/utils/constants";
 
 import { parseDate } from "@/utils/funcs2";
 import {
@@ -27,7 +25,7 @@ import { IObj } from "@/utils/interfaces";
 
 let _cnt = 0;
 
-const d = useSwindLow ? 20 : 0;
+const d =  0;
 export const strategy = ({
     df,
     balance,

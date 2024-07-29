@@ -12,14 +12,11 @@ import {
 import { IBot } from "@/models/bot";
 import { Order } from "@/models";
 import { placeTrade } from "./funcs";
-import { OKX } from "@/classes/okx";
-import { Bybit } from "@/classes/bybit";
 import { botLog } from "../functions";
 import { objStrategies } from "@/strategies";
-import { trueRange } from "indicatorts";
 import { IObj, IOrderDetails } from "../interfaces";
 import { wsOkx } from "@/classes/main-okx";
-import { objPlats } from "../consts";
+import { objPlats } from "../consts2";
 //import { wsOkx } from "@/classes/main-okx";
 
 export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {

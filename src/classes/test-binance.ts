@@ -27,57 +27,63 @@ export class TestBinance extends Platform {
         interval: number;
         savePath?: string;
     }) {
-        if (savePath) {
-            console.log("DELETING PREVIOUS DATA...");
-            try {
-                unlinkSync(savePath);
-            } catch (e) {
-                console.log("ERROR REMOVING FILE");
-            }
-        }
-        let cnt = 0;
-        let klines: [][] = [];
-        symbol = (symbol ?? data.symbol).replaceAll("-", "");
-        interval = interval ?? data.interval;
-        ///if (start) start -= 10 * interval * 60 * 1000;
-        end = end ?? Date.now();
-        const parsedInterval =
-            interval < 60 ? `${interval}m` : `${Math.round(interval / 60)}h`;
-
-        if (start) {
-            let firstTs = start;
-            while (firstTs <= end) {
-                console.log(`[Binance] GETTING ${cnt + 1} KLINES...`);
-                console.log(parseDate(new Date(firstTs)));
-                const res = await axios.get(
-                    `https://data-api.binance.vision/api/v3/klines?symbol=${symbol}&interval=${parsedInterval}&startTime=${firstTs}`
-                );
-                const data = res.data;
-                klines.push(...data);
-
-                if (data.length == 0) break;
-
-                firstTs = data[data.length - 1][6];
-                if (savePath) {
-                    writeFileSync(savePath, JSON.stringify(klines));
-                    console.log("Sved");
+        try {
+            if (savePath) {
+                console.log("DELETING PREVIOUS DATA...");
+                try {
+                    unlinkSync(savePath);
+                } catch (e) {
+                    console.log("ERROR REMOVING FILE");
                 }
-                cnt += 1;
             }
-        } else {
-            const res = await axios.get(
-                `https://data-api.binance.vision/api/v3/klines?symbol=${symbol}&interval=${parsedInterval}&endTime=${end}`
-            );
-            klines = res.data;
+            let cnt = 0;
+            let klines: [][] = [];
+            symbol = (symbol ?? data.symbol).replaceAll("-", "");
+            interval = interval ?? data.interval;
+            ///if (start) start -= 10 * interval * 60 * 1000;
+            end = end ?? Date.now();
+            const parsedInterval =
+                interval < 60
+                    ? `${interval}m`
+                    : `${Math.round(interval / 60)}h`;
+
+            if (start) {
+                let firstTs = start;
+                while (firstTs <= end) {
+                    console.log(`[Binance] GETTING ${cnt + 1} KLINES...`);
+                    console.log(parseDate(new Date(firstTs)));
+                    const res = await axios.get(
+                        `https://data-api.binance.vision/api/v3/klines?symbol=${symbol}&interval=${parsedInterval}&startTime=${firstTs}`
+                    );
+                    const data = res.data;
+                    klines.push(...data);
+
+                    if (data.length == 0) break;
+
+                    firstTs = data[data.length - 1][6];
+                    if (savePath) {
+                        writeFileSync(savePath, JSON.stringify(klines));
+                        console.log("Sved");
+                    }
+                    cnt += 1;
+                }
+            } else {
+                const res = await axios.get(
+                    `https://data-api.binance.vision/api/v3/klines?symbol=${symbol}&interval=${parsedInterval}&endTime=${end}`
+                );
+                klines = res.data;
+            }
+            if (savePath) {
+                ensureDirExists(savePath);
+                writeFileSync(savePath, JSON.stringify(klines));
+                console.log("Final Klines Saved");
+            }
+            console.log(klines.length);
+            console.log("DONE FETCHING KLINES");
+            return klines;
+        } catch (err) {
+            console.log("FAILED TO GET KLINES", err);
         }
-        if (savePath) {
-            ensureDirExists(savePath);
-            writeFileSync(savePath, JSON.stringify(klines));
-            console.log("Final Klines Saved");
-        }
-        console.log(klines.length);
-        console.log("DONE FETCHING KLINES");
-        return klines;
     }
     async getTrades({
         start,

@@ -1,26 +1,21 @@
-
 import { Server, Socket } from "socket.io";
 import { IObj } from "../interfaces";
+import { tuCE, heikinAshi, parseDate, parseKlines, tuPath } from "../funcs2";
 import {
-    tuCE,
-    heikinAshi,
-    parseDate,
-    parseKlines,
-    tuPath,
-} from "../funcs2";
-import {
+    instruments,
     klinesDir,
     klinesRootDir,
     tradesRootDir,
 } from "../constants";
-import { existsSync } from "fs";
-import { getPricePrecision, readJson, toFixed } from "../functions";
+import { existsSync, writeFileSync } from "fs";
+import { clog, getPricePrecision, readJson, toFixed } from "../functions";
 import { objStrategies, strategies } from "@/strategies";
 import { TestOKX } from "@/classes/test-platforms";
 import { platforms } from "../consts";
+import { ensureDirExists } from "../orders/funcs";
 let prevData: IObj | null = null;
 
-export const onBacktest = async (data: IObj, client?: Socket, io?:Server) => {
+export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
     try {
         const baseCcy = data.symbol;
         let {
@@ -34,7 +29,8 @@ export const onBacktest = async (data: IObj, client?: Socket, io?:Server) => {
             file,
             isParsed,
             clId,
-            T, save
+            T,
+            save,
         } = data;
 
         console.log("ON BACKTEST");
@@ -59,17 +55,17 @@ export const onBacktest = async (data: IObj, client?: Socket, io?:Server) => {
             return;
         }
         start = start ?? parseDate(new Date());
-            const year = start.split("-")[0];
-            const pth =
-                "src/data/klines/binance/SOL-USDT_5m_2023-01-01 00 00 00+02:00_2023-10-31 23 59 00+02:00.json";
-            klinesPath = test
-                ? tuPath(pth)
-                : tuPath(
-                      `${klinesRootDir}/${platName.toLowerCase()}/${year}/${symbol}_${interval}m.json`
-                  );
+        const year = start.split("-")[0];
+        const pth =
+            "src/data/klines/binance/SOL-USDT_5m_2023-01-01 00 00 00+02:00_2023-10-31 23 59 00+02:00.json";
+        klinesPath = test
+            ? tuPath(pth)
+            : tuPath(
+                  `${klinesRootDir}/${platName.toLowerCase()}/${year}/${symbol}_${interval}m.json`
+              );
         if (offline && !useFile) {
             console.log("IS OFFLINE");
-            
+
             const tradesPath = tuPath(
                 `${tradesRootDir}/${platName.toLocaleLowerCase()}/${year}/trades.json`
             );
@@ -81,15 +77,14 @@ export const onBacktest = async (data: IObj, client?: Socket, io?:Server) => {
                 client?.emit("backtest", err);
                 return;
             }
-            if (T){
-              if (existsSync(tradesPath)) {
-                trades = await require(tradesPath);
-                console.log({
-                    trades: [trades[0], trades[trades.length - 1]],
-                });
-            }  
+            if (T) {
+                if (existsSync(tradesPath)) {
+                    trades = await require(tradesPath);
+                    console.log({
+                        trades: [trades[0], trades[trades.length - 1]],
+                    });
+                }
             }
-            
         } else if (!offline && !useFile) {
             //const bot = new Bot({name:"Temp", base: baseCcy[0], ccy: baseCcy[1]})
             //const bybit = new Bybit(bot)
@@ -98,7 +93,7 @@ export const onBacktest = async (data: IObj, client?: Socket, io?:Server) => {
                 end: endTs,
                 interval,
                 symbol,
-                savePath: save ? klinesPath : undefined 
+                savePath: save ? klinesPath : undefined,
             });
             if (!r) {
                 client?.emit("err", "Failed to get klines");
@@ -118,8 +113,7 @@ export const onBacktest = async (data: IObj, client?: Socket, io?:Server) => {
             trades = r2;
             klines = r;
         }
-        if (offline && !useFile)
-            console.log(`\nKLINES_PATH: ${klinesPath!}\n`);
+        if (offline && !useFile) console.log(`\nKLINES_PATH: ${klinesPath!}\n`);
         if (useFile) console.log(`\nUse file\n`);
         console.log({ start, end });
         klines =
@@ -134,26 +128,22 @@ export const onBacktest = async (data: IObj, client?: Socket, io?:Server) => {
             m: Number(klines[0][0]),
             endTs: new Date(endTs),
         });
-        if (offline){
-             klines = klines.filter(
-            (el) => startTs <= Number(el[0]) && Number(el[0]) <= endTs
-        );
+        if (offline) {
+            klines = klines.filter(
+                (el) => startTs <= Number(el[0]) && Number(el[0]) <= endTs
+            );
         }
-       
+
         client?.emit("backtest", "Analyzing data...");
         klines = isParsed && useFile ? klines : parseKlines(klines);
-        let df = tuCE(
-            isHa && useFile ? klines : heikinAshi(klines)
-        );
-
+        let df = tuCE(isHa && useFile ? klines : heikinAshi(klines));
 
         if (!useFile) {
             // Return oly df from startTs to endTs
             df = df.filter(
-                      (el) =>
-                          Date.parse(el.ts) <= endTs &&
-                          Date.parse(el.ts) >= startTs
-                  );
+                (el) =>
+                    Date.parse(el.ts) <= endTs && Date.parse(el.ts) >= startTs
+            );
         }
         let bal = Number(data.bal);
 
@@ -172,7 +162,7 @@ export const onBacktest = async (data: IObj, client?: Socket, io?:Server) => {
             pGain,
             maker: plat.maker,
             taker: plat.taker,
-            platNm: platName.toLowerCase() as any
+            platNm: platName.toLowerCase() as any,
         });
         retData.profit = toFixed(
             retData.balance - bal,
@@ -182,11 +172,10 @@ export const onBacktest = async (data: IObj, client?: Socket, io?:Server) => {
 
         console.log(`TRADES: ${retData.trades}`);
         console.log(`PROFIT: ${retData.profit}\n`);
-        const str_name = objStrategies[strNum - 1].name
-        console.log({str_name});
+        const str_name = objStrategies[strNum - 1].name;
+        console.log({ str_name });
 
-        
-        retData = { data: {...retData,str_name }, clId };
+        retData = { data: { ...retData, str_name }, clId };
         prevData = retData;
         client?.emit("backtest", retData);
         return retData;
@@ -194,4 +183,110 @@ export const onBacktest = async (data: IObj, client?: Socket, io?:Server) => {
         console.log(e.response?.data ?? e);
         client?.emit("backtest", { err: "Something went wrong" });
     }
-}
+};
+
+export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
+    try {
+        let { interval, start, end, offline, platform, save } = data;
+        const startPair = data.from
+        let _data: {
+            pair: string[];
+            interval: number;
+            profit: number;
+            trades: number;
+        }[] = [];
+
+        prevData = null;
+        const startTs = Date.parse(start),
+            endTs = Date.parse(end);
+
+        let klinesPath: string | null;
+
+        const plat = platforms[platform].obj;
+        const platName = platforms[platform].name;
+        let coins = instruments
+            .filter((el) => el.quoteCoin == "USDT")
+            .map((el) => [el.baseCoin, el.quoteCoin]).sort();
+        if (!offline){
+           coins = coins.slice( typeof startPair == 'number' ? startPair : coins.findIndex((el) => el[0] == startPair[0]));
+         
+        }
+        start = start ?? parseDate(new Date());
+        const year = start.split("-")[0];
+
+        const strNum = Number(data.strategy);
+
+        const savePath = `data/rf/coins/${year}/${platName}_${interval}m.json`;
+        ensureDirExists(savePath);
+
+        for (let pair of coins) {
+            console.log('\nBEGIN PAIR:', pair);
+            let klines: any[] = [];
+            let trades: any[] = [];
+            let bal = Number(data.bal);
+            let symbol: string =
+                plat instanceof TestOKX ? pair.join("-") : pair.join("");
+            console.log(symbol);
+
+            klinesPath = tuPath(
+                `${klinesRootDir}/${platName.toLowerCase()}/${year}/${symbol}_${interval}m.json`
+            );
+
+            if (offline && !existsSync(klinesPath)){
+                console.log("KLINES DIR NOT FOUND FOR", pair);
+                continue
+            }
+            const r =
+                offline || existsSync(klinesPath)
+                    ? await require(klinesPath!)
+                    : await plat.getKlines({
+                          start: startTs,
+                          end: endTs,
+                          interval,
+                          symbol,
+                          savePath: save ? klinesPath : undefined,
+                      });
+                        
+            klines = r ?? [];
+
+            let df = tuCE(heikinAshi(parseKlines(klines)));
+            
+            df = df.filter(
+                (el) =>
+                    Date.parse(el.ts) <= endTs && Date.parse(el.ts) >= startTs
+            );
+            let retData = objStrategies[strNum - 1].run({
+                df,
+                trades: [],
+                balance: bal,
+                lev: 1,
+                pair,
+                maker: plat.maker,
+                taker: plat.taker,
+                platNm: platName.toLowerCase() as any,
+            });
+            retData.profit = toFixed(
+                retData.balance - bal,
+                getPricePrecision(pair, platName as any)
+            );
+            retData = { ...retData, base: pair[0], ccy: pair[1] };
+
+            console.log(pair, `TRADES: ${retData.trades}`);
+            console.log(pair, `PROFIT: ${retData.profit}\n`);
+            _data.push({
+                pair,
+                profit: retData.profit,
+                interval,
+                trades: retData.trades,
+            });
+            _data = [..._data].sort((a,b)=> a.profit > b.profit? -1 : 1)
+            writeFileSync(savePath, JSON.stringify(_data), {});
+            console.log(pair, "SAVED\n");
+        }
+
+        return _data;
+    } catch (e) {
+        console.log(e);
+        return "SOMETHING WENT WRONG"
+    }
+};

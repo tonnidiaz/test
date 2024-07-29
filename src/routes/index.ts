@@ -10,19 +10,11 @@ import {
 var router = express.Router();
 import os from "os";
 import { strategies } from "@/strategies";
-import { tuCE, parseDate, parseKlines } from "@/utils/funcs2";
-import fs, { writeFileSync } from "fs";
-import { heikinAshi } from "../utils/funcs2";
 import { Bot } from "@/models";
-import { OKX } from "@/classes/okx";
-import { BotSchema, IBot } from "@/models/bot";
-import { Bybit } from "@/classes/bybit";
-import { ensureDirExists } from "@/utils/orders/funcs";
-import { platforms } from "@/utils/constants";
-import { TestBybit, TestOKX } from "@/classes/test-platforms";
+import { platforms } from "@/utils/consts";
 import { Phemex } from "@/classes/phemex";
-import { onBacktest } from "@/utils/functions/io-funcs";
-import { objPlats } from "@/utils/consts";
+import { onBacktest, onCoins } from "@/utils/functions/io-funcs";
+import { objPlats } from "@/utils/consts2";
 
 const fp = false
     ? "src/data/klines/binance/2021/DOGEUSDT_15m.json"
@@ -38,7 +30,12 @@ router.get("/strategies", (req, res) => {
     res.json(strategies);
 });
 router.get("/platforms", (req, res) => {
-    res.json(platforms);
+    res.json(platforms.map(el=> el.name));
+});
+router.post("/coins", async (req, res) => {
+    const ret = await onCoins(req.body)
+    if (typeof ret == 'string') return res.status(500).send(ret)
+    res.json(ret)
 });
 
 router.get("/test", async (req, res) => {
