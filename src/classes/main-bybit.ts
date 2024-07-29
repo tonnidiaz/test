@@ -301,7 +301,7 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
                 await order.save();
             }
 
-            if (c <= sell_price * (1 + 0.0015 / 100) && c >= _sl) {
+            if (c <= sell_price && c >= _sl) {
 
                 if (c >= entry && c < _tp){
                     return botLog(bot, "WS: PRICE BELOW MIN TP", {_tp, c})

@@ -17,7 +17,7 @@ import { ObjectId } from "mongoose";
 import { botLog, getPricePrecision, timedLog } from "@/utils/functions";
 import { OKX } from "./okx";
 import { placeTrade } from "@/utils/orders/funcs";
-import { DEV, getTrailingStop, stops, demo, platforms, TP } from "@/utils/constants";
+import { DEV, getTrailingStop, stops, demo, platforms, TP, TRAILING_STOP_PERC } from "@/utils/constants";
 import { IObj } from "@/utils/interfaces";
 import { IOrder } from "@/models/order";
 import { scheduleJob } from "node-schedule";
@@ -131,129 +131,8 @@ export class WsOKX {
                             updateOpenBot(bot, openBot, df);
                         }
                     }
-                    if (arg.channel == "orders") {
-                        /* HANDLE ORDERS */
-
-                        for (let ord of data as OrderDetails[]) {
-                            const ordLog = (arg: any) => {
-                                console.log(
-                                    `\n[ORDER: ${ord.ordId} ]\t${arg}\n`
-                                );
-                            };
-
-                            const isBuyOrder = ord.side == "buy";
-                            const filt = isBuyOrder
-                                ? { buy_order_id: ord.ordId }
-                                : { order_id: ord.ordId };
-
-                            const order = await Order.findOne(filt).exec();
-
-                            if (order) {
-                                const bot = await Bot.findOne({
-                                    orders: order._id,
-                                }).exec();
-                                if (!bot) {
-                                    ordLog("BOT CONTAINING ORDER NOT FOUND");
-                                    return;
-                                }
-                                if (ord.state == "filled") {
-                                    const orderDetails = parseFilledOrder(ord);
-                                    updateOrder({
-                                        orderDetails,
-                                        order,
-                                        isBuyOrder,
-                                        bot,
-                                    });
-                                } else if (ord.state == "canceled") {
-                                    if (isBuyOrder) {
-                                        /* DELETE BUY ORDER FROM DB */
-                                        await Order.findByIdAndDelete(
-                                            order._id
-                                        ).exec();
-                                        ordLog("DELETED FROM DB");
-                                        bot.orders = bot.orders.filter(
-                                            (el) =>
-                                                el.toString() !=
-                                                order._id.toString()
-                                        );
-                                        botLog(
-                                            bot,
-                                            `Orders: ${bot.orders.length}`
-                                        );
-                                        await Order.findByIdAndDelete(
-                                            order._id
-                                        );
-                                        await bot.save();
-                                        botLog(bot, "ORDER DELETED");
-                                    } else {
-                                        /* CLEAR SELL ORDER ID */
-
-                                        botLog(
-                                            bot,
-                                            "CLEARING SELL ORDER_ID..."
-                                        );
-                                        order.order_id = "";
-                                        order.sell_timestamp = undefined;
-                                        order.sell_price = 0;
-                                        await order.save();
-                                        botLog(bot, "ORDER_ID CLEARED");
-                                    }
-                                }
-                            } else {
-                                ordLog("NOT IN DB");
-                            }
-                        }
-                    }
-
-                    if (arg.channel == "orders-algo") {
-                        /* HANDLE ALGO ORDERS */
-                        for (let ord of data as AlgoOrderDetailsResult[]) {
-                            const ordLog = (arg: any) => {
-                                console.log(
-                                    `\nALGO: [ORDER: ${ord.algoId} ]\t${arg}\n`
-                                );
-                            };
-
-                            const isBuyOrder = ord.side == "buy";
-                            const order = await Order.findOne({
-                                cl_order_id: ord.algoClOrdId,
-                            }).exec();
-
-                            if (order) {
-                                const bot = await Bot.findOne({
-                                    orders: order._id,
-                                }).exec();
-                                if (!bot) {
-                                    ordLog("BOT CONTAINING ORDER NOT FOUND");
-                                    return;
-                                }
-                                /* GET REAL ORDER DETAILS */
-                                if (ord.state == "effective") {
-                                    ordLog("STATE == effective");
-                                    const plat = new OKX(bot);
-                                    const res = await plat.getOrderbyId(
-                                        ord.ordId,
-                                        false
-                                    );
-                                    if (!res)
-                                        botLog(
-                                            bot,
-                                            `FAILED TO CHECK [ALGO] ORDER: ${ord.ordId}`
-                                        );
-                                    else if (res != "live") {
-                                        await updateOrder({
-                                            orderDetails: res,
-                                            order,
-                                            isBuyOrder,
-                                            bot,
-                                        });
-
-                                        botLog(bot, "OCO SELL ORDER UPDATED");
-                                    }
-                                }
-                            }
-                        }
-                    }
+             
+                   
                 }
             });
         }
@@ -420,7 +299,7 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
             order.sell_price != 0
         ) {
 
-            const trailingStop = getTrailingStop(bot.interval)
+            const trailingStop = TRAILING_STOP_PERC// getTrailingStop(bot.interval)
            
 
             let { exitLimit } = openBot;
@@ -476,7 +355,7 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
                 await order.save();
             }
 
-            if (c <= sell_price * (1 + 0.0015 / 100) && c >= _sl) {
+            if (c <= sell_price && c >= _sl) {
 
                 if (c >= entry && c < _tp){
                     return botLog(bot, "WS: PRICE BELOW MIN TP", {_tp, c})
@@ -554,7 +433,7 @@ const updateOrder = async ({
 console.log("WS OKX");
 export const wsOkx: WsOKX = new WsOKX();
 try{
-   // wsOkx.initWs()
+   wsOkx.initWs()
 }
 catch(e){
     timedLog("FAILED TO INIT WS")

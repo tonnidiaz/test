@@ -17,6 +17,7 @@ import { objStrategies } from "@/strategies";
 import { IObj, IOrderDetails } from "../interfaces";
 import { wsOkx } from "@/classes/main-okx";
 import { objPlats } from "../consts2";
+import { wsBybit } from "@/classes/main-bybit";
 //import { wsOkx } from "@/classes/main-okx";
 
 export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
@@ -114,7 +115,9 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
         order.highs = [];
         await order.save();
         botLog(bot, "WATCHING FOR THE PX CHANGES");
-        await wsOkx.addBot(bot.id, true);
+
+        const ws = bot.platform == 'bybit' ? wsBybit : wsOkx
+        await ws.addBot(bot.id, true);
     }
 };
 
