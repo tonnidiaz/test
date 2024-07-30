@@ -17,7 +17,7 @@ export const OrderSchema = new Schema(
         ccy: { type: String, default: "" },
         buy_fee: { type: Number, default: 0 },
         sell_fee: { type: Number, default: 0 },
-        stop_price: { type: Number, default: 0 },
+        sl: { type: Number, default: 0 },
         profit: { type: Number, default: 0 },
         buy_price: { type: Number, default: 0 },
         tp: { type: Number, default: 0 },

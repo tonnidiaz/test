@@ -236,9 +236,13 @@ export const strategy = ({
                 isExit = false;
             const _isGreen = prevRow.c >= o;
             const trailingStop = TRAILING_STOP_PERC;
-            const _sl = Math.min(entry, o) * (1 - SL / 100);
-            const _tp = o * (1 + TP / 100);
-            const lFromO = ((o - l) / l) * 100;
+            let _sl = entry * (1 - SL / 100);
+            let _tp = o * (1 + TP / 100);
+            let lFromO = ((o - l) / l) * 100;
+
+            _sl = Number(_sl.toFixed(pricePrecision))
+            _tp = Number(_tp.toFixed(pricePrecision))
+            lFromO = Number(lFromO.toFixed(pricePrecision))
 
             console.log("\nPOS:", { o, l, lFromO, trailingStop, c, h }, "\n");
 

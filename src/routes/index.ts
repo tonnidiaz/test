@@ -15,6 +15,7 @@ import { platforms } from "@/utils/consts";
 import { Phemex } from "@/classes/phemex";
 import { onBacktest, onCoins } from "@/utils/functions/io-funcs";
 import { objPlats } from "@/utils/consts2";
+import { parseKlines } from "@/utils/funcs2";
 
 const fp = false
     ? "src/data/klines/binance/2021/DOGEUSDT_15m.json"
@@ -38,6 +39,16 @@ router.post("/coins", async (req, res) => {
     res.json(ret)
 });
 
+
+router.get('/kline', async (req, res)=>{
+
+    const bot = new Bot({name: "TUBOT", start_amt: 10, base: "SOL", ccy: "USDT", platform: 'bybit', interval: 5})
+    const {plat} = req.query
+
+    const _plat = new (objPlats[plat as any])(bot)
+    const kline = await _plat.getKline()
+    res.json(parseKlines([kline]))
+})
 router.get("/test", async (req, res) => {
     const { q, id, bs, cy, algoId } = req.query;
     const bot = new Bot({

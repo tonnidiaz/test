@@ -142,12 +142,14 @@ export class Bybit {
         savePath,
         interval,
         symbol,
+        limit = 1000
     }: {
         end?: number;
         start?: number;
         interval?: number;
         symbol?: string;
         savePath?: string;
+        limit?: number
     }) {
         end = end ?? Date.now() - this.bot.interval * 60 * 1000; 
         let klines: any[] = [];
@@ -164,7 +166,7 @@ export class Bybit {
                     symbol: symbol,
                     interval: interval as any,
                     start: firstTs,
-                    limit: 1000,
+                    limit,
                     category: this.bot.category as any,
                 });
                 const data = res.result.list;
@@ -195,7 +197,12 @@ export class Bybit {
         }
 
         const d = [...klines]; //.reverse()
-        return d;
+        return limit == 1 ? d[d.length - 1] : d;
+    }
+
+    async getKline(){
+        const end = Date.now()
+        return await this.getKlines({end, limit: 1})
     }
 
     getSymbol() {

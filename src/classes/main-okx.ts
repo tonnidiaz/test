@@ -182,8 +182,8 @@ export class WsOKX {
             timedLog("WS: BOT RESUMED...");
         }
     }
-    async addBot(botId: ObjectId, first = false) {
-        timedLog(`\WS: ADDING BOT: ${botId}...`);
+    async addBot(botId: ObjectId, first = true) {
+        timedLog(`\WS: ADDING BOT: ${botId}...`, {first});
 
         try{
             const bot = await Bot.findById(botId).exec();
@@ -308,7 +308,7 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
 
             const { o, l, h, c, ha_h, ts } = row;
             const _isGreen = prevRow.c >= o;
-            let { stop_price, sell_price } = order;
+            let { sl, tp,  sell_price } = order;
             const entry = order.buy_price
              const _sl = entry * (1- stops[bot.interval]/100)
              const _tp = o * (1 + TP/100)
@@ -348,9 +348,7 @@ await order.save()
 
             if (initHighs.every((el) => el < h)) {
                 timedLog("ADJUSTING THE STOP_PRICE");
-                stop_price = h * (1 - trailingStop / 100);
-                order.stop_price = stop_price;
-
+               
                 // ADJUST _EXIT
                 sell_price = h * (1 - trailingStop / 100);
                 order.sell_price = sell_price;

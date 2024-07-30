@@ -18,6 +18,7 @@ import { IObj, IOrderDetails } from "../interfaces";
 import { wsOkx } from "@/classes/main-okx";
 import { objPlats } from "../consts2";
 import { wsBybit } from "@/classes/main-bybit";
+import { SL } from "../constants";
 //import { wsOkx } from "@/classes/main-okx";
 
 export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
@@ -76,7 +77,9 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
         if (res) {
             botLog(bot, "MARKET BUY ORDER PLACED. TO WS SELL CHECK");
             pos = true;
-            order = await Order.findById(res).exec();
+            order = (await Order.findById(res).exec())!;
+            order.sl = order.buy_price * (1 - SL/100)
+            await order.save()
         }
         /* CREATE NEW ORDER */
         /* if (!order || order.is_closed) {

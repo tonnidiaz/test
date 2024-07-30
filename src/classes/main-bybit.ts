@@ -134,7 +134,7 @@ export class WsBybit {
             timedLog("WS: BOT RESUMED...");
         }
     }
-    async addBot(botId: ObjectId, first = false) {
+    async addBot(botId: ObjectId, first = true) {
         timedLog(`\WS: ADDING BOT: ${botId}...`);
 
         try {
@@ -144,8 +144,24 @@ export class WsBybit {
             const order = await Order.findById(
                 bot.orders[bot.orders.length - 1]
             ).exec();
+
+            if (!order) return
+
+            const pricePrecision = getPricePrecision([bot.base, bot.ccy], bot.platform)
+
             const plat = new Bybit(bot);
-            const klines = await plat.getKlines({});
+            const klines: any[][] = await plat.getKlines({end: Date.now()});
+            const row = klines.pop()
+            if (!row) return timedLog("ROW UNDEFINED")
+            const open = Number(row[1])
+
+            let tp = open * (1 + TP/100)
+            tp = Number(tp.toFixed(pricePrecision))
+
+            timedLog({open, tp})
+            order.tp = tp
+            await order.save()
+            
             this.botsWithPos = this.botsWithPos.filter((el) => el.id != botId);
             this.botsWithPos.push({
                 id: botId,
@@ -251,15 +267,11 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
 
         const { o, l, h, c, ha_h, ts } = row;
         const _isGreen = prevRow.c >= o;
-        let { stop_price, sell_price } = order;
-        const entry = order.buy_price;
-        const _sl = entry * (1 - SL / 100);
-        const _tp = o * (1 + TP / 100);
+        let { sell_price, sl, tp, buy_price } = order;
+        
         const trailingStop = TRAILING_STOP_PERC; // getTrailingStop(bot.interval)
         const initHighs = order.highs.map((el) => el.val!);
 
-        order.tp = _tp;
-        await order.save();
         if (DEV){
             timedLog("WS:", {c, all_highs: order.all_highs});
         }
@@ -281,24 +293,21 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
         ) {
             if (initHighs.every((el) => el < h)) {
                 timedLog("ADJUSTING THE STOP_PRICE");
-                stop_price = h * (1 - trailingStop / 100);
-                order.stop_price = stop_price;
-
                 // ADJUST _EXIT
                 sell_price = h * (1 - trailingStop / 100);
                 order.sell_price = sell_price;
                 await order.save();
             }
 
-            if (c <= sell_price && c >= _sl) {
-                if (c >= entry && c < _tp) {
-                    return botLog(bot, "WS: PRICE BELOW MIN TP", { _tp, c });
+            if (c <= sell_price && c >= sl) {
+                if (c >= buy_price && c < tp) {
+                    return botLog(bot, "WS: PRICE BELOW MIN TP", { tp, c });
                 }
                 botLog(bot, `PLACING MARKET SELL ORDER AT EXIT`, {
                     h,
                     sell_price,
                     c,
-                    _sl,
+                    sl, tp
                 });
                 const amt = order.base_amt - order.buy_fee;
                 const r = await placeTrade({

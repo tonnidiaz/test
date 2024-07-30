@@ -3,12 +3,8 @@ import { randomNum } from "@/utils/functions";
 import { scheduleJob } from "node-schedule";
 
 function hello(){
-    try{
-    return console.log('HELLO');
-}catch(e){
-    console.log(e);
-}finally{
-    console.log("BYE");
-}
+    const klines = [1,2,3,4,5]
+    const last = klines.pop()
+    console.log({last, klines});
 }
 hello()

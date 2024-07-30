@@ -207,18 +207,24 @@ export class OKX {
         console.log(res);
     }
 
+
+    async getKline(){
+        const end = Date.now()
+        return await this.getKlines({end, limit: 1})
+    }
     async getKlines({
         start,
         end,
         savePath,
         interval,
-        symbol,
+        symbol, limit = 100
     }: {
         end?: number;
         start?: number;
         interval?: number;
         symbol?: string;
         savePath?: string;
+        limit?: number
     }) {
         end = end ?? Date.now() - this.bot.interval * 60 * 1000;
         let klines: any[] = [];
@@ -231,8 +237,7 @@ export class OKX {
             let firstTs = start;
             while (firstTs <= end) {
                 console.log(`GETTING ${cnt + 1} KLINES...`);
-                const limit = 100;
-                const after = firstTs + (limit - 1) * interval * 60 * 1000;
+                const after = firstTs + (limit! - 1) * interval * 60 * 1000;
                 console.log(
                     `Before: ${parseDate(
                         new Date(firstTs)
@@ -276,7 +281,7 @@ export class OKX {
         let d = [...klines];
         const lastCandle = d[d.length - 1];
         //console.log({lastCandle});
-        if (Number(lastCandle[8]) == 0) {
+        if (false&& Number(lastCandle[8]) == 0) {
             botLog(this.bot, "LAST CANDLE NOT YET CLOSED");
             return await this.getKlines({
                 start,
@@ -286,7 +291,7 @@ export class OKX {
                 symbol,
             });
         }
-        return d;
+        return limit == 1 ? d[d.length - 1] : d;
     }
 
     getSymbol() {
