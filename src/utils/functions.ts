@@ -226,7 +226,9 @@ export function capitalizeFirstLetter(string) {
 
 export function toFixed(num: number, dec: number) {
     const re = new RegExp("^-?\\d+(?:.\\d{0," + (dec || -1) + "})?");
-    return `${num}`.includes("e") ? num : Number(num.toString().match(re)![0]);
+   const isLarge =  `${num}`.includes("e")
+    console.log({isLarge})
+    return  isLarge ? num : Number(num.toString().match(re)![0]);
 }
 
 export function precision(a: number) {

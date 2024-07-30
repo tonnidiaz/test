@@ -251,28 +251,27 @@ export const strategy = ({
 
             _exit = h * (1 - trailingStop / 100); // Increase the trailing stop with the price
             const belowOpen = o * (1 - trailingStop / 100);
-
-            if (l <= belowOpen && !(o > c && _exit >= _tp)) {
-                _exit = belowOpen;
-                _fillSell({ _exit, _row: erow, _base: base, o: o });
-
-                if (c > o) {
-                    console.log("\nRE-BUYING AT OPEN\n");
-                    entry = o;
-                    _fillBuy({ _amt: balance, _entry: entry, _row: erow });
-                  
-                }
-                continue;
-            }
             if (c > _exit) {
                 // DID NOT GO DOWN TO REACH STOP_PRICE
                 console.log("SELLING AT CLOSE");
 
-                _exit = c;
-                isClose = true;
-                if (c > _tp && c > _sl)
+                if (l <= belowOpen) {
+                    /* _exit = belowOpen;
                     _fillSell({ _exit, _row: erow, _base: base, o: o });
-                continue;
+
+                    if (c > _exit) {
+                        console.log("\nRE-BUYING AT OPEN\n");
+                        entry = _exit;
+                        _fillBuy({ _amt: balance, _entry: entry, _row: erow });
+                    } */
+                    continue;
+                } else {
+                    _exit = c;
+                    isClose = true;
+                    if (c >= _tp && c > _sl)
+                        _fillSell({ _exit, _row: erow, _base: base, o: o });
+                    continue;
+                }
             } else {
                 console.log("SELLING AT STOP");
                 isExit = true;
@@ -285,12 +284,12 @@ export const strategy = ({
                 if (_exit > o) {
                     prAve.push(((_exit - o) / o) * 100);
                 }
-                if (/* isExit && */ /* _exit >= o && */ _exit < _tp) {
+                if (/* isExit && */ _exit >= entry && _exit < _tp) {
                     console.log("EXIT LESS THAN TP");
                     continue;
                 }
 
-                if (WCS1 && _exit >= o) {
+                if (WCS1 && _exit >= entry) {
                     _exit = _tp;
                 }
 

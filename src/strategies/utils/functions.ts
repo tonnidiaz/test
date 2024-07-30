@@ -1,6 +1,7 @@
 import { isStopOrder, noFees } from "@/utils/constants";
 import { toFixed } from "@/utils/functions";
 import { IObj } from "@/utils/interfaces";
+import BigNumber from 'bignumber.js'
 
 export function fillBuyOrder({
     entry,
@@ -26,15 +27,21 @@ export function fillBuyOrder({
     isA?: boolean
 }) {
     console.log('\nFILL BUY ORDER', {entry, balance});
-    let base = balance / entry// * (1 - taker);
-    const fee = base * taker
+    const _balance = new BigNumber(balance)
+    
+    let base : number | BigNumber = _balance.dividedBy(entry)// * (1 - taker);
+    const fee = base.multipliedBy(taker)
     console.log("BASE:")
-    console.log(`B4 FEE: ${base}`)
+    console.log(`B4 FEE: ${base.toString()}`)
     if (!noFees)
-        base -= fee
+        {
+           base = base.minus(fee) //base -= fee
+            
+        }
+
     console.log(`AFTER FEE: ${base}\n`)
     //console.log({balance, base, entry, taker, basePrecision});
-    base = toFixed(base, basePrecision);
+    base = toFixed(base.toNumber(), basePrecision);
     //console.log(`BASE: ${base}`);
 
     const data = { ...mData };
@@ -52,7 +59,7 @@ export function fillBuyOrder({
         balance: `[${balance}] \t ${base} \t fee: ${fee}`,
     })
     pos = true;
-    return { pos, base, mData: data, _cnt: 0, fee: fee * entry };
+    return { pos, base, mData: data, _cnt: 0, fee: fee.toNumber() * entry };
 }
 export const fillSellOrder = ({
     prevRow,
@@ -100,13 +107,16 @@ export const fillSellOrder = ({
     console.log({ exitLimit, exit, entry, base });
     //console.log(`MIKA: ${exit >= entry ? "gain" : "loss"}`);
     console.log("\nFILL SELL ORDER", {exit, base});
-    let balance = base * exit 
+
+    let _base = new BigNumber(base)
+    let balance : number | BigNumber = _base.multipliedBy(exit) 
     console.log("BALANCE")
-    const fee = balance * maker
+    const fee = balance.multipliedBy(maker)
     console.log(`B4 FEE: ${balance}`)
     if (!noFees)
-        balance -= fee
-    balance = toFixed(balance, ( pricePrecision));
+        {balance = balance.minus(fee)}
+
+    balance = toFixed(balance.toNumber(), ( pricePrecision));
     console.log(`AFTER FEE: ${balance}\n`)
     const ts = prevRow["ts"];
     
@@ -137,14 +147,14 @@ export const fillSellOrder = ({
     return {
         entryLimit,
         pos,
-        balance,
+        balance: balance,
         cnt,
         sl,
         tp,
         gain,
         loss,
         mData,
-        fee
+        fee: fee.toNumber()
      //   _bal,
     };
 };

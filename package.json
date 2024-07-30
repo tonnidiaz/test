@@ -17,6 +17,7 @@
     "@amcharts/amcharts5": "^5.9.12",
     "axios": "^1.5.0",
     "bcrypt": "^5.1.0",
+    "bignumber.js": "^9.1.2",
     "bybit-api": "^3.10.5",
     "ccxt": "^4.3.48",
     "cookie-parser": "~1.4.4",

@@ -36,7 +36,6 @@ const WS_URL_SPOT_PUBLIC = "wss://stream.bybit.com/v5/public/spot";
 
 configDotenv();
 
-let isSubed = false;
 export class WsBybit {
     ws: TuWs;
     wsList: TuWs[];
@@ -224,7 +223,7 @@ const updateBotAtClose = async (_bot: IBot) => {
     const _tp = order.tp;
 
     if (sell_price < c && c >= _sl) {
-        if (c >= order.buy_price && c < _tp) {
+        if (c < _tp) {
             return botLog(bot, "TIMED: PRICE BELOW MIN TP");
         }
         botLog(
@@ -242,7 +241,6 @@ const updateBotAtClose = async (_bot: IBot) => {
             price: 0,
         });
         if (!r) return botLog(bot, "TIMED: FAILED TO PLACE MARKET SELL ORDER");
-        //await wsBybit.rmvBot(bot.id)
         await wsBybit.rmvBot(bot.id);
         botLog(bot, "TIMED: MARKET SELL PLACED. BOT REMOVED");
     }
@@ -255,10 +253,6 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
         await wsBybit.pauseBot(openBot.id);
 
         const plat = new Bybit(bot);
-        const pricePrecision = getPricePrecision(
-            [bot.base, bot.ccy],
-            bot.platform
-        );
         const order = await Order.findById(
             bot.orders[bot.orders.length - 1]
         ).exec();
@@ -267,9 +261,8 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
         const row = klines[klines.length - 1];
         const prevRow = klines[klines.length - 2];
 
-        const { o, l, h, c, ha_h, ts } = row;
-        const _isGreen = prevRow.c >= o;
-        let { sell_price, sl, tp, buy_price } = order;
+        const { o, h, c, ts } = row;
+        let { sell_price, sl, tp } = order;
         
         const trailingStop = TRAILING_STOP_PERC; // getTrailingStop(bot.interval)
         const initHighs = order.highs.map((el) => el.val!);
@@ -302,7 +295,7 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
             }
 
             if (c <= sell_price && c >= sl) {
-                if (c >= buy_price && c < tp) {
+                if (c >= o && c < tp) {
                     return botLog(bot, "WS: PRICE BELOW MIN TP", { tp, c });
                 }
                 botLog(bot, `PLACING MARKET SELL ORDER AT EXIT`, {
