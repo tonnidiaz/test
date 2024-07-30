@@ -233,7 +233,7 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
             let okxCoins: IObj[] | null = null
 
             if (existsSync(okxCoinsPath)){
-                okxCoins = await require(okxCoinsPath)
+                okxCoins = await require(okxCoinsPath) 
             }
             _instruments = binanceInfo.symbols.filter(el=> el.isSpotTradingAllowed == true).map(el=> [el.baseAsset, el.quoteAsset]).sort()
             if (okxCoins != null){

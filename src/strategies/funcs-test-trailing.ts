@@ -101,7 +101,7 @@ export const strategy = ({
 
         console.log(`\nTS: ${row.ts}`);
         _cnt += 1;
-        if (row.v == 0) continue;
+        //if (row.v == 0) continue;
 
         const _fillSellOrder = (ret: ReturnType<typeof fillSellOrder>) => {
             (pos = ret.pos),
