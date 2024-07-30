@@ -38,22 +38,25 @@ configDotenv();
 
 export class WsBybit {
     ws: TuWs;
-    wsList: TuWs[];
+    wsList: TuWs[]  = [];
     ok: boolean;
     botsWithPos: IOpenBot[] = [];
     TAG = "WS_BYBIT:";
-    constructor() {
+    constructor() { 
         this.ok = false;
         const { env } = process;
-
+        this.ws = new TuWs(WS_URL_SPOT_PUBLIC);
         console.log("DEV");
         console.log(env.BYBIT_API_KEY_DEV, env.BYBIT_API_SECRET_DEV);
-        this.ws = new TuWs(WS_URL_SPOT_PUBLIC);
-        this.wsList = [this.ws];
-        console.log("MAIN_BYBIT INIT");
+        
     }
 
     async initWs() {
+        if (this.ws.readyState == this.ws.OPEN)
+            this.ws.close()
+        this.ws = new TuWs(WS_URL_SPOT_PUBLIC);
+        this.wsList = [this.ws];
+        console.log("MAIN_BYBIT INIT");
         for (let ws of this.wsList) {
             ws.on("open", () => {
                 timedLog(this.TAG, "OPEN");
