@@ -260,14 +260,18 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
 
         order.tp = _tp;
         await order.save();
+        if (DEV){
+            timedLog("WS:", {c, all_highs: order.all_highs});
+        }
         if (c != initHighs[initHighs.length - 1]) {
             order.highs.push({ ts: parseDate(new Date()), val: c });
-            await order.save();
+            timedLog("ADDING HIGHS...")
         }
-        if (c != initHighs[initHighs.length - 1]) {
+        if (c != order.all_highs[order.all_highs.length - 1]) {
             order.all_highs.push({ ts: parseDate(new Date()), val: c });
-            await order.save();
+            timedLog("ADDING ALL_HIGHS...")
         }
+        await order.save()
 
         if (
             bot &&

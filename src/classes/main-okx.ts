@@ -315,16 +315,18 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
             const initHighs = order.highs.map((el) => el.val!);
 
             order.tp = _tp
-            await order.save()
+            if (DEV){
+                timedLog("WS", {row})
+            }
             if (c != initHighs[initHighs.length - 1]) {
                 order.highs.push({ ts: parseDate(new Date()), val: c });
-                await order.save();
+                timedLog("ADDING HIGHS...")
             }
             if (c != initHighs[initHighs.length - 1]) {
                 order.all_highs.push({ ts: parseDate(new Date()), val: c });
-                await order.save();
+                timedLog("ADDING ALL_HIGHS...")
             }
-
+await order.save()
 
             // STOP LISTENING IF L <= O TRAILING STOP
             const lFromO = ((o - l) / l) * 100;

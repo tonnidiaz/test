@@ -72,18 +72,13 @@ export class Bybit {
           
           const  res = await this.client.submitOrder({
                 symbol: this.getSymbol(),
-                orderType: side == 'buy' ? 'Market' : 'Limit',
+                orderType:  'Market',
                 side: capitalizeFirstLetter(side),
                 qty: amt.toString(),
                 price: price?.toString(),
                 category: this.bot.category as any,
                 timeInForce: "GTC",
-                closeOnTrigger: false, reduceOnly: false,
-                orderLinkId: clOrderId
-               /*  triggerPrice:
-                    order_type == "Market" ? undefined : sl.toString(),*/
-            //    orderFilter: order_type == "Market" && side == 'buy' ? undefined : 'tpslOrder', 
-            });
+                orderLinkId: clOrderId});
             if (res.retCode != 0) {
                 console.log(res);
                 return;
