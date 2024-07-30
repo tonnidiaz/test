@@ -73,6 +73,7 @@ export const fillSellOrder = ({
     entryLimit,
     isSl = false,
     isA = true,
+    o
 }: {
     exitLimit: number | null;
     exit: number;
@@ -91,7 +92,8 @@ export const fillSellOrder = ({
     entryLimit: number | null;
     pos: boolean;
     isSl?: boolean;
-    isA?: boolean
+    isA?: boolean;
+    o?: number
 }) => {
 
     const _isTp = !isStopOrder ? exit >= entry : !isSl
@@ -108,6 +110,8 @@ export const fillSellOrder = ({
     console.log(`AFTER FEE: ${balance}\n`)
     const ts = prevRow["ts"];
     
+    const _entry = o ?? entry
+    const perc = ((exit - _entry)/_entry * 100).toFixed(2)
     const part = isA ? "A" : "B"
     mData["data"].push({
         side: `sell \t {h:${prevRow.h}, l: ${prevRow.l}}`,
@@ -116,7 +120,7 @@ export const fillSellOrder = ({
         ts,
         c: `[${part}] ${!_isTp ? 'SL' : 'TP'}: ${exit}`,
         _c: exit,
-        balance: `[${base}] \t ${balance} { ${((exit - entry)/entry * 100).toFixed(2)}% } fee: ${fee}`,
+        balance: `[${base}] \t ${balance} { ${perc}% } fee: ${fee}`,
     });
     /* Position now filled */
     base = 0;

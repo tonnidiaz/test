@@ -18,17 +18,23 @@ import { ObjectId } from "mongoose";
 import { botLog, getPricePrecision, timedLog } from "@/utils/functions";
 import { Bybit } from "./bybit";
 import { placeTrade } from "@/utils/orders/funcs";
-import { DEV, getTrailingStop, stops, demo, platforms, TP, TRAILING_STOP_PERC } from "@/utils/constants";
+import {
+    DEV,
+    getTrailingStop,
+    stops,
+    demo,
+    platforms,
+    TP,
+    TRAILING_STOP_PERC,
+    SL,
+} from "@/utils/constants";
 import { IObj, IOpenBot } from "@/utils/interfaces";
 import { IOrder } from "@/models/order";
 import { scheduleJob } from "node-schedule";
 
 const WS_URL_SPOT_PUBLIC = "wss://stream.bybit.com/v5/public/spot";
 
-
-
 configDotenv();
-
 
 let isSubed = false;
 export class WsBybit {
@@ -36,18 +42,15 @@ export class WsBybit {
     wsList: TuWs[];
     ok: boolean;
     botsWithPos: IOpenBot[] = [];
-    TAG = "WS_BYBIT:"
+    TAG = "WS_BYBIT:";
     constructor() {
         this.ok = false;
         const { env } = process;
 
         console.log("DEV");
-        console.log(
-            env.BYBIT_API_KEY_DEV,
-            env.BYBIT_API_SECRET_DEV,
-        );
-        this.ws = new TuWs(WS_URL_SPOT_PUBLIC)
-        this.wsList = [ this.ws];
+        console.log(env.BYBIT_API_KEY_DEV, env.BYBIT_API_SECRET_DEV);
+        this.ws = new TuWs(WS_URL_SPOT_PUBLIC);
+        this.wsList = [this.ws];
         console.log("MAIN_BYBIT INIT");
     }
 
@@ -64,31 +67,35 @@ export class WsBybit {
             });
 
             ws.on("message", async (resp) => {
-                const { topic, data } = ws.parseData(resp)
+                const { topic, data } = ws.parseData(resp);
 
-                for (let openBot of this.botsWithPos){
+                for (let openBot of this.botsWithPos) {
                     const bot = await Bot.findById(openBot.id).exec();
                     if (!bot?.active) return;
-                     if (topic == this.getCandleChannelName(bot!) && data) {
-                        const candle = data.map(el=> [el.start, el.open, el.high, el.low, el.close, el.volume, el.confirm].map(el=> Number(el)))[0]
-                    /* HANDLE TICKERS */
+                    if (topic == this.getCandleChannelName(bot!) && data) {
+                        const candle = data.map((el) =>
+                            [
+                                el.start,
+                                el.open,
+                                el.high,
+                                el.low,
+                                el.close,
+                                el.volume,
+                                el.confirm,
+                            ].map((el) => Number(el))
+                        )[0];
+                        /* HANDLE TICKERS */
                         const df = tuCE(
-                            heikinAshi(
-                                parseKlines([...openBot.klines, candle])
-                            )
+                            heikinAshi(parseKlines([...openBot.klines, candle]))
                         );
                         if (DEV) {
                             timedLog("WS UPDATE");
                             //timedLog(candle);
                         }
                         updateOpenBot(bot, openBot, df);
-                    
+                    }
                 }
-                }
-               
             });
-
-            
         }
     }
 
@@ -98,9 +105,7 @@ export class WsBybit {
         return channel;
     }
     async sub(bot: IBot) {
-
         for (let ws of this.wsList) {
-            
             ws.sub(this.getCandleChannelName(bot));
         }
     }
@@ -132,7 +137,7 @@ export class WsBybit {
     async addBot(botId: ObjectId, first = false) {
         timedLog(`\WS: ADDING BOT: ${botId}...`);
 
-        try{
+        try {
             const bot = await Bot.findById(botId).exec();
 
             if (!bot) return console.log("BOT NOT FOUND");
@@ -147,9 +152,9 @@ export class WsBybit {
                 exitLimit: order?.sell_price ?? 0,
                 klines,
             });
-    
+
             await this.sub(bot);
-    
+
             // SCHEDULE A ONCE OFF JOB TO BE EXEC AT 10 SECS B4 THE NEXT CANDLE
             if (first) {
                 const prev = klines[klines.length - 1];
@@ -160,8 +165,7 @@ export class WsBybit {
                 scheduleJob(at, () => updateBotAtClose(bot));
             }
             timedLog(`WS: BOT: ${botId} added`);
-        }
-        catch(e){
+        } catch (e) {
             console.log(e);
         }
     }
@@ -186,7 +190,9 @@ const updateBotAtClose = async (_bot: IBot) => {
     const bot = await Bot.findById(_bot.id).exec();
 
     if (!bot) return;
-    const order = await Order.findById(bot.orders[bot.orders.length - 1]).exec();
+    const order = await Order.findById(
+        bot.orders[bot.orders.length - 1]
+    ).exec();
 
     const pos = order && order.side == "sell" && !order.is_closed;
     timedLog("TIMED: ", { sell_px: order?.sell_price, pos });
@@ -195,13 +201,13 @@ const updateBotAtClose = async (_bot: IBot) => {
     const { sell_price } = order;
     const plat = new Bybit(bot);
     const c = await plat.getTicker();
-    timedLog({ticker: c})
-    const _sl = order.buy_price * (1- stops[bot.interval]/100)
-    const _tp = order.tp
+    timedLog({ ticker: c });
+    const _sl = order.buy_price * (1 - stops[bot.interval] / 100);
+    const _tp = order.tp;
 
     if (sell_price < c && c >= _sl) {
-        if (c >= order.buy_price && c < _tp){
-            return botLog(bot, "TIMED: PRICE BELOW MIN TP")
+        if (c >= order.buy_price && c < _tp) {
+            return botLog(bot, "TIMED: PRICE BELOW MIN TP");
         }
         botLog(
             bot,
@@ -240,58 +246,35 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
         ).exec();
         if (!order) return;
 
+        const row = klines[klines.length - 1];
+        const prevRow = klines[klines.length - 2];
+
+        const { o, l, h, c, ha_h, ts } = row;
+        const _isGreen = prevRow.c >= o;
+        let { stop_price, sell_price } = order;
+        const entry = order.buy_price;
+        const _sl = entry * (1 - SL / 100);
+        const _tp = o * (1 + TP / 100);
+        const trailingStop = TRAILING_STOP_PERC; // getTrailingStop(bot.interval)
+        const initHighs = order.highs.map((el) => el.val!);
+
+        order.tp = _tp;
+        await order.save();
+        if (c != initHighs[initHighs.length - 1]) {
+            order.highs.push({ ts: parseDate(new Date()), val: c });
+            await order.save();
+        }
+        if (c != initHighs[initHighs.length - 1]) {
+            order.all_highs.push({ ts: parseDate(new Date()), val: c });
+            await order.save();
+        }
+
         if (
             bot &&
             order.side == "sell" &&
             !order.is_closed &&
             order.sell_price != 0
         ) {
-
-            const trailingStop = TRAILING_STOP_PERC// getTrailingStop(bot.interval)
-           
-
-            let { exitLimit } = openBot;
-            const row = klines[klines.length - 1];
-            const prevRow = klines[klines.length - 2];
-
-            const { o, l, h, c, ha_h, ts } = row;
-            const _isGreen = prevRow.c >= o;
-            let { stop_price, sell_price } = order;
-            const entry = order.buy_price
-             const _sl = entry * (1- stops[bot.interval]/100)
-             const _tp = o * (1 + TP/100)
-            const initHighs = order.highs.map((el) => el.val!);
-
-            order.tp = _tp
-            await order.save()
-            if (c != initHighs[initHighs.length - 1]) {
-                order.highs.push({ ts: parseDate(new Date()), val: c });
-                await order.save();
-            }
-            if (c != initHighs[initHighs.length - 1]) {
-                order.all_highs.push({ ts: parseDate(new Date()), val: c });
-                await order.save();
-            }
-
-
-            // STOP LISTENING IF L <= O TRAILING STOP
-            const lFromO = ((o - l) / l) * 100;
-
-            
-            /* if (!_isGreen && lFromO >= trailingStop) {
-                timedLog("LOW REACHED O TRAILER...SKIPPING", {
-                    o,
-                    l,
-                    lFromO,
-                    c,
-                });
-                await wsBybit.rmvBot(bot.id);
-                rmvd = true;
-                return;
-            }
- */
-            // ADJUST STOP_PRICE IF HIGH IS HIGHER THAN ORDER HIGHS
-
             if (initHighs.every((el) => el < h)) {
                 timedLog("ADJUSTING THE STOP_PRICE");
                 stop_price = h * (1 - trailingStop / 100);
@@ -304,15 +287,14 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
             }
 
             if (c <= sell_price && c >= _sl) {
-
-                if (c >= entry && c < _tp){
-                    return botLog(bot, "WS: PRICE BELOW MIN TP", {_tp, c})
+                if (c >= entry && c < _tp) {
+                    return botLog(bot, "WS: PRICE BELOW MIN TP", { _tp, c });
                 }
                 botLog(bot, `PLACING MARKET SELL ORDER AT EXIT`, {
                     h,
                     sell_price,
                     c,
-                    _sl
+                    _sl,
                 });
                 const amt = order.base_amt - order.buy_fee;
                 const r = await placeTrade({
@@ -324,15 +306,33 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
                     price: 0,
                 });
                 if (!r) return botLog(bot, "FAILED TO PLACE MARKET SELL ORDER");
-                //await wsBybit.rmvBot(bot.id)
                 placed = true;
                 botLog(bot, "WS: MARKET SELL PLACED. BOT REMOVED");
+            }
+        } else if (order.is_closed && c >= o && sell_price < o) {
+            timedLog("REBUYING AT OPEN...");
+
+            const amt = order.new_ccy_amt - Math.abs(order.sell_fee);
+
+            const res = await placeTrade({
+                bot: bot,
+                ts: parseDate(ts),
+                amt,
+                side: "buy",
+                price: 0 /* 0 for market buy */,
+                plat: plat,
+            });
+
+            if (res) {
+                await wsBybit.rmvBot(bot.id);
+                rmvd = true;
+                timedLog("RE-BOUGHT, BOT REMOVED");
             }
         }
     } catch (e) {
         console.log(e);
     } finally {
-        if (!placed && !rmvd) {
+        if (!rmvd) {
             await wsBybit.resumeBot(bot.id);
         } else if (placed) {
             await wsBybit.rmvBot(bot.id);
@@ -340,13 +340,11 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
     }
 };
 
-
 console.log("WS Bybit");
 export const wsBybit: WsBybit = new WsBybit();
-try{
-    wsBybit.initWs()
-}
-catch(e){
-    timedLog("FAILED TO INIT WS")
+try {
+    wsBybit.initWs();
+} catch (e) {
+    timedLog("FAILED TO INIT WS");
     console.log(e);
 }

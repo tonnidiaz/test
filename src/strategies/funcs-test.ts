@@ -22,6 +22,7 @@ import { strategy as strExp } from "./funcs-test-eFromH";
 import { strategy as strBillo } from "./funcs-test-billo";
 import { strategy as strSLTP } from "./funcs-test-billo";
 import { strategy as strTrailing } from "./funcs-test-trailing";
+import { strategy as strOld } from "./funcs-test-old";
 let _cnt = 0;
 
 const d = useSwindLow ? 20 : 0;
@@ -53,6 +54,20 @@ export const strategy = ({
         useBillo = false,
         useSLTP = false;
 
+    if (false) {
+        return strOld({
+            df,
+            balance,
+            buyCond,
+            sellCond,
+            lev,
+            pair,
+            maker,
+            taker,
+            trades,
+            platNm,
+        });
+    }
     if (useTrailing) {
         return strTrailing({
             df,

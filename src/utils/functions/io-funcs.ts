@@ -13,6 +13,8 @@ import { objStrategies, strategies } from "@/strategies";
 import { TestOKX } from "@/classes/test-platforms";
 import { platforms } from "../consts";
 import { ensureDirExists } from "../orders/funcs";
+import { okxInstrus } from "@/data/okx-instrus";
+import { binanceInfo } from "../binance-info";
 let prevData: IObj | null = null;
 
 export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
@@ -188,7 +190,7 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
 export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
     try {
         let { interval, start, end, offline, platform, save } = data;
-        const startPair = data.from
+        const startPair = data.from;
         let _data: {
             pair: string[];
             interval: number;
@@ -204,23 +206,54 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
 
         const plat = platforms[platform].obj;
         const platName = platforms[platform].name;
-        let coins = instruments
-            .filter((el) => el.quoteCoin == "USDT")
-            .map((el) => [el.baseCoin, el.quoteCoin]).sort();
-        if (!offline){
-           coins = coins.slice( typeof startPair == 'number' ? startPair : coins.findIndex((el) => el[0] == startPair[0]));
-         
-        }
+        const _platName = platName.toLowerCase();
+        let _instruments: string[][];
         start = start ?? parseDate(new Date());
         const year = start.split("-")[0];
 
         const strNum = Number(data.strategy);
 
-        const savePath = `data/rf/coins/${year}/${platName}_${interval}m.json`;
+        const savePath = `data/rf/coins/${year}/${_platName}_${interval}m.json`;
+
+        if (existsSync(savePath)){
+            _data = await require(savePath)
+        }
+
+        if (_platName == "okx") {
+            _instruments = okxInstrus
+                .filter((el) => el.state == "live")
+                .map((el) => [el.baseCcy, el.quoteCcy])
+                .sort();
+        } else if (_platName == "bybit") {
+            _instruments = instruments
+                .map((el) => [el.baseCoin, el.quoteCoin])
+                .sort();
+        }else{
+            const okxCoinsPath = savePath.replace(_platName, 'okx')
+            let okxCoins: IObj[] | null = null
+
+            if (existsSync(okxCoinsPath)){
+                okxCoins = await require(okxCoinsPath)
+            }
+            _instruments = binanceInfo.symbols.filter(el=> el.isSpotTradingAllowed == true).map(el=> [el.baseAsset, el.quoteAsset]).sort()
+            if (okxCoins){
+                _instruments = _instruments.filter(el=> okxCoins.findIndex(el2 => el2.pair.toString() == el.toString()) == -1 )
+            }
+        }
+
+        let coins = _instruments.filter((el) => el[1] == "USDT");
+        if (!offline) {
+            coins = coins.slice(
+                typeof startPair == "number"
+                    ? startPair
+                    : coins.findIndex((el) => el[0] == startPair[0])
+            );
+        }
+        
         ensureDirExists(savePath);
 
         for (let pair of coins) {
-            console.log('\nBEGIN PAIR:', pair);
+            console.log("\nBEGIN PAIR:", pair);
             let klines: any[] = [];
             let trades: any[] = [];
             let bal = Number(data.bal);
@@ -232,9 +265,9 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
                 `${klinesRootDir}/${platName.toLowerCase()}/${year}/${symbol}_${interval}m.json`
             );
 
-            if (offline && !existsSync(klinesPath)){
+            if (offline && !existsSync(klinesPath)) {
                 console.log("KLINES DIR NOT FOUND FOR", pair);
-                continue
+                continue;
             }
             const r =
                 offline || existsSync(klinesPath)
@@ -246,11 +279,11 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
                           symbol,
                           savePath: save ? klinesPath : undefined,
                       });
-                        
+
             klines = r ?? [];
 
             let df = tuCE(heikinAshi(parseKlines(klines)));
-            
+
             df = df.filter(
                 (el) =>
                     Date.parse(el.ts) <= endTs && Date.parse(el.ts) >= startTs
@@ -279,7 +312,7 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
                 interval,
                 trades: retData.trades,
             });
-            _data = [..._data].sort((a,b)=> a.profit > b.profit? -1 : 1)
+            _data = [..._data].sort((a, b) => (a.profit > b.profit ? -1 : 1));
             writeFileSync(savePath, JSON.stringify(_data), {});
             console.log(pair, "SAVED\n");
         }
@@ -287,6 +320,6 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
         return _data;
     } catch (e) {
         console.log(e);
-        return "SOMETHING WENT WRONG"
+        return "SOMETHING WENT WRONG";
     }
 };

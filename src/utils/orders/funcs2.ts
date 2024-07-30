@@ -100,6 +100,9 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
         botLog(bot, `ENTRY_LIMIT UPDATED to ${entryLimit}`); */
     }
 
+    /* RMOVE BOT FROM WS JUST IN CASE */
+    const ws = bot.platform == 'bybit' ? wsBybit : wsOkx
+    await ws.rmvBot(bot.id)
     if (pos && order && !order.is_closed && strategy.buyCond(prevRow)) {
         botLog(bot, "SELL ORDER NOT YET CLOSED, UPDATING EXIT_LIMIT");
 
@@ -116,7 +119,7 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
         await order.save();
         botLog(bot, "WATCHING FOR THE PX CHANGES");
 
-        const ws = bot.platform == 'bybit' ? wsBybit : wsOkx
+        
         await ws.addBot(bot.id, true);
     }
 };

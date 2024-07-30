@@ -9170,7 +9170,9 @@ export const setTP = (v: number) => (TP = v);
 export const MAX_PEC_FROM_H = 0.5;
 export const checkGreen = false,
     rf = false,
-    slFirstAlways = true, worstCaseScenario = true;
+    slFirstAlways = true;
+
+export const WCS1 = true, WCS2 = true;
 
 export const useAnyBuy = false;
 const largeStop = false;
@@ -9178,7 +9180,7 @@ const largeStop = false;
 const trails = {
     60: 1,
     30: 0.6,
-    15: 1/* 0.15 */,
+    15: .5/* 0.15 */,
     5: 0.5 /* .01 */,
     3: 0.12,
     1: 0.12,

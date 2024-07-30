@@ -9,7 +9,8 @@ import {
     rf,
     TRAILING_STOP_PERC,
     useSwindLow,
-    worstCaseScenario,
+    WCS1,
+    WCS2,
 } from "@/utils/constants";
 
 import {
@@ -84,8 +85,8 @@ export const strategy = ({
         enterTs = "";
 
     const prAve: number[] = [];
-    const pricePrecision = getPricePrecision(pair, "okx");
-    const basePrecision = getCoinPrecision(pair, "limit", "okx");
+    const pricePrecision = getPricePrecision(pair, platNm);
+    const basePrecision = getCoinPrecision(pair, "limit", platNm);
 
     console.log({ pricePrecision, basePrecision });
     balance = toFixed(balance, pricePrecision);
@@ -100,6 +101,7 @@ export const strategy = ({
 
         console.log(`\nTS: ${row.ts}`);
         _cnt += 1;
+        if (row.v == 0) continue;
 
         const _fillSellOrder = (ret: ReturnType<typeof fillSellOrder>) => {
             (pos = ret.pos),
@@ -131,11 +133,13 @@ export const strategy = ({
             _row,
             isSl,
             _base,
+            o
         }: {
             _exit: number;
             _row: IObj;
             isSl?: boolean;
             _base: number;
+            o?: number;
         }) {
             base -= _base;
             const ret = fillSellOrder({
@@ -156,6 +160,7 @@ export const strategy = ({
                 entryLimit,
                 maker,
                 isSl,
+                o
             });
             _fillSellOrder(ret);
         }
@@ -168,6 +173,7 @@ export const strategy = ({
             _entry: number;
             _row: IObj;
         }) {
+            if (toFixed(_amt / _entry, basePrecision) <= 0) return;
             if (!entryLimit) entryLimit = _entry;
             balance -= _amt;
             const ret = fillBuyOrder({
@@ -201,22 +207,23 @@ export const strategy = ({
 
         if (!pos && buyCond(prevRow)) {
             /* BUY SEC */
-            console.log(
-                `[ ${row.ts} ] \t MARKET buy order at ${entryLimit?.toFixed(2)}`
-            );
+
             // Place limit buy order
             entryLimit = isMarket ? row.o : prevRow.ha_o;
             enterTs = row.ts;
 
             if (entryLimit && isMarket) {
                 entry = row.o;
+                console.log(
+                    `[ ${row.ts} ] \t MARKET buy order at ${entry?.toFixed(2)}`
+                );
                 _fillBuy({ _entry: entry, _row: row, _amt: balance });
             }
         }
         if (pos) {
             /* SELL SECTION */
             const rf = true;
-            exitLimit = prevRow.ha_h * (1 + 1.5 / 100); //entry * (1 + 20 / 100);
+            exitLimit = row.o; //entry * (1 + 20 / 100);
             enterTs = row.ts;
             console.log(`[ ${row.ts} ] \t Limit sell order at ${exitLimit}`);
         }
@@ -229,21 +236,21 @@ export const strategy = ({
                 isExit = false;
             const _isGreen = prevRow.c >= o;
             const trailingStop = TRAILING_STOP_PERC;
-            const _sl = entry * (1 - SL / 100);
+            const _sl = Math.min(entry, o) * (1 - SL / 100);
             const _tp = o * (1 + TP / 100);
             const lFromO = ((o - l) / l) * 100;
 
             console.log("\nPOS:", { o, l, lFromO, trailingStop, c, h }, "\n");
-    
-           _exit = h * (1 - trailingStop / 100); // Increase the trailing stop with the price
-            
+
+            _exit = h * (1 - trailingStop / 100); // Increase the trailing stop with the price
+            const belowOpen = o * (1 - trailingStop / 100);
             if (c > _exit) {
                 console.log("SELLING AT CLOSE");
                 _exit = c;
             } else {
                 console.log("SELLING AT STOP");
                 isExit = true;
-                 }
+            }
 
             let _slip = 0;
             _exit *= 1 - _slip / 100;
@@ -256,11 +263,23 @@ export const strategy = ({
                     console.log("EXIT LESS THAN TP");
                     continue;
                 }
-                if (worstCaseScenario && _exit >= entry) {
+
+                if (WCS2 && l <= belowOpen ) {
+                    _exit = o > c && _exit >= entry ? _tp : belowOpen;
+                    _fillSell({ _exit, _row: erow, _base: base, o: o });
+                    
+                    if (c >= o) {
+                        console.log("\nRE-BUYING AT OPEN\n");
+                        entry = o;
+                        _fillBuy({ _amt: balance, _entry: entry, _row: erow });
+                        
+                    } 
+                    continue
+                } else if (WCS1 && _exit >= entry) {
                     _exit = _tp;
                 }
 
-                _fillSell({ _exit, _row: erow, _base: base });
+                _fillSell({ _exit, _row: erow, _base: base, o: o });
             }
         }
     }
