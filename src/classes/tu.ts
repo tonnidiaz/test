@@ -1,6 +1,7 @@
 import { WebSocket} from "ws";
 import type {ClientOptions, RawData} from "ws"
 import type {ClientRequestArgs} from "http"
+import { timedLog } from "@/utils/functions";
 
 export class TuWs extends WebSocket{
     constructor(address: string | URL, options?: ClientOptions | ClientRequestArgs | undefined){
@@ -9,6 +10,7 @@ export class TuWs extends WebSocket{
 
     sub(channels: string | string[]){
         console.log('\n', {channels} , '\n');
+       
         this.send(JSON.stringify({
             op: 'subscribe', args: typeof channels == 'string' ? [channels] : channels
         }))

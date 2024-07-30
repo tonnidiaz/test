@@ -62,8 +62,9 @@ export class WsBybit {
             ws.on("error", (e) => {
                 console.log(this.TAG, "ERROR", e);
             });
-            ws.on("close", (e) => {
+            ws.on("close", async (e) => {
                 console.log(this.TAG, "CLOSED", e);
+                await this.initWs()
             });
 
             ws.on("message", async (resp) => {
@@ -106,6 +107,7 @@ export class WsBybit {
     }
     async sub(bot: IBot) {
         for (let ws of this.wsList) {
+         
             ws.sub(this.getCandleChannelName(bot));
         }
     }
