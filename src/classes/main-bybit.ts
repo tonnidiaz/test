@@ -37,7 +37,7 @@ const WS_URL_SPOT_PUBLIC = "wss://stream.bybit.com/v5/public/spot";
 configDotenv();
 
 export class WsBybit {
-    ws: TuWs;
+    ws: TuWs | undefined;
     wsList: TuWs[]  = [];
     ok: boolean;
     botsWithPos: IOpenBot[] = [];
@@ -45,32 +45,33 @@ export class WsBybit {
     constructor() { 
         this.ok = false;
         const { env } = process;
-        this.ws = new TuWs(WS_URL_SPOT_PUBLIC);
-        console.log("DEV");
+       
         console.log(env.BYBIT_API_KEY_DEV, env.BYBIT_API_SECRET_DEV);
         
     }
 
     async initWs() {
-        if (this.ws.readyState == this.ws.OPEN)
-            this.ws.close()
+        try{
+             if (this.ws?.readyState == this.ws?.OPEN)
+            this.ws?.close()
         this.ws = new TuWs(WS_URL_SPOT_PUBLIC);
         this.wsList = [this.ws];
         console.log("MAIN_BYBIT INIT");
         for (let ws of this.wsList) {
-            ws.on("open", () => {
+            ws?.on("open", () => {
                 timedLog(this.TAG, "OPEN");
             });
-            ws.on("error", (e) => {
+            ws?.on("error", (e) => {
                 console.log(this.TAG, "ERROR", e);
             });
-            ws.on("close", async (e) => {
+            ws?.on("close", async (e) => {
                 console.log(this.TAG, "CLOSED", e);
+                if(e != 1006)
                 await this.initWs()
             });
 
-            ws.on("message", async (resp) => {
-                const { topic, data } = ws.parseData(resp);
+            ws?.on("message", async (resp) => {
+                const { topic, data } = ws?.parseData(resp);
 
                 for (let openBot of this.botsWithPos) {
                     const bot = await Bot.findById(openBot.id).exec();
@@ -100,6 +101,10 @@ export class WsBybit {
                 }
             });
         }
+        }
+       catch(e){
+        console.log(e);
+       }
     }
 
     getCandleChannelName(bot: IBot) {
@@ -110,12 +115,12 @@ export class WsBybit {
     async sub(bot: IBot) {
         for (let ws of this.wsList) {
          
-            ws.sub(this.getCandleChannelName(bot));
+            ws?.sub(this.getCandleChannelName(bot));
         }
     }
     async unsub(bot: IBot) {
         for (let ws of this.wsList) {
-            ws.unsub(this.getCandleChannelName(bot));
+            ws?.unsub(this.getCandleChannelName(bot));
         }
     }
     getSymbol(bot: IBot) {

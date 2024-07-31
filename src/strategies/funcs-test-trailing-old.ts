@@ -23,8 +23,6 @@ import {
 } from "@/utils/functions";
 import { IObj } from "@/utils/interfaces";
 import { strategy as strTrillo } from "./funcs-test-trillo";
-import { strategy as strOld} from "./funcs-test-trailing-old";
-import { strategy as strOldTest} from "./funcs-test-trailing-old-test";
 
 let _cnt = 0;
 
@@ -53,22 +51,9 @@ export const strategy = ({
     platNm: "binance" | "bybit" | "okx";
 }) => {
     console.log(df[0]);
-    const useOld = false, useOldTest = true;
-    if (useOld)
-        return strOld({
-            df,
-            balance,
-            buyCond,
-            sellCond,
-            lev,
-            pair,
-            maker,
-            taker,
-            trades,
-            platNm,
-        });
-    if (useOldTest)
-        return strOldTest({
+    const useTrillo = false;
+    if (useTrillo)
+        return strTrillo({
             df,
             balance,
             buyCond,
@@ -267,22 +252,18 @@ export const strategy = ({
             _exit = h * (1 - trailingStop / 100); // Increase the trailing stop with the price
             const belowOpen = o * (1 - trailingStop / 100);
 
-            if (l <= belowOpen && c > o && belowOpen >= _sl && belowOpen > entry) {
+            if (l <= belowOpen && !(o > c && _exit >= _tp)) {
+                console.log("SELLING AT BELOW OPEN");
                 _exit = belowOpen;
                 _fillSell({ _exit, _row: erow, _base: base, o: o });
 
+                if (c > o) {
                     console.log("\nRE-BUYING AT OPEN\n");
                     entry = o;
                     _fillBuy({ _amt: balance, _entry: entry, _row: erow });
                   
-                
+                }
                 continue;
-            }else if (l <= belowOpen && c < o && belowOpen >= _sl && _exit < _tp  && belowOpen > entry){
-                _exit = belowOpen;
-                _fillSell({ _exit, _row: erow, _base: base, o: o });
-                entry = c
-                _fillBuy({ _amt: balance, _entry: entry, _row: erow });
-                continue
             }
             if (c > _exit) {
                 // DID NOT GO DOWN TO REACH STOP_PRICE
@@ -290,8 +271,9 @@ export const strategy = ({
 
                 _exit = c;
                 isClose = true;
-                if (c > _tp /* && c > _sl */)
+                if (c > _tp && c > _sl)
                     _fillSell({ _exit, _row: erow, _base: base, o: o });
+                else console.log("NOT SOLD")
                 continue;
             } else {
                 console.log("SELLING AT STOP");
@@ -305,7 +287,7 @@ export const strategy = ({
                 if (_exit > o) {
                     prAve.push(((_exit - o) / o) * 100);
                 }
-                if (/* isExit && */ _exit >= o && _exit < _tp) {
+                if (/* isExit && */ /* _exit >= o && */ _exit < _tp) {
                     console.log("EXIT LESS THAN TP");
                     continue;
                 }

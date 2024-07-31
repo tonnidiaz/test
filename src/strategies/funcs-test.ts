@@ -23,6 +23,7 @@ import { strategy as strBillo } from "./funcs-test-billo";
 import { strategy as strSLTP } from "./funcs-test-billo";
 import { strategy as strTrailing } from "./funcs-test-trailing";
 import { strategy as strOld } from "./funcs-test-old";
+import { strategy as strFallbackSL } from "./funcs-test-fallback-sl";
 let _cnt = 0;
 
 const d = useSwindLow ? 20 : 0;
@@ -52,7 +53,7 @@ export const strategy = ({
     const useExp = false,
         useTrailing = true,
         useBillo = false,
-        useSLTP = false;
+        useSLTP = false, useFallbackSL = false;
 
     if (false) {
         return strOld({
@@ -70,6 +71,20 @@ export const strategy = ({
     }
     if (useTrailing) {
         return strTrailing({
+            df,
+            balance,
+            buyCond,
+            sellCond,
+            lev,
+            pair,
+            maker,
+            taker,
+            trades,
+            platNm,
+        });
+    }
+    if (useFallbackSL) {
+        return strFallbackSL({
             df,
             balance,
             buyCond,

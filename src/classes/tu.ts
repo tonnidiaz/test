@@ -5,6 +5,7 @@ import { timedLog } from "@/utils/functions";
 
 export class TuWs extends WebSocket{
     constructor(address: string | URL, options?: ClientOptions | ClientRequestArgs | undefined){
+       
         super(address, options)
     }
 

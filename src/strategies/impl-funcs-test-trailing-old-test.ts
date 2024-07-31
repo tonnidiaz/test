@@ -23,8 +23,6 @@ import {
 } from "@/utils/functions";
 import { IObj } from "@/utils/interfaces";
 import { strategy as strTrillo } from "./funcs-test-trillo";
-import { strategy as strOld} from "./funcs-test-trailing-old";
-import { strategy as strOldTest} from "./funcs-test-trailing-old-test";
 
 let _cnt = 0;
 
@@ -52,34 +50,8 @@ export const strategy = ({
     trades: IObj[];
     platNm: "binance" | "bybit" | "okx";
 }) => {
-    console.log(df[0]);
-    const useOld = false, useOldTest = true;
-    if (useOld)
-        return strOld({
-            df,
-            balance,
-            buyCond,
-            sellCond,
-            lev,
-            pair,
-            maker,
-            taker,
-            trades,
-            platNm,
-        });
-    if (useOldTest)
-        return strOldTest({
-            df,
-            balance,
-            buyCond,
-            sellCond,
-            lev,
-            pair,
-            maker,
-            taker,
-            trades,
-            platNm,
-        });
+    console.log(df[0].ts);
+
     let pos = false;
     let cnt = 0,
         gain = 0,
@@ -261,60 +233,47 @@ export const strategy = ({
             _sl = Number(_sl.toFixed(pricePrecision));
             _tp = Number(_tp.toFixed(pricePrecision));
             lFromO = Number(lFromO.toFixed(pricePrecision));
+            const belowOpen = Number(
+                (o * (1 - trailingStop / 100)).toFixed(pricePrecision)
+            );
+            const belowEntry = Number(
+                (entry * (1 - trailingStop / 100)).toFixed(pricePrecision)
+            );
+            const belowHigh = Number(
+                (h * (1 - trailingStop / 100)).toFixed(pricePrecision)
+            );
+            console.log("\nPOS:", { o, l, belowOpen, _exit, c, h }, "\n");
 
-            console.log("\nPOS:", { o, l, lFromO, trailingStop, c, h }, "\n");
+            const RED = c < o
+            const GREEN = !RED
 
-            _exit = h * (1 - trailingStop / 100); // Increase the trailing stop with the price
-            const belowOpen = o * (1 - trailingStop / 100);
+            const RED_COND = l <= belowOpen && RED && belowHigh < _tp;
+            const RED_COND2 = l <= belowOpen && RED && belowHigh >= _tp;
 
-            if (l <= belowOpen && c > o && belowOpen >= _sl && belowOpen > entry) {
-                _exit = belowOpen;
-                _fillSell({ _exit, _row: erow, _base: base, o: o });
+            const GREEN_COND = GREEN && l > belowOpen && belowHigh >= _tp
+            const GREEN_COND2 = GREEN && l <= belowOpen
 
-                    console.log("\nRE-BUYING AT OPEN\n");
-                    entry = o;
-                    _fillBuy({ _amt: balance, _entry: entry, _row: erow });
-                  
-                
-                continue;
-            }else if (l <= belowOpen && c < o && belowOpen >= _sl && _exit < _tp  && belowOpen > entry){
-                _exit = belowOpen;
-                _fillSell({ _exit, _row: erow, _base: base, o: o });
-                entry = c
-                _fillBuy({ _amt: balance, _entry: entry, _row: erow });
+            _exit = Math.max(belowHigh) 
+            
+            if (false){}
+           
+
+            if (_exit == belowHigh && c > _exit && l > _exit) {
+                _exit = c;
+                isClose = true
+            }
+            if(l <= belowOpen && h <= o * (1 + 0/100) ){
                 continue
             }
-            if (c > _exit) {
-                // DID NOT GO DOWN TO REACH STOP_PRICE
-                console.log("SELLING AT CLOSE");
+            if (_exit <= h &&  l < _exit && _exit >= _sl) {
 
-                _exit = c;
-                isClose = true;
-                if (c > _tp /* && c > _sl */)
-                    _fillSell({ _exit, _row: erow, _base: base, o: o });
-                continue;
-            } else {
-                console.log("SELLING AT STOP");
-                isExit = true;
-            }
-
-            let _slip = 0;
-            _exit *= 1 - _slip / 100;
-
-            if (go && _exit >= _sl) {
-                if (_exit > o) {
-                    prAve.push(((_exit - o) / o) * 100);
+                if (_exit > o && _exit < _tp){
+                   // continue
                 }
-                if (/* isExit && */ _exit >= o && _exit < _tp) {
-                    console.log("EXIT LESS THAN TP");
-                    continue;
+                if (WCS1 && _exit >= _tp){
+                    //_exit = _tp
                 }
-
-                if (WCS1 && _exit >= o) {
-                    _exit = _tp;
-                }
-
-                _fillSell({ _exit, _row: erow, _base: base, o: o });
+                _fillSell({ _exit, _row: row, _base: base });
             }
         }
     }
