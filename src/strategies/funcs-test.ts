@@ -20,7 +20,7 @@ import {
 import { IObj } from "@/utils/interfaces";
 import { strategy as strExp } from "./funcs-test-eFromH";
 import { strategy as strBillo } from "./funcs-test-billo";
-import { strategy as strSLTP } from "./funcs-test-billo";
+import { strategy as strSLTP } from "./funcs-test-tpsl";
 import { strategy as strTrailing } from "./funcs-test-trailing";
 import { strategy as strOld } from "./funcs-test-old";
 import { strategy as strFallbackSL } from "./funcs-test-fallback-sl";
@@ -51,9 +51,9 @@ export const strategy = ({
     platNm: "binance" | "bybit" | "okx";
 }) => {
     const useExp = false,
-        useTrailing = true,
+        useTrailing = false,
         useBillo = false,
-        useSLTP = false, useFallbackSL = false;
+        useSLTP = true, useFallbackSL = false;
 
     if (false) {
         return strOld({

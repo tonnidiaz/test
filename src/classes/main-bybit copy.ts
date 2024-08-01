@@ -66,16 +66,13 @@ export class WsBybit {
             });
             ws?.on("close", async (e) => {
                 console.log(this.TAG, "CLOSED", e);
-                //if(e != 1006)
+                if(e != 1006)
                 await this.initWs()
             });
 
             ws?.on("message", async (resp) => {
                 const { topic, data } = ws?.parseData(resp);
-if (DEV) {
-                            timedLog("WS UPDATE");
-                            //timedLog(candle);
-                        }
+
                 for (let openBot of this.botsWithPos) {
                     const bot = await Bot.findById(openBot.id).exec();
                     if (!bot?.active) return;
@@ -95,7 +92,10 @@ if (DEV) {
                         const df = tuCE(
                             heikinAshi(parseKlines([...openBot.klines, candle]))
                         );
-                        
+                        if (DEV) {
+                            timedLog("WS UPDATE");
+                            //timedLog(candle);
+                        }
                         updateOpenBot(bot, openBot, df);
                     }
                 }
@@ -227,14 +227,17 @@ const updateBotAtClose = async (_bot: IBot) => {
     const plat = new Bybit(bot);
     const c = await plat.getTicker();
     timedLog({ ticker: c });
+    const _sl = order.buy_price * (1 - stops[bot.interval] / 100);
     const _tp = order.tp;
 
-    if (sell_price < c && sell_price >= _tp) {
-   
+    if (sell_price < c && c >= _sl) {
+        if (c < _tp) {
+            return botLog(bot, "TIMED: PRICE BELOW MIN TP");
+        }
         botLog(
             bot,
             `TIMED: PLACING MARKET SELL ORDER AT CLOSE SINCE IT IS > STOP_PX`,
-            { ts: parseDate(new Date()), c, sell_price, _tp }
+            { ts: parseDate(new Date()), c, sell_price, _sl }
         );
         const amt = order.base_amt - order.buy_fee;
         const r = await placeTrade({
@@ -248,8 +251,6 @@ const updateBotAtClose = async (_bot: IBot) => {
         if (!r) return botLog(bot, "TIMED: FAILED TO PLACE MARKET SELL ORDER");
         await wsBybit.rmvBot(bot.id);
         botLog(bot, "TIMED: MARKET SELL PLACED. BOT REMOVED");
-    }else{
-        timedLog('CLOSE PRICE NOT > SELL_PX', {c, _tp, sell_price})
     }
 };
 
@@ -275,20 +276,17 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
         const initHighs = order.highs.map((el) => el.val!);
 
         if (DEV){
-            timedLog("WS:", {c, all_highs: order.all_highs.length});
+            timedLog("WS:", {c, all_highs: order.all_highs});
         }
-        if (h != initHighs[initHighs.length - 1]) {
-            order.highs.push({ ts: parseDate(new Date()), val: h });
+        if (c != initHighs[initHighs.length - 1]) {
+            order.highs.push({ ts: parseDate(new Date()), val: c });
             timedLog("ADDING HIGHS...")
         }
-        if (h != order.all_highs[order.all_highs.length - 1]) {
-            order.all_highs.push({ ts: parseDate(new Date()), val: h });
+        if (c != order.all_highs[order.all_highs.length - 1]) {
+            order.all_highs.push({ ts: parseDate(new Date()), val: c });
             timedLog("ADDING ALL_HIGHS...")
         }
         await order.save()
-
-
-        const pricePrecision = getPricePrecision([bot.base, bot.ccy], bot.platform)
 
         if (
             bot &&
@@ -300,14 +298,14 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
                 timedLog("ADJUSTING THE STOP_PRICE");
                 // ADJUST _EXIT
                 sell_price = h * (1 - trailingStop / 100);
-                sell_price = Number(sell_price.toFixed(pricePrecision))
-                timedLog({sell_price})
                 order.sell_price = sell_price;
                 await order.save();
             }
 
-            if (c <= sell_price && sell_price >= tp) {
-               
+            if (c <= sell_price && c >= sl) {
+                if (c >= o && c < tp) {
+                    return botLog(bot, "WS: PRICE BELOW MIN TP", { tp, c });
+                }
                 botLog(bot, `PLACING MARKET SELL ORDER AT EXIT`, {
                     h,
                     sell_price,
@@ -327,8 +325,26 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
                 placed = true;
                 botLog(bot, "WS: MARKET SELL PLACED. BOT REMOVED");
             }
-        } 
-        
+        } else if (order.is_closed && c >= o && sell_price < o) {
+            timedLog("REBUYING AT OPEN...");
+
+            const amt = order.new_ccy_amt - Math.abs(order.sell_fee);
+
+            const res = await placeTrade({
+                bot: bot,
+                ts: parseDate(ts),
+                amt,
+                side: "buy",
+                price: 0 /* 0 for market buy */,
+                plat: plat,
+            });
+
+            if (res) {
+                await wsBybit.rmvBot(bot.id);
+                rmvd = true;
+                timedLog("RE-BOUGHT, BOT REMOVED");
+            }
+        }
     } catch (e) {
         console.log(e);
     } finally {

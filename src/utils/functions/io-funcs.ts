@@ -208,6 +208,7 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
         const platName = platforms[platform].name;
         const _platName = platName.toLowerCase();
         let _instruments: string[][];
+        let last: string[] | undefined;
         start = start ?? parseDate(new Date());
         const year = start.split("-")[0];
 
@@ -216,7 +217,8 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
         const savePath = `data/rf/coins/${year}/${_platName}_${interval}m.json`;
 
         if (existsSync(savePath)){
-            _data = await require(savePath)
+            _data = (await require(savePath)).sort((a, b) => (a.pair > b.pair ? 1 : -1))
+            last = _data[_data.length - 1].pair
         }
 
         if (_platName == "okx") {
@@ -243,12 +245,20 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
 
         let coins = _instruments.filter((el) => el[1] == "USDT");
         if (!offline) {
-            coins = coins.slice(
+            if (startPair){
+               coins = coins.slice(
                 typeof startPair == "number"
                     ? startPair
                     : coins.findIndex((el) => el[0] == startPair[0])
-            );
+            ); 
+            }else if (last){
+                coins = coins.slice(coins.findIndex(el=> el.toString() == last.toString()))
+                console.log("STARTING AT:", coins[0], {last});
+            }
+            
         }
+
+        //return []
         
         ensureDirExists(savePath);
 
