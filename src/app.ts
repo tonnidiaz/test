@@ -54,6 +54,7 @@ import { wsBybit } from "./classes/main-bybit";
 import { platforms } from "./utils/consts";
 import { Bybit } from "./classes/bybit";
 import { OKX } from "./classes/okx";
+import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 
 dotenv.config();
 // view engine setup
@@ -71,6 +72,8 @@ async function connectMongo() {
     let mongoURL = (DEV ? process.env.MONGO_URL_LOCAL : process.env.MONGO_URL)!;
     try {
         console.log(mongoURL);
+        mongoose.plugin(updateIfCurrentPlugin)
+        console.log("UPDATE IF CURRENT PLUGIN SET")
         await mongoose.connect(mongoURL, { dbName: "tb" });
         console.log("Connection established");
     } catch (e) {
