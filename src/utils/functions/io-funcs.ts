@@ -252,7 +252,7 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
                     : coins.findIndex((el) => el[0] == startPair[0])
             ); 
             }else if (last){
-                coins = coins.slice(coins.findIndex(el=> el.toString() == last.toString()))
+                coins = coins.slice(coins.findIndex(el=> el.toString() == last!.toString()))
                 console.log("STARTING AT:", coins[0], {last});
             }
             
