@@ -4,9 +4,9 @@ import { HydratedDocumentFromSchema, InferSchemaType, Schema } from "mongoose";
 export const TestSchema = new Schema(
     {
         name: {type: String, default: ''},
-        cars: {type: [{_id: false, name: String, speed: Number}], default: []}
+        cars: {type: [{_id: false, name: String, speed: Number}], default: []},
     },
-    { timestamps: true }
+    { timestamps: true, versionKey: false }
 );
 export interface ITest extends HydratedDocumentFromSchema<typeof TestSchema> {}
  

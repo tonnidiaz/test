@@ -26,9 +26,9 @@ export const OrderSchema = new Schema(
         new_ccy_amt: { type: Number, default: 0 },
         base_amt: { type: Number, default: 0 },
         is_closed: { type: Boolean, default: false },
-        bot: { type: Schema.ObjectId, required: true, ref: "Bot" },
+        bot: { type: Schema.ObjectId, required: true, ref: "Bot" }
     },
-    { timestamps: true }
+    { timestamps: true, versionKey: false }
 );
 export interface IOrder extends HydratedDocumentFromSchema<typeof OrderSchema> {}
  
