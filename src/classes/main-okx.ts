@@ -318,15 +318,7 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
             if (DEV){
                 timedLog("WS", {row})
             }
-            if (c != initHighs[initHighs.length - 1]) {
-                order.highs.push({ ts: parseDate(new Date()), val: c });
-                timedLog("ADDING HIGHS...")
-            }
-            if (c != initHighs[initHighs.length - 1]) {
-                order.all_highs.push({ ts: parseDate(new Date()), val: c });
-                timedLog("ADDING ALL_HIGHS...")
-            }
-await order.save()
+            
 
             // STOP LISTENING IF L <= O TRAILING STOP
             const lFromO = ((o - l) / l) * 100;
@@ -354,7 +346,21 @@ await order.save()
                 order.sell_price = sell_price;
                 await order.save();
             }
-
+            const _high = {
+                ts: parseDate(new Date()),
+                val: h,
+                tp,
+                px: sell_price,
+            };
+            if (h != initHighs[initHighs.length - 1]) {
+                order.highs = [_high];
+                timedLog("ADDING HIGHS...");
+            }
+            if (h != order.all_highs[order.all_highs.length - 1]) {
+                order.all_highs = [_high];
+                timedLog("ADDING ALL_HIGHS...");
+            }
+            await order.save();
             if (c <= sell_price && c >= _sl) {
 
                 if (c >= entry && c < _tp){

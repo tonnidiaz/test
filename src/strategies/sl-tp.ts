@@ -153,4 +153,4 @@ class Str11 extends Strategy{
     }
 }
 
-export const strategies = [ new Str7()]
+export const strategies = []

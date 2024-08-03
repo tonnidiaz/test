@@ -39,6 +39,7 @@ import indexRouter from "./routes/index";
 import usersRouter from "./routes/users";
 import authRouter from "./routes/auth";
 import botsRouter from "./routes/bots";
+import rfRouter from "./routes/rf";
 
 const app = express();
 import { default as mongoose } from "mongoose";
@@ -95,6 +96,7 @@ app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/auth", authRouter);
 app.use("/bots", botsRouter);
+app.use("/rf", rfRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

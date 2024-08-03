@@ -78,8 +78,8 @@ export class MACD_HL_HA extends Strategy {
         return MACD_EXT.prototype.sellCond(row) && HL_HA.prototype.sellCond(row)
     }
 }
-export class SMA_EXT extends Strategy {
-    name: string = "SMA EXT";
+export class MA_EXT extends Strategy {
+    name: string = "MA_EXT";
     desc: string = `Enter: sma20 >  sma50 && low is < 5% from o, Exit: oposite `;
 
     buyCond(row: IObj): boolean {
@@ -199,9 +199,8 @@ export class STOCHIE extends Strategy {
 export const strategies = [
     new MACD_ONLY(),
     new MACD_EXT(),
-    new MACD_MA(),
-    new MACD_MA_RSI(),
     new MA_ONLY(),
-    new SMA_EXT(),
-    new HL(), new HL_HA(), new MACD_HL_HA(), new STOCHIE()
+    new MA_EXT(),
+    new MACD_MA(),
+    new HL(), new HL_HA()
 ];

@@ -56,4 +56,4 @@ class ThreeSum extends Strategy {
     }
 }
 
-export const strategies = [new RSI_ONLY(), new ANY(), new ThreeSum()]// [ new BB_SMA(), new ThreeSum()];
+export const strategies = [new ANY()]// [ new BB_SMA(), new ThreeSum()];
