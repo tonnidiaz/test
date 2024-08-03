@@ -226,14 +226,17 @@ export const strategy = ({
             }
             else  */ if (belowH >= MIN_TRAIL /* && c > o */) {
                 const bh = WCS1 ? MIN_TRAIL : belowH;
-                _exit = c > bh && c >= MIN_TRAIL ? c : bh;
-                if (l > _exit) continue;
+                _exit = c > bh ? c : bh;
+                if (l > _exit ) continue;
             } 
            
             else {
                 go = false;
             }
             if (go && _exit != 0) {
+                const w = _exit == c ? 'CLOSE' : 'EXIT'
+                    console.log('FILL AT', w, {cgtp: _exit >= MIN_TRAIL})
+                
                 const _base = base;
                 _fillSell({ _exit, _row: erow, _base });
             }

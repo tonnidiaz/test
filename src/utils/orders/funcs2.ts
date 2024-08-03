@@ -12,13 +12,14 @@ import {
 import { IBot } from "@/models/bot";
 import { Order } from "@/models";
 import { placeTrade } from "./funcs";
-import { botLog } from "../functions";
+import { botLog, timedLog } from "../functions";
 import { objStrategies } from "@/strategies";
 import { IObj, IOrderDetails } from "../interfaces";
 import { wsOkx } from "@/classes/main-okx";
 import { objPlats } from "../consts2";
 import { wsBybit } from "@/classes/main-bybit";
 import { SL } from "../constants";
+import { Bybit } from "@/classes/bybit";
 //import { wsOkx } from "@/classes/main-okx";
 
 export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
@@ -38,9 +39,8 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
 
     const strategy = objStrategies[bot.strategy - 1];
     botLog(bot, strategy);
-    const orders = await findBotOrders(bot);
 
-    let order = orders.length ? orders[orders.length - 1] : null;
+    let order = await Order.findById(bot.orders[bot.orders.length - 1].id).exec();
 
     let pos =
         order &&
@@ -50,6 +50,15 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     console.log({ pos });
 
     /* ------ START ---------- */
+    if (pos && order && !order.is_closed){
+        /* SAME AS AT CLOSE, FILL ORDER IF CONDITIONS ARE MET AND UPDATE POSITION */
+        botLog(bot, "AT CLOSE [NEW CANDLE]")
+        
+        const _r = await updateBotAtClose(bot, order, df[df.length - 1].c)
+        if (_r != undefined){
+            pos = _r
+        }
+    }
     if (!pos) {
         // Place buy order
         botLog(bot, "BUY ORDER NOT YET PLACED, UPDATING ENTRY_LIMIT");
@@ -136,7 +145,7 @@ export const updateOrderInDb = async (order: IOrder, res: IOrderDetails) => {
     order.is_closed = true;
     order.sell_fee = fee;
     order.sell_timestamp = {
-        ...order.sell_timestamp,
+        i: order.sell_timestamp?.i,
         o: parseDate(new Date(res.fillTime)),
     };
     /* order == currentOrder */
@@ -145,4 +154,46 @@ export const updateOrderInDb = async (order: IOrder, res: IOrderDetails) => {
     order.profit = profit;
     order.order_id = res.id;
     await order.save();
+};
+
+
+const updateBotAtClose = async (bot: IBot, order: IOrder, c: number) => {
+
+    try{
+      timedLog("TIMED: UPDATE AT CLOSE");
+
+    const pos = true
+    timedLog("TIMED: ", { sell_px: order?.sell_price, pos });
+
+    const { sell_price } = order;
+    const plat = new Bybit(bot);
+    timedLog({ ticker: c });
+    const _tp = order.tp;
+
+    if (sell_price < c && sell_price >= _tp) {
+        botLog(
+            bot,
+            `TIMED: PLACING MARKET SELL ORDER AT CLOSE SINCE IT IS > STOP_PX`,
+            { ts: parseDate(new Date()), c, sell_price, _tp }
+        );
+        const amt = order.base_amt - order.buy_fee;
+        const r = await placeTrade({
+            bot: bot,
+            ts: parseDate(new Date()),
+            amt: Number(amt),
+            side: "sell",
+            plat: plat,
+            price: 0,
+        });
+        if (!r) return botLog(bot, "TIMED: FAILED TO PLACE MARKET SELL ORDER");
+        botLog(bot, "TIMED: MARKET SELL PLACED. BOT REMOVED");
+        return false
+    } else {
+        timedLog("CLOSE PRICE NOT > SELL_PX", { c, _tp, sell_price });
+        return true
+    }  
+    }
+    catch(e){
+        console.log(e);
+    }
 };

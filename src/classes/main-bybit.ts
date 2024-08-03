@@ -191,8 +191,8 @@ export class WsBybit {
                 const ts = Number(prev[0]);
                 const closeTime = ts + 2 * bot.interval * 60000;
                 const at = new Date(closeTime - 30 * 1000);
-                timedLog("SCHEDULING TIMED:", parseDate(at));
-                scheduleJob(at, () => updateBotAtClose(bot));
+                //timedLog("SCHEDULING TIMED:", parseDate(at));
+                //scheduleJob(at, () => updateBotAtClose(bot));
             }
             timedLog(`WS: BOT: ${botId} added`);
         } catch (e) {
@@ -310,11 +310,11 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
                 px: sell_price,
             };
             if (h != initHighs[initHighs.length - 1]) {
-                order.highs = [_high];
+                order.highs.push(_high);
                 timedLog("ADDING HIGHS...");
             }
             if (h != order.all_highs[order.all_highs.length - 1]) {
-                order.all_highs = [_high];
+                order.all_highs.push(_high);
                 timedLog("ADDING ALL_HIGHS...");
             }
             await order.save();
