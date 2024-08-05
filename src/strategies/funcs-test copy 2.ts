@@ -4,7 +4,6 @@ import {
     SL,
     TAKER_FEE_RATE,
     TP,
-    WCS1,
     isMarket,
     rf,
     useAnyBuy,
@@ -18,11 +17,14 @@ import {
     randomNum,
     toFixed,
 } from "@/utils/functions";
-import { IObj, ICandle} from "@/utils/interfaces";
+import { IObj } from "@/utils/interfaces";
 import { strategy as strExp } from "./funcs-test-eFromH";
 import { strategy as strBillo } from "./funcs-test-billo";
-import { strategy as strSLTP } from "./funcs-test-billo";
+import { strategy as strSLTP } from "./funcs-test-tpsl";
 import { strategy as strTrailing } from "./funcs-test-trailing";
+import { strategy as strOld } from "./funcs-test-old";
+import { strategy as strHeader } from "./funcs-test-header";
+import { strategy as strFallbackSL } from "./funcs-test-fallback-sl";
 let _cnt = 0;
 
 const d = useSwindLow ? 20 : 0;
@@ -38,10 +40,10 @@ export const strategy = ({
     trades,
     platNm,
 }: {
-    df: ICandle[];
+    df: IObj[];
     balance: number;
-    buyCond: (row: ICandle, df?: ICandle[], i?: number) => boolean;
-    sellCond: (row: ICandle, entry: number, df?: ICandle[], i?: number) => boolean;
+    buyCond: (row: IObj, df?: IObj[], i?: number) => boolean;
+    sellCond: (row: IObj, entry: number, df?: IObj[], i?: number) => boolean;
     pair: string[];
     maker: number;
     taker: number;
@@ -52,10 +54,52 @@ export const strategy = ({
     const useExp = false,
         useTrailing = false,
         useBillo = false,
-        useSLTP = false;
+        useSLTP = false, useFallbackSL = false, useHeader = false;
 
+    if (useHeader) {
+        return strHeader({
+            df,
+            balance,
+            buyCond,
+            sellCond,
+            lev,
+            pair,
+            maker,
+            taker,
+            trades,
+            platNm,
+        });
+    }
+    if (false) {
+        return strOld({
+            df,
+            balance,
+            buyCond,
+            sellCond,
+            lev,
+            pair,
+            maker,
+            taker,
+            trades,
+            platNm,
+        });
+    }
     if (useTrailing) {
         return strTrailing({
+            df,
+            balance,
+            buyCond,
+            sellCond,
+            lev,
+            pair,
+            maker,
+            taker,
+            trades,
+            platNm,
+        });
+    }
+    if (useFallbackSL) {
+        return strFallbackSL({
             df,
             balance,
             buyCond,
@@ -132,8 +176,8 @@ export const strategy = ({
         exit: number = 0,
         enterTs = "";
 
-    const pricePrecision = getPricePrecision(pair, "bybit");
-    const basePrecision = getCoinPrecision(pair, "limit", "bybit");
+    const pricePrecision = getPricePrecision(pair, platNm);
+    const basePrecision = getCoinPrecision(pair, "limit", platNm);
 
     console.log({ pricePrecision, basePrecision });
     balance = toFixed(balance, pricePrecision);
@@ -177,7 +221,7 @@ export const strategy = ({
             balance = 0;
         };
 
-        async function _fillSell(_exit: number, _row: ICandle, isSl?: boolean) {
+        async function _fillSell(_exit: number, _row: IObj, isSl?: boolean) {
             const ret = fillSellOrder({
                 exitLimit,
                 exit: _exit,
@@ -200,7 +244,7 @@ export const strategy = ({
             _fillSellOrder(ret);
         }
 
-        function _fillBuy(_entry: number, _row: ICandle) {
+        function _fillBuy(_entry: number, _row: IObj) {
             if (!entryLimit) entryLimit = entry;
             const ret = fillBuyOrder({
                 entry: _entry,
@@ -219,70 +263,61 @@ export const strategy = ({
         const isGreen = prevRow.c >= prevRow.o;
         const isSum = prevRow.c > row.o;
 
-       if (pos && exitLimit) {
+        if (!pos && entryLimit) {
+            const entryRow = row;
+            console.log("HAS NO POS");
+
+            let goOn = true,
+                isSl = false;
+
+            if (entryRow.l < entryLimit) {
+                entry = entryLimit;
+            } else {
+                goOn = false;
+                console.log("NEITHER");
+            }
+            if (goOn) {
+                const p = "EXIT";
+                console.log("\nFILLING BUY ORDER AT", p);
+                _fillBuy(entry, entryRow);
+                //continue
+            }
+        }  if (pos && exitLimit) {
             exit = 0;
-            const exitRow = prevRow;
+            const exitRow = row;
             console.log("HAS POS");
 
             let goOn = true,
                 isSl = false,
-                is_curr = false;
+                is_curr = false, isClose = false
 
-            const { h, l, c, o, ha_o, ha_h, ha_l, ha_c } = prevRow;
+            const { h, l, c, o, ha_o, ha_h, ha_l, ha_c } = exitRow;
 
             const fast = false;
 
-            const SL = fast ? 0.15 : .5; //1;
+            const SL = fast ? 0.15 : 1; //1;
             const TP1 = fast ? 1.5 : 3.5; //3.5;
             const TP2 = fast ? 0.5 : 2; //2;
 
             const _sl = entry * (1 - SL / 100); //.25
-
             const _tp = o * (1 + TP1 / 100); //3.5
-            const _tp2 = _tp * (1 + TP2 / 100); //1.5
-            const _tp3 = _tp * (1 - TP2 / 100); //1.5
 
-            const trail = h * (1 - SL/100)
             if (false) {
-            } else if (l <= _sl && h > _sl && _sl < o) {
-                exit = _sl;
-                _fillSell(exit, prevRow, true);
-                exit = 0;
-                //   if (c < _sl) continue;
-                //continue
-                if (c >= o) {
-                    entry = o;
-                    _fillBuy(entry, prevRow);
-                    exit = c;
-                    if (c < entry * (1 + TP1 / 100)) continue;
-                }
-            } else if (trail >= _tp) {
-                exit = WCS1 ? _tp : trail;
-                if (exit < entry * (1 + TP1 / 100)){continue}
-                _fillSell(exit, prevRow, true);
-                continue
-                exit = 0;
-                //   if (c < _sl) continue;
-                //continue
-                if (c < o) {
-                    entry = o;
-                    _fillBuy(entry, prevRow);
-                    continue
-                    exit = c;
-                    if (c < entry * (1 + TP1 / 100)) continue;
-                }
-            } else if (h >= _tp) {
-                /* if (h >= _tp2) {
-                    exit = _tp2;
-                } else if (c >= entry) exit = c;
-                else {
-                    continue
-                } */
-               exit = row.o
-            } else if (isGreen && h < _sl) {
+            } 
+            else if (o <= _sl){
+              exit = row.c
+              isClose = true
+            }
+            else if (l <= _sl && h > _sl) {       
+                  exit =  row.o;             
+            }
+           else if (h >= _tp) {
+                exit = row.o;
+            } else if (h < _sl) {
                 exit = row.o;
             }
-
+            //exit = row.c
+                exit = c
             if (exit == 0) {
                 console.log("NEITHER");
                 goOn = false;
@@ -293,13 +328,19 @@ export const strategy = ({
                 console.log("\nFILLING SELL ORDER AT", p);
                 _fillSell(exit, exitRow, isSl);
                 console.log({ is_curr });
+                //if (isClose){
+                   entryLimit = row.l
+               
+                //}
+                
             }
+            continue 
         }
 
         if (!pos && (useAnyBuy || buyCond(prevRow, df, i))) {
             console.log("\nKAYA RA BUY\n");
             // Place limit buy order
-            entryLimit = prevRow.c * (1 - 2.5 / 100);
+            entryLimit = row.o// prevRow.c * (1 - 2.5 / 100);
             enterTs = row.ts;
             console.log(
                 `[ ${row.ts} ] \t Limit buy order at ${entryLimit?.toFixed(2)}`
@@ -309,7 +350,7 @@ export const strategy = ({
                 _fillBuy(entry, row);
             }
         } else if (pos) {
-            exitLimit = prevRow.c;
+            exitLimit = 1;
             //console.log("\n",{isGreen, cFromE: ,"\n");
         }
 

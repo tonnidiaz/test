@@ -1,6 +1,6 @@
 import { data } from "@/data/data";
 import { strategy } from "@/strategies/funcs-test";
-import { IObj } from "@/utils/interfaces";
+import {IObj , ICandle } from "@/utils/interfaces";
 
 export class Strategy {
     name: string = "";
@@ -9,7 +9,7 @@ export class Strategy {
     buyCond(...args: any): boolean {
         return false;
     }
-    sellCond(row: IObj, entry?: number, df?: IObj[], i?: number): boolean {
+    sellCond(row: ICandle, entry?: number, df?: ICandle[], i?: number): boolean {
         return false;
     }
     run({
@@ -22,7 +22,7 @@ export class Strategy {
         platNm,
         trades,
     }: {
-        df: IObj[];
+        df: ICandle[];
         trades: IObj[];
         balance: number;
         lev?: number;

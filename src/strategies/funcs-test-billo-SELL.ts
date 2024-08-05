@@ -13,7 +13,7 @@ import {
     getPricePrecision,
     toFixed,
 } from "@/utils/functions";
-import { IObj } from "@/utils/interfaces";
+import { IObj, ICandle } from "@/utils/interfaces";
 
 let _cnt = 0;
 
@@ -30,10 +30,10 @@ export const strategy = ({
     trades,
     platNm,
 }: {
-    df: IObj[];
+    df: ICandle[];
     balance: number;
-    buyCond: (row: IObj, df?: IObj[], i?: number) => boolean;
-    sellCond: (row: IObj, entry: number, df?: IObj[], i?: number) => boolean;
+    buyCond: (row: ICandle, df?: ICandle[], i?: number) => boolean;
+    sellCond: (row: ICandle, entry: number, df?: ICandle[], i?: number) => boolean;
     pair: string[];
     maker: number;
     taker: number;
@@ -60,8 +60,8 @@ export const strategy = ({
         exit: number = 0,
         enterTs = "";
 
-    const pricePrecision = getPricePrecision(pair, "okx");
-    const basePrecision = getCoinPrecision(pair, "limit", "okx");
+    const pricePrecision = getPricePrecision(pair, platNm);
+    const basePrecision = getCoinPrecision(pair, "limit", platNm);
 
     console.log({ pricePrecision, basePrecision });
 
@@ -127,7 +127,7 @@ export const strategy = ({
             isA,
         }: {
             _exit: number;
-            _row: IObj;
+            _row: ICandle;
             isSl?: boolean;
             _base: number;
             isA: boolean;
@@ -170,7 +170,7 @@ export const strategy = ({
             _entry: number;
             isA: boolean;
             amt: number;
-            _row: IObj;
+            _row: ICandle;
         }) {
             if (amt == 0) return;
             if (!entryLimit) entryLimit = amt;

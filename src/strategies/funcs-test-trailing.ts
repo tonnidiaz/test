@@ -21,8 +21,7 @@ import {
     randomNum,
     toFixed,
 } from "@/utils/functions";
-import { IObj } from "@/utils/interfaces";
-import { strategy as strTrillo } from "./funcs-test-trillo";
+import { IObj, ICandle } from "@/utils/interfaces";
 import { strategy as strOld} from "./funcs-test-trailing-old";
 import { strategy as strOldTest} from "./funcs-test-trailing-old-test";
 
@@ -41,10 +40,10 @@ export const strategy = ({
     trades,
     platNm,
 }: {
-    df: IObj[];
+    df: ICandle[];
     balance: number;
-    buyCond: (row: IObj, df?: IObj[], i?: number) => boolean;
-    sellCond: (row: IObj, entry: number, df?: IObj[], i?: number) => boolean;
+    buyCond: (row: ICandle, df?: ICandle[], i?: number) => boolean;
+    sellCond: (row: ICandle, entry: number, df?: ICandle[], i?: number) => boolean;
     pair: string[];
     maker: number;
     taker: number;
@@ -151,7 +150,7 @@ export const strategy = ({
             o,
         }: {
             _exit: number;
-            _row: IObj;
+            _row: ICandle;
             isSl?: boolean;
             _base: number;
             o?: number;
@@ -186,7 +185,7 @@ export const strategy = ({
         }: {
             _amt: number;
             _entry: number;
-            _row: IObj;
+            _row: ICandle;
         }) {
             //if (toFixed(_amt / _entry, basePrecision) <= 0) return;
             if (!entryLimit) entryLimit = _entry;

@@ -1,6 +1,6 @@
-import { isStopOrder, noFees } from "@/utils/constants";
+import { noFees } from "@/utils/constants";
 import { toFixed } from "@/utils/functions";
-import { IObj } from "@/utils/interfaces";
+import { IObj, ICandle } from "@/utils/interfaces";
 import BigNumber from 'bignumber.js'
 
 export function fillBuyOrder({
@@ -13,7 +13,7 @@ export function fillBuyOrder({
     entryLimit,
     basePrecision,
     pos,
-    isA = true
+    isA
 }: {
     entry: number;
     prevRow: any;
@@ -46,7 +46,7 @@ export function fillBuyOrder({
 
     const data = { ...mData };
     const ts = prevRow.ts;
-    const part = isA ? "A" : "B"
+    const part = isA == undefined ? '' : isA ? "[A]" : "[B]"
 
     data.data.push({
         side: `buy \t {h:${prevRow.h}, l: ${prevRow.l}}`,
@@ -54,7 +54,7 @@ export function fillBuyOrder({
         base,
         enterTs,
         ts,
-        c: `[${part}] ${entry}`,
+        c: `${part} ${entry}`,
         _c: entry,
         balance: `[${balance}] \t ${base} \t fee: ${fee}`,
     })
@@ -78,13 +78,13 @@ export const fillSellOrder = ({
     pos,
     maker,
     entryLimit,
-    isSl = false,
-    isA = true,
+    isSl,
+    isA,
     o
 }: {
     exitLimit: number | null;
     exit: number;
-    prevRow: IObj;
+    prevRow: ICandle;
     base: number;
     enterTs: string;
     pricePrecision: number;
@@ -103,7 +103,7 @@ export const fillSellOrder = ({
     o?: number
 }) => {
 
-    const _isTp = !isStopOrder ? exit >= entry : !isSl
+    const _isTp = isSl == undefined ? exit >= entry : !isSl
     console.log({ exitLimit, exit, entry, base });
     //console.log(`MIKA: ${exit >= entry ? "gain" : "loss"}`);
     console.log("\nFILL SELL ORDER", {exit, base});
@@ -122,13 +122,13 @@ export const fillSellOrder = ({
     
     const _entry = o ?? entry
     const perc = ((exit - _entry)/_entry * 100).toFixed(2)
-    const part = isA ? "A" : "B"
+    const part = isA == undefined ? '' : isA ? "[A]" : "[B]"
     mData["data"].push({
         side: `sell \t {h:${prevRow.h}, l: ${prevRow.l}}`,
         fill: exitLimit,
         enterTs,
         ts,
-        c: `[${part}] ${!_isTp ? 'SL' : 'TP'}: ${exit}`,
+        c: `${part} ${!_isTp ? 'SL' : 'TP'}: ${exit}`,
         _c: exit,
         balance: `[${base}] \t ${balance} { ${perc}% } fee: ${fee}`,
     });

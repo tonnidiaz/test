@@ -18,7 +18,7 @@ import {
     getPricePrecision,
     toFixed,
 } from "@/utils/functions";
-import { IObj } from "@/utils/interfaces";
+import { IObj, ICandle } from "@/utils/interfaces";
 
 let _cnt = 0;
 
@@ -35,10 +35,10 @@ export const strategy = ({
     trades,
     platNm
 }: {
-    df: IObj[];
+    df: ICandle[];
     balance: number;
-    buyCond: (row: IObj, df?: IObj[], i?: number) => boolean;
-    sellCond: (row: IObj, entry: number, df?: IObj[], i?: number) => boolean;
+    buyCond: (row: ICandle, df?: ICandle[], i?: number) => boolean;
+    sellCond: (row: ICandle, entry: number, df?: ICandle[], i?: number) => boolean;
     pair: string[];
     maker: number;
     taker: number;

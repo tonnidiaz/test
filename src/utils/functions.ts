@@ -228,7 +228,7 @@ export function toFixed(num: number, dec: number) {
     const re = new RegExp("^-?\\d+(?:.\\d{0," + (dec || -1) + "})?");
    const isLarge =  `${num}`.includes("e")
     console.log({isLarge})
-    return  isLarge ? num : Number(num.toString().match(re)![0]);
+    return  (isLarge || dec == 0) ? num : Number(num.toString().match(re)![0]);
 }
 
 export function precision(a: number) {
@@ -259,7 +259,7 @@ export function getCoinPrecision(
             : okxInstrus.find(
                   (el) => el.baseCcy == pair[0] && el.quoteCcy == pair[1]
               );
-    if (!instru) return 0;
+    if (!instru) return 10;
     if (plat == "binance") {
         return Number(
             oType == "market"
@@ -274,7 +274,7 @@ export function getCoinPrecision(
                 : instru?.basePrecision
             : oType == "market"
             ? instru.tickSz
-            : instru.lotSz;
+            : instru.lotSz; 
     return precision(Number(pr));
 }
 export function getPricePrecision(
@@ -293,7 +293,7 @@ export function getPricePrecision(
             : okxInstrus.find(
                   (el) => el.baseCcy == pair[0] && el.quoteCcy == pair[1]
               );
-    if (!instru) return 0;
+    if (!instru) return 10;
 
     return plat == "binance"
         ? Number(instru.quoteAssetPrecision)

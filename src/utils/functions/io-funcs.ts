@@ -1,5 +1,5 @@
 import { Server, Socket } from "socket.io";
-import { IObj } from "../interfaces";
+import { IObj, ICandle } from "../interfaces";
 import { tuCE, heikinAshi, parseDate, parseKlines, tuPath } from "../funcs2";
 import {
     instruments,
@@ -189,7 +189,7 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
 
 export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
     try {
-        let { interval, start, end, offline, platform, save } = data;
+        let { interval, start, end, offline, platform, save, quote } = data;
         const startPair = data.from;
         let _data: {
             pair: string[];
@@ -218,7 +218,7 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
 
         if (existsSync(savePath)){
             _data = (await require(savePath)).sort((a, b) => (a.pair > b.pair ? 1 : -1))
-            last = _data[_data.length - 1].pair
+            last = _data[_data.length - 1]?.pair
         }
 
         if (_platName == "okx") {
@@ -243,7 +243,9 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
             }
         }
 
-        let coins = _instruments.filter((el) => el[1] == "USDT");
+        let coins = _instruments
+        if (quote)
+            coins = coins.filter((el) => el[1] == `${quote}`);
         if (!offline) {
             if (startPair){
                coins = coins.slice(

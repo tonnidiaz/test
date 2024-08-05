@@ -1,6 +1,11 @@
 import { ObjectId } from "mongoose";
 
 export interface IObj {[key: string]: any}
+export interface ICandle {ts: string,
+    o: number, h: number, l: number, c: number,
+    ha_o: number, ha_h: number, ha_l: number, ha_c: number,
+    [key: string]: number | any
+}
 export interface IAddress  {
 
     place_name: string,

@@ -1,5 +1,5 @@
-import { IObj, IOrderDetails } from "./interfaces";
-import { atr, ema, rsi, macd, stochasticOscillator, stoch } from "indicatorts";
+import { IObj, IOrderDetails, ICandle } from "./interfaces";
+import { atr, ema, rsi, macd } from "indicatorts";
 import path from "path";
 import { SL, TP, useHaClose } from "./constants";
 import { OrderDetails } from "okx-api";
@@ -29,7 +29,7 @@ export const parseDate = (date: Date | string) =>
         })
     );
 
-const tuMacd = (df: IObj[]) => {
+const tuMacd = (df: ICandle[]) => {
     const def = false;
     const faster = true;
     const fast = def ? 12 : faster ? 1 : 26 /* 5 */,
@@ -47,15 +47,16 @@ const tuMacd = (df: IObj[]) => {
 export const tuPath = (pth: string) => path.resolve(...pth.split("/"));
 
 export const parseKlines = (klines: [][]) => {
-    let df: IObj[] = [];
+    let df: ICandle[] = [];
+    const ha_o = 0, ha_h = 0, ha_l = 0, ha_c = 0;
     klines.forEach((k) => {
         const [ts, o, h, l, c, v] = k.map((e) => Number(e));
-        df.push({ ts: parseDate(new Date(ts)), o, h, l, c, v });
+        df.push({ ts: parseDate(new Date(ts)), o, h, l, c, v, ha_o, ha_h, ha_l, ha_c });
     });
     return df;
 };
 
-export const heikinAshi = (df: IObj[]) => {
+export const heikinAshi = (df: ICandle[]) => {
     console.log("\nBEGIN HA\n");
     const ha: IObj[] = [];
     for (let i = 0; i < df.length; i++) {
@@ -82,10 +83,10 @@ export const heikinAshi = (df: IObj[]) => {
         ha_h: ha[i].h,
         ha_l: ha[i].l,
         ha_c: ha[i].c,
-    })) as IObj[];
+    }));
 };
 
-export const tuCE = (df: IObj[]) => {
+export const tuCE = (df: ICandle[]) => {
     const mult = 1.8,
         atrLen = 1;
     const highs = df.map((e) => e[useHaClose ? "ha_h" : "c"]);
@@ -129,7 +130,6 @@ export const tuCE = (df: IObj[]) => {
         if (i > 0) {
             const lsp = pdf.long_stop;
             const ssp = pdf.short_stop;
-
             if (pdf[useHaClose ? "ha_c" : "c"] > lsp)
                 df[i].long_stop = Math.max(cdf.long_stop, pdf.long_stop);
             if (pdf.ha_c < ssp)
@@ -148,7 +148,7 @@ export const tuCE = (df: IObj[]) => {
     return df.map((el) => el);
 };
 
-export const calcEntryPrice = (row: IObj, side: "buy" | "sell") => {
+export const calcEntryPrice = (row: ICandle, side: "buy" | "sell") => {
     const val = row.c;
     return val;
 };
