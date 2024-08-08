@@ -206,7 +206,7 @@ export const strategy = ({
         if (
             !pos
          //   && !entryLimit
-           && (useAnyBuy || buyCond(prevRow, df, i))
+           && (buyCond(prevRow, df, i))
         ) {
            
             // Place limit buy order

@@ -9162,7 +9162,7 @@ export const stops = {
     15: .5,//0.5, 
     5: .5//0.25,
 };
-export let SL = .5//stops[interval]; //7//.01//1//.25//7//3; //.002//.02//.015//.05//useProdPercs ? .03 : .01//0.03//0.05; //.25//.5,
+export let SL = 1//stops[interval]; //7//.01//1//.25//7//3; //.002//.02//.015//.05//useProdPercs ? .03 : .01//0.03//0.05; //.25//.5,
 export let TP = 3.5//5.5//3.5//.5//0.5; //5//1.7//10//15//5.5//9.5//1; //.2//.3//1.1//1.7//useProdPercs ? 1.5 : 1.7//1.5//2//1.5; // 3.5//5.3
 export const SL2 = 0.25; //1
 export const setSL = (v: number) => (SL = v);
@@ -9180,7 +9180,7 @@ const largeStop = false;
 const trails = {
     60: 1,
     30: 0.6,
-    15: (.5+1)/2/* 0.15 */,
+    15: .25/* 0.15 */,
     5: 0.5 /* .01 */,
     3: 0.12,
     1: 0.12,
@@ -9190,6 +9190,6 @@ export const getTrailingStop = (interval: number) => {
     return trails[interval];
 };
 
-export const TRAILING_STOP_PERC = getTrailingStop(interval);
-
+export const TRAILING_STOP_PERC = .2//getTrailingStop(interval);
+export const MAX_PROFIT_PERC = (5000000 * 100) / 1000
 

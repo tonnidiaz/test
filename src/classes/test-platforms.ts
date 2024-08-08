@@ -150,7 +150,7 @@ export class TestOKX extends Platform {
                     const data = isBybit
                         ? (res as any).result.list
                         : (res as Candle[]);
-                    if (!data.length) break;
+                    if (!data?.length) break;
                     klines.push(...[...data].reverse());
 
                     firstTs = Number(data[0][0]) + interval * 60 * 1000;

@@ -1,7 +1,6 @@
 import { fillBuyOrder, fillSellOrder } from "./utils/functions";
 import {
     MAKER_FEE_RATE,
-    MAX_PROFIT_PERC,
     SL,
     TAKER_FEE_RATE,
     TP,
@@ -26,7 +25,6 @@ import { strategy as strTrailing } from "./funcs-test-trailing";
 import { strategy as strOld } from "./funcs-test-old";
 import { strategy as strHeader } from "./funcs-test-header";
 import { strategy as strFallbackSL } from "./funcs-test-fallback-sl";
-import { strategy as strTrExitTP } from "./fb/tr-exit-tp";
 let _cnt = 0;
 
 const d = useSwindLow ? 20 : 0;
@@ -62,23 +60,9 @@ export const strategy = ({
         useTrailing = false,
         useBillo = false,
         useSLTP = false,
-        useFallbackSL = false, useTrExitTP = true,
+        useFallbackSL = false,
         useHeader = false;
 
-    if (useTrExitTP) {
-        return strTrExitTP({
-            df,
-            balance,
-            buyCond,
-            sellCond,
-            lev,
-            pair,
-            maker,
-            taker,
-            trades,
-            platNm,
-        });
-    }
     if (useHeader) {
         return strHeader({
             df,
@@ -194,43 +178,25 @@ export const strategy = ({
         tp: number | null = null,
         base: number = 0,
         sl: number | null = null,
-        sl2: number | null = null,
         exit: number = 0,
         enterTs = "";
-    const START_BAL = balance;
-    const MAX_PROFIT = START_BAL * (1 + MAX_PROFIT_PERC / 100);
-
     console.log({ platNm });
     const pricePrecision = getPricePrecision(pair, platNm);
     const basePrecision = getCoinPrecision(pair, "limit", platNm);
 
     console.log({ pricePrecision, basePrecision });
     balance = toFixed(balance, pricePrecision);
-    let lastPrice = 0, start_bal = balance, aside = 0;
     //df = df.slice(20);
 
     console.log(trades);
 
-    let sellAfterBuy = false,
-        useExit = false;
-    let _trades: {entry: number, exit: number}[]=[];
-
-    const takeProfit = () =>{
-        console.log("\nTAKING PROFIT\n")
-        const _aside = balance * (10/100)
-        balance -= _aside
-        aside += _aside
-        start_bal = balance
-    }
     for (let i = d + 1; i < df.length; i++) {
         //if (balance < 10) continue;
-
         const prevRow = df[i - 1],
             row = df[i];
         const nextRow: ICandle = df[i + 1] ?? {};
         console.log(`\nTS: ${row.ts}`);
         _cnt += 1;
-        lastPrice = entry;
 
         const _fillSellOrder = (ret: ReturnType<typeof fillSellOrder>) => {
             (pos = ret.pos),
@@ -247,9 +213,6 @@ export const strategy = ({
             entryLimit = null;
 
             base = 0;
-            if (balance >= start_bal * (1 + 50/100)){
-                takeProfit()
-            }
         };
         const _fillBuyOrder = (ret: ReturnType<typeof fillBuyOrder>) => {
             (pos = ret.pos),
@@ -258,16 +221,12 @@ export const strategy = ({
                 (_cnt = ret._cnt);
             enterTs = row.ts;
             buyFees += ret.fee;
-            tp = Number((row.o * (1 + TP / 100)).toFixed(pricePrecision));
-            sl = Number((entry * (1 - SL / 100)).toFixed(pricePrecision));
-            sl2 = Number((entry * (1 - SL / 200)).toFixed(pricePrecision));
+            tp = toFixed(entry * (1 + TP / 100), pricePrecision);
+            sl = toFixed(entry * (1 - SL / 100), pricePrecision);
             balance = 0;
         };
 
         async function _fillSell(_exit: number, _row: ICandle, isSl?: boolean) {
-
-            const c1 = _exit == entry
-            if (false) return
             const ret = fillSellOrder({
                 exitLimit,
                 exit: _exit,
@@ -288,23 +247,9 @@ export const strategy = ({
                 isSl,
             });
             _fillSellOrder(ret);
-            _trades.push({entry, exit: _exit})
         }
-const isGreen = prevRow.c >= prevRow.o;
-        const isSum = prevRow.c > row.o;
-        
+
         function _fillBuy(_entry: number, _row: ICandle, isA?: boolean) {
-            // let c1 = false
-            // const _trLen = _trades.length
-            // if (_trLen >= 2){
-            //     for (let tr of _trades.slice(_trLen - 4)){
-            //         c1 = c1 && tr.entry == tr.exit
-            //     }
-            // }
-            // //&& /* isGreen &&  */!isSum // balance > START_BAL * (1 + 30000/100) //(balance * (Math.max(prevRow.o, prevRow.c))) / _entry < balance * (1 - 50 / 100)
-            // const c2 = false
-            // if (c1)
-            //     return;
             if (!entryLimit) entryLimit = entry;
 
             const ret = fillBuyOrder({
@@ -319,19 +264,12 @@ const isGreen = prevRow.c >= prevRow.o;
                 pos,
                 isA,
             });
-            _cnt = 0;
+
             _fillBuyOrder(ret);
         }
 
-        
-
-        if (!pos && !entryLimit && buyCond(prevRow)) {
-            entry = row.o;
-            _fillBuy(entry, row);
-
-        continue;
-           
-        }
+        const isGreen = prevRow.c >= prevRow.o;
+        const isSum = prevRow.c > row.o;
 
         if (!pos && entryLimit) {
             const _row = row;
@@ -339,19 +277,13 @@ const isGreen = prevRow.c >= prevRow.o;
             console.log("HAS NO POS");
             const { o, c, l } = _row;
             const useO = !isSum;
-            if (useO) {
-                entry = o;
-            } else {
-                entry = c;
-            }
+            entry = useO ? o : nextRow.o ?? c;
             _fillBuy(entry, row);
             if (!useO) continue;
-            //continue
         }
 
         if (pos && exitLimit) {
-                exitLimit = Math.max(prevRow.o , prevRow.c) * (1 + 3.5 / 100);
-
+            exitLimit = row.o * (1 + 3.5/100);
             exit = 0;
             const _row = row;
             console.log("HAS POS");
@@ -360,55 +292,54 @@ const isGreen = prevRow.c >= prevRow.o;
                 isClose = false;
 
             const { h, c, o } = _row;
+
+            const SL = 1;
             const _sl = entry * (1 - SL / 100);
-            let _tp = Math.max(o, entry) * (1 + 10 / 100)
-            _tp = Number(_tp.toFixed(pricePrecision))
 
             const isO = prevRow.h == prevRow.o;
-if (false){
-            }
-        
-            
-            else if ((!isGreen && !isO) || useExit) {
+
+            if (!isGreen && !isO) {
                 exit = exitLimit;
             } else {
-                if (isO) {
-                    exit = o;
-                } else {
-                    exit = isGreen ? o : c;
-                    //isClose = true
-                }
+                const _c = nextRow.o ?? c;
+                exit =isO ? o : _c;
+                isClose = true;
             }
 
-            if (
-                goOn &&
-                (isClose ||
-                    (useExit && exit <= h) ||
-                    (exit >= _sl && h >= exit))
-            ) {
-                useExit = false;
+            if (h < exit) {
+                console.log("NEITHER");
+                continue;
+            }
+            if (goOn && (exit >= _sl) && h >= exit) {
+    
                 const p = "EXIT";
                 console.log("\nFILLING SELL ORDER AT", p);
                 _fillSell(exit, _row, false);
 
                 enterTs = nextRow.ts;
+
                 entryLimit = isO ? null : prevRow.l;
-            }else if (row.c <= _sl && c >= entry ){
-                exit = c
-                _fillSell(exit, row)
-            } else if (c >= _tp) {
-                exit = c;
-                _fillSell(exit, row);
-                entryLimit = prevRow.l;
             }
 
             continue;
         }
+
         if (!pos && buyCond(prevRow, df, i)) {
             console.log("\nKAYA RA BUY\n");
+            // Place limit buy order
+            //entryLimit = row.o;
             enterTs = row.ts;
-            console.log(`HAS BUY SIGNAL...`);
-
+            console.log(
+                `[ ${row.ts} ] \t Limit buy order at ${entryLimit?.toFixed(2)}`
+            );
+            if (isMarket) {
+                entry = nextRow.o;
+                /* if (i != 1) {
+                    entryLimit = row.ha_c
+                  
+                } */
+                _fillBuy(entry, row, i == 1);
+            }
             continue;
         }
         if (pos) {
@@ -418,19 +349,17 @@ if (false){
         }
     }
 
-    if (balance == 0 && base != 0) {
+    const oKeys = Object.keys(mData.data);
+    const lastPos = mData.data[oKeys[oKeys.length - 1]];
+    if (lastPos && lastPos.side.startsWith("buy")) {
         console.log("ENDED WITH BUY");
-        balance = lastPrice * base;
-        balance *= 1 - taker;
+        balance = lastPos._c * lastPos.base;
     }
-
-    balance += aside
     gain = Number(((gain / cnt) * 100).toFixed(2));
     loss = Number(((loss / cnt) * 100).toFixed(2));
     _data = { ...mData, balance, trades: cnt, gain, loss };
 
     console.log(`\nBUY_FEES: ${pair[1]} ${buyFees}`);
-    console.log({aside});
     console.log(`SELL_FEES: ${pair[1]} ${sellFees}\n`);
     return _data;
 };

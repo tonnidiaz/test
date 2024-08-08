@@ -23,9 +23,9 @@ import { existsSync, readdirSync, writeFileSync } from "fs";
 import { TestBinance } from "@/classes/test-binance";
 import { TestBybit, TestOKX } from "@/classes/test-platforms";
 import { ITrade } from "@/utils/interfaces";
-let years = [2021,2023, 2024],
-    symbols = ["TVK", "SEOR", "VELO"],//["GSTS", "PLY", "SOL", "ELT"],
-    intervals = [5, 15];
+let years = [2024],
+    symbols = ["OM"],//["GSTS", "PLY", "SOL", "ELT"],
+    intervals = [5];
 symbols = symbols.map((el) => el.includes('/') ? el : `${el}/USDT`);
 
 async function downloader({
@@ -225,6 +225,6 @@ const mergeTrades = ({symbol, year, platNm = "binance"}: {symbol: string, year: 
 
 
 
-dld({platNm: 'bybit'})
+dld({platNm: 'binance'})
 //createDf(2024,15,"SOLUSDT")
 //afterKlines()

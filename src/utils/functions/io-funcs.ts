@@ -189,7 +189,7 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
 
 export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
     try {
-        let { interval, start, end, offline, platform, save, quote } = data;
+        let { interval, start, end, offline, platform, save, quote, prefix, skip_existing } = data;
         const startPair = data.from;
         let _data: {
             pair: string[];
@@ -214,7 +214,9 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
 
         const strNum = Number(data.strategy);
 
-        const savePath = `data/rf/coins/${year}/${_platName}_${interval}m.json`;
+        prefix = prefix ?? ''
+
+        const savePath = `data/rf/coins/${year}/${prefix}_${_platName}_${interval}m.json`;
 
         if (existsSync(savePath)){
             _data = (await require(savePath)).sort((a, b) => (a.pair > b.pair ? 1 : -1))
@@ -276,6 +278,10 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
             klinesPath = tuPath(
                 `${klinesRootDir}/${platName.toLowerCase()}/${year}/${symbol}_${interval}m.json`
             );
+            if (!offline && skip_existing && existsSync(klinesPath)){
+                console.log("SKIPING", pair);
+                continue
+            }
 
             if (offline && !existsSync(klinesPath)) {
                 console.log("KLINES DIR NOT FOUND FOR", pair);

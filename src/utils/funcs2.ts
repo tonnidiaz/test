@@ -98,8 +98,8 @@ export const tuCE = (df: ICandle[]) => {
     const ATR = atr(highs, lows, closings, { period: atrLen });
     const _atr = ATR.atrLine;
     const rsiLen = 2,
-        fastLen = 1, //89 /* 15 */,
-        slowLen = 2; //90; /* 50 */
+        fastLen = 20, //89 /* 15 */,
+        slowLen = 50; //90; /* 50 */
 
     const sma20 = ema(closings, { period: fastLen });
     const sma50 = ema(closings, { period: slowLen });

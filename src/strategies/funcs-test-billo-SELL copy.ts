@@ -80,7 +80,6 @@ export const strategy = ({
     base = 0;
     let baseA = 0,
         baseB = 0;
-let filled = false
 
     for (let i = d + 1; i < df.length; i++) {
         //if (balance < 10) continue;
@@ -210,11 +209,8 @@ let filled = false
             let goOn = true,
                 isSl = false;
 
-            const tp = o * (1 + .5/100)
-            const sl = o * (1 - 1.5/100)
-
            // const _do = prevRow.c >= prevRow.o;
-           exit =  c//h > o * (1 + .15/100) && c < o * (1 - .05/100) ? o : c;
+           exit = h > o * (1 + .15/100) && c < o * (1 - .05/100) ? o : c;
             if (exitLimit < _row.h) {
                 exit = exitLimit;
             } else {
@@ -239,8 +235,7 @@ let filled = false
                     });
                 }
             }
-            if (!filled && goOn) {
-                filled = true
+            if (goOn) {
                 const p = "EXIT";
                 console.log("\nFILLING SELL ORDER AT", p, {
                     baseA,
@@ -274,8 +269,7 @@ let filled = false
                 }
 
                 //continue
-            } else if (c >= sl) {
-                filled = true
+            } else if (true) {
                 console.log(
                     "\nAFTER_THAT:",
                     { pos, isA, isB, baseA, baseB, balA, balB },
