@@ -23,10 +23,7 @@ import { existsSync, readdirSync, writeFileSync } from "fs";
 import { TestBinance } from "@/classes/test-binance";
 import { TestBybit, TestOKX } from "@/classes/test-platforms";
 import { ITrade } from "@/utils/interfaces";
-let years = [2024],
-    symbols = ["OM"],//["GSTS", "PLY", "SOL", "ELT"],
-    intervals = [5];
-symbols = symbols.map((el) => el.includes('/') ? el : `${el}/USDT`);
+
 
 async function downloader({
     symbol,
@@ -73,23 +70,28 @@ async function downloader({
 const dld = async ({
     parse = false,
     platNm = "binance",
+    symbols, intervals, years, skip
 }: {
+    symbols: string[], years: number[], intervals: number[],
     parse?: boolean;
     platNm?: "binance" | "okx" | "bybit";
+    skip?: boolean
 }) => {
-    const bin = new TestBinance();
+    
+    symbols = symbols.map((el) => el.includes('/') ? el : `${el}/USDT`);
     for (let year of years) {
         for (let symb of symbols) {
             for (let interval of intervals) {
                 console.log(`\nDownloading ${symb}, ${year}, ${interval}m\n`);
 
                 const msymb = symb.split("/");
+                console.log({msymb});
 
                 symb = platNm == "okx" ? msymb.join("-") : msymb.join("");
                 const fname = `${symb}_${interval}m.json`;
                 const klinesPath = `${klinesRootDir}/${platNm}/${year}/${fname}`;
                 const dfsPath = `${dfsRootDir}/${platNm}/${year}/${fname}`;
-                if (existsSync(klinesPath)) {
+                if ( skip && existsSync(klinesPath)) {
                     console.log(`\n${klinesPath} EXISTS. SKIPPING...\n`);
                     continue;
                 }
@@ -224,7 +226,10 @@ const mergeTrades = ({symbol, year, platNm = "binance"}: {symbol: string, year: 
 //getTrades({symbol: "SOLUSDT", start: Date.parse("2021-01-03 00:31:18+02:00"), end: Date.parse("2021-01-10 23:59:00+02:00") });
 
 
+let years = [2024],
+    symbols = ["TURBOS", "PEPE", "FLOKI", ""],//["GSTS", "PLY", "SOL", "ELT"],
+    intervals = [60];
 
-dld({platNm: 'binance'})
+dld({platNm: 'bybit', symbols, years,intervals, skip: true})
 //createDf(2024,15,"SOLUSDT")
 //afterKlines()

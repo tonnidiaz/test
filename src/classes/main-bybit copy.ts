@@ -247,6 +247,7 @@ const updateBotAtClose = async (_bot: IBot) => {
             side: "sell",
             plat: plat,
             price: 0,
+            ordType: 'Market'
         });
         if (!r) return botLog(bot, "TIMED: FAILED TO PLACE MARKET SELL ORDER");
         await wsBybit.rmvBot(bot.id);
@@ -320,6 +321,7 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
                     side: "sell",
                     plat: plat,
                     price: 0,
+                    ordType: 'Market'
                 });
                 if (!r) return botLog(bot, "FAILED TO PLACE MARKET SELL ORDER");
                 placed = true;
@@ -337,6 +339,7 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
                 side: "buy",
                 price: 0 /* 0 for market buy */,
                 plat: plat,
+                ordType: 'Market'
             });
 
             if (res) {
@@ -359,7 +362,7 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
 console.log("WS Bybit");
 export const wsBybit: WsBybit = new WsBybit();
 try {
-    wsBybit.initWs();
+    //wsBybit.initWs();
 } catch (e) {
     timedLog("FAILED TO INIT WS");
     console.log(e);

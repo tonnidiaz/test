@@ -16,7 +16,11 @@ export const BotSchema = new Schema(
         strategy: { type: Number, default: 5 },
         user: { type: Schema.ObjectId, ref: "User" },
         orders: { type: [Schema.ObjectId], ref: "Order" },
+        aside: {type: [{base: String, ccy: String, amt: {type: Number, default: 0, _id: false}}], default: []},
+        total_base: {type: [{base: String, ccy: String, amt: {type: Number, default: 0, _id: false}}], default: []},
+        total_quote: {type: [{base: String, ccy: String, amt: {type: Number, default: 0, _id: false}}], default: []},
         start_amt: { type: Number, default: 10 },
+        start_bal: { type: Number, default: 10 },
         curr_amt: { type: Number, default: 0 },
         platform: { type: String, enum: ['bybit', 'okx'], default: 'bybit'},
         order_type: { type: String, enum: ['Market', 'Limit'], default: 'Market'}

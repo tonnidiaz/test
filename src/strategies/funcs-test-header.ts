@@ -142,7 +142,7 @@ export const strategy = ({
 
     for (let i = d + 1; i < df.length; i++) {
         //if (balance < 10) continue;
-        const prevRow = df[i - 1],
+        const prevrow = df[i - 1],
             row = df[i];
 
         console.log(`\nTS: ${row.ts}`);
@@ -180,7 +180,7 @@ export const strategy = ({
             const ret = fillSellOrder({
                 exitLimit,
                 exit: _exit,
-                prevRow: _row,
+                prevrow: _row,
                 entry: entry,
                 base,
                 pricePrecision,
@@ -203,7 +203,7 @@ export const strategy = ({
             if (!entryLimit) entryLimit = entry;
             const ret = fillBuyOrder({
                 entry: _entry,
-                prevRow: _row,
+                prevrow: _row,
                 entryLimit,
                 enterTs,
                 taker,
@@ -215,11 +215,11 @@ export const strategy = ({
             _fillBuyOrder(ret);
         }
 
-        const isGreen = prevRow.c >= prevRow.o;
-        const isSum = prevRow.c > row.o;
+        const isGreen = prevrow.c >= prevrow.o;
+        const isSum = prevrow.c > row.o;
 
         if (!pos && entryLimit) {
-            const entryRow = prevRow;
+            const entryRow = prevrow;
             console.log("HAS NO POS");
 
             let goOn = true,
@@ -239,31 +239,31 @@ export const strategy = ({
             }
         } else if (pos && exitLimit) {
             exit = 0
-            const exitRow = prevRow;
+            const exitRow = prevrow;
             console.log("HAS POS");
 
             let goOn = true,
                 isSl = false,
                 is_curr = false;
             const _sl = entry * (1 - 0.3 / 100);
-            let _tp = prevRow.o * (1 + 3.5 / 100);
-            const { h, l, c, o, ha_o, ha_h, ha_l, ha_c } = prevRow;
-            const _prevRow = df[i - 2]
-            const _isGreen = _prevRow.c >= df[i - 2].o
+            let _tp = prevrow.o * (1 + 3.5 / 100);
+            const { h, l, c, o, ha_o, ha_h, ha_l, ha_c } = prevrow;
+            const _prevrow = df[i - 2]
+            const _isGreen = _prevrow.c >= df[i - 2].o
             if (false) {
-            } else if (_prevRow.o <= _sl && _prevRow.h > _sl && o <= _sl) {
+            } else if (_prevrow.o <= _sl && _prevrow.h > _sl && o <= _sl) {
                 exit = o;
                 //if (c < o * (1 - 0)){continue}
-            } else if (prevRow.h >= _tp) {
+            } else if (prevrow.h >= _tp) {
                 const tp2 = _tp * (1 + 1.5 / 100)
-                if (prevRow.h >= tp2) {
+                if (prevrow.h >= tp2) {
                     exit = tp2;
                 } else if (c >= entry) exit = c;
                 else goOn = false;
             } else if (isGreen && h < _sl) {
                 exit = row.o;
             } 
-            if(!goOn && prevRow.h >= _tp && isGreen){
+            if(!goOn && prevrow.h >= _tp && isGreen){
                 exit = row.o
             }
             if (exit == 0) {
@@ -279,10 +279,10 @@ export const strategy = ({
             }
         }
 
-        if (!pos && (useAnyBuy || buyCond(prevRow, df, i))) {
+        if (!pos && (useAnyBuy || buyCond(prevrow, df, i))) {
             console.log("\nKAYA RA BUY\n");
             // Place limit buy order
-            entryLimit = prevRow.c * (1 - 2.5 / 100);
+            entryLimit = prevrow.c * (1 - 2.5 / 100);
             enterTs = row.ts;
             console.log(
                 `[ ${row.ts} ] \t Limit buy order at ${entryLimit?.toFixed(2)}`
@@ -292,7 +292,7 @@ export const strategy = ({
                 _fillBuy(entry, row);
             }
         } else if (pos) {
-            exitLimit = prevRow.c;
+            exitLimit = prevrow.c;
             //console.log("\n",{isGreen, cFromE: ,"\n");
         }
 

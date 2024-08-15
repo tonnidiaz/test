@@ -248,6 +248,7 @@ const updateBotAtClose = async (_bot: IBot) => {
             side: "sell",
             plat: plat,
             price: 0,
+            ordType: 'Market'
         });
         if (!r) return botLog(bot, "TIMED: FAILED TO PLACE MARKET SELL ORDER");
         await wsBybit.rmvBot(bot.id);
@@ -335,6 +336,7 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
                     side: "sell",
                     plat: plat,
                     price: 0,
+                    ordType: 'Market'
                 });
                 if (!r) return botLog(bot, "FAILED TO PLACE MARKET SELL ORDER");
                 placed = true;

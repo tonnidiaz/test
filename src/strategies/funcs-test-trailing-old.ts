@@ -96,7 +96,7 @@ export const strategy = ({
 
     for (let i = d + 1; i < df.length; i++) {
         //if (balance < 10) continue;
-        const prevRow = df[i - 1],
+        const prevrow = df[i - 1],
             row = df[i];
 
         console.log(`\nTS: ${row.ts}`);
@@ -145,7 +145,7 @@ export const strategy = ({
             const ret = fillSellOrder({
                 exitLimit,
                 exit: _exit,
-                prevRow: _row,
+                prevrow: _row,
                 entry: entry,
                 base: _base,
                 pricePrecision,
@@ -178,7 +178,7 @@ export const strategy = ({
             balance -= _amt;
             const ret = fillBuyOrder({
                 entry: _entry,
-                prevRow: _row,
+                prevrow: _row,
                 entryLimit,
                 enterTs,
                 taker,
@@ -189,7 +189,7 @@ export const strategy = ({
             });
             _fillBuyOrder(ret);
         }
-        const isGreen = prevRow.c >= prevRow.o;
+        const isGreen = prevrow.c >= prevrow.o;
 
         /* if (!pos && entryLimit) {
             if (row.l <= entryLimit) {
@@ -205,11 +205,11 @@ export const strategy = ({
             const _tp = entry * (1 + TP / 100);
         }
 
-        if (!pos && buyCond(prevRow)) {
+        if (!pos && buyCond(prevrow)) {
             /* BUY SEC */
 
             // Place limit buy order
-            entryLimit = isMarket ? row.o : prevRow.ha_o;
+            entryLimit = isMarket ? row.o : prevrow.ha_o;
             enterTs = row.ts;
 
             if (entryLimit && isMarket) {
@@ -237,8 +237,9 @@ export const strategy = ({
             let go = true,
                 isExit = false,
                 isClose = false;
-            const _isGreen = prevRow.c >= o;
-            const trailingStop = TRAILING_STOP_PERC;
+            const _isGreen = prevrow.c >= o;
+            const trailingStop = .5;
+            const SL = .1
             let _sl = entry * (1 - SL / 100);
             let _tp = o * (1 + TP / 100);
             let lFromO = ((o - l) / l) * 100;
@@ -252,8 +253,9 @@ export const strategy = ({
             _exit = h * (1 - trailingStop / 100); // Increase the trailing stop with the price
             const belowOpen = o * (1 - trailingStop / 100);
 
-            if (l <= belowOpen && !(o > c && _exit >= _tp)) {
+            if (l <= belowOpen && belowOpen < h) {
                 console.log("SELLING AT BELOW OPEN");
+                if (l < belowOpen * (1-.5/100)) continue
                 _exit = belowOpen;
                 _fillSell({ _exit, _row: erow, _base: base, o: o });
 
@@ -265,39 +267,39 @@ export const strategy = ({
                 }
                 continue;
             }
-            if (c > _exit) {
-                // DID NOT GO DOWN TO REACH STOP_PRICE
-                console.log("SELLING AT CLOSE");
+            //  if (c > _exit) {
+            //      // DID NOT GO DOWN TO REACH STOP_PRICE
+            //      console.log("SELLING AT CLOSE")
+            //      _exit = c;
+            //      isClose = true;
+            //      if (c > _tp && c > _sl)
+            //          _fillSell({ _exit, _row: erow, _base: base, o: o });
+            //      else console.log("NOT SOLD")
+            //      continue; 
+            //  }
+             // else {
+            //     console.log("SELLING AT STOP");
+            //     isExit = true;
+            // }
 
-                _exit = c;
-                isClose = true;
-                if (c > _tp && c > _sl)
-                    _fillSell({ _exit, _row: erow, _base: base, o: o });
-                else console.log("NOT SOLD")
-                continue;
-            } else {
-                console.log("SELLING AT STOP");
-                isExit = true;
-            }
+            // let _slip = 0;
+            // _exit *= 1 - _slip / 100;
 
-            let _slip = 0;
-            _exit *= 1 - _slip / 100;
+            // if (go && _exit >= _sl) {
+            //     if (_exit > o) {
+            //         prAve.push(((_exit - o) / o) * 100);
+            //     }
+            //     if (/* isExit && */ /* _exit >= o && */ _exit < _tp) {
+            //         console.log("EXIT LESS THAN TP");
+            //         continue;
+            //     }
 
-            if (go && _exit >= _sl) {
-                if (_exit > o) {
-                    prAve.push(((_exit - o) / o) * 100);
-                }
-                if (/* isExit && */ /* _exit >= o && */ _exit < _tp) {
-                    console.log("EXIT LESS THAN TP");
-                    continue;
-                }
+            //     if (WCS1 && _exit >= o) {
+            //         _exit = _tp;
+            //     }
 
-                if (WCS1 && _exit >= o) {
-                    _exit = _tp;
-                }
-
-                _fillSell({ _exit, _row: erow, _base: base, o: o });
-            }
+            //     _fillSell({ _exit, _row: erow, _base: base, o: o });
+            // }
         }
     }
 

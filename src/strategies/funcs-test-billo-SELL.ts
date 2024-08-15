@@ -84,7 +84,7 @@ let filled = false
 
     for (let i = d + 1; i < df.length; i++) {
         //if (balance < 10) continue;
-        const prevRow = df[i - 1],
+        const prevrow = df[i - 1],
             nextRow = df[i + 1],
             row = df[i];
 
@@ -145,7 +145,7 @@ let filled = false
             const ret = fillSellOrder({
                 exitLimit,
                 exit: _exit,
-                prevRow: _row,
+                prevrow: _row,
                 entry: entry,
                 base: _base,
                 pricePrecision,
@@ -184,7 +184,7 @@ let filled = false
 
             const ret = fillBuyOrder({
                 entry: _entry,
-                prevRow: _row,
+                prevrow: _row,
                 entryLimit,
                 enterTs,
                 taker,
@@ -197,7 +197,7 @@ let filled = false
             _fillBuyOrder(ret, isA);
         }
 
-        const isGreen = prevRow.c >= prevRow.o;
+        const isGreen = prevrow.c >= prevrow.o;
         if (pos && exitLimit) {
             const isA = balA == 0 && baseA != 0,
                 isB = balB == 0 && baseB != 0;
@@ -213,7 +213,7 @@ let filled = false
             const tp = o * (1 + .5/100)
             const sl = o * (1 - 1.5/100)
 
-           // const _do = prevRow.c >= prevRow.o;
+           // const _do = prevrow.c >= prevrow.o;
            exit =  c//h > o * (1 + .15/100) && c < o * (1 - .05/100) ? o : c;
             if (exitLimit < _row.h) {
                 exit = exitLimit;
@@ -308,7 +308,7 @@ let filled = false
             continue;
         }
 
-        if (!pos && buyCond(prevRow, df, i)) {
+        if (!pos && buyCond(prevrow, df, i)) {
             console.log("KAYA RA BUY");
             if (entryLimit) {
                 console.log("BUY ORDER NOT FILLED, RE-CHECKING SIGNALS");
@@ -324,9 +324,9 @@ let filled = false
                 console.log({ balA, balB });
                 _fillBuy({ _entry: entry, amt: balA, _row: row, isA: true });
             }
-        } else if (pos && sellCond(prevRow, entry, df, i)) {
+        } else if (pos && sellCond(prevrow, entry, df, i)) {
             const rf = false;
-            exitLimit = rf ? Math.max(prevRow.ha_h, prevRow.h) : row.c;
+            exitLimit = rf ? Math.max(prevrow.ha_h, prevrow.h) : row.c;
             const perc = 1; //rf ? 6.5 : 0;
             if (exitLimit) exitLimit *= 1 + perc / 100;
 

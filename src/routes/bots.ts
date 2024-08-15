@@ -36,10 +36,19 @@ router.post("/create", authMid, async (req, res) => {
         for (let k of Object.keys(body)) {
             bot.set(k, body[k]);
         }
+        
         [bot.base, bot.ccy] = body.pair ?? body.symbol;
         const user = await User.findOne({ username: body.user }).exec();
         if (!user) return tunedErr(res, 400, "User account not available");
         bot.user = user.id;
+
+        const total_quote = { base: bot.base, ccy: bot.ccy, amt: bot.start_bal };
+        bot.total_quote.push(total_quote);
+
+       const aside = { base: bot.base, ccy: bot.ccy, amt: 0 };
+        bot.aside.push(aside);
+
+        bot.start_bal = bot.start_amt
         await bot.save();
         user.bots.push(bot.id);
         await user.save();

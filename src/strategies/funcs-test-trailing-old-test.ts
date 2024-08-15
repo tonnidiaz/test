@@ -93,7 +93,7 @@ export const strategy = ({
     const lastRow = df[df.length - 1]
     for (let i = d + 1; i < df.length; i++) {
         //if (balance < 10) continue;
-        const prevRow = df[i - 1],
+        const prevrow = df[i - 1],
             row = df[i];
         const nextRow = df[i + 1] ?? row;
         
@@ -145,7 +145,7 @@ export const strategy = ({
             const ret = fillSellOrder({
                 exitLimit,
                 exit: _exit,
-                prevRow: _row,
+                prevrow: _row,
                 entry: entry,
                 base: _base,
                 pricePrecision,
@@ -179,7 +179,7 @@ export const strategy = ({
             balance -= _amt;
             const ret = fillBuyOrder({
                 entry: _entry,
-                prevRow: _row,
+                prevrow: _row,
                 entryLimit,
                 enterTs,
                 taker,
@@ -190,7 +190,7 @@ export const strategy = ({
             });
             _fillBuyOrder(ret);
         }
-        const isGreen = prevRow.c >= prevRow.o;
+        const isGreen = prevrow.c >= prevrow.o;
 
         /* if (!pos && entryLimit) {
             if (row.l <= entryLimit) {
@@ -208,11 +208,11 @@ export const strategy = ({
 
         
 
-        if (!pos && buyCond(prevRow)) {
+        if (!pos && buyCond(prevrow)) {
             /* BUY SEC */
 
             // Place limit buy order
-            entryLimit = isMarket ? row.o : prevRow.ha_o;
+            entryLimit = isMarket ? row.o : prevrow.ha_o;
             enterTs = row.ts;
 
             if (entryLimit && isMarket) {
@@ -229,8 +229,8 @@ export const strategy = ({
         if (pos && !exitLimit) {
             /* SELL SECTION */
             const rf = true;
-            const isCurr = prevRow.c < row.o || !isGreen;
-            exitLimit = prevRow.h;
+            const isCurr = prevrow.c < row.o || !isGreen;
+            exitLimit = prevrow.c * (1 - .5/100);
             enterTs = row.ts;
             console.log(`[ ${row.ts} ] \t Limit sell order at ${exitLimit}`);
             // if (isCurr)

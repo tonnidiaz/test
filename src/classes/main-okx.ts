@@ -439,7 +439,7 @@ const updateOrder = async ({
 console.log("WS OKX");
 export const wsOkx: WsOKX = new WsOKX();
 try{
-   wsOkx.initWs()
+   //wsOkx.initWs()
 }
 catch(e){
     timedLog("FAILED TO INIT WS")

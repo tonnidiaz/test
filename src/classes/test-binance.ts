@@ -10,8 +10,8 @@ import { ITrade } from "@/utils/interfaces";
 export class TestBinance extends Platform {
     client: binance;
 
-    constructor() {
-        super();
+    constructor({demo = false}: {demo?: boolean}) {
+        super({demo});
         this.client = new binance();
     }
     async getKlines({

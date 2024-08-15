@@ -52,7 +52,7 @@ export const strategy = ({
     platNm: "binance" | "bybit" | "okx";
 }) => {
     console.log(df[0]);
-    const useOld = false, useOldTest = true;
+    const useOld = false, useOldTest = false;
     if (useOld)
         return strOld({
             df,
@@ -110,7 +110,7 @@ export const strategy = ({
 
     for (let i = d + 1; i < df.length; i++) {
         //if (balance < 10) continue;
-        const prevRow = df[i - 1],
+        const prevrow = df[i - 1],
             row = df[i];
 
         console.log(`\nTS: ${row.ts}`);
@@ -159,7 +159,7 @@ export const strategy = ({
             const ret = fillSellOrder({
                 exitLimit,
                 exit: _exit,
-                prevRow: _row,
+                prevrow: _row,
                 entry: entry,
                 base: _base,
                 pricePrecision,
@@ -190,9 +190,10 @@ export const strategy = ({
             //if (toFixed(_amt / _entry, basePrecision) <= 0) return;
             if (!entryLimit) entryLimit = _entry;
             balance -= _amt;
+            console.log("FB", {_row})
             const ret = fillBuyOrder({
                 entry: _entry,
-                prevRow: _row,
+                prevrow: _row,
                 entryLimit,
                 enterTs,
                 taker,
@@ -203,7 +204,7 @@ export const strategy = ({
             });
             _fillBuyOrder(ret);
         }
-        const isGreen = prevRow.c >= prevRow.o;
+        const isGreen = prevrow.c >= prevrow.o;
 
         /* if (!pos && entryLimit) {
             if (row.l <= entryLimit) {
@@ -219,11 +220,11 @@ export const strategy = ({
             const _tp = entry * (1 + TP / 100);
         }
 
-        if (!pos && buyCond(prevRow)) {
+        if (!pos && buyCond(prevrow)) {
             /* BUY SEC */
 
             // Place limit buy order
-            entryLimit = isMarket ? row.o : prevRow.ha_o;
+            entryLimit = isMarket ? row.o : prevrow.ha_o;
             enterTs = row.ts;
 
             if (entryLimit && isMarket) {
@@ -251,7 +252,7 @@ export const strategy = ({
             let go = true,
                 isExit = false,
                 isClose = false;
-            const _isGreen = prevRow.c >= o;
+            const _isGreen = prevrow.c >= o;
             const trailingStop = TRAILING_STOP_PERC;
             let _sl = entry * (1 - SL / 100);
             let _tp = o * (1 + TP / 100);

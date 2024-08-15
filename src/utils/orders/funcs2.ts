@@ -12,7 +12,7 @@ import {
 import { IBot } from "@/models/bot";
 import { Order } from "@/models";
 import { placeTrade } from "./funcs";
-import { botLog, timedLog } from "../functions";
+import { botLog, ceil, getCoinPrecision, getPricePrecision, timedLog, toFixed } from "../functions";
 import { objStrategies } from "@/strategies";
 import { IObj, IOrderDetails } from "../interfaces";
 import { wsOkx } from "@/classes/main-okx";
@@ -26,114 +26,105 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     const plat = new objPlats[bot.platform](bot);
 
     botLog(bot, "SIM: GETTING KLINES...");
-    const klines = await plat.getKlines({});
+    const klines = await plat.getKlines({ end: Date.now() });
 
     if (!klines) return console.log("FAILED TO GET KLINES");
 
     const df = tuCE(heikinAshi(parseKlines(klines)));
 
-    const row = df[df.length - 1];
-    const prevRow = row;
-    botLog(bot, "CANDLE");
-    console.log(row);
+    const pxPr = getPricePrecision([bot.base, bot.ccy], bot.platform);
+        const basePrecision = getCoinPrecision([bot.base, bot.ccy], "limit", bot.platform);
 
+    const row = df[df.length - 1];
+    const prevRow = df[df.length - 2];
+    const isGreen = prevRow.c >= prevRow.o;
+
+    botLog(bot, { row: row.ts, prevRow: prevRow.ts });
     const strategy = objStrategies[bot.strategy - 1];
     botLog(bot, strategy);
 
     let order = await Order.findById(bot.orders[bot.orders.length - 1].id).exec();
 
     let pos =
-        order &&
-        order.side == "sell" &&
-        !order.is_closed &&
-        order.buy_order_id.length != 0;
-    console.log({ pos });
+            order &&
+            order.side == "sell" &&
+            !order.is_closed &&
+            order.buy_order_id.length != 0;
 
-    /* ------ START ---------- */
-    if (pos && order && !order.is_closed){
-        /* SAME AS AT CLOSE, FILL ORDER IF CONDITIONS ARE MET AND UPDATE POSITION */
-        botLog(bot, "AT CLOSE [NEW CANDLE]")
-        
-        const _r = await updateBotAtClose(bot, order, df[df.length - 1].c)
-        if (_r != undefined){
-            pos = _r
-        }
-    }
-    if (!pos) {
-        // Place buy order
-        botLog(bot, "BUY ORDER NOT YET PLACED, UPDATING ENTRY_LIMIT");
+        const { o, ts } = row;
 
-        const entryLimit = prevRow.ha_c;
-        botLog(bot, {
-            entryLimit,
-        });
+        if (!order || !pos){
+            botLog(bot, "KAYA RA BUY")
 
-        const ts = new Date();
-        /* PLACE MARKET BUY ORDER */
-        const amt =
-            order && order.buy_order_id.length
-                ? order.new_ccy_amt - Math.abs(order.sell_fee)
-                : bot.start_amt;
+            const entry = o
+            botLog(bot, `MARKET BUY ORDER AT ${o}`)
+            const amt = order ? order.new_ccy_amt - Math.abs(order.sell_fee) : bot.start_bal;
 
-        const res = await placeTrade({
-            bot: bot,
-            ts: parseDate(ts),
-            amt,
-            side: "buy",
-            price: 0 /* 0 for market buy */,
-            plat: plat,
-        });
-        if (res) {
-            botLog(bot, "MARKET BUY ORDER PLACED. TO WS SELL CHECK");
-            pos = true;
-            order = (await Order.findById(res).exec())!;
-            order.sl = order.buy_price * (1 - SL/100)
-            await order.save()
-        }
-        /* CREATE NEW ORDER */
-        /* if (!order || order.is_closed) {
-            order = new Order({
-                buy_price: entryLimit,
- 
+            const r = await placeTrade({
+                bot: bot,
+                ts: parseDate(new Date()),
+                amt,
                 side: "buy",
-                bot: bot.id,
-                base: bot.base,
-                ccy: bot.ccy,
+                price: 0 /* 0 for market buy */,
+                plat: plat,
+                ordType: 'Market'
             });
-            bot.orders.push(order.id)
 
-            await bot.save()
-    }
-        // ENTER_TS 
-        order.buy_timestamp = { i: parseDate(ts) };
-        order.buy_price = entryLimit;
+            if (!r){
+              return   botLog(bot, "FAILED TO PLACE BUY ORDER")
+            }
 
-        await order.save();
-        botLog(bot, `ENTRY_LIMIT UPDATED to ${entryLimit}`); */
-    }
+            order = (await Order.findById(r).exec())!
+            pos = true
 
-    /* RMOVE BOT FROM WS JUST IN CASE */
-    const ws = bot.platform == 'bybit' ? wsBybit : wsOkx
-    await ws.rmvBot(bot.id)
-    if (pos && order && !order.is_closed && strategy.buyCond(prevRow)) {
-        botLog(bot, "SELL ORDER NOT YET CLOSED, UPDATING EXIT_LIMIT");
 
-        const exitLimit = 1; //Math.min(prevRow.ha_c, prevRow.ha_o)//prevRow.ha_h;
-        order.sell_timestamp = { i: parseDate(new Date()) };
-        if (order.sell_price == 0) {
-            order.sell_price = exitLimit;
-
-            botLog(bot, `EXIT_LIMIT UPDATED TO: ${exitLimit}`);
+            if (!isGreen){
+                console.log("SKIPING...")
+                return
+            }
         }
+        if (pos && order) {
+            const TP = 5,
+                SL = 1.2,
+                TRAIL = 0.1;
 
-        botLog(bot, "CLEARING BOT HIGHS...");
-        order.highs = [];
-        await order.save();
-        botLog(bot, "WATCHING FOR THE PX CHANGES");
+            const entry = order.buy_price;
+            const tp = ceil(o * (1 + TP / 100), pxPr);
+            const trail = ceil(prevRow.h * (1 - TRAIL / 100), pxPr);
+            const sl = ceil(entry * (1 - SL / 100), pxPr);
+            
+            let exit = 0;
 
-        
-        await ws.addBot(bot.id, true);
-    }
+            let _base = order.base_amt - order.buy_fee;
+
+            if (o >= trail && isGreen) {
+                timedLog("OPEN > TRAIL");
+                exit = o;
+                if (o < entry) _base /= 2
+                else if (!isGreen) _base /= 3
+
+            }
+            _base = toFixed(_base, basePrecision)
+            botLog(bot, {_base})
+
+            if (exit != 0 && exit >= sl) {
+                timedLog("PLACING SELL ORDER AT OPEN", { volume: row.v, exit });
+
+                const amt = _base
+                const r = await placeTrade({
+                    bot: bot,
+                    ts: parseDate(new Date()),
+                    amt: Number(amt),
+                    side: "sell",
+                    plat: plat,
+                    price: exit,
+                    ordType: "Market"
+                });
+
+                if (!r){return timedLog("COULD NOT PLACE SELL ORDER")}
+                botLog(bot, "SELL ORDER PLACED")
+            }
+        }
 };
 
 export const updateOrderInDb = async (order: IOrder, res: IOrderDetails) => {
@@ -184,6 +175,7 @@ const updateBotAtClose = async (bot: IBot, order: IOrder, c: number) => {
             side: "sell",
             plat: plat,
             price: 0,
+            ordType: "Market"
         });
         if (!r) return botLog(bot, "TIMED: FAILED TO PLACE MARKET SELL ORDER");
         botLog(bot, "TIMED: MARKET SELL PLACED. BOT REMOVED");

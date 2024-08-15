@@ -5,6 +5,10 @@ import fs from "fs";
 const { env } = process;
 import { Response } from "express";
 
+
+
+const test = true
+
 function randomInRange(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
@@ -38,9 +42,9 @@ export function clog(message?: any, ...params: any[]) {
 import axios from "axios";
 import { IObj } from "./interfaces";
 import { IBot } from "@/models/bot";
-import { instruments } from "./constants";
 import { okxInstrus } from "@/data/okx-instrus";
 import { binanceInfo } from "./binance-info";
+import { bybitInstrus } from "./bybit-instrus";
 import { parseDate } from "./funcs2";
 
 const tunedErr = (res: Response, status: number, msg: string, e?: any) => {
@@ -256,7 +260,7 @@ export function getCoinPrecision(
                   (el) => el.baseAsset == pair[0] && el.quoteAsset == pair[1]
               )
             : plat == "bybit"
-            ? instruments.find(
+            ? bybitInstrus.find(
                   (el) => el.baseCoin == pair[0] && el.quoteCoin == pair[1]
               )
             : okxInstrus.find(
@@ -290,7 +294,7 @@ export function getPricePrecision(
                   (el) => el.baseAsset == pair[0] && el.quoteAsset == pair[1]
               )
             : plat == "bybit"
-            ? instruments.find(
+            ? bybitInstrus.find(
                   (el) => el.baseCoin == pair[0] && el.quoteCoin == pair[1]
               )
             : okxInstrus.find(
@@ -304,6 +308,77 @@ export function getPricePrecision(
               Number(instru[plat == "bybit" ? "minPricePrecision" : "tickSz"])
           );
 }
+export function getMinSz(
+    pair: string[],
+    plat: "binance" | "bybit" | "okx"
+) {
+    if (test)  return -Infinity;
+    const instru: IObj | undefined =
+        plat == "binance"
+            ? binanceInfo.symbols.find(
+                  (el) => el.baseAsset == pair[0] && el.quoteAsset == pair[1]
+              )
+            : plat == "bybit"
+            ? bybitInstrus.find(
+                  (el) => el.baseCoin == pair[0] && el.quoteCoin == pair[1]
+              )
+            : okxInstrus.find(
+                  (el) => el.baseCcy == pair[0] && el.quoteCcy == pair[1]
+              );
+    if (!instru) return 0;
+
+    return plat == "binance"
+        ? Number(instru.minQty)
+        : 
+              Number(instru[plat == "bybit" ? "minTradeQty" : "minSz"])
+}
+export function getMaxSz(
+    pair: string[],
+    plat: "binance" | "bybit" | "okx"
+) {
+    if (test)  return Infinity;
+    const instru: IObj | undefined =
+        plat == "binance"
+            ? binanceInfo.symbols.find(
+                  (el) => el.baseAsset == pair[0] && el.quoteAsset == pair[1]
+              )
+            : plat == "bybit"
+            ? bybitInstrus.find(
+                  (el) => el.baseCoin == pair[0] && el.quoteCoin == pair[1]
+              )
+            : okxInstrus.find(
+                  (el) => el.baseCcy == pair[0] && el.quoteCcy == pair[1]
+              );
+    if (!instru) return 0;
+
+    return pair[0] == 'KISHU' && false ? Infinity :  (plat == "binance"
+        ? Number(instru.maxQty)
+        : Number(instru[plat == "bybit" ? "maxTradeQty" : "maxMktSz"]))
+}
+export function getMaxAmt(
+    pair: string[],
+    plat: "binance" | "bybit" | "okx"
+) {
+    if (test)  return Infinity;
+    const instru: IObj | undefined =
+        plat == "binance"
+            ? binanceInfo.symbols.find(
+                  (el) => el.baseAsset == pair[0] && el.quoteAsset == pair[1]
+              )
+            : plat == "bybit"
+            ? bybitInstrus.find(
+                  (el) => el.baseCoin == pair[0] && el.quoteCoin == pair[1]
+              )
+            : okxInstrus.find(
+                  (el) => el.baseCcy == pair[0] && el.quoteCcy == pair[1]
+              );
+    if (!instru) return 0;
+
+    return (plat == "binance"
+        ? Number(instru.maxQty)
+        : Number(instru[plat == "bybit" ? "maxTradeAmt" : "maxMktAmt"]))
+}
+
 export const sleep = async (ms: number) => {
     await new Promise((res) => setTimeout(res, ms));
 };

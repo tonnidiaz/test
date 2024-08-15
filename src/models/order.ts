@@ -22,8 +22,10 @@ export const OrderSchema = new Schema(
         buy_price: { type: Number, default: 0 },
         tp: { type: Number, default: 0 },
         sell_price: { type: Number, default: 0 },
-        ccy_amt: { type: Number, default: 0 },
-        new_ccy_amt: { type: Number, default: 0 },
+        _entry: { type: Number, default: 0 },
+        _exit: { type: Number, default: 0 },
+        ccy_amt: { type: Number, default: 0 }, //START BALANCE
+        new_ccy_amt: { type: Number, default: 0 }, // BALANCE AFTER SELL, WITH FEES
         base_amt: { type: Number, default: 0 },
         is_closed: { type: Boolean, default: false },
         bot: { type: Schema.ObjectId, required: true, ref: "Bot" }

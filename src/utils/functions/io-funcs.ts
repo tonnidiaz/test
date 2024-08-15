@@ -2,7 +2,7 @@ import { Server, Socket } from "socket.io";
 import { IObj, ICandle } from "../interfaces";
 import { tuCE, heikinAshi, parseDate, parseKlines, tuPath } from "../funcs2";
 import {
-    instruments,
+    ETH_RATE,
     klinesDir,
     klinesRootDir,
     tradesRootDir,
@@ -15,11 +15,12 @@ import { platforms } from "../consts";
 import { ensureDirExists } from "../orders/funcs";
 import { okxInstrus } from "@/data/okx-instrus";
 import { binanceInfo } from "../binance-info";
+import { bybitInstrus } from "../bybit-instrus";
 let prevData: IObj | null = null;
 
 export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
     try {
-        const baseCcy = data.symbol;
+        const pair = data.symbol;
         let {
             interval,
             start,
@@ -33,9 +34,13 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
             clId,
             T,
             save,
+            demo,
         } = data;
 
+        demo = demo ?? false;
         console.log("ON BACKTEST");
+        // CLEAR CONSOLE
+        console.clear();
         prevData = null;
         const startTs = Date.parse(start),
             endTs = Date.parse(end);
@@ -46,11 +51,12 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
 
         client?.emit("backtest", "Getting klines...");
 
-        const plat = platforms[platform].obj;
+        const plat = new platforms[platform].obj({ demo });
+
         const platName = platforms[platform].name;
         let symbol: string =
-            plat instanceof TestOKX ? baseCcy.join("-") : baseCcy.join("");
-        console.log(symbol);
+            plat instanceof TestOKX ? pair.join("-") : pair.join("");
+        console.log({ symbol, demo });
         const test = false;
         if (useFile && !file) {
             client?.emit("backtest", { err: "File required" });
@@ -60,10 +66,11 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
         const year = start.split("-")[0];
         const pth =
             "src/data/klines/binance/SOL-USDT_5m_2023-01-01 00 00 00+02:00_2023-10-31 23 59 00+02:00.json";
+        const subPath = demo ? "demo" : "live";
         klinesPath = test
             ? tuPath(pth)
             : tuPath(
-                  `${klinesRootDir}/${platName.toLowerCase()}/${year}/${symbol}_${interval}m.json`
+                  `${klinesRootDir}/${platName.toLowerCase()}/${year}/${subPath}/${symbol}_${interval}m-${subPath}.json`
               );
         if (offline && !useFile) {
             console.log("IS OFFLINE");
@@ -74,7 +81,7 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
 
             if (!existsSync(klinesPath!)) {
                 const err = {
-                    err: `DataFrame for ${symbol} in ${year} at ${interval}m does not exist`,
+                    err: `${klinesPath} does not exist`,
                 };
                 client?.emit("backtest", err);
                 return;
@@ -90,6 +97,9 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
         } else if (!offline && !useFile) {
             //const bot = new Bot({name:"Temp", base: baseCcy[0], ccy: baseCcy[1]})
             //const bybit = new Bybit(bot)
+            if (save) {
+                ensureDirExists(klinesPath);
+            }
             const r = await plat.getKlines({
                 start: startTs,
                 end: endTs,
@@ -140,6 +150,8 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
         klines = isParsed && useFile ? klines : parseKlines(klines);
         let df = tuCE(isHa && useFile ? klines : heikinAshi(klines));
 
+        const quote = pair[1];
+
         if (!useFile) {
             // Return oly df from startTs to endTs
             df = df.filter(
@@ -147,7 +159,19 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
                     Date.parse(el.ts) <= endTs && Date.parse(el.ts) >= startTs
             );
         }
+
+        let QUOTE_RATE = 1;
+        switch (quote) {
+            case "ETH":
+                QUOTE_RATE = ETH_RATE;
+            default:
+                console.log("IS_USDT");
+        }
+
         let bal = Number(data.bal);
+        console.log({ bal });
+        bal /= QUOTE_RATE;
+        console.log({ bal });
 
         client?.emit("backtest", "Backtesting....");
 
@@ -160,20 +184,31 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
             trades,
             balance: bal,
             lev,
-            pair: baseCcy,
+            pair: pair,
             pGain,
             maker: plat.maker,
             taker: plat.taker,
             platNm: platName.toLowerCase() as any,
         });
-        retData.profit = toFixed(
+
+        let profit = toFixed(
             retData.balance - bal,
-            getPricePrecision(baseCcy, platName as any)
+            getPricePrecision(pair, platName as any)
         );
-        retData = { ...retData, base: baseCcy[0], ccy: baseCcy[1] };
+        console.log({ balance: retData.balance, aside: retData.aside, profit });
+        retData.balance *= QUOTE_RATE;
+        retData.aside *= QUOTE_RATE;
+        profit *= QUOTE_RATE;
+        console.log({ balance: retData.balance, aside: retData.aside, profit });
+
+        //console.log(`PROFIT: ${pair[1]} ${profit}`);
+        //profit  *= (pair[1] == 'ETH' ? ETH_RATE : 1)
+        retData.profit = profit;
+        console.log(`PROFIT: USDT ${profit}`);
+        retData = { ...retData, base: pair[0], ccy: pair[1] };
 
         console.log(`TRADES: ${retData.trades}`);
-        console.log(`PROFIT: ${retData.profit}\n`);
+
         const str_name = objStrategies[strNum - 1].name;
         console.log({ str_name });
 
@@ -189,13 +224,27 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
 
 export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
     try {
-        let { interval, start, end, offline, platform, save, quote, prefix, skip_existing } = data;
+        let {
+            interval,
+            start,
+            end,
+            offline,
+            demo,
+            platform,
+            save,
+            quote,
+            prefix,
+            skip_existing,
+            from_last,
+            skip_saved,
+        } = data;
         const startPair = data.from;
         let _data: {
             pair: string[];
-            interval: number;
             profit: number;
             trades: number;
+            aside: 0 | number;
+            total: number;
         }[] = [];
 
         prevData = null;
@@ -204,7 +253,7 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
 
         let klinesPath: string | null;
 
-        const plat = platforms[platform].obj;
+        const plat = new platforms[platform].obj({ demo });
         const platName = platforms[platform].name;
         const _platName = platName.toLowerCase();
         let _instruments: string[][];
@@ -214,13 +263,15 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
 
         const strNum = Number(data.strategy);
 
-        prefix = prefix ?? ''
+        prefix = prefix ?? "";
+        const sub = demo ? "demo" : "live";
+        const savePath = `data/rf/coins/${year}/${sub}/${prefix}_${_platName}_${interval}m-${sub}.json`;
 
-        const savePath = `data/rf/coins/${year}/${prefix}_${_platName}_${interval}m.json`;
-
-        if (existsSync(savePath)){
-            _data = (await require(savePath)).sort((a, b) => (a.pair > b.pair ? 1 : -1))
-            last = _data[_data.length - 1]?.pair
+        if (existsSync(savePath) && from_last) {
+            _data = (await require(savePath)).sort((a, b) =>
+                a.pair > b.pair ? 1 : -1
+            );
+            last = _data[_data.length - 1]?.pair;
         }
 
         if (_platName == "okx") {
@@ -228,42 +279,52 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
                 .filter((el) => el.state == "live")
                 .map((el) => [el.baseCcy, el.quoteCcy])
                 .sort();
-        } else if (_platName == "bybit") {
-            _instruments = instruments
-                .map((el) => [el.baseCoin, el.quoteCoin])
-                .sort();
-        }else{
-            const okxCoinsPath = savePath.replace(_platName, 'okx')
-            let okxCoins: IObj[] | null = null
+        } else {
+            const okxCoinsPath = savePath.replace(_platName, "okx");
+            let okxCoins: IObj[] | null = null;
 
-            if (existsSync(okxCoinsPath)){
-                okxCoins = await require(okxCoinsPath) 
+            if (existsSync(okxCoinsPath)) {
+                okxCoins = await require(okxCoinsPath);
             }
-            _instruments = binanceInfo.symbols.filter(el=> el.isSpotTradingAllowed == true).map(el=> [el.baseAsset, el.quoteAsset]).sort()
-            if (okxCoins != null){
-                _instruments = _instruments.filter(el=> okxCoins!.findIndex(el2 => el2.pair.toString() == el.toString()) == -1 )
+            if (_platName == "bybit") {
+                _instruments = bybitInstrus
+                    .map((el) => [el.baseCoin, el.quoteCoin])
+                    .sort();
+            } else {
+                _instruments = binanceInfo.symbols
+                    .filter((el) => el.isSpotTradingAllowed == true)
+                    .map((el) => [el.baseAsset, el.quoteAsset])
+                    .sort();
+            }
+            if (okxCoins != null) {
+                _instruments = _instruments.filter(
+                    (el) =>
+                        okxCoins!.findIndex(
+                            (el2) => el2.pair.toString() == el.toString()
+                        ) == -1
+                );
             }
         }
 
-        let coins = _instruments
-        if (quote)
-            coins = coins.filter((el) => el[1] == `${quote}`);
+        let coins = _instruments;
+        if (quote) coins = coins.filter((el) => el[1] == `${quote}`);
         if (!offline) {
-            if (startPair){
-               coins = coins.slice(
-                typeof startPair == "number"
-                    ? startPair
-                    : coins.findIndex((el) => el[0] == startPair[0])
-            ); 
-            }else if (last){
-                coins = coins.slice(coins.findIndex(el=> el.toString() == last!.toString()))
-                console.log("STARTING AT:", coins[0], {last});
+            if (startPair) {
+                coins = coins.slice(
+                    typeof startPair == "number"
+                        ? startPair
+                        : coins.findIndex((el) => el[0] == startPair[0])
+                );
+            } else if (last) {
+                coins = coins.slice(
+                    coins.findIndex((el) => el.toString() == last!.toString())
+                );
+                console.log("STARTING AT:", coins[0], { last });
             }
-            
         }
 
         //return []
-        
+
         ensureDirExists(savePath);
 
         for (let pair of coins) {
@@ -276,11 +337,11 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
             console.log(symbol);
 
             klinesPath = tuPath(
-                `${klinesRootDir}/${platName.toLowerCase()}/${year}/${symbol}_${interval}m.json`
+                `${klinesRootDir}/${platName.toLowerCase()}/${year}/${sub}/${symbol}_${interval}m-${sub}.json`
             );
-            if (!offline && skip_existing && existsSync(klinesPath)){
+            if (!offline && skip_existing && existsSync(klinesPath)) {
                 console.log("SKIPING", pair);
-                continue
+                continue;
             }
 
             if (offline && !existsSync(klinesPath)) {
@@ -288,7 +349,7 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
                 continue;
             }
             const r =
-                offline || existsSync(klinesPath)
+                offline || (existsSync(klinesPath) && skip_saved)
                     ? await require(klinesPath!)
                     : await plat.getKlines({
                           start: startTs,
@@ -299,13 +360,25 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
                       });
 
             klines = r ?? [];
-
+            if (!klines.length) continue;
             let df = tuCE(heikinAshi(parseKlines(klines)));
 
             df = df.filter(
                 (el) =>
                     Date.parse(el.ts) <= endTs && Date.parse(el.ts) >= startTs
             );
+
+            let QUOTE_RATE = 1;
+            const quote = pair[1];
+            switch (quote) {
+                case "ETH":
+                    QUOTE_RATE = ETH_RATE;
+                default:
+                    console.log("IS_USDT");
+            }
+            console.log({ bal });
+            bal /= QUOTE_RATE;
+            console.log({ bal });
             let retData = objStrategies[strNum - 1].run({
                 df,
                 trades: [],
@@ -316,18 +389,36 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
                 taker: plat.taker,
                 platNm: platName.toLowerCase() as any,
             });
-            retData.profit = toFixed(
+
+            let profit = toFixed(
                 retData.balance - bal,
                 getPricePrecision(pair, platName as any)
             );
+
+            console.log({
+                balance: retData.balance,
+                aside: retData.aside,
+                profit,
+            });
+
+            retData.balance *= QUOTE_RATE;
+            retData.aside *= QUOTE_RATE;
+            profit *= QUOTE_RATE;
+            console.log({
+                balance: retData.balance,
+                aside: retData.aside,
+                profit,
+            });
+            retData.profit = profit;
             retData = { ...retData, base: pair[0], ccy: pair[1] };
 
             console.log(pair, `TRADES: ${retData.trades}`);
             console.log(pair, `PROFIT: ${retData.profit}\n`);
             _data.push({
                 pair,
+                aside: retData.aside,
                 profit: retData.profit,
-                interval,
+                total: retData.profit + retData.aside,
                 trades: retData.trades,
             });
             _data = [..._data].sort((a, b) => (a.profit > b.profit ? -1 : 1));

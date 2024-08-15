@@ -5,7 +5,7 @@ import BigNumber from 'bignumber.js'
 
 export function fillBuyOrder({
     entry,
-    prevRow,
+    prevrow,
     taker,
     enterTs,
     balance,
@@ -16,7 +16,7 @@ export function fillBuyOrder({
     isA
 }: {
     entry: number;
-    prevRow: any;
+    prevrow: ICandle;
     taker: number;
     enterTs: string;
     balance: number;
@@ -27,9 +27,11 @@ export function fillBuyOrder({
     isA?: boolean
 }) {
     console.log('\nFILL BUY ORDER', {entry, balance});
+    console.log({prevrow});
     const _balance = new BigNumber(balance)
     
     let base : number | BigNumber = _balance.dividedBy(entry)// * (1 - taker);
+
     const fee = base.multipliedBy(taker)
     console.log("BASE:")
     console.log(`B4 FEE: ${base.toString()}`)
@@ -45,11 +47,11 @@ export function fillBuyOrder({
     //console.log(`BASE: ${base}`);
 
     const data = { ...mData };
-    const ts = prevRow.ts;
+    const ts = prevrow.ts;
     const part = isA == undefined ? '' : isA ? "[A]" : "[B]"
 
     data.data.push({
-        side: `buy \t {h:${prevRow.h}, l: ${prevRow.l}}`,
+        side: `buy \t {h:${prevrow.h}, l: ${prevrow.l}}`,
         fill: entryLimit,
         base,
         enterTs,
@@ -62,7 +64,7 @@ export function fillBuyOrder({
     return { pos, base, mData: data, _cnt: 0, fee: fee.toNumber() * entry };
 }
 export const fillSellOrder = ({
-    prevRow,
+    prevrow,
     exit,
     exitLimit,
     base,
@@ -84,7 +86,7 @@ export const fillSellOrder = ({
 }: {
     exitLimit: number | null;
     exit: number;
-    prevRow: ICandle;
+    prevrow: ICandle;
     base: number;
     enterTs: string;
     pricePrecision: number;
@@ -118,13 +120,13 @@ export const fillSellOrder = ({
 
     balance = toFixed(balance.toNumber(), ( pricePrecision));
     console.log(`AFTER FEE: ${balance}\n`)
-    const ts = prevRow["ts"];
+    const ts = prevrow["ts"];
     
     const _entry = o ?? entry
     const perc = ((exit - _entry)/_entry * 100).toFixed(2)
     const part = isA == undefined ? '' : isA ? "[A]" : "[B]"
     mData["data"].push({
-        side: `sell \t {h:${prevRow.h}, l: ${prevRow.l}}`,
+        side: `sell \t {h:${prevrow.h}, l: ${prevrow.l}}`,
         fill: exitLimit,
         enterTs,
         ts,

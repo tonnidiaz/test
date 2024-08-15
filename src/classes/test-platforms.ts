@@ -1,4 +1,4 @@
-import { MAKER_FEE_RATE, TAKER_FEE_RATE, demo } from "@/utils/constants";
+import { MAKER_FEE_RATE, TAKER_FEE_RATE } from "@/utils/constants";
 import { ensureDirExists } from "@/utils/orders/funcs";
 import { getInterval, parseDate } from "@/utils/funcs2";
 import { botLog } from "@/utils/functions";
@@ -23,6 +23,12 @@ export class Platform {
     name: string = "";
     maker: number = MAKER_FEE_RATE;
     taker: number = TAKER_FEE_RATE;
+
+    demo: boolean
+
+    constructor({demo = false}: {demo?: boolean}){
+        this.demo = demo
+    }
     async getKlines({
         start,
         end,
@@ -66,8 +72,10 @@ export class TestOKX extends Platform {
     apiKey: string;
     apiSecret: string;
     passphrase: string;
-    constructor() {
-        super();
+
+    
+    constructor({demo = false}: {demo?: boolean}) {
+        super({demo});
         this.flag = demo ? "1" : "0";
         this.apiKey = demo
             ? process.env.OKX_API_KEY_DEV!
@@ -103,7 +111,8 @@ export class TestOKX extends Platform {
         isBybit?: boolean;
     }) {
         try {
-            const client = new RestClientV5();
+            const client = new RestClientV5({demoTrading: this.demo, testnet: false});
+            console.log({client: 'client', demo: this.demo}, '\n');
             end = end ?? Date.now();
             let klines: any[] = [];
             let cnt = 0;
@@ -206,7 +215,6 @@ export class TestOKX extends Platform {
         isBybit?: boolean;
     }) {
         try {
-            const client = new RestClientV5();
             end = end ?? Date.now();
             let trades: any[] = [];
             let cnt = 0;
@@ -272,8 +280,8 @@ export class TestOKX extends Platform {
 
 export class TestBybit extends Platform {
     client: RestClientV5;
-    constructor() {
-        super();
+    constructor({demo = false}: {demo?: boolean}) {
+        super({demo});
         const apiKey = demo
             ? process.env.BYBIT_API_KEY_DEV!
             : process.env.BYBIT_API_KEY!;

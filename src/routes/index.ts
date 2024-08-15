@@ -16,6 +16,7 @@ import { Phemex } from "@/classes/phemex";
 import { onBacktest, onCoins } from "@/utils/functions/io-funcs";
 import { objPlats } from "@/utils/consts2";
 import { parseKlines } from "@/utils/funcs2";
+import { TestGateio } from "@/classes/test-gateio";
 
 const fp = false
     ? "src/data/klines/binance/2021/DOGEUSDT_15m.json"
@@ -51,38 +52,11 @@ router.get('/kline', async (req, res)=>{
 })
 router.get("/test", async (req, res) => {
     const { q, id, bs, cy, algoId } = req.query;
-    const bot = new Bot({
-        base: bs ?? "UMA",
-        ccy: cy ?? "USDT",
-        name: "TBot",
-        platform: "okx",
-        order_type: "Market",
-    });
-    const plat = new objPlats[bot.platform](bot);
-    const side: string = "sell";
-    const pxPr = getPricePrecision([bot.base, bot.ccy], bot.platform);
-    const szPr = 2; //getCoinPrecision([bot.base, bot.ccy], "sell", bot.platform);
-    let px = side == "sell" ? 0.08973 : 0.081; //0.07961
-    let sz = side == "buy" ? 15 / px : 60;
-    const oid = "1615261603501297664";
-    const sl = toFixed(0.08759, pxPr); //toFixed(px * (1 + ((side == 'sell' ? -.05/100 : .05/100))), pxPr)
-    px = toFixed(px, pxPr);
-    sz = toFixed(sz, szPr);
-
-    const isAlgo = algoId ? true : false;
-    const _id = (isAlgo ? algoId : id) ?? oid;
-
-    const r =
-        q == "place"
-            ? await plat.placeOrder(
-                  sz,
-                  px,
-                  side as any,
-                  sl,
-                  Date.now().toString()
-              )
-            : await plat.getOrderbyId(_id as string, isAlgo); //placeOrder(43.415972599999996, undefined, "sell")
-    console.log(r);
+    
+    const plat = new TestGateio({})
+    const klines = await plat.getKlines({symbol: 'SOL_USDT', interval: 60, start: Date.parse("2024-01-01 00:00:00+02:00")})
+    const df =  parseKlines(klines ?? [])
+    console.log(df[df.length - 1]);
     res.json({});
 });
 

@@ -72,7 +72,7 @@ export const strategy = ({
 
     for (let i = d + 1; i < df.length; i++) {
         //if (balance < 10) continue;
-        const prevRow = df[i - 1],
+        const prevrow = df[i - 1],
             prePrevRow = df[i - 2],
             row = df[i];
 
@@ -106,7 +106,7 @@ export const strategy = ({
             const ret = fillSellOrder({
                 exitLimit,
                 exit: _exit,
-                prevRow: _row,
+                prevrow: _row,
                 entry: entry, 
                 base,
                 pricePrecision,
@@ -128,7 +128,7 @@ export const strategy = ({
             if (!entryLimit) entryLimit = _entry;
             const ret = fillBuyOrder({
                 entry: _entry,
-                prevRow: _row,
+                prevrow: _row,
                 entryLimit,
                 enterTs,
                 taker,
@@ -139,7 +139,7 @@ export const strategy = ({
             });
             _fillBuyOrder(ret);
         };
-        const isGreen = prevRow.c >= prevRow.o;
+        const isGreen = prevrow.c >= prevrow.o;
 
         if (!pos && entryLimit) {
             console.log("\nNO POS\n");
@@ -188,25 +188,25 @@ export const strategy = ({
                 _fillSell(exit, exitRow, isSl);
 
                 pos = false
-                entryLimit = o
+               // entryLimit = o
                 if (c <= o){
                     _entry = c
                     _fillBuy(_entry, row)
-                }else{
+                } else{
                     _entry = df[i + 1].c
                     i += 1
                     _fillBuy(_entry, row)
                 }
               
                 
-                //continue
+                continue
             }
         }
 
         if (
             !pos
          //   && !entryLimit
-           && (buyCond(prevRow, df, i))
+           && (buyCond(prevrow, df, i))
         ) {
            
             // Place limit buy order
@@ -221,7 +221,7 @@ export const strategy = ({
             }
         } else if (pos && sellCond(row, entry, df, i)) {
             const rf = true;
-            exitLimit = rf ? Math.max(prevRow.ha_h, prevRow.h) : prevRow.ha_o;
+            exitLimit = rf ? Math.max(prevrow.ha_h, prevrow.h) : prevrow.ha_o;
             const perc = rf ? 1.3 : 10;
             if (exitLimit) exitLimit *= 1 + perc / 100;
             enterTs = row.ts;

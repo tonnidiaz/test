@@ -98,8 +98,8 @@ export const tuCE = (df: ICandle[]) => {
     const ATR = atr(highs, lows, closings, { period: atrLen });
     const _atr = ATR.atrLine;
     const rsiLen = 2,
-        fastLen = 20, //89 /* 15 */,
-        slowLen = 50; //90; /* 50 */
+        fastLen = 1, //89 /* 15 */,
+        slowLen = 2; //90; /* 50 */
 
     const sma20 = ema(closings, { period: fastLen });
     const sma50 = ema(closings, { period: slowLen });
@@ -157,12 +157,23 @@ export const calcSL = (entry: number) => {
     return entry * (1 - SL / 100);
 };
 export const calcTP = (entry: number) => entry * (1 + TP / 100);
-export const getInterval = (m: number, plt: "bybit" | "okx" | "binance") => {
-    return plt == "okx"
-        ? m >= 60
-            ? `${Math.floor(m / 60)}H`
-            : `${m}m`
-        : `${m}`;
+export const getInterval = (m: number, plt: "bybit" | "okx" | "binance" | "gateio") => {
+
+    let interval = `${m}`
+
+    switch(plt){
+        case 'okx':
+            interval = m >= 60
+            ? `${Math.floor(m / 60)}H` : `${m}m`;
+            break
+            
+        case 'gateio':
+            interval = m >= 60
+            ? `${Math.floor(m / 60)}h` : `${m}m`
+            break
+    }
+
+    return interval as any
 };
 
 export const parseFilledOrder = (res: OrderDetails | AccountOrderV5) => {
