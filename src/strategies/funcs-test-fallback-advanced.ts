@@ -161,8 +161,8 @@ export const strategy = ({
 
         const isGreen = prevrow.c >= prevrow.o;
         const isSum = prevrow.c > row.o;
-        console.log(pair)
-        console.log({ts: row.ts, o: row.o, h: row.h, l: row.l, c: row.c})
+        console.log(pair);
+        console.log({ ts: row.ts, o: row.o, h: row.h, l: row.l, c: row.c });
         if (row.v <= 0) continue;
 
         if (!pos && entryLimit) {
@@ -210,7 +210,7 @@ export const strategy = ({
 
             const { h, l, c, o, ha_o, ha_h, ha_l, ha_c } = _row;
 
-            const SL = .15,
+            const SL = 0.15,
                 TP = 1.5;
             const _sl = o * (1 - SL / 100); //.25
 
@@ -218,45 +218,37 @@ export const strategy = ({
             const _prev_tp = prevrow.o * (1 + TP / 100);
 
             let _tp = o * (1 + TP / 100); //3.5
-const calcSl = ()=> ceil(entry * (1 - .05 / 100), pricePrecision);
-            sl = calcSl()
-            
-            if (false) {
-            } else if (l <= _sl && h > _sl) {
-                exit = _sl;
-                _fillSell(exit, _row, true);
+            const calcSl = () => ceil(entry * (1 - 0.05 / 100), pricePrecision);
+            sl = calcSl();
 
-                entry = _sl;
-                _fillBuy(entry, _row);
-                if (h >= _tp) {
-                    exit = _tp;
-                }
-                else if (c > o){
-                    exit =  c
-                }
-            } else if (h >= _tp) {
+            if (false) {
+            }  else if (h >= _tp) {
                 const tp2 = _tp * (1 + 0.5 / 100); //1.5
                 if (h >= tp2) {
                     exit = tp2;
                 }
+            }
 
-                //else if (c >= entry) exit = row.o;
-                // else goOn = false;
-            } 
+            else if (l <= _sl && _sl < h && l >= _sl * (1 - 5.5/100) && !isGreen ) {
+                const px = i % 2 == 0? l : _sl
+                exit = px;
+                _fillSell(exit, _row, true);
 
-
-            goOn = exit != 0;
-
-            // if(!goOn && c >= o && h >= _tp){
-            //     exit = c
-            // }
+                entry = px;
+                _fillBuy(entry, _row);
+                if (h >= _tp) {
+                    exit = _tp;
+                } else if (c > o) {
+                    exit = c;
+                }
+            }
 
             goOn = exit != 0;
             if (exit == 0) {
                 console.log("NEITHER");
                 goOn = false;
             }
-            sl = calcSl()
+            sl = calcSl();
 
             exitLimit = o;
 

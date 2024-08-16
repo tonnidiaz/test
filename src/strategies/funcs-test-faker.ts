@@ -14,7 +14,6 @@ import {
 } from "@/utils/constants";
 
 import {
-    ceil,
     findAve,
     getCoinPrecision,
     getMaxAmt,
@@ -216,6 +215,7 @@ export const strategy = ({
 
 
     console.log({ minSz, maxSz, pricePrecision, basePrecision });
+    balance = toFixed(balance, pricePrecision);
     let START_BAL = balance
     console.log({balance})
 
@@ -228,7 +228,6 @@ export const strategy = ({
         START_BAL = balance;
     }
 
-    let _bool = false
 
     const _fillSellOrder = (ret: ReturnType<typeof fillSellOrder>) => {
         (pos = ret.pos),
@@ -247,29 +246,26 @@ export const strategy = ({
         if (profitPerc >= 100){
             putAside(balance/2.5)
         }
-        _bool = false
     };
 
     const _fillBuyOrder = (ret: ReturnType<typeof fillBuyOrder>) => {
-        if (maxSz == null  || minSz == null  || pricePrecision == null  || basePrecision == null) return
         (pos = ret.pos),
             (mData = ret.mData),
             (_cnt = ret._cnt);
         buyFees += ret.fee;
-        tp = toFixed(entry * (1 + TP / 100), pricePrecision!);
-        sl = toFixed(entry * (1 - SL / 100), pricePrecision!);
+        tp = toFixed(entry * (1 + TP / 100), pricePrecision);
+        sl = toFixed(entry * (1 - SL / 100), pricePrecision);
         base += ret.base
     };
 
     async function _fillSell({_exit, _base, _row, isSl} : {_exit: number, _row: ICandle, _base: number, isSl?: boolean}) {
         console.log("\nSELLING", {_base, _exit} ,"\n")
-        if (maxSz == null  || minSz == null  || pricePrecision == null  || basePrecision == null) return
 
         const _bal = _base * _exit
-        if (_bal > maxAmt!){
+        if (_bal > maxAmt){
             console.log(`BAL ${_bal} > MAX_AMT ${maxAmt}`)
-             _base = (maxAmt! * (1 - .5/100)) / _exit
-             _base = toFixed(_base, basePrecision!)
+             _base = (maxAmt * (1 - .5/100)) / _exit
+             _base = toFixed(_base, basePrecision)
             return _fillSell({_exit, _base, _row, isSl})
 
         }
@@ -303,12 +299,11 @@ export const strategy = ({
 
     function _fillBuy({amt, _entry, _row} : {amt: number, _entry: number, _row: ICandle}) {
         console.log("\BUYING", {amt, _entry} ,"\n")
-        if (maxSz == null  || minSz == null  || pricePrecision == null  || basePrecision == null) return
         const _base = amt / _entry;
         if (_base < minSz) {
             const msg =  `BASE: ${_base} < MIN_SZ: ${minSz}`
             return console.log(`${msg}`);
-        }else if (_base > maxSz!){
+        }else if (_base > maxSz){
             const msg = `BASE: ${_base} > MAX_SZ: ${maxSz}`;
 
             console.log(`${msg}\n`);
@@ -339,22 +334,18 @@ export const strategy = ({
 
     for (let i = d + 1; i < df.length; i++) {
         
-        
-        const prevrow = df[i - 1],
-            row = df[i];
-
- if (maxSz == null  || minSz == null  || pricePrecision == null  || basePrecision == null || row.v <= 0
+        if (minSz == 0 || maxSz == 0
             // || maxReached //|| profitPerc >= 100//9900
             ) continue;
+        const prevrow = df[i - 1],
+            row = df[i];
+ 
         lastPx = row.o;
 
-        const isGreen = prevrow.c >= prevrow.o
-        const isYello = prevrow.c > row.o
         console.log(`\nTS: ${row.ts}`);
 
         if (pos) _cnt += 1;
 
-        const _sell = !isGreen && prevrow.sma_20 < prevrow.sma_50
         if (!pos && buyCond(prevrow, df, i)) {
             console.log("\nKAYA RA BUY\n");
             enterTs = row.ts;
@@ -363,8 +354,7 @@ export const strategy = ({
             entry = row.o;
             _fillBuy({amt: balance, _row: row, _entry: entry});
 
-            if (!isGreen)
-                continue;
+            continue;
         }
         if (pos) {
             enterTs = row.ts;
@@ -384,37 +374,20 @@ export const strategy = ({
             let goOn = true,
                 isClose = false, isSl = false;
 
-                let SL =  .5//.5//1.2;
-            const TRAIL = .1 // .1
-            const trail = ceil(prevrow.h * (1 - TRAIL / 100), pricePrecision);
-            
             const { h, c, o } = _row;
             const _sl = entry * (1 - SL / 100);
             let _tp = Math.max(o, entry) * (1 + 10 / 100);
             _tp = Number(_tp.toFixed(pricePrecision));
 
-            const isO = prevrow.h == Math.max(prevrow.c, prevrow.o) ;
+            const isO = prevrow.h == prevrow.o;
             if (false) {
             } 
            
-            exit = Math.max(o, exitLimit)
-            
-            isSl = _sell
+            exit = exitLimit
             if (false) {
             }
-            else if (o >= trail && isO){
-                exit = o
-                
-                
-            }
 
-            _bool = true
-
-           
-            
-             //|| prevrow.hist < 0
-                
-            if (exit != 0 && h >= exit && (isSl || exit >= _sl)){
+            if (exit != 0 && h >= exit){
 
                 isSl = exit < entry
                 _fillSell({_row, _exit: exit, _base: base, isSl})

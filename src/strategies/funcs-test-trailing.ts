@@ -284,19 +284,19 @@ export const strategy = ({
                 _fillBuy({ _amt: balance, _entry: entry, _row: erow });
                 continue
             }
-            if (c > _exit) {
-                // DID NOT GO DOWN TO REACH STOP_PRICE
-                console.log("SELLING AT CLOSE");
+            // if (c > _exit) {
+            //     // DID NOT GO DOWN TO REACH STOP_PRICE
+            //     console.log("SELLING AT CLOSE");
 
-                _exit = c;
-                isClose = true;
-                if (c > _tp /* && c > _sl */)
-                    _fillSell({ _exit, _row: erow, _base: base, o: o });
-                continue;
-            } else {
-                console.log("SELLING AT STOP");
-                isExit = true;
-            }
+            //     _exit = c;
+            //     isClose = true;
+            //     if (c > _tp /* && c > _sl */)
+            //         _fillSell({ _exit, _row: erow, _base: base, o: o });
+            //     continue;
+            // } else {
+            //     console.log("SELLING AT STOP");
+            //     isExit = true;
+            // }
 
             let _slip = 0;
             _exit *= 1 - _slip / 100;

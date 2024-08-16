@@ -76,7 +76,7 @@ export const strategy = ({
 
     for (let i = d + 1; i < df.length; i++) {
         //if (balance < 10) continue;
-        const prevRow = df[i - 1],
+        const prevrow = df[i - 1],
             row = df[i];
 
         console.log(`\nTS: ${row.ts}`);
@@ -114,7 +114,7 @@ export const strategy = ({
             const ret = fillSellOrder({
                 exitLimit,
                 exit: _exit,
-                prevRow: _row,
+                prevrow: _row,
                 entry: entry,
                 base,
                 pricePrecision,
@@ -137,7 +137,7 @@ export const strategy = ({
             if (!entryLimit) entryLimit = entry;
             const ret = fillBuyOrder({
                 entry: _entry,
-                prevRow: _row,
+                prevrow: _row,
                 entryLimit,
                 enterTs,
                 taker,
@@ -149,18 +149,18 @@ export const strategy = ({
             _fillBuyOrder(ret);
         }
 
-        const isGreen = prevRow.c >= prevRow.o;
+        const isGreen = prevrow.c >= prevrow.o;
 
        if (pos && exitLimit) {
             exit = 0;
-            const exitRow = prevRow;
+            const exitRow = prevrow;
             console.log("HAS POS");
 
             let goOn = true,
                 isSl = false,
                 is_curr = false;
 
-            const { h, c, o } = prevRow;
+            const { h, c, o } = prevrow;
 
 
             const SL = .15; //1;
@@ -193,10 +193,10 @@ export const strategy = ({
             }
         }
 
-        if (!pos && (useAnyBuy || buyCond(prevRow, df, i))) {
+        if (!pos && (useAnyBuy || buyCond(prevrow, df, i))) {
             console.log("\nKAYA RA BUY\n");
             // Place limit buy order
-            entryLimit = prevRow.c * (1 - 2.5 / 100);
+            entryLimit = prevrow.c * (1 - 2.5 / 100);
             enterTs = row.ts;
             console.log(
                 `[ ${row.ts} ] \t Limit buy order at ${entryLimit?.toFixed(2)}`
@@ -207,7 +207,7 @@ export const strategy = ({
             }
         } 
          else if (pos) {
-            exitLimit = prevRow.h * (1 + .5/100);
+            exitLimit = prevrow.h * (1 + .5/100);
         }
 
     }

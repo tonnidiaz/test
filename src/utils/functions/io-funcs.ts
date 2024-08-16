@@ -25,7 +25,7 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
     try {
         const pair = data.symbol;
         let {
-            interval,
+            interval,skip_existing,
             start,
             end,
             offline,
@@ -45,6 +45,9 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
         // CLEAR CONSOLE
         console.clear();
         prevData = null;
+
+        
+
         const startTs = Date.parse(start),
             endTs = Date.parse(end);
 
@@ -54,12 +57,20 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
 
         client?.emit("backtest", "Getting klines...");
 
-        const plat = new platforms[platform].obj({ demo });
+        
 
-        const platName = platforms[platform].name;
+        const platName = platform.toLowerCase();
+        
+        const plat = new platforms[platName]({ demo });
         let symbol: string = getSymbol(pair, platName);
+        const pxPr = getPricePrecision(pair, platName as any)
 
         console.log({ symbol, demo });
+
+        if (pxPr == null) {
+            client?.emit('backtest', {err: `PRECISION FOR ${symbol} NOT AVAL`})
+            return
+        }
         const test = false;
         if (useFile && !file) {
             client?.emit("backtest", { err: "File required" });
@@ -103,7 +114,7 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
             if (save) {
                 ensureDirExists(klinesPath);
             }
-            const r = await plat.getKlines({
+            const r = skip_existing && existsSync(klinesPath) ? await require(klinesPath) :  await plat.getKlines({
                 start: startTs,
                 end: endTs,
                 interval,
@@ -128,6 +139,7 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
             trades = r2;
             klines = r;
         }
+
         if (offline && !useFile) console.log(`\nKLINES_PATH: ${klinesPath!}\n`);
         if (useFile) console.log(`\nUse file\n`);
         console.log({ start, end });
@@ -186,6 +198,7 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
             df,
             trades,
             balance: bal,
+            
             lev,
             pair: pair,
             pGain,
@@ -196,7 +209,7 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
 
         let profit = toFixed(
             retData.balance - bal,
-            getPricePrecision(pair, platName as any)
+            pxPr
         );
         console.log({ balance: retData.balance, aside: retData.aside, profit });
         retData.balance *= QUOTE_RATE;
@@ -225,7 +238,7 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
     }
 };
 
-export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
+export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
     try {
         let {
             interval,
@@ -240,6 +253,7 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
             skip_existing,
             from_last,
             skip_saved,
+            clId,
         } = data;
         const startPair = data.from;
         let _data: {
@@ -250,15 +264,19 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
             total: number;
         }[] = [];
 
+        let result : IObj = {}
+        let msg = ""
+
         prevData = null;
         const startTs = Date.parse(start),
             endTs = Date.parse(end);
 
         let klinesPath: string | null;
+        console.log({platform})
 
-        const plat = new platforms[platform].obj({ demo });
-        const platName = platforms[platform].name;
-        const _platName = platName.toLowerCase();
+        const platName = platform.toLowerCase();
+        const plat = new platforms[platName]({demo})
+        const _platName = platform.toLowerCase();
         let _instruments: string[][];
         let last: string[] | undefined;
         start = start ?? parseDate(new Date());
@@ -270,6 +288,7 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
         const sub = demo ? "demo" : "live";
         const savePath = `data/rf/coins/${year}/${sub}/${prefix}_${_platName}_${interval}m-${sub}.json`;
 
+        client?.emit('cointest', `${platform}: BEGINE COINTEST...`)
         if (existsSync(savePath) && from_last) {
             _data = (await require(savePath)).sort((a, b) =>
                 a.pair > b.pair ? 1 : -1
@@ -331,7 +350,10 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
                 coins = coins.slice(
                     coins.findIndex((el) => el.toString() == last!.toString())
                 );
-                console.log("STARTING AT:", coins[0], { last });
+
+                 msg = `STARTING AT: ${coins[0]} -> last: ${last}`
+                console.log(msg);
+                //client?.emit('cointest', msg)
             }
         }
 
@@ -340,7 +362,11 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
         ensureDirExists(savePath);
 
         for (let pair of coins) {
-            console.log("\nBEGIN PAIR:", pair);
+
+            try{
+                msg = `BEGIN PAIR ${pair}`
+            console.log(`${msg}`);
+            //client?.emit('cointest', msg)
             let klines: any[] = [];
             let trades: any[] = [];
             let bal = Number(data.bal);
@@ -348,16 +374,25 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
 
             console.log(symbol);
 
+            const pxPr = getPricePrecision(pair, platName as any)
+            if (pxPr == null) {
+                msg = `PRICE PRECISION FOR ${symbol} NOT AVAIL`
+                console.log(msg)
+                //client?.emit('cointest', {err: msg})
+                continue}
+
             klinesPath = tuPath(
                 `${klinesRootDir}/${platName.toLowerCase()}/${year}/${sub}/${symbol}_${interval}m-${sub}.json`
             );
             if (!offline && skip_existing && existsSync(klinesPath)) {
                 console.log("SKIPING", pair);
+                //client?.emit('cointest', `SKIPPING ${pair}`)
                 continue;
             }
 
             if (offline && !existsSync(klinesPath)) {
                 console.log("KLINES DIR NOT FOUND FOR", pair);
+                //client?.emit('cointest', {err: `${klinesPath} not found`})
                 continue;
             }
             const r =
@@ -404,7 +439,7 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
 
             let profit = toFixed(
                 retData.balance - bal,
-                getPricePrecision(pair, platName as any)
+                pxPr
             );
 
             console.log({
@@ -435,12 +470,22 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
             });
             _data = [..._data].sort((a, b) => (a.profit > b.profit ? -1 : 1));
             writeFileSync(savePath, JSON.stringify(_data), {});
-            console.log(pair, "SAVED\n");
-        }
 
-        return _data;
-    } catch (e) {
-        console.log(e);
-        return "SOMETHING WENT WRONG";
+            msg = `${pair} DONE`
+            console.log(msg, '\n');
+            //client?.emit("cointest", msg)
+            }
+            catch(e: any){
+                console.log(e);
+                //client?.emit("cointest", { err: `${pair}: Something went wrong` });
+            }
+        }
+            result = {...result, data: _data, clId, platform}
+            prevData = result
+            client?.emit('cointest', result)
+        return result;
+    } catch (e: any) {
+        console.log(e.response?.data ?? e);
+        client?.emit("cointest", { err: "Something went wrong" });
     }
 };

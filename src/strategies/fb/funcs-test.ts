@@ -216,6 +216,7 @@ export const strategy = ({
 
 
     console.log({ minSz, maxSz, pricePrecision, basePrecision });
+    balance = toFixed(balance, pricePrecision);
     let START_BAL = balance
     console.log({balance})
 
@@ -251,25 +252,23 @@ export const strategy = ({
     };
 
     const _fillBuyOrder = (ret: ReturnType<typeof fillBuyOrder>) => {
-        if (maxSz == null  || minSz == null  || pricePrecision == null  || basePrecision == null) return
         (pos = ret.pos),
             (mData = ret.mData),
             (_cnt = ret._cnt);
         buyFees += ret.fee;
-        tp = toFixed(entry * (1 + TP / 100), pricePrecision!);
-        sl = toFixed(entry * (1 - SL / 100), pricePrecision!);
+        tp = toFixed(entry * (1 + TP / 100), pricePrecision);
+        sl = toFixed(entry * (1 - SL / 100), pricePrecision);
         base += ret.base
     };
 
     async function _fillSell({_exit, _base, _row, isSl} : {_exit: number, _row: ICandle, _base: number, isSl?: boolean}) {
         console.log("\nSELLING", {_base, _exit} ,"\n")
-        if (maxSz == null  || minSz == null  || pricePrecision == null  || basePrecision == null) return
 
         const _bal = _base * _exit
-        if (_bal > maxAmt!){
+        if (_bal > maxAmt){
             console.log(`BAL ${_bal} > MAX_AMT ${maxAmt}`)
-             _base = (maxAmt! * (1 - .5/100)) / _exit
-             _base = toFixed(_base, basePrecision!)
+             _base = (maxAmt * (1 - .5/100)) / _exit
+             _base = toFixed(_base, basePrecision)
             return _fillSell({_exit, _base, _row, isSl})
 
         }
@@ -303,12 +302,11 @@ export const strategy = ({
 
     function _fillBuy({amt, _entry, _row} : {amt: number, _entry: number, _row: ICandle}) {
         console.log("\BUYING", {amt, _entry} ,"\n")
-        if (maxSz == null  || minSz == null  || pricePrecision == null  || basePrecision == null) return
         const _base = amt / _entry;
         if (_base < minSz) {
             const msg =  `BASE: ${_base} < MIN_SZ: ${minSz}`
             return console.log(`${msg}`);
-        }else if (_base > maxSz!){
+        }else if (_base > maxSz){
             const msg = `BASE: ${_base} > MAX_SZ: ${maxSz}`;
 
             console.log(`${msg}\n`);
@@ -342,8 +340,7 @@ export const strategy = ({
         
         const prevrow = df[i - 1],
             row = df[i];
-
- if (maxSz == null  || minSz == null  || pricePrecision == null  || basePrecision == null || row.v <= 0
+ if (minSz == 0 || maxSz == 0 || row.v <= 0
             // || maxReached //|| profitPerc >= 100//9900
             ) continue;
         lastPx = row.o;
@@ -384,7 +381,7 @@ export const strategy = ({
             let goOn = true,
                 isClose = false, isSl = false;
 
-                let SL =  .5//.5//1.2;
+                let SL = .5//.5//1.2;
             const TRAIL = .1 // .1
             const trail = ceil(prevrow.h * (1 - TRAIL / 100), pricePrecision);
             

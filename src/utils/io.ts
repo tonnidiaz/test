@@ -18,7 +18,7 @@ import { getPricePrecision, readJson, toFixed } from "./functions";
 import { objStrategies, strategies } from "@/strategies";
 import { TestOKX } from "@/classes/test-platforms";
 import { platforms } from "./consts";
-import {onBacktest} from './functions/io-funcs'
+import {onBacktest, onCointest} from './functions/io-funcs'
 
 const corsOptions: CorsOptions = { origin: "*" };
 const io = new Server({ cors: corsOptions }); // yes, no server arg here; it's not required
@@ -48,14 +48,14 @@ io.on("connection", (client) => {
         }, 1500);
     });
 
-    client.on("backtest", async (d)=>prevData = await onBacktest(d, client)
-        );
+    client.on("backtest", async (d)=>prevData = await onBacktest(d, client));
+    client.on("cointest", async (d)=>prevData = await onCointest(d, client));
 
     client.on("strategies", (e) => {
         client.emit("strategies", { data: strategies });
     });
     client.on("platforms", (e) => {
-        client.emit("platforms", { data: platforms.map((el) => el.name) });
+        client.emit("platforms", { data: Object.keys(platforms) });
     });
 
     client.on("test-candles", async (data: IObj) => {
@@ -70,6 +70,7 @@ io.on("connection", (client) => {
                 isHa,
                 useFile,
                 file,
+                save,
                 isParsed,demo
             } = data;
 
@@ -81,8 +82,8 @@ io.on("connection", (client) => {
 
             client.emit("test-candles", "Getting klines...");
 
-            const plat =new platforms[platform].obj({demo});
-            const platName = platforms[platform].name;
+            const plat =new platforms[platform]({demo});
+            const platName = platform.toLowerCase();
             let symbol: string =
                 plat instanceof TestOKX ? baseCcy.join("-") : baseCcy.join("");
             console.log(symbol);
@@ -95,13 +96,14 @@ io.on("connection", (client) => {
                 console.log("IS OFFLINE");
                 start = start ?? parseDate(new Date());
                 const year = start.split("-")[0];
+                const sub = demo ? "demo" : "live";
                 klinesPath = tuPath(
-                    `${klinesRootDir}/${platName.toLowerCase()}/${year}/${symbol}_${interval}m.json`
+                    `${klinesRootDir}/${platName.toLowerCase()}/${year}/${sub}/${symbol}_${interval}m-${sub}.json`
                 );
 
                 if (!existsSync(klinesPath!)) {
                     const err = {
-                        err: `DataFrame for ${symbol} in ${year} at ${interval}m does not exist`,
+                        err: `${klinesPath} does not exist`,
                     };
                     client.emit("test-candles", err);
                     return;
@@ -156,13 +158,10 @@ io.on("connection", (client) => {
                         h: el.h,
                         l: el.l,
                         c: el.c,
-                        macd: el.macd,
-                        signal: el.signal,
-                        hist: el.hist,
                         sma_20: el.sma_20,
-                        sma_50: el.sma_50,
+                        sma_50: el.sma_50, vol: el.v
                     },
-                    ha: { o: el.ha_o, h: el.ha_h, l: el.ha_l, c: el.ha_c },
+                    ha: { o: el.ha_o, h: el.ha_h, l: el.ha_l, c: el.ha_c, vol: el.v },
                 };
             });
             client.emit("test-candles", {

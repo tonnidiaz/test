@@ -13,7 +13,7 @@ import { strategies } from "@/strategies";
 import { Bot } from "@/models";
 import { platforms } from "@/utils/consts";
 import { Phemex } from "@/classes/phemex";
-import { onBacktest, onCoins } from "@/utils/functions/io-funcs";
+import { onBacktest, onCointest } from "@/utils/functions/io-funcs";
 import { objPlats } from "@/utils/consts2";
 import { parseKlines } from "@/utils/funcs2";
 import { TestGateio } from "@/classes/test-gateio";
@@ -33,10 +33,10 @@ router.get("/strategies", (req, res) => {
     res.json(strategies);
 });
 router.get("/platforms", (req, res) => {
-    res.json(platforms.map(el=> el.name));
+    res.json(Object.keys(platforms));
 });
 router.post("/coins", async (req, res) => {
-    const ret = await onCoins(req.body)
+    const ret = await onCointest(req.body)
     if (typeof ret == 'string') return res.status(500).send(ret)
     res.json(ret)
 });

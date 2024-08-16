@@ -7,7 +7,7 @@ import { Response } from "express";
 
 
 
-const test = false
+const test = true
 
 function randomInRange(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -285,36 +285,24 @@ export function getCoinPrecision(
      
     if (!instru) {
         console.log(`\getCoinPrecision: ${pair} not on ${plat}\n`)
-        return null};
-    
-    
-        let pr: number |null = 0;
-        const is_quote = oType == 'market'
-        switch(plat){
-            
-            case 'binance':
-                const _i0 = instru as typeof binanceInfo.symbols[0]
-                pr = Number(oType == 'market' ? _i0.quoteAssetPrecision : _i0.baseAssetPrecision)
-                break
-            case 'bitget':
-                const _i1 = instru as typeof bitgetInstrus[0]
-                pr = Number( is_quote ? _i1.quotePrecision : _i1.quantityPrecision)
-                break
-            case 'bybit':
-                const _i2 = instru as typeof bybitInstrus[0]
-                pr = precision(Number( is_quote ? _i2.quotePrecision : _i2.basePrecision)) 
-                break
-            case 'okx':
-                const _i3 = instru as typeof okxInstrus[0]
-                pr = precision(Number( is_quote ? _i3.tickSz : _i3.lotSz)) 
-                break;
-    
-            case 'gateio':
-                const _i4 = instru as typeof gateioInstrus[0]
-                pr = Number(is_quote ? _i4.precision : _i4.amount_precision)
-                break
-        }
-        return pr
+        return Infinity};
+        
+    if (plat == "binance") {
+        return Number(
+            oType == "market"
+                ? instru.quoteAssetPrecision
+                : instru.baseAssetPrecision
+        );
+    }
+    const pr =
+        plat == "bybit"
+            ? oType == "market"
+                ? instru.quotePrecision
+                : instru?.basePrecision
+            : oType == "market"
+            ? instru.tickSz
+            : instru.lotSz; 
+    return precision(Number(pr));
 }
 export function getPricePrecision(
     pair: string[],
@@ -350,9 +338,9 @@ export function getPricePrecision(
      
     if (!instru) {
         console.log(`\ngetPricePrecision: ${pair} not on ${plat}\n`)
-        return null};
+        return Infinity};
 
-    let pr: number | null = null
+    let pr = 0
     switch(plat){
         
         case 'binance':
@@ -363,213 +351,79 @@ export function getPricePrecision(
             const _i1 = instru as typeof bitgetInstrus[0]
             pr = Number(_i1.pricePrecision)
             break
-        case 'bybit':
-            const _i2 = instru as typeof bybitInstrus[0]
-            pr = precision(Number(_i2.quotePrecision)) 
-            break
-        case 'okx':
-            const _i3 = instru as typeof okxInstrus[0]
-            pr = precision(Number(_i3.tickSz)) 
-            break;
-
-        case 'gateio':
-            const _i4 = instru as typeof gateioInstrus[0]
-            pr = Number(_i4.precision)
-            break
+      
     }
     return pr
 }
-
 export function getMinSz(
     pair: string[],
-    plat: string
+    plat: "binance" | "bybit" | "okx"
 ) {
     if (test)  return -Infinity;
-    const _base = pair[0], _quote = pair[1];
-    let instru : IObj | undefined;
-
-    switch(plat){
-        case "binance":
-            instru = binanceInfo.symbols.find(
+    const instru: IObj | undefined =
+        plat == "binance"
+            ? binanceInfo.symbols.find(
                   (el) => el.baseAsset == pair[0] && el.quoteAsset == pair[1]
-              );
-            break;
-        case "bybit":
-            instru = bybitInstrus.find(
+              )
+            : plat == "bybit"
+            ? bybitInstrus.find(
                   (el) => el.baseCoin == pair[0] && el.quoteCoin == pair[1]
-              );
-            break;
-        case "bitget":
-            instru = bitgetInstrus.find(el => el.baseCoin == _base && el.quoteCoin == _quote);
-            break;
-        case "okx":
-            instru = okxInstrus.find(
+              )
+            : okxInstrus.find(
                   (el) => el.baseCcy == pair[0] && el.quoteCcy == pair[1]
               );
-            break;
-        case "gateio":
-            instru = gateioInstrus.find(el => el.base == _base && el.quote == _quote);
-            break;
-    }
-     
-    if (!instru) {
-        console.log(`\ngetMinSz: ${pair} not on ${plat}\n`)
-        return null};
-        
+    if (!instru) return 0;
 
-        let sz: number | null = null
-        switch(plat){
-            
-            case 'binance':
-                const _i0 = instru as typeof binanceInfo.symbols[0]
-                sz = Number(_i0.filters[3].minQty)
-                break
-            case 'bitget':
-                const _i1 = instru as typeof bitgetInstrus[0]
-                sz = Number(_i1.minTradeAmount)
-                break
-            case 'bybit':
-                const _i2 = instru as typeof bybitInstrus[0]
-                sz = Number(_i2.minTradeQty)
-                break
-            case 'okx':
-                const _i3 = instru as typeof okxInstrus[0]
-                sz = Number(_i3.minSz)
-                break;
-    
-            case 'gateio':
-                const _i4 = instru as typeof gateioInstrus[0]
-                sz = Number(_i4.min_base_amount)
-                break
-        }
-        return sz
+    return plat == "binance"
+        ? Number(instru.minQty)
+        : 
+              Number(instru[plat == "bybit" ? "minTradeQty" : "minSz"])
 }
 export function getMaxSz(
     pair: string[],
-    plat: string
+    plat: "binance" | "bybit" | "okx"
 ) {
     if (test)  return Infinity;
-    const _base = pair[0], _quote = pair[1];
-    let instru : IObj | undefined;
-
-    switch(plat){
-        case "binance":
-            instru = binanceInfo.symbols.find(
+    const instru: IObj | undefined =
+        plat == "binance"
+            ? binanceInfo.symbols.find(
                   (el) => el.baseAsset == pair[0] && el.quoteAsset == pair[1]
-              );
-            break;
-        case "bybit":
-            instru = bybitInstrus.find(
+              )
+            : plat == "bybit"
+            ? bybitInstrus.find(
                   (el) => el.baseCoin == pair[0] && el.quoteCoin == pair[1]
-              );
-            break;
-        case "bitget":
-            instru = bitgetInstrus.find(el => el.baseCoin == _base && el.quoteCoin == _quote);
-            break;
-        case "okx":
-            instru = okxInstrus.find(
+              )
+            : okxInstrus.find(
                   (el) => el.baseCcy == pair[0] && el.quoteCcy == pair[1]
               );
-            break;
-        case "gateio":
-            instru = gateioInstrus.find(el => el.base == _base && el.quote == _quote);
-            break;
-    }
-     
-    if (!instru) {
-        console.log(`\ngetMaxSz: ${pair} not on ${plat}\n`)
-        return null};
+    if (!instru) return 0;
 
-        let sz: number | null = null
-        switch(plat){
-            
-            case 'binance':
-                const _i0 = instru as typeof binanceInfo.symbols[0]
-                sz = Number(_i0.filters[3].maxQty)
-                break
-            case 'bitget':
-                const _i1 = instru as typeof bitgetInstrus[0]
-                sz = Number(_i1.maxTradeAmount)
-                break
-            case 'bybit':
-                const _i2 = instru as typeof bybitInstrus[0]
-                sz = Number(_i2.maxTradeQty)
-                break
-            case 'okx':
-                const _i3 = instru as typeof okxInstrus[0]
-                sz = Number(_i3.maxMktSz)
-                break;
-    
-            case 'gateio':
-                const _i4 = instru as typeof gateioInstrus[0]
-                sz = Number(_i4.max_base_amount)
-                break
-        }
-        return sz
+    return pair[0] == 'KISHU' && false ? Infinity :  (plat == "binance"
+        ? Number(instru.maxQty)
+        : Number(instru[plat == "bybit" ? "maxTradeQty" : "maxMktSz"]))
 }
 export function getMaxAmt(
     pair: string[],
-    plat: string
+    plat: "binance" | "bybit" | "okx"
 ) {
     if (test)  return Infinity;
-    const _base = pair[0], _quote = pair[1];
-    let instru : IObj | undefined;
-
-    switch(plat){
-        case "binance":
-            instru = binanceInfo.symbols.find(
+    const instru: IObj | undefined =
+        plat == "binance"
+            ? binanceInfo.symbols.find(
                   (el) => el.baseAsset == pair[0] && el.quoteAsset == pair[1]
-              );
-            break;
-        case "bybit":
-            instru = bybitInstrus.find(
+              )
+            : plat == "bybit"
+            ? bybitInstrus.find(
                   (el) => el.baseCoin == pair[0] && el.quoteCoin == pair[1]
-              );
-            break;
-        case "bitget":
-            instru = bitgetInstrus.find(el => el.baseCoin == _base && el.quoteCoin == _quote);
-            break;
-        case "okx":
-            instru = okxInstrus.find(
+              )
+            : okxInstrus.find(
                   (el) => el.baseCcy == pair[0] && el.quoteCcy == pair[1]
               );
-            break;
-        case "gateio":
-            instru = gateioInstrus.find(el => el.base == _base && el.quote == _quote);
-            break;
-    }
-     
-    if (!instru) {
-        console.log(`\ngetMinSz: ${pair} not on ${plat}\n`)
-        return null};
-        
+    if (!instru) return 0;
 
-        let sz : number | null = null
-        switch(plat){
-            
-            case 'binance':
-                const _i0 = instru as typeof binanceInfo.symbols[0]
-                sz = Infinity
-                break
-            case 'bitget':
-                const _i1 = instru as typeof bitgetInstrus[0]
-                sz = Number(_i1.maxTradeAmount)
-                break
-            case 'bybit':
-                const _i2 = instru as typeof bybitInstrus[0]
-                sz = Number(_i2.maxTradeAmt)
-                break
-            case 'okx':
-                const _i3 = instru as typeof okxInstrus[0]
-                sz = Number(_i3.maxMktAmt)
-                break;
-    
-            case 'gateio':
-                const _i4 = instru as typeof gateioInstrus[0]
-                sz = Number(_i4.max_quote_amount)
-                break
-        }
-        return sz
+    return (plat == "binance"
+        ? Number(instru.maxQty)
+        : Number(instru[plat == "bybit" ? "maxTradeAmt" : "maxMktAmt"]))
 }
 
 export const sleep = async (ms: number) => {

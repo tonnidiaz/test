@@ -2,20 +2,16 @@
  * TRAILING TP
  */
 
-import { okxInstrus } from "@/data/okx-instrus";
 import { fillBuyOrder, fillSellOrder } from "../utils/functions";
 import {
     MAKER_FEE_RATE,
     SL,
     TAKER_FEE_RATE,
     TP,
-    TRAILING_STOP_PERC,
-    WCS1,
     isMarket,
-    rf,
     SELL_AT_LAST_BUY,
     useSwindLow,
-    ETH_RATE,
+    PUT_ASIDE,
 } from "@/utils/constants";
 
 import {
@@ -25,12 +21,9 @@ import {
     getMinSz,
     getMaxSz,
     getPricePrecision,
-    randomNum,
     toFixed,
-    sleep,
     getMaxAmt,
 } from "@/utils/functions";
-import { writeFileSync } from "fs";
 import { IObj, ICandle } from "@/utils/interfaces";
 let _cnt = 0;
 
@@ -72,7 +65,7 @@ export const strategy = ({
 
     let mData: IObj = { data: [] },
         _data: IObj;
-    console.log("CE_SMA: BEGIN BACKTESTING...\n");
+    console.log("BEGIN BACKTESTING...\n");
     let entry: number = 0,
         entryLimit: number | null = null,
         exitLimit: number | null = null,
@@ -94,19 +87,14 @@ export const strategy = ({
     balance = toFixed(balance, pricePrecision);
     let START_BAL = balance
     console.log({balance})
-    //df = df.slice(20);
 
-    console.log(trades);
-
-    const times: { start: string; end: string; cnt: number }[] = [];
     let aside = 0
-    let isSLOrder = false, maxReached = false;
 
     const putAside = (amt: number)=>{
+        if (!PUT_ASIDE) return
         balance -= amt;
         aside += amt;
         START_BAL = balance;
-        maxReached = false
     }
 
 
@@ -172,7 +160,6 @@ export const strategy = ({
         
 
         _fillSellOrder(ret);
-        times.push({ start: enterTs, end: _row.ts, cnt: _cnt });
         _cnt = 0;
         base -= _base
 
@@ -188,7 +175,6 @@ export const strategy = ({
         }else if (_base > maxSz){
             const msg = `BASE: ${_base} > MAX_SZ: ${maxSz}`;
 
-            maxReached = true
             console.log(`${msg}\n`);
 
             amt =( maxSz * (1 - .5/100)) * _entry
@@ -257,7 +243,8 @@ export const strategy = ({
         if (!isGreen)
         {
             console.log("SKIPING...")
-            continue; }
+        //    continue; 
+        }
         }
 
         if (pos) {
@@ -267,11 +254,11 @@ export const strategy = ({
             const _row = row;  
             let isSl = false;
             const { h, o, ha_o, l, c, v } = _row; 
-            let SL = .05//.5//1.2;
+            let SL = .5//.5//1.2;
             const TRAIL = .1 // .1
             const trail = ceil(prevrow.h * (1 - TRAIL / 100), pricePrecision);
             const exitEntry = ceil((exit - entry) / entry *100, pricePrecision);
-            const TP = 5.5
+            const TP = 3.5
             tp = ceil(o * (1 + TP / 100), pricePrecision);
             sl = ceil(entry * (1 - SL / 100), pricePrecision);
             console.log({trail, exitEntry, exit, entry, o, h, l, c, tp, sl, v});
@@ -283,31 +270,22 @@ export const strategy = ({
             const _TRAIL = .5
 
              const _trail = h * (1- _TRAIL/100)
-             exit = tp
 
              
             if (false) {
                
             } 
-            else if (h >= tp){exit = tp}
             
-else if (l <= sl && sl < h){exit = sl}
-
-            isSl = true
-            // else if (o >= trail){
-            //     exit = o; isO = true
-            //     //isSl = true
-            //     //if (o < entry) _base /= 2
-            //     //else if (!isGreen) _base /= 3
+            else if (o >= trail){
+                exit = o; isO = true
+                console.log({_base})
                 
-
-            //     console.log({_base})
-            //     SL = 1
-            // }
-            // else if (h >= tp){
-            //     exit = tp
-            // }
-           
+            }
+            else if (h >= tp){
+                exit = tp
+                 //isSl = true
+            }
+          
             
 
             _base = toFixed(_base, basePrecision)
@@ -332,15 +310,10 @@ else if (l <= sl && sl < h){exit = sl}
     if (lastPos && lastPos.side.startsWith("buy")) {
         console.log("ENDED WITH BUY");
 
-        
         const _row = df[df.length - 1]
         const _exit = SELL_AT_LAST_BUY ? lastPos._c : _row.o;
         _fillSell({_row, _exit, _base: base, isSl: true})
-        times.push({
-            start: enterTs,
-            end: "Incomplete: " + df[df.length - 1].ts,
-            cnt: _cnt,
-        });
+       
     }
 
     console.log('\n', {balance, aside, base});
@@ -354,10 +327,6 @@ else if (l <= sl && sl < h){exit = sl}
     console.log({ minSz, maxSz, maxAmt });
     
     console.log(`SELL_FEES: ${quote} ${sellFees}\n`);
-    
-    // writeFileSync(
-    //     `data/times/times-${pair[0]}.json`,
-    //     JSON.stringify(times.sort((a, b) => (a.cnt > b.cnt ? -1 : 1)))
-    // );
+
     return _data;
 };

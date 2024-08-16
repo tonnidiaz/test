@@ -26,10 +26,9 @@ export function fillBuyOrder({
     pos: boolean;
     isA?: boolean
 }) {
-    console.log('\nFILL BUY ORDER', {entry, balance});
-    console.log({prevrow});
+    console.log('\nFILL BUY ORDER');
     const _balance = new BigNumber(balance)
-    
+    console.log({balance, _balance, taker, entry})
     let base : number | BigNumber = _balance.dividedBy(entry)// * (1 - taker);
 
     const fee = base.multipliedBy(taker)
@@ -89,7 +88,7 @@ export const fillSellOrder = ({
     prevrow: ICandle;
     base: number;
     enterTs: string;
-    pricePrecision: number;
+    pricePrecision: number | null;
     mData: IObj;
     entry: number;
     cnt: number;
@@ -106,10 +105,11 @@ export const fillSellOrder = ({
 }) => {
 
     const _isTp = isSl == undefined ? exit >= entry : !isSl
-    console.log({ exitLimit, exit, entry, base });
+    
     //console.log(`MIKA: ${exit >= entry ? "gain" : "loss"}`);
-    console.log("\nFILL SELL ORDER", {exit, base});
-
+    console.log("\nFILL SELL ORDER");
+    console.log({maker});
+    console.log({ exitLimit, exit, entry, base });
     let _base = new BigNumber(base)
     let balance : number | BigNumber = _base.multipliedBy(exit) 
     console.log("BALANCE")
@@ -118,7 +118,7 @@ export const fillSellOrder = ({
     if (!noFees)
         {balance = balance.minus(fee)}
 
-    balance = toFixed(balance.toNumber(), ( pricePrecision));
+    balance = toFixed(balance.toNumber(), ( pricePrecision!));
     console.log(`AFTER FEE: ${balance}\n`)
     const ts = prevrow["ts"];
     

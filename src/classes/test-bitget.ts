@@ -6,7 +6,7 @@ import { writeFileSync } from "fs";
 
 export class TestBitget extends Platform {
     name = "BITGET";
-    maker: number = 0.1 / 100;
+    maker: number = 0.1 / 100; 
     taker: number = 0.1 / 100;
     client: RestClientV2;
     flag: "1" | "0";
@@ -28,23 +28,7 @@ export class TestBitget extends Platform {
         this.client = new RestClientV2({});
     }
 
-    _parseData(data: (number | string)[][]) {
-        /**
-                 *  0 - Unix timestamp with second precision
-                    1 - Trading volume in quote currency
-                    2 - Closing price
-                    3 - Highest price
-                    4 - Lowest price
-                    5 - Opening price
-                    6 - Trading volume in base currency
-                    7 - Whether the window is closed; tr
-                 */
-        return data
-            .map((el) => {
-                return el.map((el, i) => (i == 0 ? Number(el) * 1000 : el));
-            })
-            .map((el) => [el[0], el[5], el[3], el[4], el[2], el[1], el[7]]);
-    }
+
 
     async getKlines({
         start,
