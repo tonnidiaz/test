@@ -11,7 +11,6 @@ import {
 } from "@/utils/constants";
 
 import {
-    ceil,
     findAve,
     getCoinPrecision,
     getPricePrecision,
@@ -41,12 +40,7 @@ export const strategy = ({
     df: ICandle[];
     balance: number;
     buyCond: (row: ICandle, df?: ICandle[], i?: number) => boolean;
-    sellCond: (
-        row: ICandle,
-        entry: number,
-        df?: ICandle[],
-        i?: number
-    ) => boolean;
+    sellCond: (row: ICandle, entry: number, df?: ICandle[], i?: number) => boolean;
     pair: string[];
     maker: number;
     taker: number;
@@ -54,6 +48,7 @@ export const strategy = ({
     trades: IObj[];
     platNm: "binance" | "bybit" | "okx";
 }) => {
+   
     let pos = false;
     let cnt = 0,
         gain = 0,
@@ -161,9 +156,6 @@ export const strategy = ({
 
         const isGreen = prevrow.c >= prevrow.o;
         const isSum = prevrow.c > row.o;
-        console.log(pair)
-        console.log({ts: row.ts, o: row.o, h: row.h, l: row.l, c: row.c})
-        if (row.v <= 0) continue;
 
         if (!pos && entryLimit) {
             const _row = prevrow;
@@ -185,9 +177,60 @@ export const strategy = ({
                 //continue
             }
         } else if (pos && exitLimit) {
+            exit = 0
+            const _row = prevrow;
+            console.log("HAS POS");
+
+            let goOn = true,
+                isSl = false,
+                is_curr = false;
+                
+            const { h, l, c, o, ha_o, ha_h, ha_l, ha_c } = _row;
+
+
+            const _sl = o * (1 - 0.15 / 100); //.25
+            
+            
+            let _tp = o * (1 + 1.5 / 100); //3.5
+            
+            if (false) {
+            }
+             else if (prevrow.h >= _tp) {
+                const tp2 = _tp * (1 + 0.5 / 100) //1.5
+                if (prevrow.h >= tp2) {
+                    exit = tp2;
+                } //else if (c >= entry) exit = row.o;
+                else goOn = false;
+            } else if (l <= _sl && h > _sl) {
+                exit = _sl;
+            } 
+            
+            else if (isGreen && h < _sl) {
+                exit = row.o;
+                
+            }
+            
+            goOn = exit != 0
+
+            if(!goOn && isGreen && h >= _tp){
+                exit = row.o
+            }
+
+            goOn = exit != 0
+            if (exit == 0) {
+                console.log("NEITHER");
+                goOn = false;
+            }
+
+            if (goOn) {
+                const p = "EXIT";
+                console.log("\nFILLING SELL ORDER AT", p);
+                _fillSell(exit, _row, isSl);
+                console.log({ is_curr });
+            }
         }
 
-        if (!pos && (useAnyBuy || buyCond(prevrow, df, i)) && row.v > 0) {
+        if (!pos && (useAnyBuy || buyCond(prevrow, df, i))) {
             console.log("\nKAYA RA BUY\n");
             // Place limit buy order
             entryLimit = prevrow.c * (1 - 2.5 / 100);
@@ -200,72 +243,11 @@ export const strategy = ({
                 _fillBuy(entry, row);
             }
         } else if (pos) {
-            exit = 0;
-            const _row = row;
-            console.log("HAS POS");
+            exitLimit = prevrow.c;
+            //console.log("\n",{isGreen, cFromE: ,"\n");
+        }
 
-            let goOn = true,
-                isSl = false,
-                is_curr = false;
-
-            const { h, l, c, o, ha_o, ha_h, ha_l, ha_c } = _row;
-
-            const SL = .15,
-                TP = 1.5;
-            const _sl = o * (1 - SL / 100); //.25
-
-            const _prev_sl = prevrow.o * (1 - SL / 100);
-            const _prev_tp = prevrow.o * (1 + TP / 100);
-
-            let _tp = o * (1 + TP / 100); //3.5
-const calcSl = ()=> ceil(entry * (1 - .05 / 100), pricePrecision);
-            sl = calcSl()
-            
-            if (false) {
-            } else if (l <= _sl && h > _sl) {
-                exit = _sl;
-                _fillSell(exit, _row, true);
-
-                entry = _sl;
-                _fillBuy(entry, _row);
-                if (h >= _tp) {
-                    exit = _tp;
-                }
-                else if (c > o){
-                    exit =  c
-                }
-            } else if (h >= _tp) {
-                const tp2 = _tp * (1 + 0.5 / 100); //1.5
-                if (h >= tp2) {
-                    exit = tp2;
-                }
-
-                //else if (c >= entry) exit = row.o;
-                // else goOn = false;
-            } 
-
-
-            goOn = exit != 0;
-
-            // if(!goOn && c >= o && h >= _tp){
-            //     exit = c
-            // }
-
-            goOn = exit != 0;
-            if (exit == 0) {
-                console.log("NEITHER");
-                goOn = false;
-            }
-            sl = calcSl()
-
-            exitLimit = o;
-
-            if (goOn && pos && exit <= h && exit >= sl) {
-                const p = "EXIT";
-                console.log("\nFILLING SELL ORDER AT", p);
-                _fillSell(exit, _row, isSl);
-                console.log({ is_curr });
-            }
+        if (pos && exitLimit) {
         }
     }
 

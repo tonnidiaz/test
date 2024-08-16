@@ -17,12 +17,13 @@ import {
     tuPath,
 } from "@/utils/funcs2";
 
-import { readJson } from "@/utils/functions";
+import { getSymbol, readJson } from "@/utils/functions";
 
 import { existsSync, readdirSync, writeFileSync } from "fs";
 import { TestBinance } from "@/classes/test-binance";
 import { TestBybit, TestOKX } from "@/classes/test-platforms";
 import { ITrade } from "@/utils/interfaces";
+import { platforms } from "@/utils/consts";
 
 
 async function downloader({
@@ -50,11 +51,7 @@ async function downloader({
     symbol = platNm == "okx" ? symbArr.join("-") : symbArr.join("");
 
     const plat =
-        platNm == "okx"
-            ? new TestOKX()
-            : platNm == "bybit"
-            ? new TestBybit()
-            : new TestBinance();
+    new platforms[platNm].obj({})
 
     await plat.getKlines({
         symbol: symbol,
@@ -74,7 +71,7 @@ const dld = async ({
 }: {
     symbols: string[], years: number[], intervals: number[],
     parse?: boolean;
-    platNm?: "binance" | "okx" | "bybit";
+    platNm?: "binance" | "okx" | "bybit" | "gateio" | 'bitget';
     skip?: boolean
 }) => {
     
@@ -84,10 +81,11 @@ const dld = async ({
             for (let interval of intervals) {
                 console.log(`\nDownloading ${symb}, ${year}, ${interval}m\n`);
 
-                const msymb = symb.split("/");
-                console.log({msymb});
+                const pair = symb.split("/");
+                console.log({msymb: pair});
 
-                symb = platNm == "okx" ? msymb.join("-") : msymb.join("");
+                symb = getSymbol(pair, platNm);
+
                 const fname = `${symb}_${interval}m.json`;
                 const klinesPath = `${klinesRootDir}/${platNm}/${year}/${fname}`;
                 const dfsPath = `${dfsRootDir}/${platNm}/${year}/${fname}`;
@@ -98,16 +96,11 @@ const dld = async ({
                 ensureDirExists(klinesPath);
                 const bot = new Bot({
                     name: "TBOT",
-                    base: msymb[0],
-                    ccy: msymb[1],
+                    base: pair[0],
+                    ccy: pair[1],
                     interval,
                 });
-                const plat =
-                    platNm == "okx"
-                        ? new TestOKX()
-                        : platNm == "bybit"
-                        ? new TestBybit()
-                        : new TestBinance();
+                const plat = new platforms[platNm].obj({})
                 const month =
                     platNm == "okx" ? (year < 2022 ? "07" : "01") : "01";
                 let klines = await plat.getKlines({
@@ -175,7 +168,7 @@ const getTrades = async ({symbol, start, end, platNm = "binance"}: {symbol: stri
     const startDate = parseDate(new Date(start))
     const endDate = parseDate(new Date(end))
     const year = startDate.split('-')[0]
-    const plat = new TestBinance();
+    const plat = new platforms[platNm].obj({})
     const savePath = tradesRootDir + `/${platNm}/${year}/${symbol}_${start}-${end}.json`
     console.log({savePath});
     const r = await plat.getTrades({

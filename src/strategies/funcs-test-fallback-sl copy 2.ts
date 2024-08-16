@@ -26,7 +26,7 @@ import {
 import { IObj, ICandle } from "@/utils/interfaces";
 import { strategy as strExp } from "./funcs-test-eFromH";
 import { strategy as strBillo } from "./funcs-test-billo";
-import { strategy as strFbAdvanced} from "./funcs-test-fallback-advanced";
+import { strategy as strSLTP } from "./funcs-test-billo";
 import { strategy as strTrailing } from "./funcs-test-trailing";
 let _cnt = 0;
 
@@ -34,7 +34,7 @@ const d = useSwindLow ? 20 : 0;
 export const strategy = ({
     df,
     balance,
-    buyCond, sellCond,
+    buyCond,
     pair,
     maker = MAKER_FEE_RATE,
     taker = TAKER_FEE_RATE,
@@ -57,21 +57,6 @@ export const strategy = ({
     trades: IObj[];
     platNm: "binance" | "bybit" | "okx";
 }) => {
-    const useFbAdvanced = true
-    if (useFbAdvanced) {
-        return strFbAdvanced({
-            df,
-            balance,
-            buyCond,
-            sellCond,
-            pair,
-            maker,
-            taker,
-            trades,
-            platNm,
-        });
-    }
-
     let pos = false;
     let cnt = 0,
         gain = 0,

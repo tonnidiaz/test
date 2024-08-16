@@ -157,7 +157,7 @@ export const calcSL = (entry: number) => {
     return entry * (1 - SL / 100);
 };
 export const calcTP = (entry: number) => entry * (1 + TP / 100);
-export const getInterval = (m: number, plt: "bybit" | "okx" | "binance" | "gateio") => {
+export const getInterval = (m: number, plt: "bybit" | "okx" | "binance" | "gateio" | "bitget") => {
 
     let interval = `${m}`
 
@@ -170,6 +170,10 @@ export const getInterval = (m: number, plt: "bybit" | "okx" | "binance" | "gatei
         case 'gateio':
             interval = m >= 60
             ? `${Math.floor(m / 60)}h` : `${m}m`
+            break
+        case 'bitget':
+            interval = m >= 60
+            ? `${Math.floor(m / 60)}h` : `${m}min`
             break
     }
 

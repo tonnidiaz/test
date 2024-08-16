@@ -413,3 +413,18 @@ export const findAve = (numbers: number[]) => {
     const avg = sum / numbers.length;
     return avg;
 };
+
+export const getSymbol = (pair: string[], plat: string, )=>{
+    plat = plat.toLowerCase()
+    let sep = ''
+    switch(plat){
+        case  'okx':
+            sep = '-';
+            break;
+        case 'gateio':
+            sep = '_';
+            break;
+    }
+
+    return pair.join(sep)
+}

@@ -17,6 +17,7 @@ import { onBacktest, onCoins } from "@/utils/functions/io-funcs";
 import { objPlats } from "@/utils/consts2";
 import { parseKlines } from "@/utils/funcs2";
 import { TestGateio } from "@/classes/test-gateio";
+import { TestBitget } from "@/classes/test-bitget";
 
 const fp = false
     ? "src/data/klines/binance/2021/DOGEUSDT_15m.json"
@@ -53,11 +54,20 @@ router.get('/kline', async (req, res)=>{
 router.get("/test", async (req, res) => {
     const { q, id, bs, cy, algoId } = req.query;
     
-    const plat = new TestGateio({})
-    const klines = await plat.getKlines({symbol: 'SOL_USDT', interval: 60, start: Date.parse("2024-01-01 00:00:00+02:00")})
+    const plat = new TestBitget({})
+
+    try{
+     const klines = await plat.getKlines({symbol: 'SOLUSDT', interval: 60, start: Date.parse("2024-01-01 00:00:00+02:00"), end: Date.parse("2024-03-28 23:59:00+02:00")})
     const df =  parseKlines(klines ?? [])
     console.log(df[df.length - 1]);
-    res.json({});
+       
+    }
+    catch(e){
+        console.log(e);
+    }finally{
+     res.json({});
+       
+    }
 });
 
 router.get("/trades", async (req, res) => {

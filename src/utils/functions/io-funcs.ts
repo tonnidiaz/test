@@ -8,7 +8,7 @@ import {
     tradesRootDir,
 } from "../constants";
 import { existsSync, writeFileSync } from "fs";
-import { clog, getPricePrecision, readJson, toFixed } from "../functions";
+import { clog, getPricePrecision, readJson, toFixed, getSymbol } from "../functions";
 import { objStrategies, strategies } from "@/strategies";
 import { TestOKX } from "@/classes/test-platforms";
 import { platforms } from "../consts";
@@ -16,6 +16,9 @@ import { ensureDirExists } from "../orders/funcs";
 import { okxInstrus } from "@/data/okx-instrus";
 import { binanceInfo } from "../binance-info";
 import { bybitInstrus } from "../bybit-instrus";
+import { TestGateio } from "@/classes/test-gateio";
+import { gateioInstrus } from "@/data/gateio-instrus";
+import { bitgetInstrus } from "@/data/bitget-instrus";
 let prevData: IObj | null = null;
 
 export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
@@ -54,8 +57,8 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
         const plat = new platforms[platform].obj({ demo });
 
         const platName = platforms[platform].name;
-        let symbol: string =
-            plat instanceof TestOKX ? pair.join("-") : pair.join("");
+        let symbol: string = getSymbol(pair, platName);
+
         console.log({ symbol, demo });
         const test = false;
         if (useFile && !file) {
@@ -278,7 +281,6 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
             _instruments = okxInstrus
                 .filter((el) => el.state == "live")
                 .map((el) => [el.baseCcy, el.quoteCcy])
-                .sort();
         } else {
             const okxCoinsPath = savePath.replace(_platName, "okx");
             let okxCoins: IObj[] | null = null;
@@ -289,13 +291,23 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
             if (_platName == "bybit") {
                 _instruments = bybitInstrus
                     .map((el) => [el.baseCoin, el.quoteCoin])
-                    .sort();
-            } else {
+            } else if (_platName == 'binance') {
                 _instruments = binanceInfo.symbols
                     .filter((el) => el.isSpotTradingAllowed == true)
                     .map((el) => [el.baseAsset, el.quoteAsset])
-                    .sort();
+                   
             }
+            else if (_platName == 'gateio'){
+                _instruments = gateioInstrus.filter(el => el.trade_status == 'tradable').map(el=> [el.base, el.quote])
+            }
+            else if (_platName == 'bitget'){
+                _instruments = bitgetInstrus.filter(el => el.status == 'online').map(el=> [el.baseCoin, el.quoteCoin])
+            }
+            else {
+                _instruments = []
+            }
+
+            _instruments = _instruments.sort()
             if (okxCoins != null) {
                 _instruments = _instruments.filter(
                     (el) =>
@@ -332,8 +344,8 @@ export const onCoins = async (data: IObj, client?: Socket, io?: Server) => {
             let klines: any[] = [];
             let trades: any[] = [];
             let bal = Number(data.bal);
-            let symbol: string =
-                plat instanceof TestOKX ? pair.join("-") : pair.join("");
+            const symbol = getSymbol(pair, platName)
+
             console.log(symbol);
 
             klinesPath = tuPath(

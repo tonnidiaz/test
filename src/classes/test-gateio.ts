@@ -5,8 +5,8 @@ import { ApiClient, SpotApi } from "gate-api";
 import { writeFileSync } from "fs";
 
 export class TestGateio extends Platform {
-    name = "OKX";
-    maker: number = 0.08 / 100;
+    name = "GATEIO";
+    maker: number = 0.1 / 100;
     taker: number = 0.1 / 100;
     client: SpotApi;
     flag: "1" | "0";
@@ -29,6 +29,24 @@ export class TestGateio extends Platform {
         this.client = new SpotApi(client);
     }
 
+    _parseData(data: (number | string)[][]){
+           /**
+                 *  0 - Unix timestamp with second precision
+                    1 - Trading volume in quote currency
+                    2 - Closing price
+                    3 - Highest price
+                    4 - Lowest price
+                    5 - Opening price
+                    6 - Trading volume in base currency
+                    7 - Whether the window is closed; tr
+                 */
+        return data.map((el) => {
+            return el.map((el, i) =>
+                i == 0 ? Number(el) * 1000 : el
+            );
+        }).map(el=> [el[0], el[5], el[3], el[4], el[2], el[1], el[7]]);
+    }
+
     async getKlines({
         start,
         end,
@@ -44,17 +62,25 @@ export class TestGateio extends Platform {
         savePath?: string | undefined;
         isBybit?: boolean;
     }) {
-        try {
+
+            
             console.log({ client: "client", demo: this.demo }, "\n");
             end = end ?? Date.now() - interval * 60000;
-            const MIN_DATE = Date.now() - (10000 - 30) * interval * 60000;
+            
+            const END = end
+            const diff = (10000 - 30) * interval * 60000
+            const MIN_DATE =end - diff;
 
             console.log({
                 MIN_DATE: parseDate(new Date(MIN_DATE)),
                 START: parseDate(new Date(start ?? 0)),
             });
             if (start && start < MIN_DATE) {
-                start = MIN_DATE;
+                //start = MIN_DATE;
+                //end = start + diff
+            }
+            if (end && end > Date.now()) {
+                end = Date.now();
             }
             console.log({
                 MIN_DATE: parseDate(new Date(MIN_DATE)),
@@ -97,11 +123,7 @@ export class TestGateio extends Platform {
                             limit: limit,
                         }
                     );
-                    const data = res.body.map((el) => {
-                        return el.map((el, i) =>
-                            i == 0 ? Number(el) * 1000 : el
-                        );
-                    });
+                    const data = this._parseData(res.body) 
                     if (!data?.length) break;
 
                     if (klines.length)
@@ -128,17 +150,16 @@ export class TestGateio extends Platform {
                         to: end ? Math.round(end / 1000) : undefined,
                     }
                 );
-                const data = res.body.map((el) => {
-                    return el.map((el, i) => (i == 0 ? Number(el) * 1000 : el));
-                });
+
+             
+                    
+                const data = this._parseData(res.body) 
                 klines = [...data];
             }
 
-            let d = [...klines];
+            let d = [...klines]
             console.log(d[d.length - 1]);
             return d;
-        } catch (err) {
-            console.log("FAILED TO GET KLINES", err);
-        }
+        
     }
 }

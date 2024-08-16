@@ -70,7 +70,7 @@ io.on("connection", (client) => {
                 isHa,
                 useFile,
                 file,
-                isParsed,
+                isParsed,demo
             } = data;
 
             const startTs = Date.parse(start),
@@ -81,7 +81,7 @@ io.on("connection", (client) => {
 
             client.emit("test-candles", "Getting klines...");
 
-            const plat = platforms[platform].obj;
+            const plat =new platforms[platform].obj({demo});
             const platName = platforms[platform].name;
             let symbol: string =
                 plat instanceof TestOKX ? baseCcy.join("-") : baseCcy.join("");
