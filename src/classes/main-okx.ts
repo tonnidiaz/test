@@ -17,7 +17,7 @@ import { ObjectId } from "mongoose";
 import { botLog, getPricePrecision, timedLog } from "@/utils/functions";
 import { OKX } from "./okx";
 import { placeTrade } from "@/utils/orders/funcs";
-import { DEV, getTrailingStop, stops, demo, platforms, TP, TRAILING_STOP_PERC } from "@/utils/constants";
+import { DEV, getTrailingStop, stops, platforms, TP, TRAILING_STOP_PERC } from "@/utils/constants";
 import { IObj } from "@/utils/interfaces";
 import { IOrder } from "@/models/order";
 import { scheduleJob } from "node-schedule";
@@ -30,6 +30,7 @@ interface IOpenBot {
 }
 
 let isSubed = false;
+const demo = true //TODO Change to false
 export class WsOKX {
     passphrase: string;
     ws: WebsocketClient;
@@ -287,6 +288,8 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
             [bot.base, bot.ccy],
             bot.platform
         );
+
+        if (pricePrecision == null) return
         const order = await Order.findById(
             bot.orders[bot.orders.length - 1]
         ).exec();

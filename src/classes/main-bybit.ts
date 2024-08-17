@@ -22,7 +22,6 @@ import {
     DEV,
     getTrailingStop,
     stops,
-    demo,
     platforms,
     TP,
     TRAILING_STOP_PERC,
@@ -162,6 +161,7 @@ export class WsBybit {
                 [bot.base, bot.ccy],
                 bot.platform
             );
+            if (pricePrecision == null) return
 
             const plat = new Bybit(bot);
             const klines: any[][] = await plat.getKlines({ end: Date.now() });
@@ -287,6 +287,7 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
             [bot.base, bot.ccy],
             bot.platform
         );
+        if (pricePrecision == null) return
 
         if (
             bot &&

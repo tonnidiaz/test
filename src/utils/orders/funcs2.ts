@@ -35,6 +35,7 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     const pxPr = getPricePrecision([bot.base, bot.ccy], bot.platform);
         const basePrecision = getCoinPrecision([bot.base, bot.ccy], "limit", bot.platform);
 
+        if (pxPr == null || basePrecision == null) return 
     const row = df[df.length - 1];
     const prevRow = df[df.length - 2];
     const isGreen = prevRow.c >= prevRow.o;

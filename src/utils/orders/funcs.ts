@@ -96,7 +96,15 @@ export const placeTrade = async ({
         const maxAmt = getMaxAmt(pair, bot.platform);
         const pxPr = getPricePrecision(pair, bot.platform);
         const basePrecision = getCoinPrecision(pair, "limit", bot.platform);
-
+        if (
+            minSz == null ||
+            maxSz == null ||
+            pxPr == null ||
+            maxAmt == null ||
+            basePrecision == null
+        ) {
+            return;
+        }
         let aside = bot.aside.find(
             (el) => el.base == pair[0] && el.ccy == pair[1]
         );
@@ -124,10 +132,9 @@ export const placeTrade = async ({
 
         botLog(bot, "PLACE_TRADE", { amt, price, side });
 
-         const putAside = async (amt: number)=>{
-
-            botLog(bot, `PUTTING ${amt} ASIDE...`)
-            order.new_ccy_amt = order.new_ccy_amt- amt; // LEAVE THE FEE
+        const putAside = async (amt: number) => {
+            botLog(bot, `PUTTING ${amt} ASIDE...`);
+            order.new_ccy_amt = order.new_ccy_amt - amt; // LEAVE THE FEE
             aside.amt = aside.amt + amt;
             bot.start_bal = order.new_ccy_amt - Math.abs(order.sell_fee);
 
@@ -135,13 +142,13 @@ export const placeTrade = async ({
                 return el.base == aside.base && el.ccy == aside.ccy
                     ? aside
                     : el;
-            })
+            });
 
-            await order.save()
-            await bot.save()
+            await order.save();
+            await bot.save();
 
-            botLog(bot, `${amt} PUT ASIDE`)
-        }
+            botLog(bot, `${amt} PUT ASIDE`);
+        };
 
         if (ordType == "Limit" && price == 0) {
             return botLog(bot, "ERR: PRICE REQUIRED FOR LIMIT ORDERS");
@@ -224,11 +231,7 @@ export const placeTrade = async ({
 
         amt = toFixed(
             amt,
-            getCoinPrecision(
-                [bot.base, bot.ccy],
-                side == "sell" ? "limit" : "market",
-                bot.platform
-            )
+            basePrecision
         );
         botLog(bot, `Placing a ${ordType} ${amt} ${side} order at ${price}...`);
 
@@ -339,12 +342,12 @@ export const placeTrade = async ({
 
             // PUT ASIDE
 
-            const START_BAL = bot.start_bal
+            const START_BAL = bot.start_bal;
 
-            const profitPerc = (quote_amt - START_BAL) / START_BAL * 100
-        if (profitPerc >= 100){
-           await putAside(quote_amt/2.5)
-        }
+            const profitPerc = ((quote_amt - START_BAL) / START_BAL) * 100;
+            if (profitPerc >= 100) {
+                await putAside(quote_amt / 2.5);
+            }
         }
 
         total_quote.amt = quote_amt;

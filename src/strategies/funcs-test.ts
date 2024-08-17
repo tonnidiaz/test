@@ -25,15 +25,9 @@ import {
     toFixed,
 } from "@/utils/functions";
 import { IObj, ICandle } from "@/utils/interfaces";
-import { strategy as strExp } from "./funcs-test-eFromH";
-import { strategy as strBillo } from "./funcs-test-billo";
-import { strategy as strSLTP } from "./funcs-test-tpsl";
-import { strategy as strTrailing } from "./funcs-test-trailing";
-import { strategy as strOld } from "./funcs-test-old";
-import { strategy as strHeader } from "./funcs-test-header";
 import { strategy as strFallbackSL } from "./funcs-test-fallback-sl";
 import { strategy as strTrExitTP } from "./fb/tr-exit-tp";
-import { strategy as strBelowOpen } from "./funcs-test-below-open";
+
 let _cnt = 0;
 
 const d = useSwindLow ? 20 : 0;
@@ -63,62 +57,13 @@ export const strategy = ({
     taker: number;
     lev?: number;
     trades: IObj[];
-    platNm: "binance" | "bybit" | "okx";
+    platNm: string
 }) => {
-    const useExp = false,
-        useTrailing = false,
-        useBillo = false,
-        useSLTP = false,
-        useFallbackSL = false,
-        useTrExitTP = false,
-        useHeader = false,
-        useBelowOpen = false;
+    const useFallbackSL = false,
+        useTrExitTP = false;
 
-    if (useBelowOpen) {
-        return strBelowOpen({
-            df,
-            balance,
-            buyCond,
-            sellCond,
-            lev,
-            pair,
-            maker,
-            taker,
-            trades,
-            platNm,
-        });
-    }
     if (useTrExitTP) {
         return strTrExitTP({
-            df,
-            balance,
-            buyCond,
-            sellCond,
-            lev,
-            pair,
-            maker,
-            taker,
-            trades,
-            platNm,
-        });
-    }
-    if (useHeader) {
-        return strHeader({
-            df,
-            balance,
-            buyCond,
-            sellCond,
-            lev,
-            pair,
-            maker,
-            taker,
-            trades,
-            platNm,
-        });
-    }
-
-    if (useTrailing) {
-        return strTrailing({
             df,
             balance,
             buyCond,
@@ -145,48 +90,7 @@ export const strategy = ({
             platNm,
         });
     }
-    if (useBillo) {
-        return strBillo({
-            df,
-            balance,
-            buyCond,
-            sellCond,
-            lev,
-            pair,
-            maker,
-            taker,
-            trades,
-            platNm,
-        });
-    }
-    if (useSLTP) {
-        return strSLTP({
-            df,
-            balance,
-            buyCond,
-            sellCond,
-            lev,
-            pair,
-            maker,
-            taker,
-            platNm,
-            trades,
-        });
-    }
-    if (useExp) {
-        return strExp({
-            df,
-            balance,
-            buyCond,
-            sellCond,
-            lev,
-            pair,
-            maker,
-            taker,
-            trades,
-            platNm,
-        });
-    }
+    
     let pos = false;
     let cnt = 0,
         gain = 0,

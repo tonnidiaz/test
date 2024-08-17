@@ -11,10 +11,14 @@ import {
     isMarket,
     TRAILING_STOP_PERC,
     useSwindLow,
+    PUT_ASIDE,
 } from "@/utils/constants";
 
 import {
     getCoinPrecision,
+    getMaxAmt,
+    getMaxSz,
+    getMinSz,
     getPricePrecision,
     toFixed,
 } from "@/utils/functions";
@@ -49,136 +53,175 @@ export const strategy = ({
     taker: number;
     lev?: number;
     trades: IObj[];
-    platNm: "binance" | "bybit" | "okx";
+    platNm: string;
 }) => {
-    console.log(df[0].ts);
-
     let pos = false;
     let cnt = 0,
         gain = 0,
         loss = 0,
         buyFees = 0,
-        sellFees = 0;
+        sellFees = 0,
+        lastPx = 0;
 
     let mData: IObj = { data: [] },
         _data: IObj;
-    console.log("CE_SMA: BEGIN BACKTESTING...\n");
+    console.log("BEGIN BACKTESTING...\n");
     let entry: number = 0,
         entryLimit: number | null = null,
         exitLimit: number | null = null,
         tp: number | null = null,
         base: number = 0,
-        lastPrice = 0,
         sl: number | null = null,
         exit: number = 0,
         enterTs = "";
 
-    const prAve: number[] = [];
     const pricePrecision = getPricePrecision(pair, platNm);
+    const minSz = getMinSz(pair, platNm);
+    const maxSz = getMaxSz(pair, platNm);
+    const maxAmt = getMaxAmt(pair, platNm);
     const basePrecision = getCoinPrecision(pair, "limit", platNm);
+    const quote = pair[1]
 
-    console.log({ pricePrecision, basePrecision });
-    balance = toFixed(balance, pricePrecision);
-    //df = df.slice(20);
 
-    console.log(trades);
-    const lastRow = df[df.length - 1]
-    for (let i = d + 1; i < df.length; i++) {
-        const prevrow = df[i - 1],
-            row = df[i];
-        const nextRow = df[i + 1] ?? row;
+    console.log({ minSz, maxSz, pricePrecision, basePrecision });
+    let START_BAL = balance
+    console.log({balance})
+
+    let aside = 0
+
+    const putAside = (amt: number)=>{
+        if (!PUT_ASIDE) return
+        balance -= amt;
+        aside += amt;
+        START_BAL = balance;
+    }
+
+    let _bool = false
+    let buyRow = df[0]
+    const _fillSellOrder = (ret: ReturnType<typeof fillSellOrder>) => {
+        (pos = ret.pos),
+            (mData = ret.mData),
+            (sl = ret.sl),
+            (tp = ret.tp),
+            (entryLimit = ret.entryLimit),
+            (cnt = ret.cnt),
+            (gain = ret.gain),
+            (loss = ret.loss);
+        sellFees += ret.fee;
+        exitLimit = null;
+        entryLimit = null;
+        balance += ret.balance
+        const profitPerc = (balance - START_BAL) / START_BAL * 100
+        if (profitPerc >= 100){
+            putAside(balance/2.5)
+        }
+        _bool = false
+    };
+
+    const _fillBuyOrder = (ret: ReturnType<typeof fillBuyOrder>) => {
+        if (maxSz == null  || minSz == null  || pricePrecision == null  || basePrecision == null) return
+        (pos = ret.pos),
+            (mData = ret.mData),
+            (_cnt = ret._cnt);
+        buyFees += ret.fee;
+        tp = toFixed(entry * (1 + TP / 100), pricePrecision!);
+        sl = toFixed(entry * (1 - SL / 100), pricePrecision!);
+        base += ret.base
+    };
+
+    async function _fillSell({_exit, _base, _row, isSl} : {_exit: number, _row: ICandle, _base: number, isSl?: boolean}) {
+        console.log("\nSELLING", {_base, _exit} ,"\n")
+        if (maxSz == null  || minSz == null  || pricePrecision == null  || basePrecision == null) return
+
+        const _bal = _base * _exit
+        if (_bal > maxAmt!){
+            console.log(`BAL ${_bal} > MAX_AMT ${maxAmt}`)
+             _base = (maxAmt! * (1 - .5/100)) / _exit
+             _base = toFixed(_base, basePrecision!)
+            return _fillSell({_exit, _base, _row, isSl})
+
+        }
+        const ret = fillSellOrder({
+            exitLimit,
+            exit: _exit,
+            prevrow: _row,
+            entry: entry,
+            base: _base,
+            pricePrecision,
+            enterTs,
+            gain,
+            loss,
+            cnt,
+            mData,
+            pos,
+            sl,
+            tp,
+            entryLimit,
+            maker,
+            isSl,
+        });
         
 
+        _fillSellOrder(ret);
+        _cnt = 0;
+        base -= _base
+
+        console.log(`\nAFTER SELL: bal = ${balance}, base = ${base}\n`);
+    }
+
+    function _fillBuy({amt, _entry, _row} : {amt: number, _entry: number, _row: ICandle}) {
+        console.log("\BUYING", {amt, _entry} ,"\n")
+        if (maxSz == null  || minSz == null  || pricePrecision == null  || basePrecision == null) return
+        const _base = amt / _entry;
+        if (_base < minSz) {
+            const msg =  `BASE: ${_base} < MIN_SZ: ${minSz}`
+            return console.log(`${msg}`);
+        }else if (_base > maxSz!){
+            const msg = `BASE: ${_base} > MAX_SZ: ${maxSz}`;
+
+            console.log(`${msg}\n`);
+
+            amt =( maxSz * (1 - .5/100)) * _entry
+            amt = toFixed(amt, pricePrecision)
+            return _fillBuy({amt, _entry, _row})
+        }
+        _cnt = 0;
+        if (!entryLimit) entryLimit = entry;
+        const ret = fillBuyOrder({
+            entry: _entry,
+            prevrow: _row,
+            entryLimit,
+            enterTs,
+            taker,
+            balance: amt,
+            basePrecision,
+            mData: { ...mData },
+            pos,
+        });
+        _fillBuyOrder(ret);
+        balance -= amt
+
+        console.log(`\nAFTER BUY: bal = ${balance}, base = ${base}\n`);
+        buyRow = _row
+        
+    }
+
+    for (let i = d + 1; i < df.length; i++) {
+        
+        
+        const prevrow = df[i - 1],
+            row = df[i];
+
+ if (maxSz == null  || minSz == null  || pricePrecision == null  || basePrecision == null || row.v <= 0
+            // || maxReached //|| profitPerc >= 100//9900
+            ) continue;
+        lastPx = row.o;
+
+        const isGreen = prevrow.c >= prevrow.o
+        const isYello = prevrow.c > row.o
         console.log(`\nTS: ${row.ts}`);
-        _cnt += 1;
-        lastPrice = entry;
+        console.log({ts: row.ts, o: row.o, h: row.h, l: row.l, c: row.c, v: row.v})
 
-        const _fillSellOrder = (ret: ReturnType<typeof fillSellOrder>) => {
-            (pos = ret.pos),
-                (mData = ret.mData),
-                (sl = ret.sl),
-                (balance += ret.balance),
-                (tp = ret.tp),
-                (entryLimit = ret.entryLimit),
-                (cnt = ret.cnt),
-                (gain = ret.gain),
-                (loss = ret.loss);
-            sellFees += ret.fee;
-            exitLimit = null;
-            entryLimit = null;
-        };
-        const _fillBuyOrder = (ret: ReturnType<typeof fillBuyOrder>) => {
-            (pos = ret.pos),
-                (base += ret.base),
-                (mData = ret.mData),
-                (_cnt = ret._cnt);
-            enterTs = row.ts;
-            buyFees += ret.fee;
-            tp = toFixed(entry * (1 + TP / 100), pricePrecision);
-            sl = toFixed(entry * (1 - SL / 100), pricePrecision);
-        };
-
-        async function _fillSell({
-            _exit,
-            _row,
-            isSl,
-            _base,
-            o,
-        }: {
-            _exit: number;
-            _row: ICandle;
-            isSl?: boolean;
-            _base: number;
-            o?: number;
-        }) {
-            base -= _base;
-            const ret = fillSellOrder({
-                exitLimit,
-                exit: _exit,
-                prevrow: _row,
-                entry: entry,
-                base: _base,
-                pricePrecision,
-                enterTs,
-                gain,
-                loss,
-                cnt,
-                mData,
-                pos,
-                sl,
-                tp,
-                entryLimit,
-                maker,
-                isSl,
-                o,
-            });
-            _fillSellOrder(ret);
-        }
-        function _fillBuy({
-            _amt,
-            _entry,
-            _row,
-        }: {
-            _amt: number;
-            _entry: number;
-            _row: ICandle;
-        }) {
-            if (!entryLimit) entryLimit = _entry;
-            balance -= _amt;
-            const ret = fillBuyOrder({
-                entry: _entry,
-                prevrow: _row,
-                entryLimit,
-                enterTs,
-                taker,
-                balance: _amt, //: _bal,
-                basePrecision,
-                mData: { ...mData },
-                pos,
-            });
-            _fillBuyOrder(ret);
-        }
-        const isGreen = prevrow.c >= prevrow.o;
         
         if (!pos && buyCond(prevrow)) {
             /* BUY SEC */
@@ -192,7 +235,7 @@ export const strategy = ({
                         pricePrecision
                     )}`
                 );
-                _fillBuy({ _entry: entry, _row: row, _amt: balance });
+                _fillBuy({ _entry: entry, _row: row, amt: balance });
             }
         }
         if (pos && !exitLimit) {
@@ -220,7 +263,7 @@ export const strategy = ({
             } 
 
             if (_exit && _exit <= h) {
-                exit = isClose ? nextRow.o : _exit;
+                exit = isClose ? c : _exit;
                 _fillSell({ _exit, _row, _base: base });
             }
         }
@@ -228,7 +271,7 @@ export const strategy = ({
 
     if (base != 0) {
         console.log("ENDED WITH BUY");
-        let _bal = lastPrice * base;
+        let _bal = lastPx * base;
         _bal *= 1 - taker;
         balance += _bal;
     }

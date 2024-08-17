@@ -1,6 +1,7 @@
 import { fillBuyOrder, fillSellOrder } from "./utils/functions";
 import {
     MAKER_FEE_RATE,
+    PUT_ASIDE,
     SELL_AT_LAST_BUY,
     SL,
     TAKER_FEE_RATE,
@@ -24,10 +25,7 @@ import {
     toFixed,
 } from "@/utils/functions";
 import { IObj, ICandle } from "@/utils/interfaces";
-import { strategy as strExp } from "./funcs-test-eFromH";
-import { strategy as strBillo } from "./funcs-test-billo";
 import { strategy as strFbAdvanced} from "./funcs-test-fallback-advanced";
-import { strategy as strTrailing } from "./funcs-test-trailing";
 let _cnt = 0;
 
 const d = useSwindLow ? 20 : 0;
@@ -55,7 +53,7 @@ export const strategy = ({
     taker: number;
     lev?: number;
     trades: IObj[];
-    platNm: "binance" | "bybit" | "okx";
+    platNm: string;
 }) => {
     const useFbAdvanced = true
     if (useFbAdvanced) {
@@ -82,7 +80,7 @@ export const strategy = ({
 
     let mData: IObj = { data: [] },
         _data: IObj;
-    console.log("CE_SMA: BEGIN BACKTESTING...\n");
+    console.log("BEGIN BACKTESTING...\n");
     let entry: number = 0,
         entryLimit: number | null = null,
         exitLimit: number | null = null,
@@ -101,26 +99,20 @@ export const strategy = ({
 
 
     console.log({ minSz, maxSz, pricePrecision, basePrecision });
-    balance = toFixed(balance, pricePrecision);
     let START_BAL = balance
     console.log({balance})
-    //df = df.slice(20);
 
-    console.log(trades);
-
-    const times: { start: string; end: string; cnt: number }[] = [];
     let aside = 0
-    let isSLOrder = false, maxReached = false;
 
     const putAside = (amt: number)=>{
-        return;
+        if (!PUT_ASIDE) return
         balance -= amt;
         aside += amt;
         START_BAL = balance;
-        maxReached = false
     }
 
-
+    let _bool = false
+    let buyRow = df[0]
     const _fillSellOrder = (ret: ReturnType<typeof fillSellOrder>) => {
         (pos = ret.pos),
             (mData = ret.mData),
@@ -138,26 +130,29 @@ export const strategy = ({
         if (profitPerc >= 100){
             putAside(balance/2.5)
         }
+        _bool = false
     };
 
     const _fillBuyOrder = (ret: ReturnType<typeof fillBuyOrder>) => {
+        if (maxSz == null  || minSz == null  || pricePrecision == null  || basePrecision == null) return
         (pos = ret.pos),
             (mData = ret.mData),
             (_cnt = ret._cnt);
         buyFees += ret.fee;
-        tp = toFixed(entry * (1 + TP / 100), pricePrecision);
-        sl = toFixed(entry * (1 - SL / 100), pricePrecision);
+        tp = toFixed(entry * (1 + TP / 100), pricePrecision!);
+        sl = toFixed(entry * (1 - SL / 100), pricePrecision!);
         base += ret.base
     };
 
     async function _fillSell({_exit, _base, _row, isSl} : {_exit: number, _row: ICandle, _base: number, isSl?: boolean}) {
         console.log("\nSELLING", {_base, _exit} ,"\n")
+        if (maxSz == null  || minSz == null  || pricePrecision == null  || basePrecision == null) return
 
         const _bal = _base * _exit
-        if (_bal > maxAmt){
+        if (_bal > maxAmt!){
             console.log(`BAL ${_bal} > MAX_AMT ${maxAmt}`)
-             _base = (maxAmt * (1 - .5/100)) / _exit
-             _base = toFixed(_base, basePrecision)
+             _base = (maxAmt! * (1 - .5/100)) / _exit
+             _base = toFixed(_base, basePrecision!)
             return _fillSell({_exit, _base, _row, isSl})
 
         }
@@ -183,7 +178,6 @@ export const strategy = ({
         
 
         _fillSellOrder(ret);
-        times.push({ start: enterTs, end: _row.ts, cnt: _cnt });
         _cnt = 0;
         base -= _base
 
@@ -192,14 +186,14 @@ export const strategy = ({
 
     function _fillBuy({amt, _entry, _row} : {amt: number, _entry: number, _row: ICandle}) {
         console.log("\BUYING", {amt, _entry} ,"\n")
+        if (maxSz == null  || minSz == null  || pricePrecision == null  || basePrecision == null) return
         const _base = amt / _entry;
         if (_base < minSz) {
             const msg =  `BASE: ${_base} < MIN_SZ: ${minSz}`
             return console.log(`${msg}`);
-        }else if (_base > maxSz){
+        }else if (_base > maxSz!){
             const msg = `BASE: ${_base} > MAX_SZ: ${maxSz}`;
 
-            maxReached = true
             console.log(`${msg}\n`);
 
             amt =( maxSz * (1 - .5/100)) * _entry
@@ -223,28 +217,30 @@ export const strategy = ({
         balance -= amt
 
         console.log(`\nAFTER BUY: bal = ${balance}, base = ${base}\n`);
+        buyRow = _row
         
     }
 
     for (let i = d + 1; i < df.length; i++) {
         
-        if (minSz == 0 || maxSz == 0
-            // || maxReached //|| profitPerc >= 100//9900
-            ) continue;
+        
         const prevrow = df[i - 1],
             row = df[i];
- 
+
+ if (maxSz == null  || minSz == null  || pricePrecision == null  || basePrecision == null || row.v <= 0
+            // || maxReached //|| profitPerc >= 100//9900
+            ) continue;
         lastPx = row.o;
 
+        const isGreen = prevrow.c >= prevrow.o
+        const isYello = prevrow.c > row.o
         console.log(`\nTS: ${row.ts}`);
+        console.log({ts: row.ts, o: row.o, h: row.h, l: row.l, c: row.c, v: row.v})
 
         if (pos) _cnt += 1;
 
-        
-        const isGreen = prevrow.c >= prevrow.o,
-            isSom = prevrow.c > row.o;
+        const isSom = prevrow.c > row.o;
 
-        if (row.v <= 0) continue
         if (!pos && buyCond(prevrow, df, i)) {
             console.log("\nKAYA RA BUY\n");
             // Place limit buy order
@@ -315,16 +311,10 @@ export const strategy = ({
 
     if (lastPos && lastPos.side.startsWith("buy")) {
         console.log("ENDED WITH BUY");
-
-        
-        const _row = df[df.length - 1]
+        const _row = SELL_AT_LAST_BUY ? buyRow : df[df.length - 1]
         const _exit = SELL_AT_LAST_BUY ? lastPos._c : _row.o;
         _fillSell({_row, _exit, _base: base, isSl: true})
-        times.push({
-            start: enterTs,
-            end: "Incomplete: " + df[df.length - 1].ts,
-            cnt: _cnt,
-        });
+       
     }
 
     console.log('\n', {balance, aside, base});
@@ -332,8 +322,6 @@ export const strategy = ({
     
     gain = Number(((gain / cnt) * 100).toFixed(2));
     loss = Number(((loss / cnt) * 100).toFixed(2));
-
-    //if (aside == 0){aside = balance}
     _data = { ...mData, balance, trades: cnt, gain, loss, aside};
 
     console.log(`\nBUY_FEES: ${quote} ${buyFees}`);
