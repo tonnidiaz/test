@@ -3,6 +3,7 @@ import { ensureDirExists } from "@/utils/orders/funcs";
 import { Platform } from "./test-platforms";
 import { RestClientV2 } from "bitget-api";
 import { writeFileSync } from "fs";
+import { CompanyResultSortBy } from "indicatorts";
 
 export class TestBitget extends Platform {
     name = "BITGET";
@@ -61,7 +62,7 @@ export class TestBitget extends Platform {
             //end = start + diff
         }
         if (end && end > Date.now()) {
-            end = Date.now();
+            //end = Date.now();
         }
         console.log({
             MIN_DATE: parseDate(new Date(MIN_DATE)),
@@ -69,6 +70,7 @@ export class TestBitget extends Platform {
         });
 
         let klines: any[] = [];
+        let done = false;
         let cnt = 0;
         console.log(
             `[ ${isBybit ? "ByBit" : this.name} ] \t GETTING KLINES.. FOR ` +
@@ -101,20 +103,30 @@ export class TestBitget extends Platform {
                 });
                 let { data } = res;
                 data = data.map((el) => el.map((el) => Number(el)));
-                if (!data?.length) break;
 
-                if (klines.length) {
-                    console.log(
-                        "\n",
-                        {
-                            last: parseDate(
-                                new Date(klines[klines.length - 1][0])
-                            ),
-                            new: parseDate(new Date(data[0][0])),
-                        },
-                        "\n"
-                    );
+                const last = klines.length != 0 && Number(klines[klines.length - 1][0])
+                const _new = Number(data[0][0])
+                console.log(
+                    "\n",
+                    {
+                        last: last && parseDate(
+                            new Date(klines[klines.length - 1][0])
+                        ),
+                        new: parseDate(new Date(data[0][0])),
+                    },
+                    "\n"
+                );
+                
+                if (last){
+                    if (last >= _new)
+                    {console.log("LAST > NEW")}
+                    data = data.filter(el => el[0] > last)
+                    
                 }
+                if (!data?.length) break; 
+
+               
+
                 klines.push(...[...data]);
 
                 firstTs =
@@ -126,6 +138,8 @@ export class TestBitget extends Platform {
                     writeFileSync(savePath, JSON.stringify(klines));
                     console.log("Saved");
                 }
+
+                if (done){break}
                 cnt += 1;
             }
         } else {

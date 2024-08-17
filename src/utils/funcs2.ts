@@ -46,13 +46,35 @@ const tuMacd = (df: ICandle[]) => {
 };
 export const tuPath = (pth: string) => path.resolve(...pth.split("/"));
 
-export const parseKlines = (klines: [][]) => {
+export const parseKlines = (klines: (string | number)[][]) => {
+    console.log(parseKlines)
     let df: ICandle[] = [];
     const ha_o = 0, ha_h = 0, ha_l = 0, ha_c = 0;
-    klines.forEach((k) => {
+    const interval = Math.floor((Number(klines[1][0]) - Number(klines[0][0])) / 60000)
+    console.log({interval});
+
+    for (let i = 0; i < klines.length; i++){
+        const k = klines[i]
+         
         const [ts, o, h, l, c, v] = k.map((e) => Number(e));
         df.push({ ts: parseDate(new Date(ts)), o, h, l, c, v, ha_o, ha_h, ha_l, ha_c });
-    });
+        if (i > 0){
+            const prev = Number(klines[i - 1][0]), curr = Number(klines[i][0])
+            const _diff = Math.floor((Number(curr) - Number(prev))/ 60000)
+            
+            if (_diff !== interval) {
+                console.log({_diff, 
+                    i, len: klines.length,
+                    prev: parseDate(new Date(prev)),
+                    curr: parseDate(new Date(curr)),
+                })
+                console.log("KLINE DATA INVALID")
+                return df
+            }
+
+        }
+    }
+
     return df;
 };
 

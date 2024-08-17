@@ -621,3 +621,5 @@ export const getSymbol = (pair: string[], plat: string, )=>{
 
     return pair.join(sep)
 }
+
+export const clearTerminal = () =>{process.stdout.write('\x1Bc'); }

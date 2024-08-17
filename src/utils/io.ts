@@ -14,7 +14,7 @@ import {
     tradesRootDir,
 } from "./constants";
 import { existsSync } from "fs";
-import { getPricePrecision, readJson, toFixed } from "./functions";
+import { clearTerminal, getPricePrecision, getSymbol, readJson, toFixed } from "./functions";
 import { objStrategies, strategies } from "@/strategies";
 import { TestOKX } from "@/classes/test-platforms";
 import { platforms } from "./consts";
@@ -25,10 +25,12 @@ const io = new Server({ cors: corsOptions }); // yes, no server arg here; it's n
 let prevData: any = null;
 // attach stuff to io
 io.on("connection", (client) => {
-    console.log(`${client.id} CONNECTED`);
-
-    if (prevData) {
-        io.emit("backtest", prevData);
+    console.log(`IO: ${client.id} CONNECTED`);
+    
+    console.log({ep: prevData?.ep})
+    if (prevData && prevData.ep) {
+        
+        io.emit(prevData.ep, prevData.data);
         //prevData = null
     }
     io.emit("event", "This is event");
@@ -59,8 +61,9 @@ io.on("connection", (client) => {
     });
 
     client.on("test-candles", async (data: IObj) => {
+        clearTerminal()
         try {
-            const baseCcy = data.symbol;
+            const pair = data.symbol;
             let {
                 interval,
                 start,
@@ -84,23 +87,24 @@ io.on("connection", (client) => {
 
             const plat =new platforms[platform]({demo});
             const platName = platform.toLowerCase();
-            let symbol: string =
-                plat instanceof TestOKX ? baseCcy.join("-") : baseCcy.join("");
+            const symbol = getSymbol(pair, platName)
             console.log(symbol);
             const test = false;
             if (useFile && !file) {
                 client.emit("test-candles", { err: "File required" });
                 return;
             }
-            if (offline && !useFile) {
-                console.log("IS OFFLINE");
-                start = start ?? parseDate(new Date());
+            start = start ?? parseDate(new Date());
                 const year = start.split("-")[0];
                 const sub = demo ? "demo" : "live";
-                klinesPath = tuPath(
+            klinesPath = tuPath(
                     `${klinesRootDir}/${platName.toLowerCase()}/${year}/${sub}/${symbol}_${interval}m-${sub}.json`
-                );
+            );
 
+            if (offline && !useFile) {
+                console.log("IS OFFLINE");
+                
+                
                 if (!existsSync(klinesPath!)) {
                     const err = {
                         err: `${klinesPath} does not exist`,
@@ -116,6 +120,7 @@ io.on("connection", (client) => {
                     end: endTs,
                     interval,
                     symbol,
+                    savePath: save ? klinesPath : undefined
                 });
                 if (!r) {
                     client.emit("err", "Failed to get klines");
@@ -166,7 +171,7 @@ io.on("connection", (client) => {
             });
             client.emit("test-candles", {
                 data: retData,
-                symbol: baseCcy,
+                symbol: pair,
                 interval,
             });
             return retData;

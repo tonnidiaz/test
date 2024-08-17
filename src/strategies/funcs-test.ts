@@ -229,7 +229,7 @@ export const strategy = ({
     }
 
     let _bool = false
-
+    let buyRow = df[0]
     const _fillSellOrder = (ret: ReturnType<typeof fillSellOrder>) => {
         (pos = ret.pos),
             (mData = ret.mData),
@@ -334,6 +334,7 @@ export const strategy = ({
         balance -= amt
 
         console.log(`\nAFTER BUY: bal = ${balance}, base = ${base}\n`);
+        buyRow = _row
         
     }
 
@@ -351,6 +352,7 @@ export const strategy = ({
         const isGreen = prevrow.c >= prevrow.o
         const isYello = prevrow.c > row.o
         console.log(`\nTS: ${row.ts}`);
+        console.log({ts: row.ts, o: row.o, h: row.h, l: row.l, c: row.c, v: row.v})
 
         if (pos) _cnt += 1;
 
@@ -408,6 +410,7 @@ export const strategy = ({
                 
             }
 
+
             _bool = true
 
            
@@ -429,7 +432,7 @@ export const strategy = ({
     if (lastPos && lastPos.side.startsWith("buy")) {
         console.log("ENDED WITH BUY");
 
-        const _row = df[df.length - 1]
+        const _row = SELL_AT_LAST_BUY ? buyRow : df[df.length - 1]
         const _exit = SELL_AT_LAST_BUY ? lastPos._c : _row.o;
         _fillSell({_row, _exit, _base: base, isSl: true})
        

@@ -8,7 +8,7 @@ import {
     tradesRootDir,
 } from "../constants";
 import { existsSync, writeFileSync } from "fs";
-import { clog, getPricePrecision, readJson, toFixed, getSymbol } from "../functions";
+import { clog, getPricePrecision, readJson, toFixed, getSymbol, clearTerminal } from "../functions";
 import { objStrategies, strategies } from "@/strategies";
 import { TestOKX } from "@/classes/test-platforms";
 import { platforms } from "../consts";
@@ -22,6 +22,7 @@ import { bitgetInstrus } from "@/data/bitget-instrus";
 let prevData: IObj | null = null;
 
 export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
+     const ep = "backtest"
     try {
         const pair = data.symbol;
         let {
@@ -43,10 +44,10 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
         demo = demo ?? false;
         console.log("ON BACKTEST");
         // CLEAR CONSOLE
-        console.clear();
+        clearTerminal()
         prevData = null;
 
-        
+       
 
         const startTs = Date.parse(start),
             endTs = Date.parse(end);
@@ -55,7 +56,7 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
         let klines: any[] = [];
         let trades: any[] = [];
 
-        client?.emit("backtest", "Getting klines...");
+        client?.emit(ep, "Getting klines...");
 
         
 
@@ -68,12 +69,12 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
         console.log({ symbol, demo });
 
         if (pxPr == null) {
-            client?.emit('backtest', {err: `PRECISION FOR ${symbol} NOT AVAL`})
+            client?.emit(ep, {err: `PRECISION FOR ${symbol} NOT AVAL`})
             return
         }
         const test = false;
         if (useFile && !file) {
-            client?.emit("backtest", { err: "File required" });
+            client?.emit(ep, { err: "File required" });
             return;
         }
         start = start ?? parseDate(new Date());
@@ -97,7 +98,7 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
                 const err = {
                     err: `${klinesPath} does not exist`,
                 };
-                client?.emit("backtest", err);
+                client?.emit(ep, err);
                 return;
             }
             if (T) {
@@ -161,7 +162,7 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
             );
         }
 
-        client?.emit("backtest", "Analyzing data...");
+        client?.emit(ep, "Analyzing data...");
         klines = isParsed && useFile ? klines : parseKlines(klines);
         let df = tuCE(isHa && useFile ? klines : heikinAshi(klines));
 
@@ -188,7 +189,7 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
         bal /= QUOTE_RATE;
         console.log({ bal });
 
-        client?.emit("backtest", "Backtesting....");
+        client?.emit(ep, "Backtesting....");
 
         const lev = data.lev ? Number(data.lev) : 1;
         const strNum = Number(data.strategy);
@@ -229,16 +230,18 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
         console.log({ str_name });
 
         retData = { data: { ...retData, str_name }, clId };
-        prevData = retData;
-        client?.emit("backtest", retData);
-        return retData;
+        prevData = {ep, data: retData};
+        client?.emit(ep, retData);
+        return prevData;
     } catch (e: any) {
         console.log(e.response?.data ?? e);
-        client?.emit("backtest", { err: "Something went wrong" });
+        client?.emit(ep, { err: "Something went wrong" });
     }
 };
 
 export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
+    const ep = "cointest"
+    clearTerminal()
     try {
         let {
             interval,
@@ -288,7 +291,8 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
         const sub = demo ? "demo" : "live";
         const savePath = `data/rf/coins/${year}/${sub}/${prefix}_${_platName}_${interval}m-${sub}.json`;
 
-        client?.emit('cointest', `${platform}: BEGINE COINTEST...`)
+        
+        client?.emit(ep, `${platform}: BEGINE COINTEST...`)
         if (existsSync(savePath) && from_last) {
             _data = (await require(savePath)).sort((a, b) =>
                 a.pair > b.pair ? 1 : -1
@@ -353,7 +357,7 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
 
                  msg = `STARTING AT: ${coins[0]} -> last: ${last}`
                 console.log(msg);
-                //client?.emit('cointest', msg)
+                //client?.emit(ep, msg)
             }
         }
 
@@ -366,7 +370,7 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
             try{
                 msg = `BEGIN PAIR ${pair}`
             console.log(`${msg}`);
-            //client?.emit('cointest', msg)
+            //client?.emit(ep, msg)
             let klines: any[] = [];
             let trades: any[] = [];
             let bal = Number(data.bal);
@@ -378,7 +382,7 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
             if (pxPr == null) {
                 msg = `PRICE PRECISION FOR ${symbol} NOT AVAIL`
                 console.log(msg)
-                //client?.emit('cointest', {err: msg})
+                //client?.emit(ep, {err: msg})
                 continue}
 
             klinesPath = tuPath(
@@ -386,13 +390,13 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
             );
             if (!offline && skip_existing && existsSync(klinesPath)) {
                 console.log("SKIPING", pair);
-                //client?.emit('cointest', `SKIPPING ${pair}`)
+                //client?.emit(ep, `SKIPPING ${pair}`)
                 continue;
             }
 
             if (offline && !existsSync(klinesPath)) {
                 console.log("KLINES DIR NOT FOUND FOR", pair);
-                //client?.emit('cointest', {err: `${klinesPath} not found`})
+                //client?.emit(ep, {err: `${klinesPath} not found`})
                 continue;
             }
             const r =
@@ -473,19 +477,26 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
 
             msg = `${pair} DONE`
             console.log(msg, '\n');
-            //client?.emit("cointest", msg)
+           // result = {...result, data: _data, clId, platform}
+            // result = {...result, data: _data, clId, platform}
+            // prevData = { ep , data: result}
+            // client?.emitWithAck(ep, result)
+
             }
             catch(e: any){
                 console.log(e);
-                //client?.emit("cointest", { err: `${pair}: Something went wrong` });
+                //client?.emit(ep, { err: `${pair}: Something went wrong` });
             }
         }
+        console.log("COINTEST DONE")
             result = {...result, data: _data, clId, platform}
-            prevData = result
-            client?.emit('cointest', result)
-        return result;
+            prevData = { ep , data: result}
+
+                client?.emit(ep, result)
+            
+        return prevData;
     } catch (e: any) {
         console.log(e.response?.data ?? e);
-        client?.emit("cointest", { err: "Something went wrong" });
+        client?.emit(ep, { err: "Something went wrong" });
     }
 };
