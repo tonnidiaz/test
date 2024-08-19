@@ -242,12 +242,13 @@ export function ceil(num: number, dec: number) {
 
 export function precision(a: number) {
     if (!isFinite(a)) return 0;
-    var e = 1,
-        p = 0;
-    while (Math.round(a * e) / e !== a) {
-        e *= 10;
-        p++;
-    }
+    // var e = 1,
+    //     p = 0;
+    // while (Math.round(a * e) / e !== a) {
+    //     e *= 10;
+    //     p++;
+    // }
+    const p = `${a}`.split(".")[1].length - 1
     return p;
 }
 

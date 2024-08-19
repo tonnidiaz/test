@@ -4,7 +4,7 @@ import { gateioInstrus } from "@/utils/data/instrus/gateio-instrus";
 import { okxInstrus } from "@/utils/data/instrus/okx-instrus";
 import { bybitInstrus } from "@/utils/data/instrus/bybit-instrus";
 import { parseDate } from "@/utils/funcs2";
-import { randomNum } from "@/utils/functions";
+import { getPricePrecision, randomNum } from "@/utils/functions";
 import { scheduleJob } from "node-schedule";
 
 const _gateioInstrus = gateioInstrus.filter(el=> el.trade_status == 'tradable').length
@@ -14,12 +14,4 @@ const _binanceInstrus = binanceInstrus.filter(el=> el.status == 'TRADING' && el.
 const _bybitInstrus = bybitInstrus.length
 
 
-console.log(
-    {
-        _gateioInstrus,
-        _bitgetInstrus,
-        _bybitInstrus,
-        _binanceInstrus,
-        _okxInstrus,
-
-    })
+console.log(getPricePrecision(["SOL", "USDT"], 'bybit'))
