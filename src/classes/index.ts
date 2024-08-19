@@ -18,7 +18,7 @@ export class OrderPlacer {
     }
 
     async checkPlaceOrder() {
-        const bot = await Bot.findById(this.bot._id).exec();
+        const bot = await Bot.findById(this.bot.id).exec();
         if (!bot) return;
         const now = new Date();
         const currMin = now.getMinutes();

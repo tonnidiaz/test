@@ -289,7 +289,7 @@ export const findBotOrders = async (bot: IBot) => {
 };
 
 export const getLastOrder = async (bot: IBot) => {
-    return await Order.findById(bot.orders[bot.orders.length - 1].id).exec();
+    return await Order.findById(bot.orders[bot.orders.length - 1]).exec();
 };
 
 export const getBotPlat = (bot: IBot) => {

@@ -19,7 +19,7 @@ export class DefTester extends Backtest {
                 _entry: this.entry,
             });
 
-            //if (this.isGreen) return;
+           // if (!this.isGreen) return;
         }
 
         if (this.pos) {
