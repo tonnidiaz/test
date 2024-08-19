@@ -1,0 +1,25 @@
+//@version=5
+indicator(title="Moving Average Exponential", shorttitle="TU_EMA", overlay=true, timeframe="", timeframe_gaps=true)
+len_20 = input.int(3, minval=1, title="Fast Length")
+len_50 = input.int(8, minval=1, title="Slow Length")
+src = input(close, title="Source")
+offset = input.int(title="Offset", defval=0, minval=-500, maxval=500, display = display.data_window)
+out_20 = ta.ema(src, len_20)
+out_50 = ta.ema(src, len_50)
+
+plot(out_20, title="FAST EMA", color=color.orange, offset=offset, linewidth = 3)
+plot(out_50, title="SLOW EMA", color=color.blue, offset=offset, linewidth = 3)
+
+ma(source, length, type) =>
+    switch type
+        "SMA" => ta.sma(source, length)
+        "EMA" => ta.ema(source, length)
+        "SMMA (RMA)" => ta.rma(source, length)
+        "WMA" => ta.wma(source, length)
+        "VWMA" => ta.vwma(source, length)
+
+typeMA = input.string(title = "Method", defval = "EMA", options=["SMA", "EMA", "SMMA (RMA)", "WMA", "VWMA"], group="Smoothing", display = display.data_window)
+smoothingLength = input.int(title = "Length", defval = 5, minval = 1, maxval = 100, group="Smoothing", display = display.data_window)
+
+smoothingLine = ma(out_20, smoothingLength, typeMA)
+plot(smoothingLine, title="Smoothing Line", color=#f37f20, offset=offset, display=display.none)
