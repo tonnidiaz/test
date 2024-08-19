@@ -11,7 +11,7 @@ coverage
 *.env
 dist
 build
-data
+_data
 # Benchmarking
 benchmarks/graphs
 src/data/**/*.json

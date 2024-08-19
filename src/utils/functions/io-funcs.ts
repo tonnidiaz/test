@@ -299,7 +299,7 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
 
         prefix = prefix ?? "";
         const sub = demo ? "demo" : "live";
-        const savePath = `data/rf/coins/${year}/${sub}/${prefix}_${_platName}_${interval}m-${sub}.json`;
+        const savePath = `_data/rf/coins/${year}/${sub}/${prefix}_${_platName}_${interval}m-${sub}.json`;
 
         
         if (_platName == "okx") {
