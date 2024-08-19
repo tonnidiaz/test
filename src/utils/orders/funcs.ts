@@ -27,6 +27,9 @@ import {
     heikinAshi,
     parseDate,
     parseKlines,
+    getLastOrder,
+    orderHasPos,
+    getBotPlat,
 } from "../funcs2";
 import { objStrategies } from "@/strategies";
 import { updateOrderInDb } from "./funcs2";
@@ -60,9 +63,49 @@ export const ensureDirExists = (filePath: string) => {
     fs.mkdirSync(dirname);
 };
 
-export const updateOrder = async (bot: IBot) => {
+export const updateOrder = async ({
+    bot,
+    cancel = true,
+}: {
+    bot: IBot;
+    cancel?: boolean;
+}) => {
     /* CHECK PREV ORDERS */
     try {
+        botLog(bot, "CHECKING PREV ORDERS");
+
+        let order = await getLastOrder(bot);
+        let pos = orderHasPos(order);
+
+        const plat = getBotPlat(bot);
+
+        if (order && !pos) {
+            // CURRENTLY NOT PLACING LIMIT BUY ORDERS
+        } else if (order && pos && order.order_id.length) {
+            botLog(bot, "CHECKING SELL ORDER...");
+
+            const ordId = order.order_id;
+            const res = await plat.getOrderbyId(ordId);
+            if (!res) {
+                botLog(bot, "FAILED TO GET SELL ORDER");
+            } else if (res == "live") {
+                botLog(bot, "SELL ORDER STILL ACTIVE");
+
+                if (cancel) {
+                    botLog(bot, "CANCELLING ORDER...");
+                    const r = await plat.cancelOrder({ ordId });
+                    if (r) {
+                        botLog(bot, "SELL ORDER CANCELLED");
+                        order.order_id == "";
+                    } else {
+                        botLog(bot, "FAILED TO CANCEL SELL ORDER");
+                    }
+                }
+            } else {
+                await updateOrderInDb(order, res);
+            }
+        }
+
         return { isClosed: false, lastOrder: "orderId" };
     } catch (e) {
         console.log(e);
@@ -133,13 +176,14 @@ export const placeTrade = async ({
         botLog(bot, "PLACE_TRADE", { amt, price, side });
 
         const putAside = async (amt: number) => {
+            if (!aside) return
             botLog(bot, `PUTTING ${amt} ASIDE...`);
             order.new_ccy_amt = order.new_ccy_amt - amt; // LEAVE THE FEE
-            aside.amt = aside.amt + amt;
+            aside.amt = aside!.amt + amt;
             bot.start_bal = order.new_ccy_amt - Math.abs(order.sell_fee);
 
-            bot.aside.map((el) => {
-                return el.base == aside.base && el.ccy == aside.ccy
+            bot.aside?.map((el) => {
+                return el.base == aside?.base && el.ccy == aside?.ccy
                     ? aside
                     : el;
             });
@@ -229,10 +273,7 @@ export const placeTrade = async ({
         price = toFixed(price, pxPr);
         amt = ordType == "Market" ? amt : side == "sell" ? amt : amt / price;
 
-        amt = toFixed(
-            amt,
-            basePrecision
-        );
+        amt = toFixed(amt, basePrecision);
         botLog(bot, `Placing a ${ordType} ${amt} ${side} order at ${price}...`);
 
         const clOrderId = Date.now().toString();
@@ -254,9 +295,10 @@ export const placeTrade = async ({
             order._exit = price;
         }
         await order.save();
-        if (side == "buy") bot.orders.push(order._id);
+        if (side == "buy") bot.orders.push(order._id)
+        const px = ordType == "Market" ? undefined : price
 
-        const orderId = await plat.placeOrder(amt, price, side, sl, clOrderId);
+        const orderId = await plat.placeOrder(amt, px, side, sl, clOrderId);
 
         if (!orderId) {
             botLog(bot, "Failed to place order");
@@ -346,7 +388,7 @@ export const placeTrade = async ({
 
             const profitPerc = ((quote_amt - START_BAL) / START_BAL) * 100;
             if (profitPerc >= 100) {
-                await putAside(quote_amt / 2.5);
+               // await putAside(quote_amt / 2.5);
             }
         }
 
@@ -354,12 +396,12 @@ export const placeTrade = async ({
         total_base.amt = base_amt;
 
         bot.total_quote.map((el) => {
-            return el.base == total_quote.base && el.ccy == total_quote.ccy
+            return el.base == total_quote?.base && el.ccy == total_quote?.ccy
                 ? total_quote
                 : el;
         });
         bot.total_quote.map((el) => {
-            return el.base == total_quote.base && el.ccy == total_quote.ccy
+            return el.base == total_quote?.base && el.ccy == total_quote?.ccy
                 ? total_quote
                 : el;
         });

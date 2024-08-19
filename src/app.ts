@@ -134,11 +134,11 @@ const job = schedule.scheduleJob("* * * * * *", function(){
 jobs.push({job, id: "1"}) */
 
 const main = async () => {
+    
     const activeBots = await Bot.find({ active: true }).exec();
     setJobs([]);
-    console.log(wsBybit.TAG);
     for (let bot of activeBots) {
-        const plat = bot.platform == 'bybit' ? wsBybit : wsOkx
+        //const plat = bot.platform == 'bybit' ? wsBybit : wsOkx
         await addBotJob(bot);
         botLog(bot, "INITIALIZING WS...");
     
@@ -152,7 +152,7 @@ const main = async () => {
                 !lastOrder.is_closed &&
                 lastOrder.sell_price != 0
             ) {
-                await plat.addBot(bot.id, true);
+                //await plat.addBot(bot.id, true);
                 
             }
         }  

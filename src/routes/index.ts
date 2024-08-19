@@ -12,7 +12,6 @@ import os from "os";
 import { strategies } from "@/strategies";
 import { Bot } from "@/models";
 import { platforms } from "@/utils/consts";
-import { Phemex } from "@/classes/phemex";
 import { onBacktest, onCointest } from "@/utils/functions/io-funcs";
 import { objPlats } from "@/utils/consts2";
 import { parseKlines } from "@/utils/funcs2";
@@ -71,10 +70,7 @@ router.get("/test", async (req, res) => {
 });
 
 router.get("/trades", async (req, res) => {
-    const { start, end, symbol } = req.query as any;
-    const plat = new Phemex(); //new TestOKX()
-    console.log({ start, end });
-    const ret = await plat.getTrades();
+    
     /* const ret = await plat.getTrades({start: Date.parse(start), symbol, end: end ? Date.parse(end) : end})
     if (ret){
         return res.json(ret.map(el=>({...el, ts: parseDate(new Date(Number(el.ts)))})));

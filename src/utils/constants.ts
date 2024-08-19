@@ -71,6 +71,6 @@ export const getTrailingStop = (interval: number) => {
 export const TRAILING_STOP_PERC = .1//getTrailingStop(interval);
 export const MAX_PROFIT_PERC = (5000000 * 100) / 1000
 
-export const SELL_AT_LAST_BUY = true , PUT_ASIDE = false
+export const SELL_AT_LAST_BUY = false , PUT_ASIDE = false
 
 export const ETH_RATE = 2000

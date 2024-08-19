@@ -6,6 +6,10 @@ import { OrderDetails } from "okx-api";
 import { IBot } from "@/models/bot";
 import { Order } from "@/models";
 import { AccountOrderV5 } from "bybit-api";
+import { IOrder } from "@/models/order";
+import { objPlats } from "./consts2";
+import { objStrategies } from "@/strategies";
+import type { Order as GateOrder} from "gate-api";
 
 const ddNum = (e: any) => {
     e = `${e}`.trim();
@@ -47,33 +51,55 @@ const tuMacd = (df: ICandle[]) => {
 export const tuPath = (pth: string) => path.resolve(...pth.split("/"));
 
 export const parseKlines = (klines: (string | number)[][]) => {
-    console.log(parseKlines)
+    console.log(parseKlines, { len: klines.length });
+    let invalid = false;
     let df: ICandle[] = [];
-    const ha_o = 0, ha_h = 0, ha_l = 0, ha_c = 0;
-    const interval = Math.floor((Number(klines[1][0]) - Number(klines[0][0])) / 60000)
-    console.log({interval});
+    const ha_o = 0,
+        ha_h = 0,
+        ha_l = 0,
+        ha_c = 0;
+    const interval = Math.floor(
+        (Number(klines[1][0]) - Number(klines[0][0])) / 60000
+    );
+    console.log({ interval });
 
-    for (let i = 0; i < klines.length; i++){
-        const k = klines[i]
-         
+    for (let i = 0; i < klines.length; i++) {
+        const k = klines[i];
+
         const [ts, o, h, l, c, v] = k.map((e) => Number(e));
-        df.push({ ts: parseDate(new Date(ts)), o, h, l, c, v, ha_o, ha_h, ha_l, ha_c });
-        if (i > 0){
-            const prev = Number(klines[i - 1][0]), curr = Number(klines[i][0])
-            const _diff = Math.floor((Number(curr) - Number(prev))/ 60000)
-            
+        df.push({
+            ts: parseDate(new Date(ts)),
+            o,
+            h,
+            l,
+            c,
+            v,
+            ha_o,
+            ha_h,
+            ha_l,
+            ha_c,
+        });
+        if (i > 0) {
+            const prev = Number(klines[i - 1][0]),
+                curr = Number(klines[i][0]);
+            const _diff = Math.floor((Number(curr) - Number(prev)) / 60000);
+
             if (_diff !== interval) {
-                console.log({_diff, 
-                    i, len: klines.length,
+                invalid = true;
+                console.log({
+                    _diff,
+                    i,
+                    len: klines.length,
                     prev: parseDate(new Date(prev)),
                     curr: parseDate(new Date(curr)),
-                })
-                console.log("KLINE DATA INVALID")
-                return df
+                });
+                console.log("KLINE DATA INVALID");
+                return df;
             }
-
         }
     }
+
+    console.log("\nKLINES OK\n");
 
     return df;
 };
@@ -179,52 +205,76 @@ export const calcSL = (entry: number) => {
     return entry * (1 - SL / 100);
 };
 export const calcTP = (entry: number) => entry * (1 + TP / 100);
-export const getInterval = (m: number, plt: "bybit" | "okx" | "binance" | "gateio" | "bitget") => {
+export const getInterval = (
+    m: number,
+    plt: "bybit" | "okx" | "binance" | "gateio" | "bitget"
+) => {
+    let interval = `${m}`;
 
-    let interval = `${m}`
+    switch (plt) {
+        case "okx":
+            interval = m >= 60 ? `${Math.floor(m / 60)}H` : `${m}m`;
+            break;
 
-    switch(plt){
-        case 'okx':
-            interval = m >= 60
-            ? `${Math.floor(m / 60)}H` : `${m}m`;
-            break
-            
-        case 'gateio':
-            interval = m >= 60
-            ? `${Math.floor(m / 60)}h` : `${m}m`
-            break
-        case 'bitget':
-            interval = m >= 60
-            ? `${Math.floor(m / 60)}h` : `${m}min`
-            break
+        case "gateio":
+            interval = m >= 60 ? `${Math.floor(m / 60)}h` : `${m}m`;
+            break;
+        case "bitget":
+            interval = m >= 60 ? `${Math.floor(m / 60)}h` : `${m}min`;
+            break;
     }
 
-    return interval as any
+    return interval as any;
 };
 
-export const parseFilledOrder = (res: OrderDetails | AccountOrderV5) => {
+export const parseFilledOrder = (res: IObj, plat: string) => {
     let data: IOrderDetails;
 
-    if ((res as any).ordId) {
-        res = res as OrderDetails
-        data = { id: res.ordId,
+    if (plat == 'okx') {
+        res = res as OrderDetails;
+        data = {
+            id: res.ordId,
             fillPx: Number(res.avgPx),
             fillSz: Number(res.accFillSz),
             fee: Number(res.fee),
             fillTime: Number(res.fillTime),
-            cTime: Number(res.cTime),};
-    }
-    else {
-        res = res as AccountOrderV5
-        data = {id: res.orderId,
+            cTime: Number(res.cTime),
+        };
+    } else if (plat == 'bybit') {
+        res = res as AccountOrderV5;
+        data = {
+            id: res.orderId,
             fillPx: Number(res.avgPrice),
             fillSz: Number(res.cumExecQty),
             fee: Number(res.cumExecFee),
             fillTime: Number(res.updatedTime),
-            cTime: Number(res.createType)}
+            cTime: Number(res.createTime),
+        };
+    } else if (plat == "bitget"){
+        data = {
+            id: res.orderId,
+            fillPx: Number(res.priceAvg),
+            fillSz: Number(res.baseVolume),
+            fee: Number(res.feeDetail.newFees.t),
+            fillTime: Number(res.uTime),
+            cTime: Number(res.cTime),
+        };
+    }
+    else{
+        // GATEIO
+        const _res = res as GateOrder;
+        data = {
+            id: _res.id!,
+            fillPx: Number(_res.fillPrice!),
+            fillSz: Number(_res.filledTotal),
+            fee: Number(_res.fee),
+            fillTime: Number(_res.updateTimeMs),
+            cTime: Number(_res.createTimeMs),
+        };
+
     }
 
-    return data
+    return data;
 };
 
 export const findBotOrders = async (bot: IBot) => {
@@ -236,4 +286,30 @@ export const findBotOrders = async (bot: IBot) => {
         }).exec()
     ).filter((el) => bot.orders.includes(el._id));
     return orders;
+};
+
+export const getLastOrder = async (bot: IBot) => {
+    return await Order.findById(bot.orders[bot.orders.length - 1].id).exec();
+};
+
+export const getBotPlat = (bot: IBot) => {
+    return new objPlats[bot.platform](bot);
+};
+export const getBotStrategy = (bot: IBot) => {
+    return objStrategies[bot.strategy - 1];
+};
+
+export const orderHasPos = (order?: IOrder | null) => {
+    return (
+        order != null &&
+        order.side == "sell" &&
+        !order.is_closed &&
+        order.buy_order_id.length != 0
+    );
+};
+export const getBaseToSell = (order: IOrder) => {
+    return order.base_amt - order.buy_fee;
+};
+export const getAmtToBuyWith = (bot: IBot, order?: IOrder | null) => {
+    return order ? order.new_ccy_amt - Math.abs(order.sell_fee) : bot.start_bal;
 };

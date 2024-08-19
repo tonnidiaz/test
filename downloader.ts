@@ -26,53 +26,17 @@ import { ITrade } from "@/utils/interfaces";
 import { platforms } from "@/utils/consts";
 
 
-async function downloader({
-    symbol,
-    start,
-    end,
-    interval,
-    platNm = "binance",
-}: {
-    start: string;
-    end: string;
-    symbol: string;
-    interval: number;
-    platNm?: "binance" | "okx" | "bybit";
-}) {
-    const symbArr = symbol.split("/");
-
-    const fname = `${symbArr.join(
-        "-"
-    )}_${interval}m_${start}_${end}.json`.replace(/[\/|\\:*?"<>]/g, " ");
-    console.log(fname);
-    const fpath = tuPath(`${klinesRootDir}/${platNm}/${fname}`);
-    ensureDirExists(fpath);
-
-    symbol = platNm == "okx" ? symbArr.join("-") : symbArr.join("");
-
-    const plat =
-    new platforms[platNm].obj({})
-
-    await plat.getKlines({
-        symbol: symbol,
-        start: Date.parse(start),
-        end: Date.parse(end),
-        interval,
-        savePath: fpath,
-    });
-
-    console.log("DONE DOWNLOADING KLINES");
-}
 
 const dld = async ({
     parse = false,
     platNm = "binance",
+    demo = false,
     symbols, intervals, years, skip
 }: {
     symbols: string[], years: number[], intervals: number[],
     parse?: boolean;
     platNm?: "binance" | "okx" | "bybit" | "gateio" | 'bitget';
-    skip?: boolean
+    skip?: boolean, demo?: boolean
 }) => {
     
     symbols = symbols.map((el) => el.includes('/') ? el : `${el}/USDT`);
@@ -100,7 +64,7 @@ const dld = async ({
                     ccy: pair[1],
                     interval,
                 });
-                const plat = new platforms[platNm].obj({})
+                const plat = new platforms[platNm]({demo})
                 const month =
                     platNm == "okx" ? (year < 2022 ? "07" : "01") : "01";
                 let klines = await plat.getKlines({

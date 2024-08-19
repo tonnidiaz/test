@@ -6,24 +6,16 @@ import { writeFileSync } from "fs";
 
 export class TestGateio extends Platform {
     name = "GATEIO";
-    maker: number = 0.1 / 100;
-    taker: number = 0.1 / 100;
+    maker: number = 0.2 / 100;
+    taker: number = 0.2 / 100;
     client: SpotApi;
-    flag: "1" | "0";
     apiKey: string;
     apiSecret: string;
-    passphrase: string;
 
     constructor({ demo = false }: { demo?: boolean }) {
         super({ demo });
-        this.flag = demo ? "1" : "0";
-        this.apiKey = demo
-            ? process.env.OKX_API_KEY_DEV!
-            : process.env.OKX_API_KEY!;
-        this.apiSecret = demo
-            ? process.env.OKX_API_SECRET_DEV!
-            : process.env.OKX_API_SECRET!;
-        this.passphrase = process.env.OKX_PASSPHRASE!;
+        this.apiKey = process.env.GATEIO_API_KEY!;
+        this.apiSecret =  process.env.GATEIO_API_SECRET!;
 
         const client = new ApiClient();
         this.client = new SpotApi(client);
@@ -68,7 +60,7 @@ export class TestGateio extends Platform {
             end = end ?? Date.now() - interval * 60000;
             
             const END = end
-            const diff = (10000 - 30) * interval * 60000
+            const diff = 100 * interval * 1000
             const MIN_DATE =end - diff;
 
             console.log({
@@ -106,7 +98,7 @@ export class TestGateio extends Platform {
                 while (firstTs <= end) {
                     console.log(`GETTING ${cnt + 1} KLINES...`);
                     const limit = 1000;
-                    const after = firstTs + (limit - 1) * interval * 60 * 1000;
+                    const after = firstTs + 100 * interval * 60 * 1000;
                     console.log(
                         `Before: ${parseDate(
                             new Date(firstTs)
@@ -118,9 +110,9 @@ export class TestGateio extends Platform {
 
                         {
                             interval: getInterval(interval, "gateio"),
-                            from: Math.round(firstTs / 1000),
+                            //from: Math.round(firstTs / 1000),
                             to: Math.round(after / 1000),
-                            limit: limit,
+                            //limit: limit,
                         }
                     );
                     const data = this._parseData(res.body) 

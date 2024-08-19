@@ -72,7 +72,7 @@ export class Bybit {
           
           const  res = await this.client.submitOrder({
                 symbol: this.getSymbol(),
-                orderType:  'Market',
+                orderType:  price == undefined ? 'Market' : "Limit",
                 side: capitalizeFirstLetter(side),
                 qty: amt.toString(),
                 price: price?.toString(),
@@ -121,7 +121,7 @@ export class Bybit {
                 return "live";
             }
 
-            data = parseFilledOrder(d);
+            data = parseFilledOrder(d, this.bot.platform);
             return data;
         } catch (error) {
             console.log(error);

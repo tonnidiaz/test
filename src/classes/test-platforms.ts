@@ -24,10 +24,10 @@ export class Platform {
     maker: number = MAKER_FEE_RATE;
     taker: number = TAKER_FEE_RATE;
 
-    demo: boolean
+    demo: boolean;
 
-    constructor({demo = false}: {demo?: boolean}){
-        this.demo = demo
+    constructor({ demo = false }: { demo?: boolean }) {
+        this.demo = demo;
     }
     async getKlines({
         start,
@@ -41,7 +41,7 @@ export class Platform {
         interval: number;
         symbol: string;
         savePath?: string;
-    }): Promise<any[] | undefined> {
+    }): Promise<any[] | undefined | void> {
         return;
     }
     async getTrades({
@@ -73,9 +73,8 @@ export class TestOKX extends Platform {
     apiSecret: string;
     passphrase: string;
 
-    
-    constructor({demo = false}: {demo?: boolean}) {
-        super({demo});
+    constructor({ demo = false }: { demo?: boolean }) {
+        super({ demo });
         this.flag = demo ? "1" : "0";
         this.apiKey = demo
             ? process.env.OKX_API_KEY_DEV!
@@ -110,9 +109,11 @@ export class TestOKX extends Platform {
         savePath?: string | undefined;
         isBybit?: boolean;
     }) {
-        try {
-            const client = new RestClientV5({demoTrading: this.demo, testnet: false});
-            console.log({client: 'client', demo: this.demo}, '\n');
+            const client = new RestClientV5({
+                demoTrading: this.demo,
+                testnet: false,
+            });
+            console.log({ client: "client", demo: this.demo }, "\n");
             end = end ?? Date.now();
             let klines: any[] = [];
             let cnt = 0;
@@ -131,8 +132,9 @@ export class TestOKX extends Platform {
             if (start) {
                 let firstTs = start;
                 while (firstTs <= end) {
-                    console.log(`GETTING ${cnt + 1} KLINES...`);
-                    const limit = 100;
+                    
+                    const limit = isBybit ? 1000 : 100;
+                    console.log(`GETTING ${cnt + 1} KLINES LIMIT: ${limit}`);
                     const after = firstTs + (limit - 1) * interval * 60 * 1000;
                     console.log(
                         `Before: ${parseDate(
@@ -145,7 +147,8 @@ export class TestOKX extends Platform {
                               category: "spot",
                               symbol,
                               interval: interval as any,
-                              start: firstTs,
+                              start: firstTs + interval * 60 * 1000,
+                              limit
                           })
                         : await this.client.getHistoricCandles(
                               symbol,
@@ -162,13 +165,19 @@ export class TestOKX extends Platform {
                     if (!data?.length) break;
                     klines.push(...[...data].reverse());
 
-                    firstTs = Number(data[0][0]) + interval * 60 * 1000;
-                    console.log(new Date(firstTs).toISOString());
+                    firstTs = Number(data[0][0]);
+                    console.log({
+                        last_kline: parseDate(
+                            new Date(Number(klines[klines.length - 1][0]))
+                        ),
+                        first_ts: parseDate(new Date(firstTs))
+                    });
                     if (savePath) {
                         ensureDirExists(savePath);
                         writeFileSync(savePath, JSON.stringify(klines));
                         console.log("Saved");
                     }
+                    //if (cnt > 0) break
                     cnt += 1;
                 }
             } else {
@@ -197,9 +206,7 @@ export class TestOKX extends Platform {
             let d = [...klines];
             console.log(d[d.length - 1]);
             return d;
-        } catch (err) {
-            console.log("FAILED TO GET KLINES", err);
-        }
+        
     }
     async getTrades({
         start,
@@ -280,8 +287,8 @@ export class TestOKX extends Platform {
 
 export class TestBybit extends Platform {
     client: RestClientV5;
-    constructor({demo = false}: {demo?: boolean}) {
-        super({demo});
+    constructor({ demo = false }: { demo?: boolean }) {
+        super({ demo });
         const apiKey = demo
             ? process.env.BYBIT_API_KEY_DEV!
             : process.env.BYBIT_API_KEY!;

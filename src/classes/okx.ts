@@ -187,7 +187,7 @@ export class OKX {
                 return "live";
             }
             //console.log(this.bot.name, "FINAL RES", finalRes);
-            data = parseFilledOrder(finalRes);
+            data = parseFilledOrder(finalRes, this.bot.platform);
 
             return data;
         } catch (error: any) {

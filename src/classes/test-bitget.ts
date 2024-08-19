@@ -53,10 +53,6 @@ export class TestBitget extends Platform {
         const diff = (10000 - 30) * interval * 60000;
         const MIN_DATE = end - diff;
 
-        console.log({
-            MIN_DATE: parseDate(new Date(MIN_DATE)),
-            START: parseDate(new Date(start ?? 0)),
-        });
         if (start && start < MIN_DATE) {
             //start = MIN_DATE;
             //end = start + diff
@@ -102,6 +98,7 @@ export class TestBitget extends Platform {
                     limit: limit,
                 });
                 let { data } = res;
+                if (!data || !data.length) return console.log(data)
                 data = data.map((el) => el.map((el) => Number(el)));
 
                 const last = klines.length != 0 && Number(klines[klines.length - 1][0])

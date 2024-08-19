@@ -358,7 +358,7 @@ const updateOpenBot = async (bot: IBot, openBot: IOpenBot, klines: IObj[]) => {
 console.log("WS Bybit");
 export const wsBybit: WsBybit = new WsBybit();
 try {
-    wsBybit.initWs();
+   // wsBybit.initWs();
 } catch (e) {
     timedLog("FAILED TO INIT WS");
     console.log(e);

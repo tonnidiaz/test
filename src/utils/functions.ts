@@ -42,12 +42,12 @@ export function clog(message?: any, ...params: any[]) {
 import axios from "axios";
 import { ICandle, IObj } from "./interfaces";
 import { IBot } from "@/models/bot";
-import { okxInstrus } from "@/data/okx-instrus";
+import { okxInstrus } from "@/data/instrus/okx-instrus";
 import { binanceInfo } from "./binance-info";
-import { bybitInstrus } from "./bybit-instrus";
+import { bybitInstrus } from "../data/instrus/bybit-instrus";
 import { parseDate } from "./funcs2";
-import { bitgetInstrus } from "@/data/bitget-instrus";
-import { gateioInstrus } from "@/data/gateio-instrus";
+import { bitgetInstrus } from "@/data/instrus/bitget-instrus";
+import { gateioInstrus } from "@/data/instrus/gateio-instrus";
 
 const tunedErr = (res: Response, status: number, msg: string, e?: any) => {
     if (e) {
@@ -497,7 +497,7 @@ export function getMaxSz(
                 break
             case 'okx':
                 const _i3 = instru as typeof okxInstrus[0]
-                sz = Number(_i3.maxMktSz)
+                sz = Number(_i3.maxLmtSz)
                 break;
     
             case 'gateio':

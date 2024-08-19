@@ -26,7 +26,6 @@ import {
 } from "@/utils/functions";
 import { IObj, ICandle } from "@/utils/interfaces";
 import { strategy as strFallbackSL } from "./funcs-test-fallback-sl";
-import { strategy as strNoClass } from "./funcs-test-no-class";
 import { strategy as strTrExitTP } from "./fb/tr-exit-tp";
 import { DefTester } from "./def";
 
@@ -62,7 +61,7 @@ export const strategy = ({
     platNm: string
 }) => {
 
-    const params = {
+    const defTester = new DefTester({
         df,
         balance,
         buyCond,
@@ -73,12 +72,8 @@ export const strategy = ({
         taker,
         trades,
         platNm,
-    }
-
-    const useNoClass = false
-
-    const defTester = new DefTester(params)
-   return useNoClass ? strNoClass(params) : defTester.run()
+    })
+   return defTester.run()
 };
 
 
