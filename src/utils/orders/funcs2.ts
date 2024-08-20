@@ -49,7 +49,7 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     
     let order = await getLastOrder(bot);
     let pos = orderHasPos(order)
-    botLog(bot, {order, pos})
+    botLog(bot, {order: order?.id, pos})
 
         if (useDef5){
             await prodStr5({row, prevrow, bot, order, pos, pxPr, basePr})

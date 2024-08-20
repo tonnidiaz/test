@@ -36,11 +36,11 @@ export const prodStrategy = async ({
 
     const plat = getBotPlat(bot);
     const str = getBotStrategy(bot);
-    botLog(bot, { str });
+    botLog(bot, { str, pos });
 
     const { ts, o, h, l, c } = row;
     const isGreen = prevrow.c >= prevrow.o;
-    let entry = 0;
+    let entry = order?._entry;
 
     if (!pos && str.buyCond(prevrow)) {
         botLog(bot, "KAYA RA BUY");
