@@ -26,6 +26,7 @@ import { bybitInstrus } from "../data/instrus/bybit-instrus";
 import { TestGateio } from "@/classes/test-gateio";
 import { gateioInstrus } from "@/utils/data/instrus/gateio-instrus";
 import { bitgetInstrus } from "@/utils/data/instrus/bitget-instrus";
+import { mexcInstrus } from "../data/instrus/mexc-instrus";
 let prevData: IObj | null = null;
 
 export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
@@ -272,9 +273,11 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
             total: number;
         }[] = [];
 
-        const _parseData = ()=>{
-            _data = Array.from(new Set(_data.map(el=> JSON.stringify(el)))).map(el=> JSON.parse(el))
-        }
+        const _parseData = () => {
+            _data = Array.from(
+                new Set(_data.map((el) => JSON.stringify(el)))
+            ).map((el) => JSON.parse(el));
+        };
 
         let result: IObj = {};
         let msg = "";
@@ -287,7 +290,7 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
         console.log({ platform });
 
         const platName: string = platform.toLowerCase();
-        const plat = new platforms[platName]({demo})
+        const plat = new platforms[platName]({ demo });
 
         const _platName = platform.toLowerCase();
         let _instruments: string[][];
@@ -301,7 +304,6 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
         const sub = demo ? "demo" : "live";
         const savePath = `_data/rf/coins/${year}/${sub}/${prefix}_${_platName}_${interval}m-${sub}.json`;
 
-        
         if (_platName == "okx") {
             _instruments = okxInstrus
                 .filter((el) => el.state == "live")
@@ -313,28 +315,38 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
             if (existsSync(okxCoinsPath)) {
                 okxCoins = await require(okxCoinsPath);
             }
-            if (_platName == "bybit") {
-                _instruments = bybitInstrus.map((el) => [
-                    el.baseCoin,
-                    el.quoteCoin,
-                ]);
-            } else if (_platName == "binance") {
-                _instruments = binanceInfo.symbols
-                    .filter((el) => el.isSpotTradingAllowed == true)
-                    .map((el) => [el.baseAsset, el.quoteAsset]);
-            } else if (_platName == "gateio") {
-                _instruments = gateioInstrus
-                    .filter((el) => el.trade_status == "tradable")
-                    .map((el) => [el.base, el.quote]);
-            } else if (_platName == "bitget") {
-                _instruments = bitgetInstrus
-                    .filter((el) => el.status == "online")
-                    .map((el) => [el.baseCoin, el.quoteCoin]);
-            } else {
-                _instruments = [];
+
+            _instruments = [];
+
+            switch (_platName) {
+                case "bybit":
+                    _instruments = bybitInstrus.map((el) => [
+                        el.baseCoin,
+                        el.quoteCoin,
+                    ]);
+                    break;
+                case "binance":
+                    _instruments = binanceInfo.symbols
+                        .filter((el) => el.isSpotTradingAllowed == true)
+                        .map((el) => [el.baseAsset, el.quoteAsset]);
+                    break;
+                case "gateio":
+                    _instruments = gateioInstrus
+                        .filter((el) => el.trade_status == "tradable")
+                        .map((el) => [el.base, el.quote]);
+                    break;
+                case "bitget":
+                    _instruments = bitgetInstrus
+                        .filter((el) => el.status == "online")
+                        .map((el) => [el.baseCoin, el.quoteCoin]);
+                    break;
+                case "mexc":
+                    _instruments = mexcInstrus
+                        .filter((el) => el.status == '1' && el.isSpotTradingAllowed)
+                        .map((el) => [el.baseAsset, el.quoteAsset]);
+                    break;
             }
 
-            
             // if (okxCoins != null) {
             //     _instruments = _instruments.filter(
             //         (el) =>
@@ -344,8 +356,8 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
             //     );
             // }
         }
-            
-        _instruments = _instruments.sort()//.sort((a, b)=> a.toString() > b.toString() ? 1 : -1)
+
+        _instruments = _instruments.sort(); //.sort((a, b)=> a.toString() > b.toString() ? 1 : -1)
         let coins = _instruments;
         if (quote) coins = coins.filter((el) => el[1] == `${quote}`);
 
@@ -442,14 +454,14 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
                                 savePath: klinesPath,
                             });
 
-                            if (!ret) return
-                            klines = ret
+                            if (!ret) return;
+                            klines = ret;
                             return await _klines(klines);
-                        } 
+                        }
 
                         return _ks;
                     }
-                    return _ks
+                    return _ks;
                 };
                 const _ks = await _klines(klines);
                 if (!_ks) continue;
@@ -516,7 +528,7 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
                     a.profit > b.profit ? -1 : 1
                 );
 
-                _parseData()
+                _parseData();
                 writeFileSync(savePath, JSON.stringify(_data), {});
 
                 msg = `${pair} DONE`;
@@ -531,7 +543,7 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
             }
         }
 
-        _parseData()
+        _parseData();
 
         console.log("COINTEST DONE");
         result = { ...result, data: _data, clId, platform };

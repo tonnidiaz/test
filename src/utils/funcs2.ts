@@ -207,7 +207,7 @@ export const calcSL = (entry: number) => {
 export const calcTP = (entry: number) => entry * (1 + TP / 100);
 export const getInterval = (
     m: number,
-    plt: "bybit" | "okx" | "binance" | "gateio" | "bitget"
+    plt: string
 ) => {
     let interval = `${m}`;
 
@@ -221,6 +221,9 @@ export const getInterval = (
             break;
         case "bitget":
             interval = m >= 60 ? `${Math.floor(m / 60)}h` : `${m}min`;
+            break;
+        case "mexc":
+            interval =`${m}m`;
             break;
     }
 
