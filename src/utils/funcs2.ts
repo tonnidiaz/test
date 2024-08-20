@@ -306,8 +306,7 @@ export const orderHasPos = (order?: IOrder | null) => {
     return (
         order != null &&
         order.side == "sell" &&
-        !order.is_closed &&
-        order.buy_order_id.length != 0
+        !order.is_closed
     );
 };
 export const getBaseToSell = (order: IOrder) => {

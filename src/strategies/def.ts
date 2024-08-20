@@ -31,7 +31,7 @@ export class DefTester extends Backtest {
             const e =  Math.max(this.prevrow.o, this.prevrow.c);
             this.exitLimit = e * (1 + 2.5 / 100);
             const _row = this.row;
-            const SL = 1
+            const SL = 100000
 
             
 
