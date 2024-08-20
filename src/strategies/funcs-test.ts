@@ -78,7 +78,7 @@ export const strategy = ({
     }
 
     const useNoClass = false,
-    useDef5 = true;
+    useDef5 = false;
 
     
 
