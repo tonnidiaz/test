@@ -5,9 +5,9 @@ interface IHigh {
 }
 export const OrderSchema = new Schema(
     {
-        order_id: { type: String, default: "" },
-        cl_order_id: { type: String, default: "" },
-        buy_order_id: { type: String, default: "" },
+        order_id: { type: String},
+        cl_order_id: { type: String },
+        buy_order_id: { type: String },
         side: { type: String, default: "buy" },
         buy_timestamp: { type: {_id: false, i: String, o: String}},
         sell_timestamp: { type: {_id: false, i: String, o: String}},

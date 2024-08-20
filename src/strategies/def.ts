@@ -31,15 +31,19 @@ export class DefTester extends Backtest {
             const e =  Math.max(this.prevrow.o, this.prevrow.c);
             this.exitLimit = e * (1 + 2.5 / 100);
             const _row = this.row;
+            const SL = 1
+
+            
 
             const { h, c, o } = _row;
             this.exit = 0;
             
             this.exit = this.exitLimit;
+            const sl = ceil(this.entry * (1 - SL/100), this.pricePrecision)
 
-            console.log({ exit: this.exit });
+            console.log({ exit: this.exit, sl });
 
-            if (this.exit != 0 && h >= this.exit) {
+            if (this.exit != 0 && h >= this.exit && this.exit >= sl) {
                 this.isSl = this.exit < this.entry;
                 console.log("FILLING LIMIT SELL ORDER");
                 this.sell_order_filled = true;
