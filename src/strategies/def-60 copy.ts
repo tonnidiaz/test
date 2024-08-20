@@ -1,7 +1,7 @@
 import { ceil } from "@/utils/functions";
 import { Backtest } from "./class";
 
-export class DefTester60 extends Backtest {
+export class DefTester extends Backtest {
     name: string = "DefTester"
 
     inloop({ i }: { i: number }): void {
@@ -31,7 +31,7 @@ export class DefTester60 extends Backtest {
             
             console.log("HAS POS");
             const e = Math.max(this.prevrow.o, this.prevrow.c)
-            this.exitLimit = e * (1 + 3.5 / 100);
+            this.exitLimit = e * (1 + 2.5 / 100);
             const _row = this.row;
         
             const { h, c, o } = _row;
@@ -53,14 +53,7 @@ export class DefTester60 extends Backtest {
             isSl = true//_sell// || true;            
             let is_market = false;
 
-            if (o >= trail && isO){
-                this.exit = o
-                is_market = true
-            
-            }else{ 
-               this.exit = this.exitLimit 
-            }
-            
+            this.exit = this.exitLimit
             
             console.log({isSl, exit: this.exit, trail, _sl})
             if (

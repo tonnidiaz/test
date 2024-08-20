@@ -287,6 +287,7 @@ export class Backtest {
 
     run() {
         console.log(this.name, ": BEGIN BACKTESTING...\n");
+        console.log({pxPr: this.pricePrecision, basePr: this.basePrecision})
         for (let i = 1; i < this.df.length; i++) {
             this.prevrow = this.df[i - 1];
             this.row = this.df[i];

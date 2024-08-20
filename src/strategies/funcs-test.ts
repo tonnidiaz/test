@@ -29,6 +29,8 @@ import { strategy as strFallbackSL } from "./funcs-test-fallback-sl";
 import { strategy as strNoClass } from "./funcs-test-no-class";
 import { strategy as strTrExitTP } from "./fb/tr-exit-tp";
 import { DefTester } from "./def";
+import { DefTester60 } from "./def-60";
+import { Backtest } from "./class";
 
 let _cnt = 0;
 
@@ -75,10 +77,24 @@ export const strategy = ({
         platNm,
     }
 
-    const useNoClass = false
+    const useNoClass = false,
+    useDef5 = true;
 
-    const defTester = new DefTester(params)
-   return useNoClass ? strNoClass(params) : defTester.run()
+    
+
+    let Fn: typeof Backtest, res: ReturnType<typeof strNoClass>;
+    if (useNoClass){
+        res = strNoClass(params)
+    }else {
+        if (useDef5){
+            Fn = DefTester
+        }else{
+            Fn = DefTester60
+        }
+
+        res = new Fn(params).run()
+}
+   return res
 };
 
 

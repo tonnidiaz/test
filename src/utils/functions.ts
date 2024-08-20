@@ -242,14 +242,13 @@ export function ceil(num: number, dec: number) {
 
 export function precision(a: number) {
     if (!isFinite(a)) return 0;
-    // var e = 1,
-    //     p = 0;
-    // while (Math.round(a * e) / e !== a) {
-    //     e *= 10;
-    //     p++;
-    // }
-    const p = `${a}`.split(".")[1].length - 1
-    return p;
+    var e = 1,
+        p = 0;
+    while (Math.round(a * e) / e !== a) {
+        e *= 10;
+        p++;
+    }
+    return p == 1 ? p : p - 1;
 }
 
 export function getCoinPrecision(
@@ -303,6 +302,7 @@ export function getCoinPrecision(
                 break
             case 'bybit':
                 const _i2 = instru as typeof bybitInstrus[0]
+                
                 pr = precision(Number( is_quote ? _i2.quotePrecision : _i2.basePrecision)) 
                 break
             case 'okx':
