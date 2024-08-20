@@ -249,7 +249,7 @@ export function precision(a: number) {
         e *= 10;
         p++;
     }
-    return p == 1 ? p : p - 1;
+    return p//p == 1 ? p : p - 1;
 }
 
 export function getCoinPrecision(
@@ -280,7 +280,7 @@ export function getCoinPrecision(
             case 'bybit':
                 const _i2 = instru as typeof bybitInstrus[0]
                 
-                pr = precision(Number( is_quote ? _i2.quotePrecision : _i2.basePrecision)) 
+                pr = precision(Number( is_quote ? _i2.lotSizeFilter.quotePrecision : _i2.lotSizeFilter.basePrecision)) 
                 break
             case 'okx':
                 const _i3 = instru as typeof okxInstrus[0]
@@ -313,7 +313,7 @@ const getInstru = (pair: string[], plat: string) =>{
             break;
         case "bybit":
             instru = bybitInstrus.find(
-                  (el) => el.baseCoin == pair[0] && el.quoteCoin == pair[1]
+                  (el) => el.baseCoin == pair[0] && el.quoteCoin == pair[1] && el.status == "Trading"
               );
             break;
         case "bitget":
@@ -359,7 +359,7 @@ export function getPricePrecision(
             break
         case 'bybit':
             const _i2 = instru as typeof bybitInstrus[0]
-            pr = precision(Number(_i2.quotePrecision)) 
+            pr = precision(Number(_i2.priceFilter.tickSize)) 
             break
         case 'okx':
             const _i3 = instru as typeof okxInstrus[0]
@@ -404,7 +404,7 @@ export function getMinSz(
                 break
             case 'bybit':
                 const _i2 = instru as typeof bybitInstrus[0]
-                sz = Number(_i2.minTradeQty)
+                sz = Number(_i2.lotSizeFilter.minOrderQty)
                 break
             case 'okx':
                 const _i3 = instru as typeof okxInstrus[0]
@@ -447,7 +447,7 @@ export function getMaxSz(
                 break
             case 'bybit':
                 const _i2 = instru as typeof bybitInstrus[0]
-                sz = Number(_i2.maxTradeQty)
+                sz = Number(_i2.lotSizeFilter.maxOrderQty)
                 break
             case 'okx':
                 const _i3 = instru as typeof okxInstrus[0]
@@ -491,7 +491,7 @@ export function getMaxAmt(
                 break
             case 'bybit':
                 const _i2 = instru as typeof bybitInstrus[0]
-                sz = Number(_i2.maxTradeAmt)
+                sz = Number(_i2.lotSizeFilter.maxOrderAmt)
                 break
             case 'okx':
                 const _i3 = instru as typeof okxInstrus[0]

@@ -320,7 +320,7 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
 
             switch (_platName) {
                 case "bybit":
-                    _instruments = bybitInstrus.map((el) => [
+                    _instruments = bybitInstrus.filter(el=> el.status == 'Trading').map((el) => [
                         el.baseCoin,
                         el.quoteCoin,
                     ]);
