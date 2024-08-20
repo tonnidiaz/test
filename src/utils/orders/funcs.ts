@@ -82,9 +82,10 @@ export const updateOrder = async ({
         if (order && !pos) {
             // CURRENTLY NOT PLACING LIMIT BUY ORDERS
         } else if (order && pos && order.order_id.length) {
-            botLog(bot, "CHECKING SELL ORDER...");
+            
 
             const ordId = order.order_id;
+            botLog(bot, "CHECKING SELL ORDER...", {ordId});
             const res = await plat.getOrderbyId(ordId);
             if (!res) {
                 botLog(bot, "FAILED TO GET SELL ORDER");
@@ -97,6 +98,7 @@ export const updateOrder = async ({
                     if (r) {
                         botLog(bot, "SELL ORDER CANCELLED");
                         order.order_id == "";
+                        await order.save()
                     } else {
                         botLog(bot, "FAILED TO CANCEL SELL ORDER");
                     }
