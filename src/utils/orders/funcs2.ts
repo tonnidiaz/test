@@ -14,7 +14,14 @@ import {
 import { IBot } from "@/models/bot";
 import { Order } from "@/models";
 import { placeTrade } from "./funcs";
-import { botLog, ceil, getCoinPrecision, getPricePrecision, timedLog, toFixed } from "../functions";
+import {
+    botLog,
+    ceil,
+    getCoinPrecision,
+    getPricePrecision,
+    timedLog,
+    toFixed,
+} from "../functions";
 import { objStrategies } from "@/strategies";
 import { IObj, IOrderDetails } from "../interfaces";
 import { wsOkx } from "@/classes/main-okx";
@@ -24,9 +31,11 @@ import { SL } from "../constants";
 import { Bybit } from "@/classes/bybit";
 import { prodStrategy as prodStr5 } from "./strategies/def-5";
 import { prodStrategy as prodStr60 } from "./strategies/def-60";
+import { cloud5Prod } from "./strategies/cloud-5.prod";
 //import { wsOkx } from "@/classes/main-okx";
 
-const useDef5 = false, useDef60 = true
+const useDef5 = false,
+    useDef60 = true;
 
 export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     const plat = new objPlats[bot.platform](bot);
@@ -39,24 +48,28 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     const df = tuCE(heikinAshi(parseKlines(klines)));
 
     const pxPr = getPricePrecision([bot.base, bot.ccy], bot.platform);
-        const basePr = getCoinPrecision([bot.base, bot.ccy], "limit", bot.platform);
+    const basePr = getCoinPrecision([bot.base, bot.ccy], "limit", bot.platform);
 
-        if (pxPr == null || basePr == null) return 
+    if (pxPr == null || basePr == null) return;
     const row = df[df.length - 1];
     const prevrow = df[df.length - 2];
 
     botLog(bot, { row: row.ts, prevrow: prevrow.ts });
-    
-    let order = await getLastOrder(bot);
-    let pos = orderHasPos(order)
-    botLog(bot, {order: order?.id, pos})
 
-        if (useDef5){
-            await prodStr5({row, prevrow, bot, order, pos, pxPr, basePr})
-        }
-        else if (useDef60){
-            await prodStr60({row, prevrow, bot, order, pos, pxPr, basePr})
-        }
+    let order = await getLastOrder(bot);
+    let pos = orderHasPos(order);
+
+    botLog(bot, { ts: row.ts, o: row.o });
+
+    const params = { row, prevrow, bot, order, pos, pxPr, basePr }
+    await cloud5Prod(params)
+
+
+    // if (useDef5) {
+    //     await prodStr5(params);
+    // } else if (useDef60) {
+    //     await prodStr60({ row, prevrow, bot, order, pos, pxPr, basePr });
+    // }
 };
 
 export const updateOrderInDb = async (order: IOrder, res: IOrderDetails) => {
@@ -79,45 +92,43 @@ export const updateOrderInDb = async (order: IOrder, res: IOrderDetails) => {
     await order.save();
 };
 
-
 const updateBotAtClose = async (bot: IBot, order: IOrder, c: number) => {
+    try {
+        timedLog("TIMED: UPDATE AT CLOSE");
 
-    try{
-      timedLog("TIMED: UPDATE AT CLOSE");
+        const pos = true;
+        timedLog("TIMED: ", { sell_px: order?.sell_price, pos });
 
-    const pos = true
-    timedLog("TIMED: ", { sell_px: order?.sell_price, pos });
+        const { sell_price } = order;
+        const plat = new Bybit(bot);
+        timedLog({ ticker: c });
+        const _tp = order.tp;
 
-    const { sell_price } = order;
-    const plat = new Bybit(bot);
-    timedLog({ ticker: c });
-    const _tp = order.tp;
-
-    if (sell_price < c && sell_price >= _tp) {
-        botLog(
-            bot,
-            `TIMED: PLACING MARKET SELL ORDER AT CLOSE SINCE IT IS > STOP_PX`,
-            { ts: parseDate(new Date()), c, sell_price, _tp }
-        );
-        const amt = order.base_amt - order.buy_fee;
-        const r = await placeTrade({
-            bot: bot,
-            ts: parseDate(new Date()),
-            amt: Number(amt),
-            side: "sell",
-            plat: plat,
-            price: 0,
-            ordType: "Market"
-        });
-        if (!r) return botLog(bot, "TIMED: FAILED TO PLACE MARKET SELL ORDER");
-        botLog(bot, "TIMED: MARKET SELL PLACED. BOT REMOVED");
-        return false
-    } else {
-        timedLog("CLOSE PRICE NOT > SELL_PX", { c, _tp, sell_price });
-        return true
-    }  
-    }
-    catch(e){
+        if (sell_price < c && sell_price >= _tp) {
+            botLog(
+                bot,
+                `TIMED: PLACING MARKET SELL ORDER AT CLOSE SINCE IT IS > STOP_PX`,
+                { ts: parseDate(new Date()), c, sell_price, _tp }
+            );
+            const amt = order.base_amt - order.buy_fee;
+            const r = await placeTrade({
+                bot: bot,
+                ts: parseDate(new Date()),
+                amt: Number(amt),
+                side: "sell",
+                plat: plat,
+                price: 0,
+                ordType: "Market",
+            });
+            if (!r)
+                return botLog(bot, "TIMED: FAILED TO PLACE MARKET SELL ORDER");
+            botLog(bot, "TIMED: MARKET SELL PLACED. BOT REMOVED");
+            return false;
+        } else {
+            timedLog("CLOSE PRICE NOT > SELL_PX", { c, _tp, sell_price });
+            return true;
+        }
+    } catch (e) {
         console.log(e);
     }
 };

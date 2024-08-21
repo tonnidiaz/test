@@ -48,6 +48,7 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
             T,
             save,
             demo,
+            parent
         } = data;
 
         demo = demo ?? false;
@@ -207,13 +208,13 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
             df,
             trades,
             balance: bal,
-
             lev,
             pair: pair,
             pGain,
             maker: plat.maker,
             taker: plat.taker,
             platNm: platName.toLowerCase() as any,
+            parent: parent.toLowerCase()
         });
 
         let profit = toFixed(retData.balance - bal, pxPr);
@@ -263,7 +264,8 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
             skip_saved,
             fix_invalid,
             clId,
-            show
+            show, 
+            parent
         } = data;
         const startPair = data.from;
         let _data: {
@@ -503,6 +505,7 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
                     maker: plat.maker,
                     taker: plat.taker,
                     platNm: platName.toLowerCase() as any,
+                    parent: parent.toLowerCase()
                 });
 
                 let profit = toFixed(retData.balance - bal, pxPr);

@@ -15,7 +15,7 @@ import {
 } from "./constants";
 import { existsSync } from "fs";
 import { clearTerminal, getPricePrecision, getSymbol, readJson, toFixed } from "./functions";
-import { objStrategies, strategies } from "@/strategies";
+import { objStrategies, parentStrategies, strategies } from "@/strategies";
 import { TestOKX } from "@/classes/test-platforms";
 import { platforms } from "./consts";
 import {onBacktest, onCointest} from './functions/io-funcs'
@@ -58,6 +58,9 @@ io.on("connection", (client) => {
     });
     client.on("platforms", (e) => {
         client.emit("platforms", { data: Object.keys(platforms) });
+    });
+    client.on("parents", (e) => {
+        client.emit("parents", { data: Object.keys(parentStrategies) });
     });
 
     client.on("test-candles", async (data: IObj) => {

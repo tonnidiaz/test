@@ -1,6 +1,9 @@
 import { data } from "@/data/data";
+import { parentStrategies } from "@/strategies";
+import { Backtest } from "@/strategies/class";
 import { strategy } from "@/strategies/funcs-test";
-import {IObj , ICandle } from "@/utils/interfaces";
+import { MAKER_FEE_RATE, TAKER_FEE_RATE } from "@/utils/constants";
+import { IObj, ICandle } from "@/utils/interfaces";
 
 export class Strategy {
     name: string = "";
@@ -9,7 +12,12 @@ export class Strategy {
     buyCond(...args: any): boolean {
         return false;
     }
-    sellCond(row: ICandle, entry?: number, df?: ICandle[], i?: number): boolean {
+    sellCond(
+        row: ICandle,
+        entry?: number,
+        df?: ICandle[],
+        i?: number
+    ): boolean {
         return false;
     }
     run({
@@ -17,10 +25,11 @@ export class Strategy {
         balance,
         lev = 1,
         pair,
-        maker,
-        taker,
+        maker = MAKER_FEE_RATE,
+        taker = TAKER_FEE_RATE,
         platNm,
         trades,
+        parent,
     }: {
         df: ICandle[];
         trades: IObj[];
@@ -30,12 +39,26 @@ export class Strategy {
         maker: number;
         taker: number;
         pair: string[];
-        platNm: "binance" | "bybit" | "okx";
+        platNm: string;
+        parent: string;
     }) {
         console.log(
             `\nRunning ${this.name} strategy [${this.desc}] \t ${pair}\n`
         );
-        const mData = strategy({
+        // const mData = strategy({
+        //     df,
+        //     balance,
+        //     buyCond: this.buyCond,
+        //     sellCond: this.sellCond,
+        //     pair,
+        //     lev,
+        //     maker,
+        //     taker,
+        //     trades,
+        //     platNm,
+        // });
+
+        const params = {
             df,
             balance,
             buyCond: this.buyCond,
@@ -46,7 +69,11 @@ export class Strategy {
             taker,
             trades,
             platNm,
-        });
+        };
+
+        const Fn = new parentStrategies[parent](params);
+
+        const mData = Fn.run();
         return mData;
     }
 

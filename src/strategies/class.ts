@@ -93,6 +93,8 @@ export class Backtest {
         trades: IObj[];
         platNm: string;
     }) {
+
+        console.log("\nPARENT:", this.constructor.name)
         this.balance = balance;
         this.START_BAL = balance;
         this.df = df;
