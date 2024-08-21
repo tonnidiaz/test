@@ -18,7 +18,7 @@ router.get("/", async (req, res) => {
         const username = query.user;
 
         const user = username ? await User.findOne({ username }).exec() : null;
-        console.log(user);
+        //console.log(user);
         if (username && !user) return tunedErr(res, 404, "Bot not found");
         const bots = user
             ? await Bot.find({ user: user.id }).exec()
