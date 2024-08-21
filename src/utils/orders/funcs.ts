@@ -288,6 +288,7 @@ export const placeTrade = async ({
                       bot: bot.id,
                       base: bot.base,
                       ccy: bot.ccy,
+                      ccy_amt: amt
                   })
                 : orders[orders.length - 1];
 
