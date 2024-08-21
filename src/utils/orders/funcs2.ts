@@ -40,7 +40,7 @@ const useDef5 = false,
 
 export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     const plat = new objPlats[bot.platform](bot);
-    await sleep(1000)
+    await sleep(500)
     botLog(bot, "SIM: GETTING KLINES...");
     const klines = await plat.getKlines({ end: Date.now() });
 

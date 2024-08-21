@@ -137,10 +137,10 @@ async function place({ get = false }: { get?: boolean }) {
 async function klines(){
     const bot = new Bot({
         name: "TBOT",
-        interval: 5,
-        base: "TURBOS",
+        interval: 1,
+        base: "CLOUD",
         ccy: "USDT",
-        platform: "bybit",
+        platform: "mexc",
     });
     const plat = new objPlats[bot.platform](bot);
 

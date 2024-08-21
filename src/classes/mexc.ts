@@ -125,7 +125,7 @@ export class Mexc {
         savePath,
         interval,
         symbol,
-        limit = 1000,
+        limit = 500,
     }: {
         end?: number;
         start?: number;
@@ -135,16 +135,18 @@ export class Mexc {
         limit?: number;
     }) {
         try{
-            end = end ?? Date.now() - this.bot.interval * 60 * 1000;
+            interval = interval ?? this.bot.interval;
+            end = end ?? Date.now() - 2 * interval * 60000;
         let klines: any[] = [];
         let cnt = 0;
-        interval = interval ?? this.bot.interval;
+        
         symbol = symbol ?? this.getSymbol();
 
+        end += (interval * 60000)
         const res = await this.client.klines(
             this.getSymbol(),
             getInterval(interval, "mexc"),
-            { endTime: end, startTime: start }
+            { endTime: end, startTime: end  - (limit) * interval * 60000, limit: limit }
         );
 
         const data = res;
