@@ -36,7 +36,7 @@ export const cloud5Prod = async ({
 
     const plat = getBotPlat(bot);
     const str = getBotStrategy(bot);
-    botLog(bot, { str, pos });
+    
 
     let isSl = false,
             is_market = false;
@@ -47,6 +47,7 @@ export const cloud5Prod = async ({
         
     
     const trail = ceil(prevrow.h * (1 - TRAIL / 100), pxPr);
+    botLog(bot, { str, pos, trail, o });
 
     if (!pos && str.buyCond(prevrow)) {
         botLog(bot, "KAYA RA BUY");
