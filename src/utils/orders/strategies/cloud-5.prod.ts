@@ -45,9 +45,9 @@ export const cloud5Prod = async ({
     let entry = order?._entry;
     const TRAIL = 0.1;
         
-    
+    const isO = prevrow.h == Math.max(prevrow.c, prevrow.o);
     const trail = ceil(prevrow.h * (1 - TRAIL / 100), pxPr);
-    botLog(bot, { str, pos, trail, o });
+    botLog(bot, { str, pos, trail, o, isO });
 
     if (!pos && str.buyCond(prevrow)) {
         botLog(bot, "KAYA RA BUY");
@@ -85,11 +85,12 @@ export const cloud5Prod = async ({
         exitLimit = e * (1 + T/ 100);
         
         let exit = 0;
-        const isO = prevrow.h == Math.max(prevrow.c, prevrow.o);
+        
         isSl = true//!isGreen;
         const _sl = entry * (1 - SL / 100);
         const minTP = entry * (1 + 0.1 / 100);
         const openCond = (o >= trail && isO) || o > minTP;
+        botLog(bot, {openCond, minTP})
         if (openCond ) {
             exit = o;
             is_market = true;
