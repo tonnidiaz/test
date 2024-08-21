@@ -28,17 +28,27 @@ export class DefTester extends Backtest {
 
         if (this.pos) {
             console.log("HAS POS");
-            const e =  Math.max(this.prevrow.o, this.prevrow.c);
-            this.exitLimit = e * (1 + 2.5 / 100);
-            const _row = this.row;
-            const SL = 100000
+ const _row = this.row;
+            const { h, c, o } = _row; 
+             const e =  Math.max(this.prevrow.o, this.prevrow.c);
 
+             const tr = h * (1 - .25/100)
+            this.exitLimit = Math.max(c, tr)// e * (1 + 2.5 / 100);
+            
+            const SL = 1.5
+            const tp = ceil(o * (1 + 3.5/100), this.pricePrecision)
             
 
-            const { h, c, o } = _row;
             this.exit = 0;
             
-            this.exit = this.exitLimit;
+            let ex = 0
+            if (tr >= tp){
+                ex= tr
+            }else if (c > tr){
+                ex = c
+            }
+
+            this.exit = ex
             const sl = ceil(this.entry * (1 - SL/100), this.pricePrecision)
 
             console.log({ exit: this.exit, sl });

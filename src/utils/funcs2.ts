@@ -230,6 +230,29 @@ export const getInterval = (
     return interval as any;
 };
 
+
+const testMexcOrderRes = {
+    "symbol": "LTCBTC",
+    "orderId": 1,
+    "orderListId": -1,
+    "clientOrderId": "myOrder1",
+    "price": "0.1",
+    "origQty": "1.0",
+    "executedQty": "0.0",
+    "cummulativeQuoteQty": "0.0",
+    "status": "NEW",
+    "timeInForce": "GTC",
+    "type": "LIMIT",
+    "side": "BUY",
+    "stopPrice": "0.0",
+    "time": 1499827319559,
+    "updateTime": 1499827319559,
+    "isWorking": true,
+    "origQuoteOrderQty": "0.000000"
+  }
+
+type MexcOrder = typeof testMexcOrderRes
+ 
 export const parseFilledOrder = (res: IObj, plat: string) => {
     let data: IOrderDetails;
 
@@ -261,6 +284,18 @@ export const parseFilledOrder = (res: IObj, plat: string) => {
             fee: Number(res.feeDetail.newFees.t),
             fillTime: Number(res.uTime),
             cTime: Number(res.cTime),
+        };
+    }
+    else if (plat == "mexc"){
+        const _r = res as MexcOrder
+        const fillPx = Number(_r.cummulativeQuoteQty) / Number(_r.executedQty)
+        data = {
+            id: `${_r.orderId}`,
+            fillPx,
+            fillSz: Number(_r.executedQty),
+            fee: Number(0),
+            fillTime: Number(_r.updateTime),
+            cTime: Number(_r.time),
         };
     }
     else{

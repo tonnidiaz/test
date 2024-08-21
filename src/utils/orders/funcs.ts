@@ -13,6 +13,7 @@ import {
     getCoinPrecision,
     getMaxAmt,
     getMaxSz,
+    getMinAmt,
     getMinSz,
     getPricePrecision,
     sleep,
@@ -140,6 +141,7 @@ export const placeTrade = async ({
         const minSz = getMinSz(pair, bot.platform);
         const maxSz = getMaxSz(pair, bot.platform);
         const maxAmt = getMaxAmt(pair, bot.platform);
+        const minAmt = getMinAmt(pair, bot.platform);
         const pxPr = getPricePrecision(pair, bot.platform);
         const basePrecision = getCoinPrecision(pair, "limit", bot.platform);
         if (
@@ -228,7 +230,7 @@ export const placeTrade = async ({
             const _entry = price;
 
             const _base = amt / price;
-            if (_base < minSz) {
+            if (_base < minSz ||  amt < (minAmt ?? 1)) {
                 const msg = `BASE: ${_base} < MIN_SZ: ${minSz}`;
                 return botLog(bot, msg);
             } else if (_base > maxSz) {
@@ -250,24 +252,20 @@ export const placeTrade = async ({
                 });
             }
         } else {
+
+            // SELL
             let _base = amt;
             const _bal = _base * price;
-            if (_bal > maxAmt) {
+            if (_bal <( minAmt ?? 1)){
+                botLog(bot, "EKSE, THIS SHIT < MIN")
+                return;
+            }
+            else if (_bal > maxAmt) {
                 console.log(`BAL ${_bal} > MAX_AMT ${maxAmt}`);
                 _base = (maxAmt * (1 - 0.5 / 100)) / price;
 
                 _base = toFixed(_base, basePrecision);
                 amt = _base;
-                return await placeTrade({
-                    bot,
-                    ts,
-                    amt,
-                    side,
-                    price,
-                    plat,
-                    sl,
-                    ordType,
-                });
             }
         }
 

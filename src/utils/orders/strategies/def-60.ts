@@ -1,5 +1,5 @@
 /**
- * WORKS BEST WITH THE 60min TIMEFRAME
+ * WORKS BEST WITH THE 30min TIMEFRAME
  */
 
 import { IBot } from "@/models/bot";
@@ -36,11 +36,11 @@ export const prodStrategy = async ({
 
     const plat = getBotPlat(bot);
     const str = getBotStrategy(bot);
-    botLog(bot, { str });
+    botLog(bot, { str, pos });
 
     const { ts, o, h, l, c } = row;
     const isGreen = prevrow.c >= prevrow.o;
-    let entry = 0;
+    let entry = order?._entry;
 
     if (!pos && str.buyCond(prevrow)) {
         botLog(bot, "KAYA RA BUY");
@@ -70,25 +70,27 @@ export const prodStrategy = async ({
         let exitLimit = 0;
 
         const e = Math.max(prevrow.o, prevrow.c);
-        const T = 3.5
+        const T = 3
         exitLimit = e * (1 + T/ 100);
 
         const _sell = !isGreen && prevrow.c >= o;
         let isSl = false,
             is_market = false;
-        const SL = 0.5,
+        const SL = 4.5,
             TRAIL = 0.1;
         const isO = prevrow.h == Math.max(prevrow.c, prevrow.o);
 
         let exit = 0;
 
-        isSl = _sell;
+        isSl = !isGreen;
         const trail = ceil(prevrow.h * (1 - TRAIL / 100), pxPr);
         const _sl = entry * (1 - SL / 100);
+        const minTP = entry * (1 + 0.1 / 100);
 
-        if (o >= trail && isO) {
+        if (o >= trail|| o > minTP ) {
             exit = o;
             is_market = true;
+            isSl = false
         } else {
             exit = exitLimit;
         }
@@ -97,7 +99,7 @@ export const prodStrategy = async ({
         botLog(bot, { isSl, exit, trail, _sl, base: amt });
 
         if (exit != 0 && (isSl || exit >= _sl)) {
-            if (is_market || exit < o) {
+            if (is_market) {
                 botLog(bot, "PLACING MARKET SELL AT OPEN");
                 const r = await placeTrade({
                     bot: bot,

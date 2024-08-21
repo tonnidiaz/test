@@ -263,6 +263,7 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
             skip_saved,
             fix_invalid,
             clId,
+            show
         } = data;
         const startPair = data.from;
         let _data: {
@@ -303,6 +304,14 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
         prefix = prefix ?? "";
         const sub = demo ? "demo" : "live";
         const savePath = `_data/rf/coins/${year}/${sub}/${prefix}_${_platName}_${interval}m-${sub}.json`;
+        if (show){
+            if(existsSync(savePath)){
+                result = {clId, platform, data: await require(savePath)}
+                client?.emit(ep, result)
+            }
+
+            return result
+        }
 
         if (_platName == "okx") {
             _instruments = okxInstrus
@@ -443,7 +452,7 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
                     console.log(_klines);
                     const _ks = parseKlines(klines);
 
-                    if (klines.length !== _ks.length) {
+                    if (klines.length != _ks.length) {
                         console.log(`[${pair}] KLINES IVALID`);
                         if (fix_invalid) {
                             const ret = await plat.getKlines({

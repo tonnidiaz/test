@@ -10,20 +10,14 @@ export class TestMexc extends Platform {
     maker: number = 0.1 / 100;
     taker: number = 0.1 / 100;
     client: Mexc.Spot;
-    flag: "1" | "0";
     apiKey: string;
     apiSecret: string;
     passphrase: string;
 
     constructor({ demo = false }: { demo?: boolean }) {
         super({ demo });
-        this.flag = demo ? "1" : "0";
-        this.apiKey = demo
-            ? process.env.MEXC_API_KEY_DEV!
-            : process.env.MEXC_API_KEY!;
-        this.apiSecret = demo
-            ? process.env.MEXC_API_SECRET_DEV!
-            : process.env.MEXC_API_SECRET!;
+        this.apiKey =  process.env.MEXC_API_KEY!;
+        this.apiSecret = process.env.MEXC_API_SECRET!;
         this.passphrase = process.env.MEXC_PASSPHRASE!;
 
         this.client = new Mexc.Spot();
@@ -145,10 +139,10 @@ export class TestMexc extends Platform {
             const res = await this.client.klines(
                 symbol,
                 getInterval(interval, "mexc"),
-                { endTime: end, startTime: end }
+                { endTime: end, startTime: start }
             );
 
-            const { data } = res;
+            const data = res;
             klines = [...data];
         }
 

@@ -509,6 +509,22 @@ export function getMaxAmt(
         }
         return sz
 }
+export function getMinAmt(
+    pair: string[],
+    plat: string
+) {
+    const _base = pair[0], _quote = pair[1];
+    let instru  = getInstru(pair, plat)
+     
+    if (!instru) {
+        console.log(`\ngetMinSz: ${pair} not on ${plat}\n`)
+        return null};
+        
+
+        let sz : number | null = null
+        sz = 1 // 1 USDT MIN
+        return sz
+}
 
 export const sleep = async (ms: number) => {
     await new Promise((res) => setTimeout(res, ms));

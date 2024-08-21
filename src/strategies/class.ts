@@ -183,6 +183,7 @@ export class Backtest {
             return;
 
         const _bal = _base * _exit;
+        if (_bal < 1)
         if (_bal > this.maxAmt!) {
             console.log(`BAL ${_bal} > MAX_AMT ${this.maxAmt}`);
             _base = (this.maxAmt! * (1 - 0.5 / 100)) / _exit;

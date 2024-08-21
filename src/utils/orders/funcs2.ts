@@ -26,7 +26,7 @@ import { prodStrategy as prodStr5 } from "./strategies/def-5";
 import { prodStrategy as prodStr60 } from "./strategies/def-60";
 //import { wsOkx } from "@/classes/main-okx";
 
-const useDef5 = true, useDef60 = false
+const useDef5 = false, useDef60 = true
 
 export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     const plat = new objPlats[bot.platform](bot);
