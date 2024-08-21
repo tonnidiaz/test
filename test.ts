@@ -3,7 +3,7 @@ import { bitgetInstrus } from "@/utils/data/instrus/bitget-instrus";
 import { gateioInstrus } from "@/utils/data/instrus/gateio-instrus";
 import { okxInstrus } from "@/utils/data/instrus/okx-instrus";
 import { bybitInstrus } from "@/utils/data/instrus/bybit-instrus";
-import { parseDate } from "@/utils/funcs2";
+import { parseDate, parseKlines } from "@/utils/funcs2";
 import {
     getCoinPrecision,
     getPricePrecision,
@@ -132,4 +132,23 @@ async function place({ get = false }: { get?: boolean }) {
     console.log(r);
 }
 
-place({get: false});
+//place({get: false});
+
+async function klines(){
+    const bot = new Bot({
+        name: "TBOT",
+        interval: 5,
+        base: "TURBOS",
+        ccy: "USDT",
+        platform: "bybit",
+    });
+    const plat = new objPlats[bot.platform](bot);
+
+    const r = await plat.getKlines({end: Date.now()})
+    
+    const df = parseKlines(r ?? [])
+    console.log(df[df.length - 1].ts)
+}
+
+
+klines()

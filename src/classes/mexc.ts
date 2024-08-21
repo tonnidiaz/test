@@ -134,7 +134,8 @@ export class Mexc {
         savePath?: string;
         limit?: number;
     }) {
-        end = end ?? Date.now() - this.bot.interval * 60 * 1000;
+        try{
+            end = end ?? Date.now() - this.bot.interval * 60 * 1000;
         let klines: any[] = [];
         let cnt = 0;
         interval = interval ?? this.bot.interval;
@@ -151,6 +152,10 @@ export class Mexc {
 
         const d = [...klines]; //.reverse()
         return limit == 1 ? d[d.length - 1] : d;
+        }catch(e: any){
+            return this._parseErr(e)
+        }
+        
     }
 
     async getKline() {

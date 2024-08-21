@@ -19,6 +19,7 @@ import {
     ceil,
     getCoinPrecision,
     getPricePrecision,
+    sleep,
     timedLog,
     toFixed,
 } from "../functions";
@@ -39,7 +40,7 @@ const useDef5 = false,
 
 export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     const plat = new objPlats[bot.platform](bot);
-
+    await sleep(1000)
     botLog(bot, "SIM: GETTING KLINES...");
     const klines = await plat.getKlines({ end: Date.now() });
 
@@ -54,7 +55,7 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     const row = df[df.length - 1];
     const prevrow = df[df.length - 2];
 
-    botLog(bot, { row: row.ts, prevrow: prevrow.ts });
+    botLog(bot, { prevrow: prevrow.ts, row: row.ts });
 
     let order = await getLastOrder(bot);
     let pos = orderHasPos(order);
