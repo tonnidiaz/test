@@ -137,14 +137,14 @@ async function place({ get = false }: { get?: boolean }) {
 async function klines(){
     const bot = new Bot({
         name: "TBOT",
-        interval: 1,
+        interval: 5,
         base: "CLOUD",
         ccy: "USDT",
         platform: "mexc",
     });
     const plat = new objPlats[bot.platform](bot);
 
-    const r = await plat.getKlines({end: Date.now()})
+    const r = await plat.getKlines({end: Date.parse("2024-08-22 01:15:00+02:00")})
     
     const df = parseKlines(r ?? [])
     console.log(df[df.length - 1].ts)

@@ -33,6 +33,31 @@ export const parseDate = (date: Date | string) =>
         })
     );
 
+    export const getExactDate = (interval: number) =>{
+            // Validate the interval
+            if (interval <= 0) {
+                throw new Error('Interval must be a positive number');
+            }
+        
+            // Get the current date and time
+            const now = new Date();
+        
+            // Calculate the number of milliseconds in the interval
+            const intervalMs = interval * 60 * 1000;
+        
+            // Get the current time in milliseconds
+            const nowMs = now.getTime();
+        
+            // Round down to the nearest interval
+            const roundedMs = Math.floor(nowMs / intervalMs) * intervalMs;
+        
+            // Create a new Date object for the rounded time
+            const roundedDate = new Date(roundedMs);
+        
+            // Return the ISO string of the rounded date
+            return roundedDate
+        
+    }
 const tuMacd = (df: ICandle[]) => {
     const def = false;
     const faster = true;

@@ -10,6 +10,7 @@ import {
     parseKlines,
     orderHasPos,
     getLastOrder,
+    getExactDate,
 } from "../funcs2";
 import { IBot } from "@/models/bot";
 import { Order } from "@/models";
@@ -42,7 +43,7 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     const plat = new objPlats[bot.platform](bot);
     await sleep(500)
     botLog(bot, "SIM: GETTING KLINES...");
-    const klines = await plat.getKlines({ end: Date.now() });
+    const klines = await plat.getKlines({ end: getExactDate(bot.interval).getTime() });
 
     if (!klines) return console.log("FAILED TO GET KLINES");
 
