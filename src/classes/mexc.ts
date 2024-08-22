@@ -111,13 +111,16 @@ export class Mexc {
         }
     }
     async getTicker() {
-        botLog(this.bot, "GETTING TICKER...");
-        // const res = await this.client.getTickers({
-        //     symbol: this.getSymbol(), category: 'spot'
-        // })
-        // const ticker = Number(res.result.list[0].lastPrice)
-        // console.log({ticker});
-        return 5;
+        try{
+botLog(this.bot, "GETTING TICKER...");
+        const res = await this.client.tickerPrice(this.getSymbol())
+        const ticker = Number(res.price)
+        console.log({ticker});
+        return ticker;
+        }catch(e){
+            this._parseErr(e)
+        }
+        
     }
     async getKlines({
         start,
@@ -135,6 +138,10 @@ export class Mexc {
         limit?: number;
     }) {
         try{
+
+            if (end){
+                console.log("HAS END", parseDate(new Date(end)))
+            }
             interval = interval ?? this.bot.interval;
             end = end ?? Date.now() - 2 * interval * 60000;
         let klines: any[] = [];
@@ -146,7 +153,9 @@ export class Mexc {
         const res = await this.client.klines(
             this.getSymbol(),
             getInterval(interval, "mexc"),
-            { endTime: end, startTime: end  - (limit) * interval * 60000, limit: limit }
+            { 
+                //endTime: end, startTime: (end)  - (limit) * interval * 60000 
+            }
         );
 
         const data = res;

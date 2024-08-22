@@ -157,45 +157,18 @@ export class Bybit {
         interval = interval ?? this.bot.interval;
         symbol = symbol ?? this.getSymbol();
 
-        if (start) {
-            let firstTs = start;
-            while (firstTs <= end) {
-                console.log(`GETTING ${cnt + 1} KLINES...`);
-                console.log(parseDate(new Date(firstTs)));
-                const res = await this.client.getKline({
-                    symbol: symbol,
-                    interval: interval as any,
-                    start: firstTs,
-                    limit,
-                    category: this.bot.category as any,
-                });
-                const data = res.result.list;
-                if (!data.length) break;
-                klines.push(...[...data].reverse());
-                console.log(new Date(Number(data[0][0])).toISOString());
-                firstTs = Number(data[0][0]) + this.bot.interval * 60 * 1000;
-                console.log(new Date(firstTs).toISOString());
-                if (savePath) {
-                    ensureDirExists(savePath);
-                    writeFileSync(savePath, JSON.stringify(klines));
-                    console.log("Sved");
-                }
-                cnt += 1;
-            }
-        } else {
+        
             console.log("GETTING KLINES...");
             const res = await this.client.getKline({
-                symbol: this.getSymbol(),
-                interval: this.bot.interval as any,
-                end: end,
+                symbol,
+                interval: interval as any,
+                //end: end,
                 //start: start,
                 limit: 1000,
                 category: this.bot.category as any,
             });
             let data = res.result.list;
             klines = [...data].reverse();
-        }
-
         const d = [...klines]; //.reverse()
         return limit == 1 ? d[d.length - 1] : d;
     }

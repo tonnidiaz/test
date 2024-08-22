@@ -144,8 +144,9 @@ async function klines(){
     });
     const plat = new objPlats[bot.platform](bot);
 
-    const r = await plat.getKlines({end: Date.parse("2024-08-22 01:15:00+02:00")})
-    
+    const r = await plat.getTicker()//getKlines({end: Date.parse("2024-08-22 02:10:00+02:00")})
+    console.log(r)
+    return
     const df = parseKlines(r ?? [])
     console.log(df[df.length - 1].ts)
 }

@@ -25,7 +25,7 @@ import {
     toFixed,
 } from "../functions";
 import { objStrategies } from "@/strategies";
-import { IObj, IOrderDetails } from "../interfaces";
+import { ICandle, IObj, IOrderDetails } from "../interfaces";
 import { wsOkx } from "@/classes/main-okx";
 import { objPlats } from "../consts2";
 import { wsBybit } from "@/classes/main-bybit";
@@ -43,9 +43,13 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     const plat = new objPlats[bot.platform](bot);
     await sleep(500)
     botLog(bot, "SIM: GETTING KLINES...");
-    const klines = await plat.getKlines({ end: getExactDate(bot.interval).getTime() });
 
+    const end = getExactDate(bot.interval)
+
+    const klines = await plat.getKlines({ });
+    const o = await plat.getTicker()
     if (!klines) return console.log("FAILED TO GET KLINES");
+    if (!o) return console.log("FAILED TO GET TICKER");
 
     const df = tuCE(heikinAshi(parseKlines(klines)));
 
@@ -53,15 +57,17 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     const basePr = getCoinPrecision([bot.base, bot.ccy], "limit", bot.platform);
 
     if (pxPr == null || basePr == null) return;
-    const row = df[df.length - 1];
-    const prevrow = df[df.length - 2];
-
+    
+    
+    const prevrow = df[df.length - 1];
+    const row: ICandle = {ts: parseDate(end), o, h: o, l:o, c: o, v: prevrow.v, ha_o: o,ha_h: o, ha_l:o, ha_c: o };
     botLog(bot, { prevrow: prevrow.ts, row: row.ts });
 
     let order = await getLastOrder(bot);
     let pos = orderHasPos(order);
 
     botLog(bot, { ts: row.ts, o: row.o });
+    //return
 
     const params = { row, prevrow, bot, order, pos, pxPr, basePr }
     await cloud5Prod(params)
