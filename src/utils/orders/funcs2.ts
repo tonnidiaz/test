@@ -31,7 +31,7 @@ import { objPlats } from "../consts2";
 import { wsBybit } from "@/classes/main-bybit";
 import { DEV, SL } from "../constants";
 import { Bybit } from "@/classes/bybit";
-import { prodStrategy as prodStr5 } from "./strategies/def-5";
+import { def5Prod } from "./strategies/def-5.prod";
 import { prodStrategy as prodStr60 } from "./strategies/def-60";
 import { cloud5Prod } from "./strategies/cloud-5.prod";
 //import { wsOkx } from "@/classes/main-okx";
@@ -71,7 +71,8 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     if (DEV) return
 
     const params = { row, prevrow, bot, order, pos, pxPr, basePr }
-    await cloud5Prod(params)
+    //await cloud5Prod(params)
+    await def5Prod(params)
 
 
     // if (useDef5) {
@@ -95,8 +96,8 @@ export const updateOrderInDb = async (order: IOrder, res: IOrderDetails) => {
     };
     /* order == currentOrder */
     const bal = order.new_ccy_amt - Math.abs(res.fee);
-    const profit = ((bal - order.ccy_amt) / order.ccy_amt) * 100;
-    order.profit = profit;
+    const profit = (order.sell_price - order.buy_price) / order.buy_price * 100 // ((bal - order.ccy_amt) / order.ccy_amt * 100) ;
+    order.profit = toFixed(profit, 2);
     order.order_id = res.id;
     await order.save();
 };

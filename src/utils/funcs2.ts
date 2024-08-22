@@ -9,7 +9,7 @@ import { AccountOrderV5 } from "bybit-api";
 import { IOrder } from "@/models/order";
 import { objPlats } from "./consts2";
 import { objStrategies } from "@/strategies";
-import type { Order as GateOrder} from "gate-api";
+import type { Order as GateOrder } from "gate-api";
 
 const ddNum = (e: any) => {
     e = `${e}`.trim();
@@ -33,31 +33,30 @@ export const parseDate = (date: Date | string) =>
         })
     );
 
-    export const getExactDate = (interval: number) =>{
-            // Validate the interval
-            if (interval <= 0) {
-                throw new Error('Interval must be a positive number');
-            }
-        
-            // Get the current date and time
-            const now = new Date();
-        
-            // Calculate the number of milliseconds in the interval
-            const intervalMs = interval * 60 * 1000;
-        
-            // Get the current time in milliseconds
-            const nowMs = now.getTime();
-        
-            // Round down to the nearest interval
-            const roundedMs = Math.floor(nowMs / intervalMs) * intervalMs;
-        
-            // Create a new Date object for the rounded time
-            const roundedDate = new Date(roundedMs);
-        
-            // Return the ISO string of the rounded date
-            return roundedDate
-        
+export const getExactDate = (interval: number) => {
+    // Validate the interval
+    if (interval <= 0) {
+        throw new Error("Interval must be a positive number");
     }
+
+    // Get the current date and time
+    const now = new Date();
+
+    // Calculate the number of milliseconds in the interval
+    const intervalMs = interval * 60 * 1000;
+
+    // Get the current time in milliseconds
+    const nowMs = now.getTime();
+
+    // Round down to the nearest interval
+    const roundedMs = Math.floor(nowMs / intervalMs) * intervalMs;
+
+    // Create a new Date object for the rounded time
+    const roundedDate = new Date(roundedMs);
+
+    // Return the ISO string of the rounded date
+    return roundedDate;
+};
 const tuMacd = (df: ICandle[]) => {
     const def = false;
     const faster = true;
@@ -76,57 +75,62 @@ const tuMacd = (df: ICandle[]) => {
 export const tuPath = (pth: string) => path.resolve(...pth.split("/"));
 
 export const parseKlines = (klines: (string | number)[][]) => {
-    console.log(parseKlines, { len: klines.length });
-    let invalid = false;
-    let df: ICandle[] = [];
-    const ha_o = 0,
-        ha_h = 0,
-        ha_l = 0,
-        ha_c = 0;
-    const interval = Math.floor(
-        (Number(klines[1][0]) - Number(klines[0][0])) / 60000
-    );
-    console.log({ interval });
+    try {
+        console.log(parseKlines, { len: klines.length });
+        let invalid = false;
+        let df: ICandle[] = [];
+        const ha_o = 0,
+            ha_h = 0,
+            ha_l = 0,
+            ha_c = 0;
+        const interval = Math.floor(
+            (Number(klines[1][0]) - Number(klines[0][0])) / 60000
+        );
+        console.log({ interval });
 
-    for (let i = 0; i < klines.length; i++) {
-        const k = klines[i];
+        for (let i = 0; i < klines.length; i++) {
+            const k = klines[i];
 
-        const [ts, o, h, l, c, v] = k.map((e) => Number(e));
-        df.push({
-            ts: parseDate(new Date(ts)),
-            o,
-            h,
-            l,
-            c,
-            v,
-            ha_o,
-            ha_h,
-            ha_l,
-            ha_c,
-        });
-        if (i > 0) {
-            const prev = Number(klines[i - 1][0]),
-                curr = Number(klines[i][0]);
-            const _diff = Math.floor((Number(curr) - Number(prev)) / 60000);
+            const [ts, o, h, l, c, v] = k.map((e) => Number(e));
+            df.push({
+                ts: parseDate(new Date(ts)),
+                o,
+                h,
+                l,
+                c,
+                v,
+                ha_o,
+                ha_h,
+                ha_l,
+                ha_c,
+            });
+            if (i > 0) {
+                const prev = Number(klines[i - 1][0]),
+                    curr = Number(klines[i][0]);
+                const _diff = Math.floor((Number(curr) - Number(prev)) / 60000);
 
-            if (_diff !== interval) {
-                invalid = true;
-                console.log({
-                    _diff,
-                    i,
-                    len: klines.length,
-                    prev: parseDate(new Date(prev)),
-                    curr: parseDate(new Date(curr)),
-                });
-                console.log("KLINE DATA INVALID");
-                return df;
+                if (_diff !== interval) {
+                    invalid = true;
+                    console.log({
+                        _diff,
+                        i,
+                        len: klines.length,
+                        prev: parseDate(new Date(prev)),
+                        curr: parseDate(new Date(curr)),
+                    });
+                    console.log("KLINE DATA INVALID");
+                    return df;
+                }
             }
         }
+
+        console.log("\nKLINES OK\n");
+
+        return df;
+    } catch (e) {
+        console.log(e);
+        return [];
     }
-
-    console.log("\nKLINES OK\n");
-
-    return df;
 };
 
 export const heikinAshi = (df: ICandle[]) => {
@@ -230,10 +234,7 @@ export const calcSL = (entry: number) => {
     return entry * (1 - SL / 100);
 };
 export const calcTP = (entry: number) => entry * (1 + TP / 100);
-export const getInterval = (
-    m: number,
-    plt: string
-) => {
+export const getInterval = (m: number, plt: string) => {
     let interval = `${m}`;
 
     switch (plt) {
@@ -248,40 +249,39 @@ export const getInterval = (
             interval = m >= 60 ? `${Math.floor(m / 60)}h` : `${m}min`;
             break;
         case "mexc":
-            interval =`${m}m`;
+            interval = `${m}m`;
             break;
     }
 
     return interval as any;
 };
 
-
 const testMexcOrderRes = {
-    "symbol": "LTCBTC",
-    "orderId": 1,
-    "orderListId": -1,
-    "clientOrderId": "myOrder1",
-    "price": "0.1",
-    "origQty": "1.0",
-    "executedQty": "0.0",
-    "cummulativeQuoteQty": "0.0",
-    "status": "NEW",
-    "timeInForce": "GTC",
-    "type": "LIMIT",
-    "side": "BUY",
-    "stopPrice": "0.0",
-    "time": 1499827319559,
-    "updateTime": 1499827319559,
-    "isWorking": true,
-    "origQuoteOrderQty": "0.000000"
-  }
+    symbol: "LTCBTC",
+    orderId: 1,
+    orderListId: -1,
+    clientOrderId: "myOrder1",
+    price: "0.1",
+    origQty: "1.0",
+    executedQty: "0.0",
+    cummulativeQuoteQty: "0.0",
+    status: "NEW",
+    timeInForce: "GTC",
+    type: "LIMIT",
+    side: "BUY",
+    stopPrice: "0.0",
+    time: 1499827319559,
+    updateTime: 1499827319559,
+    isWorking: true,
+    origQuoteOrderQty: "0.000000",
+};
 
-type MexcOrder = typeof testMexcOrderRes
- 
+type MexcOrder = typeof testMexcOrderRes;
+
 export const parseFilledOrder = (res: IObj, plat: string) => {
     let data: IOrderDetails;
 
-    if (plat == 'okx') {
+    if (plat == "okx") {
         res = res as OrderDetails;
         data = {
             id: res.ordId,
@@ -291,7 +291,7 @@ export const parseFilledOrder = (res: IObj, plat: string) => {
             fillTime: Number(res.fillTime),
             cTime: Number(res.cTime),
         };
-    } else if (plat == 'bybit') {
+    } else if (plat == "bybit") {
         res = res as AccountOrderV5;
         data = {
             id: res.orderId,
@@ -301,7 +301,7 @@ export const parseFilledOrder = (res: IObj, plat: string) => {
             fillTime: Number(res.updatedTime),
             cTime: Number(res.createTime),
         };
-    } else if (plat == "bitget"){
+    } else if (plat == "bitget") {
         data = {
             id: res.orderId,
             fillPx: Number(res.priceAvg),
@@ -310,10 +310,9 @@ export const parseFilledOrder = (res: IObj, plat: string) => {
             fillTime: Number(res.uTime),
             cTime: Number(res.cTime),
         };
-    }
-    else if (plat == "mexc"){
-        const _r = res as MexcOrder
-        const fillPx = Number(_r.cummulativeQuoteQty) / Number(_r.executedQty)
+    } else if (plat == "mexc") {
+        const _r = res as MexcOrder;
+        const fillPx = Number(_r.cummulativeQuoteQty) / Number(_r.executedQty);
         data = {
             id: `${_r.orderId}`,
             fillPx,
@@ -322,8 +321,7 @@ export const parseFilledOrder = (res: IObj, plat: string) => {
             fillTime: Number(_r.updateTime),
             cTime: Number(_r.time),
         };
-    }
-    else{
+    } else {
         // GATEIO
         const _res = res as GateOrder;
         data = {
@@ -334,7 +332,6 @@ export const parseFilledOrder = (res: IObj, plat: string) => {
             fillTime: Number(_res.updateTimeMs),
             cTime: Number(_res.createTimeMs),
         };
-
     }
 
     return data;
@@ -352,7 +349,9 @@ export const findBotOrders = async (bot: IBot) => {
 };
 
 export const getLastOrder = async (bot: IBot) => {
-    return bot.orders.length ? await Order.findById(bot.orders[bot.orders.length - 1]).exec() :  null;
+    return bot.orders.length
+        ? await Order.findById(bot.orders[bot.orders.length - 1]).exec()
+        : null;
 };
 
 export const getBotPlat = (bot: IBot) => {
@@ -363,11 +362,7 @@ export const getBotStrategy = (bot: IBot) => {
 };
 
 export const orderHasPos = (order?: IOrder | null) => {
-    return (
-        order != null &&
-        order.side == "sell" &&
-        !order.is_closed
-    );
+    return order != null && order.side == "sell" && !order.is_closed;
 };
 export const getBaseToSell = (order: IOrder) => {
     return order.base_amt - order.buy_fee;

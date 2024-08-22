@@ -77,7 +77,7 @@ export class Cloud5 extends Backtest {
                 this.isSl = this.exit < this.entry;
 
                 if (is_market) {
-                    this.entry = o;
+                    this.exit = o;
                     console.log("FILLING MARKET SELL ORDER AT OPEN");
                     this._fillSell({
                         _base: this.base,
@@ -85,6 +85,8 @@ export class Cloud5 extends Backtest {
                         _row,
                         isSl: this.isSl,
                     });
+              
+                    
                 } else {
                     console.log("FILLING LIMIT SELL ORDER");
                     this.sell_order_filled = true;

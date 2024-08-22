@@ -59,11 +59,11 @@ async function fun() {
     console.log(r);
 }
 
-async function place({ get = false }: { get?: boolean }) {
+async function place({ get = false, oid="" }: { get?: boolean, oid?: string }) {
     const bot = new Bot({
         name: "TBOT",
-        interval: 30,
-        base: "AMC",
+        interval: 5,
+        base: "CLOUD",
         ccy: "USDT",
         platform: "mexc",
     });
@@ -86,8 +86,6 @@ async function place({ get = false }: { get?: boolean }) {
     px = toFixed(px, pxPr);
     amt = toFixed(amt, pxPr);
     console.log({ px, base, amt });
-
-    const oid = "C02__454906501123854336049";
 
     let r: any;
 
@@ -152,4 +150,38 @@ async function klines(){
 }
 
 
-klines()
+//klines()
+place({get: true, oid: "C02__455212287674880000049"})
+
+/* 
+BUY
+
+{
+  symbol: 'CLOUDUSDT',
+  orderId: 'C02__455211027953455104049',
+  orderListId: -1,
+  clientOrderId: '1724313002084',
+  price: '0.0007936',
+  origQty: '0',
+  executedQty: '1817.23',
+  cummulativeQuoteQty: '1.399993992',
+  status: 'FILLED',
+  timeInForce: '',
+  type: 'MARKET',
+  side: 'BUY',
+  stopPrice: '',
+  icebergQty: '',
+  time: 1724313002000,
+  updateTime: 1724313002000,
+  isWorking: true,
+  origQuoteOrderQty: '1.4'
+}
+{
+  id: 'C02__455211027953455104049',
+  fillPx: 0.0007704,
+  fillSz: 1817.23,
+  fee: 0,
+  fillTime: 1724313002000,
+  cTime: 1724313002000
+}
+*/

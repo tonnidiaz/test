@@ -101,7 +101,7 @@ export class TestBitget extends Platform {
                 if (!data || !data.length) return console.log(data)
                 data = data.map((el) => el.map((el) => Number(el)));
 
-                const last = klines.length != 0 && Number(klines[klines.length - 1][0])
+                const last = klines.length == 0 ? null : Number(klines[klines.length - 1][0])
                 const _new = Number(data[0][0])
                 console.log(
                     "\n",
@@ -116,8 +116,9 @@ export class TestBitget extends Platform {
                 
                 if (last){
                     if (last >= _new)
-                    {console.log("LAST > NEW")}
+                    {console.log("LAST > NEW", data.length)}
                     data = data.filter(el => el[0] > last)
+                    console.log(data.length);
                     
                 }
                 if (!data?.length) break; 
