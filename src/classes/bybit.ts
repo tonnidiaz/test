@@ -1,6 +1,6 @@
 import { IBot } from "@/models/bot";
 import { ensureDirExists } from "@/utils/orders/funcs";
-import { parseDate, parseFilledOrder } from "@/utils/funcs2";
+import { getExactDate, parseDate, parseFilledOrder } from "@/utils/funcs2";
 import {
     botLog,
     capitalizeFirstLetter,
@@ -151,7 +151,7 @@ export class Bybit {
         savePath?: string;
         limit?: number
     }) {
-        end = end ?? Date.now() - this.bot.interval * 60 * 1000; 
+        end = end ?? getExactDate(this.bot.interval).getTime() - this.bot.interval * 60 * 1000; 
         let klines: any[] = [];
         let cnt = 0;
         interval = interval ?? this.bot.interval;
@@ -164,12 +164,25 @@ export class Bybit {
                 interval: interval as any,
                 end: end,
                 //start: start,
-                limit: 1000,
+                limit: 200,
                 category: this.bot.category as any,
             });
             let data = res.result.list;
             klines = [...data].reverse();
         const d = [...klines]; //.reverse()
+
+        const last = Number(d[d.length - 1][0])
+
+        botLog(this.bot, {end: parseDate(end), last: parseDate(last)})
+        if (end >= last + interval * 60000){
+            botLog(this.bot, "END > LAST")
+            return await this.getKlines({ start,
+                end,
+                savePath,
+                interval,
+                symbol,
+                limit })
+        }
         return limit == 1 ? d[d.length - 1] : d;
     }
 

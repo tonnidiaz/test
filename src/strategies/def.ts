@@ -21,7 +21,7 @@ console.log({o, trail});
             let m = this.minSz;
             this.entry = this.row.o;
 
-            if (o < trail)
+            if (o < trail && this.prevrow.c <= this.prevrow.o)
             this._fillBuy({
                 amt: this.balance,
                 _row: this.row,

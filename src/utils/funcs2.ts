@@ -26,7 +26,7 @@ const toISOString = (date: string) => {
     date = `${dateArr[0]}-${ddNum(dateArr[1])}-${ddNum(dateArr[2])}`;
     return `${date} ${time}+02:00`;
 };
-export const parseDate = (date: Date | string) =>
+export const parseDate = (date: Date | string | number) =>
     toISOString(
         new Date(date).toLocaleString("en-ZA", {
             timeZone: "Africa/Johannesburg",
