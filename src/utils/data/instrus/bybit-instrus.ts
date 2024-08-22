@@ -13408,4 +13408,4 @@ export const bybitInstrus = [
             "marketParameter": "0.05"
         }
     }
-]
+]//.map(el=>({...el, baseCoin: el.baseCoin.trim(), quoteCoin: el.quoteCoin.trim()}))

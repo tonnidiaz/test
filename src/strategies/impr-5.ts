@@ -1,8 +1,7 @@
 import { ceil } from "@/utils/functions";
 import { Backtest } from "./class";
 
-export class DefTester extends Backtest {
-    name: string = "DefTester"
+export class Impr5 extends Backtest {
 
     inloop({ i }: { i: number }): void {
         console.log("inloop")
@@ -13,7 +12,7 @@ export class DefTester extends Backtest {
             this.prevrow.h * (1 - TRAIL / 100),
             this.pricePrecision
         );
-console.log({o, trail});
+
         if (!this.pos && this.buyCond(this.prevrow, this.df, i)) {
             console.log("\nKAYA RA BUY\n");
             this.enterTs = this.row.ts;
@@ -32,7 +31,7 @@ console.log({o, trail});
                 
             }
 
-            //if (this.isGreen) return;
+       /// if (!this.isGreen) return;
         }
 
         if (this.pos) {
@@ -58,12 +57,26 @@ console.log({o, trail});
 
             isSl = !this.isGreen//_sell || true;            
             let is_market = false;
-            const minTP = this.entry * (1 + 1 / 100);
-            const openCond = (o >= trail && isO) || o > minTP;
+
+            const TP = 1//this.isGreen ? 2 : 3
+            const minTP = this.entry * (1 + TP / 100);
+            const openCond = (o >= trail && isO) 
+             || o >= minTP;
             if (false) {
-            } else if (openCond) {
-                this.exit = o;
-                is_market = true
+            }
+            
+           
+            else if (openCond) {
+                if (o < minTP){
+                    const E = !this.isGreen ? 2 : 0
+                   this.exit = o * (1 + E/100);
+                   isSl = true
+                   
+                }else{
+                    this.exit = o
+                     is_market = true 
+                }
+                
                 //isSl = false
             }else{
                 this.exit = this.exitLimit
@@ -88,7 +101,6 @@ console.log({o, trail});
                     this.sell_order_filled = true
                     this.amt_sold = this.base
                 }
-            }
-        }
+            }}
     }
 }

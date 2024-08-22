@@ -46,10 +46,10 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
 
     const end = getExactDate(bot.interval)
 
-    const klines = await plat.getKlines({ end: end.getTime() - bot.interval * 60000});
-    const o = await plat.getTicker()
+    const klines = await plat.getKlines({ end: end.getTime()});
+    //const o = await plat.getTicker()
     if (!klines) return console.log("FAILED TO GET KLINES");
-    if (!o) return console.log("FAILED TO GET TICKER");
+    //if (!o) return console.log("FAILED TO GET TICKER");
 
     const df = tuCE(heikinAshi(parseKlines(klines)));
 
@@ -59,8 +59,8 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     if (pxPr == null || basePr == null) return;
     
     
-    const prevrow = df[df.length - 1];
-    const row: ICandle = {ts: parseDate(end), o, h: o, l:o, c: o, v: prevrow.v, ha_o: o,ha_h: o, ha_l:o, ha_c: o };
+    const prevrow = df[df.length - 2];
+    const row: ICandle = df[df.length - 1]//{ts: parseDate(end), o, h: o, l:o, c: o, v: prevrow.v, ha_o: o,ha_h: o, ha_l:o, ha_c: o };
     botLog(bot, { prevrow: prevrow.ts, row: row.ts });
 
     let order = await getLastOrder(bot);

@@ -109,9 +109,17 @@ export class TestOKX extends Platform {
         savePath?: string | undefined;
         isBybit?: boolean;
     }) {
+        const bybit_apiKey = this.demo
+            ? process.env.BYBIT_API_KEY_DEV!
+            : process.env.BYBIT_API_KEY!;
+        const bybit_apiSecret = this.demo
+            ? process.env.BYBIT_API_SECRET_DEV!
+            : process.env.BYBIT_API_SECRET!;
+        const bybit_passphrase = process.env.BYBIT_PASSPHRASE!;
             const client = new RestClientV5({
                 demoTrading: this.demo,
                 testnet: false,
+                key: bybit_apiKey, secret: bybit_apiSecret
             });
             console.log({ client: "client", demo: this.demo }, "\n");
             end = end ?? Date.now();

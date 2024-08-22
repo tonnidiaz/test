@@ -313,7 +313,7 @@ const getInstru = (pair: string[], plat: string) =>{
             break;
         case "bybit":
             instru = bybitInstrus.find(
-                  (el) => el.baseCoin == pair[0] && el.quoteCoin == pair[1] && el.status == "Trading"
+                  (el) => el.baseCoin == _base && el.quoteCoin == _quote && el.status == "Trading"
               );
             break;
         case "bitget":
