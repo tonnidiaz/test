@@ -162,7 +162,7 @@ export class Bybit {
             const res = await this.client.getKline({
                 symbol,
                 interval: interval as any,
-                //end: end,
+                end: end,
                 //start: start,
                 limit: 1000,
                 category: this.bot.category as any,

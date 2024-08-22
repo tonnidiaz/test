@@ -29,7 +29,7 @@ import { ICandle, IObj, IOrderDetails } from "../interfaces";
 import { wsOkx } from "@/classes/main-okx";
 import { objPlats } from "../consts2";
 import { wsBybit } from "@/classes/main-bybit";
-import { SL } from "../constants";
+import { DEV, SL } from "../constants";
 import { Bybit } from "@/classes/bybit";
 import { prodStrategy as prodStr5 } from "./strategies/def-5";
 import { prodStrategy as prodStr60 } from "./strategies/def-60";
@@ -41,12 +41,12 @@ const useDef5 = false,
 
 export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     const plat = new objPlats[bot.platform](bot);
-    await sleep(500)
+    //await sleep(500)
     botLog(bot, "SIM: GETTING KLINES...");
 
     const end = getExactDate(bot.interval)
 
-    const klines = await plat.getKlines({ });
+    const klines = await plat.getKlines({ end: end.getTime() - bot.interval * 60000});
     const o = await plat.getTicker()
     if (!klines) return console.log("FAILED TO GET KLINES");
     if (!o) return console.log("FAILED TO GET TICKER");
@@ -67,7 +67,8 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     let pos = orderHasPos(order);
 
     botLog(bot, { ts: row.ts, o: row.o });
-    //return
+    
+    if (DEV) return
 
     const params = { row, prevrow, bot, order, pos, pxPr, basePr }
     await cloud5Prod(params)

@@ -32,6 +32,8 @@ export class Cloud5 extends Backtest {
                     _row: this.row,
                     _entry: this.entry,
                 });
+            }else{
+                console.log("CANNOT BUY") 
             }
 
             //if (this.isGreen) return;
@@ -63,7 +65,7 @@ export class Cloud5 extends Backtest {
             if (openCond) {
                 this.exit = o;
                 is_market = true;
-                //isSl = false; // o > this.entry// || true;
+                isSl = true; // o > this.entry// || true;
             }
 
             console.log({ isSl, exit: this.exit, trail, _sl });
