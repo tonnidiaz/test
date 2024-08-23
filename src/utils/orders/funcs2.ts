@@ -44,36 +44,42 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     //await sleep(500)
     botLog(bot, "SIM: GETTING KLINES...");
 
-    const end = getExactDate(bot.interval)
+    const end = getExactDate(bot.interval);
 
-    const klines = await plat.getKlines({ end: end.getTime()});
+    const klines = await plat.getKlines({ end: end.getTime() });
     //const o = await plat.getTicker()
     if (!klines) return console.log("FAILED TO GET KLINES");
     //if (!o) return console.log("FAILED TO GET TICKER");
 
-    const df = tuCE(heikinAshi(parseKlines(klines)));
+    let df = parseKlines(klines);
+    let prevrow = df[df.length - 2];
+    let row: ICandle = df[df.length - 1];
+    botLog(bot, { prevrow: prevrow.ts, row: row.ts });
+    if (prevrow.v == 0){
+        botLog(bot, "VOL: SKIPPING")
+        return
+    }
+    df = tuCE(heikinAshi(df));
 
     const pxPr = getPricePrecision([bot.base, bot.ccy], bot.platform);
     const basePr = getCoinPrecision([bot.base, bot.ccy], "limit", bot.platform);
 
     if (pxPr == null || basePr == null) return;
+
+    prevrow = df[df.length - 2];
+    row = df[df.length - 1]; //{ts: parseDate(end), o, h: o, l:o, c: o, v: prevrow.v, ha_o: o,ha_h: o, ha_l:o, ha_c: o };
     
-    
-    const prevrow = df[df.length - 2];
-    const row: ICandle = df[df.length - 1]//{ts: parseDate(end), o, h: o, l:o, c: o, v: prevrow.v, ha_o: o,ha_h: o, ha_l:o, ha_c: o };
-    botLog(bot, { prevrow: prevrow.ts, row: row.ts });
 
     let order = await getLastOrder(bot);
     let pos = orderHasPos(order);
 
     botLog(bot, { ts: row.ts, o: row.o });
-    
-    if (DEV) return
 
-    const params = { row, prevrow, bot, order, pos, pxPr, basePr }
+    if (DEV) return;
+
+    const params = { row, prevrow, bot, order, pos, pxPr, basePr };
     //await cloud5Prod(params)
-    await def5Prod(params)
-
+    await def5Prod(params);
 
     // if (useDef5) {
     //     await prodStr5(params);
@@ -96,7 +102,8 @@ export const updateOrderInDb = async (order: IOrder, res: IOrderDetails) => {
     };
     /* order == currentOrder */
     const bal = order.new_ccy_amt - Math.abs(res.fee);
-    const profit = (order.sell_price - order.buy_price) / order.buy_price * 100 // ((bal - order.ccy_amt) / order.ccy_amt * 100) ;
+    const profit =
+        ((order.sell_price - order.buy_price) / order.buy_price) * 100; // ((bal - order.ccy_amt) / order.ccy_amt * 100) ;
     order.profit = toFixed(profit, 2);
     order.order_id = res.id;
     await order.save();

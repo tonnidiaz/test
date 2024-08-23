@@ -1,39 +1,43 @@
-/**
- * WORKS BEST WITH 5min CLOUD-USDT from MEXC
- */
-
 import { ceil } from "@/utils/functions";
 import { Backtest } from "./class";
 
-export class Cloud5 extends Backtest {
-    name: string = "Cloud5";
+export class Def5Adv extends Backtest {
+    name: string = "DefTester";
 
     inloop({ i }: { i: number }): void {
         console.log("inloop");
         const _row = this.row;
-
-        const { h, c, o, l } = _row;
-
+        const { h, c, o } = _row;
         const TRAIL = 0.1; // .1
         const trail = ceil(
             this.prevrow.h * (1 - TRAIL / 100),
             this.pricePrecision
         );
+        console.log({ o, trail });
 
+        if (!this.pos && this.entryLimit){
+            const _row = this.prevrow
+            const {h, l} = _row
+
+            if (l <= this.entryLimit){
+                this.entry = this.entryLimit
+                this._fillBuy({amt: this.balance, _entry: this.entry, _row})
+            }
+        }
         if (!this.pos && this.buyCond(this.prevrow, this.df, i)) {
             console.log("\nKAYA RA BUY\n");
             this.enterTs = this.row.ts;
             console.log(`HAS BUY SIGNAL...`);
             let m = this.minSz;
             this.entry = this.row.o;
-            if (o < trail ) {
+
+            if (o < trail && this.prevrow.c <= this.prevrow.o)
                 this._fillBuy({
                     amt: this.balance,
                     _row: this.row,
                     _entry: this.entry,
                 });
-            }else{
-                console.log("CANNOT BUY") 
+            else {
             }
 
             //if (this.isGreen) return;
@@ -45,27 +49,31 @@ export class Cloud5 extends Backtest {
 
         if (this.pos) {
             console.log("HAS POS");
-            let e = Math.max(this.prevrow.o, this.prevrow.c);
-            const SL = 2.5, T = 1.5
-            this.exitLimit = e * (1 + T / 100);
+            const e = Math.max(this.prevrow.o, this.prevrow.c);
+            this.exitLimit = e * (1 + 3.5 / 100);
 
+            const _sell = !this.isGreen && this.prevrow.c >= o;
             this.exit = 0;
+
             let isSl = false;
+            let SL = 0.5; //_sell ? 1 : .5; //.5//1.2;
 
-            let is_market = false;
-            isSl = true//!this.isGreen; // && this.prevrow.c <= o
-
-            this.exit = this.exitLimit;
-
-            const minTP = this.entry * (1 + 0.1 / 100);
+            const _sl = ceil(this.entry * (1 - SL / 100), this.pricePrecision);
             const isO =
                 this.prevrow.h == Math.max(this.prevrow.c, this.prevrow.o);
-            const _sl = this.entry * (1 - SL / 100);
+
+            isSl = !this.isGreen; //_sell || true;
+            let is_market = false;
+            const minTP = this.entry * (1 + 1 / 100);
             const openCond = (o >= trail && isO) || o > minTP;
-            if (openCond) {
+            if (false) {
+            } else if (openCond) {
                 this.exit = o;
                 is_market = true;
-                isSl = true; // o > this.entry// || true;
+                //isSl = false
+            } else {
+                this.exit = this.exitLimit;
+                isSl = true;
             }
 
             console.log({ isSl, exit: this.exit, trail, _sl });
@@ -77,7 +85,6 @@ export class Cloud5 extends Backtest {
                 this.isSl = this.exit < this.entry;
 
                 if (is_market) {
-                    this.exit = o;
                     console.log("FILLING MARKET SELL ORDER AT OPEN");
                     this._fillSell({
                         _base: this.base,
@@ -85,8 +92,6 @@ export class Cloud5 extends Backtest {
                         _row,
                         isSl: this.isSl,
                     });
-              
-                    
                 } else {
                     console.log("FILLING LIMIT SELL ORDER");
                     this.sell_order_filled = true;

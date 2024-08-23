@@ -265,7 +265,8 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
             fix_invalid,
             clId,
             show, 
-            parent
+            parent,
+            only
         } = data;
         const startPair = data.from;
         let _data: {
@@ -306,10 +307,19 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
         prefix = prefix ?? "";
         const sub = demo ? "demo" : "live";
         const savePath = `_data/rf/coins/${year}/${sub}/${prefix}_${_platName}_${interval}m-${sub}.json`;
-        if (show){
+        
+        client?.emit(ep, `${platform}: BEGIN COINTEST...`);
+
+        if (only){
+            if (!existsSync(savePath)){ client?.emit(ep, {err: "NOTHING TO SHOW"});return}
+            
+        }
+        else if (show){
             if(existsSync(savePath)){
                 result = {clId, platform, data: await require(savePath)}
                 client?.emit(ep, result)
+            }else{
+                client?.emit(ep, {err: "NOTHING TO SHOW"})
             }
 
             return result
@@ -370,18 +380,25 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
 
         _instruments = _instruments.sort(); //.sort((a, b)=> a.toString() > b.toString() ? 1 : -1)
         let coins = _instruments;
-        if (quote) coins = coins.filter((el) => el[1] == `${quote}`);
+        if (only){
+            coins = coins.filter(el=> el[0] == only[0] && el[1] == only[1])
+        }
+        else if (quote) coins = coins.filter((el) => el[1] == `${quote}`);
 
-        client?.emit(ep, `${platform}: BEGINE COINTEST...`);
-        if (existsSync(savePath) && from_last) {
-            console.log("\nCONTINUING WHERE WE LEFT OF...\n");
+        if ((only || from_last) && existsSync(savePath)){
             _data = (await require(savePath)).sort((a, b) =>
                 a.pair > b.pair ? 1 : -1
             );
+
+            if (from_last){
+                console.log("\nCONTINUING WHERE WE LEFT OF...\n");
+            
             last = _data[_data.length - 1]?.pair;
+            }
         }
 
-        if (!offline || true) {
+
+        if (!only) {
             if (startPair) {
                 coins = coins.slice(
                     typeof startPair == "number"
@@ -414,7 +431,11 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
                 const symbol = getSymbol(pair, platName);
 
                 console.log(symbol);
+                if (_data.length && only){
 
+                    // FILTER OUT THE CURRENT PAIR
+                    _data = _data.filter(el=> el.pair.toString() != only.toString())
+                }
                 const pxPr = getPricePrecision(pair, platName as any);
                 if (pxPr == null) {
                     msg = `PRICE PRECISION FOR ${symbol} NOT AVAIL`;

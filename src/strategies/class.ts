@@ -61,9 +61,14 @@ export class Backtest {
     amt_bought = 0;
     amt_sold = 0;
 
-    name = "Backtester"
+    name = "Backtester";
     buyCond: (row: ICandle, df?: ICandle[], i?: number) => boolean;
-    sellCond: (row: ICandle, entry: number, df?: ICandle[], i?: number) => boolean;
+    sellCond: (
+        row: ICandle,
+        entry: number,
+        df?: ICandle[],
+        i?: number
+    ) => boolean;
 
     constructor({
         df,
@@ -93,8 +98,7 @@ export class Backtest {
         trades: IObj[];
         platNm: string;
     }) {
-
-        console.log("\nPARENT:", this.constructor.name)
+        console.log("\nPARENT:", this.constructor.name);
         this.balance = balance;
         this.START_BAL = balance;
         this.df = df;
@@ -186,12 +190,12 @@ export class Backtest {
 
         const _bal = _base * _exit;
         if (_bal < 1)
-        if (_bal > this.maxAmt!) {
-            console.log(`BAL ${_bal} > MAX_AMT ${this.maxAmt}`);
-            _base = (this.maxAmt! * (1 - 0.5 / 100)) / _exit;
-            _base = toFixed(_base, this.basePrecision!);
-            return this._fillSell({ _exit, _base, _row, isSl });
-        }
+            if (_bal > this.maxAmt!) {
+                console.log(`BAL ${_bal} > MAX_AMT ${this.maxAmt}`);
+                _base = (this.maxAmt! * (1 - 0.5 / 100)) / _exit;
+                _base = toFixed(_base, this.basePrecision!);
+                return this._fillSell({ _exit, _base, _row, isSl });
+            }
         const ret = fillSellOrder({
             exitLimit: this.exitLimit,
             exit: _exit,
@@ -214,7 +218,7 @@ export class Backtest {
 
         this._fillSellOrder(ret);
         this.base -= _base;
-        this.sell_order_filled = false
+        this.sell_order_filled = false;
 
         console.log(
             `\nAFTER SELL: bal = ${this.balance}, base = ${this.base}\n`
@@ -265,99 +269,109 @@ export class Backtest {
         });
         this._fillBuyOrder(ret);
         this.balance -= amt;
-        this.buy_order_filled = false
+        this.buy_order_filled = false;
         console.log(
             `\nAFTER BUY: bal = ${this.balance}, base = ${this.base}\n`
         );
         this.buyrow = _row;
     }
 
-    _checkOrders(){
-        console.log("CHECKING PREVIOUS LIMIT ORDERS...")
-    
-            if (this.buy_order_filled && !this.pos && this.amt_bought != 0){
-                console.log("LIMIT BUY ORDER FILLED")
-                this._fillBuy({amt: this.amt_bought, _entry: this.entry, _row: this.prevrow})
-                this.amt_bought = 0
-            }
-            else if (this.sell_order_filled && this.pos && this.amt_sold != 0){
-                console.log("LIMIT SELL ORDER FILLED")
-                this._fillSell({_base: this.amt_sold, _exit: this.exit, _row: this.prevrow, isSl: this.isSl})
-                this.amt_sold = 0
-            }
-        
+    _checkOrders() {
+        console.log("CHECKING PREVIOUS LIMIT ORDERS...");
+
+        if (this.buy_order_filled && !this.pos && this.amt_bought != 0) {
+            console.log("LIMIT BUY ORDER FILLED");
+            this._fillBuy({
+                amt: this.amt_bought,
+                _entry: this.entry,
+                _row: this.prevrow,
+            });
+            this.amt_bought = 0;
+        } else if (this.sell_order_filled && this.pos && this.amt_sold != 0) {
+            console.log("LIMIT SELL ORDER FILLED");
+            this._fillSell({
+                _base: this.amt_sold,
+                _exit: this.exit,
+                _row: this.prevrow,
+                isSl: this.isSl,
+            });
+            this.amt_sold = 0;
+        }
     }
 
     run() {
         console.log(this.name, ": BEGIN BACKTESTING...\n");
-        console.log({pxPr: this.pricePrecision, basePr: this.basePrecision})
+        console.log({ pxPr: this.pricePrecision, basePr: this.basePrecision });
         for (let i = 1; i < this.df.length; i++) {
             this.prevrow = this.df[i - 1];
             this.row = this.df[i];
             this.lastPx = this.row.o;
 
-            this.isGreen = this.prevrow.c >= this.prevrow.o
-            this.isYellow = this.prevrow.c > this.row.o
-            console.log('\n', {
-                ts: this.row.ts,
-                o: this.row.o,
-                h: this.row.h,
-                l: this.row.l,                 
-                c: this.row.c,
-                v: this.row.v,
-            }, '\n');
+            this.isGreen = this.prevrow.c >= this.prevrow.o;
+            this.isYellow = this.prevrow.c > this.row.o;
+            console.log(
+                "\n",
+                {
+                    ts: this.row.ts,
+                    o: this.row.o,
+                    h: this.row.h,
+                    l: this.row.l,
+                    c: this.row.c,
+                    v: this.row.v,
+                },
+                "\n"
+            );
 
-            this._checkOrders()
-
-            if (this.row.v <= 0) continue
+            this._checkOrders();
+            const { o } = this.row;
+            if (this.prevrow.v == 0) continue
             this.inloop({ i });
-
         }
         const oKeys = Object.keys(this.mData.data);
-            const lastPos = this.mData.data[oKeys[oKeys.length - 1]];
+        const lastPos = this.mData.data[oKeys[oKeys.length - 1]];
 
-            if (lastPos && lastPos.side.startsWith("buy")) {
-                console.log("ENDED WITH BUY");
+        if (lastPos && lastPos.side.startsWith("buy")) {
+            console.log("ENDED WITH BUY");
 
-                const _row = SELL_AT_LAST_BUY
-                    ? this.buyrow
-                    : this.df[this.df.length - 1];
-                const _exit = SELL_AT_LAST_BUY ? lastPos._c : _row!.o;
-                this._fillSell({
-                    _row: _row!,
-                    _exit,
-                    _base: this.base,
-                    isSl: true,
-                });
-            }
-
-            console.log("\n", {
-                balance: this.balance,
-                aside: this.aside,
-                base: this.base,
+            const _row = SELL_AT_LAST_BUY
+                ? this.buyrow
+                : this.df[this.df.length - 1];
+            const _exit = SELL_AT_LAST_BUY ? lastPos._c : _row!.o;
+            this._fillSell({
+                _row: _row!,
+                _exit,
+                _base: this.base,
+                isSl: true,
             });
+        }
 
-            this.gain = Number(((this.gain / this.cnt) * 100).toFixed(2));
-            this.loss = Number(((this.loss / this.cnt) * 100).toFixed(2));
-            this._data = {
-                ...this.mData,
-                balance: this.balance,
-                trades: this.cnt,
-                gain: this.gain,
-                loss: this.loss,
-                aside: this.aside,
-            };
+        console.log("\n", {
+            balance: this.balance,
+            aside: this.aside,
+            base: this.base,
+        });
 
-            console.log(`\nBUY_FEES: ${this.quote} ${this.buyFees}`);
-            console.log({
-                minSz: this.minSz,
-                maxSz: this.maxSz,
-                maxAmt: this.maxAmt,
-            });
+        this.gain = Number(((this.gain / this.cnt) * 100).toFixed(2));
+        this.loss = Number(((this.loss / this.cnt) * 100).toFixed(2));
+        this._data = {
+            ...this.mData,
+            balance: this.balance,
+            trades: this.cnt,
+            gain: this.gain,
+            loss: this.loss,
+            aside: this.aside,
+        };
 
-            console.log(`SELL_FEES: ${this.quote} ${this.sellFees}\n`);
+        console.log(`\nBUY_FEES: ${this.quote} ${this.buyFees}`);
+        console.log({
+            minSz: this.minSz,
+            maxSz: this.maxSz,
+            maxAmt: this.maxAmt,
+        });
 
-            return this._data;
+        console.log(`SELL_FEES: ${this.quote} ${this.sellFees}\n`);
+
+        return this._data;
     }
 
     inloop({ i }: { i: number }) {}

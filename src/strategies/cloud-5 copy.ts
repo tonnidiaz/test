@@ -26,7 +26,7 @@ export class Cloud5 extends Backtest {
             console.log(`HAS BUY SIGNAL...`);
             let m = this.minSz;
             this.entry = this.row.o;
-            if (o < trail ) {
+            if (o < trail) {
                 this._fillBuy({
                     amt: this.balance,
                     _row: this.row,
