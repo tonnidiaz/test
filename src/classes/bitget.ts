@@ -5,7 +5,7 @@ import { RestClientV2 } from "bitget-api";
 import { writeFileSync } from "fs";
 import { CompanyResultSortBy } from "indicatorts";
 import { IBot } from "@/models/bot";
-import { botLog, capitalizeFirstLetter, getSymbol } from "@/utils/functions";
+import { botLog, capitalizeFirstLetter, getSymbol, sleep } from "@/utils/functions";
 import { IOrderDetails } from "@/utils/interfaces";
 import { DEV } from "@/utils/constants";
 
@@ -72,6 +72,7 @@ export class Bitget {
             botLog(this.bot, { end: parseDate(end), last: parseDate(last) });
             if (end >= last + interval * 60000) {
                 botLog(this.bot, "END > LAST");
+                await sleep(200)
                 return await this.getKlines({ start, end, interval, symbol });
             }
             return d;
