@@ -20,7 +20,7 @@ export class Impr5 extends Backtest {
             let m = this.minSz;
             this.entry = this.row.o;
 
-            if (o < trail)
+            if (o < trail  && this.prevrow.c <= this.prevrow.o)
             this._fillBuy({
                 amt: this.balance,
                 _row: this.row,
@@ -28,7 +28,7 @@ export class Impr5 extends Backtest {
             });
 
             else{
-                
+                console.log("CANNOT BUY")
             }
 
        /// if (!this.isGreen) return;
@@ -58,7 +58,7 @@ export class Impr5 extends Backtest {
             isSl = !this.isGreen//_sell || true;            
             let is_market = false;
 
-            const TP = 1//this.isGreen ? 2 : 3
+            const TP = 1
             const minTP = this.entry * (1 + TP / 100);
             const openCond = (o >= trail && isO) 
              || o >= minTP;
@@ -71,6 +71,7 @@ export class Impr5 extends Backtest {
                     const E = !this.isGreen ? 2 : 0
                    this.exit = o * (1 + E/100);
                    isSl = true
+                   is_market = E == 0
                    
                 }else{
                     this.exit = o
