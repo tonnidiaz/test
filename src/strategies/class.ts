@@ -59,6 +59,7 @@ export class Backtest {
     sell_order_filled = false;
     buy_order_filled = false;
     amt_bought = 0;
+    zero_vols = 0;
     amt_sold = 0;
 
     name = "Backtester";
@@ -324,6 +325,9 @@ export class Backtest {
 
             this._checkOrders();
             const { o } = this.row;
+            if (this.row.v == 0){
+                this.zero_vols += 1
+            }
             if (this.prevrow.v == 0) continue
             this.inloop({ i });
         }
@@ -367,6 +371,7 @@ export class Backtest {
             minSz: this.minSz,
             maxSz: this.maxSz,
             maxAmt: this.maxAmt,
+            zero_vols: this.zero_vols
         });
 
         console.log(`SELL_FEES: ${this.quote} ${this.sellFees}\n`);

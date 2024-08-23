@@ -3,12 +3,13 @@ import { Bot, Order, User } from "@/models";
 import { IBot } from "@/models/bot";
 import { botJobSpecs, jobs} from "@/utils/constants";
 import { addBotJob } from "@/utils/orders/funcs";
-import { botLog, tunedErr } from "@/utils/functions";
+import { botLog, getPricePrecision, toFixed, tunedErr } from "@/utils/functions";
 import { IObj } from "@/utils/interfaces";
 import express from "express";
 import schedule from "node-schedule";
 import { wsOkx } from "@/classes/main-okx";
 import { wsBybit } from "@/classes/main-bybit";
+import { getAmtToBuyWith } from "@/utils/funcs2";
 
 const router = express.Router();
 
@@ -59,6 +60,15 @@ router.post("/create", authMid, async (req, res) => {
     }
 });
 
+const calcCurrAmt = async (bot: IBot)=>{
+    const order = await Order.findById(bot.orders[bot.orders.length -1]).exec()
+    let amt = order?.is_closed ? getAmtToBuyWith(bot, order) : order?.ccy_amt
+    const pxPr = getPricePrecision([bot.base, bot.ccy], bot.platform)
+
+    return toFixed(amt ?? 0, pxPr ?? 2)
+
+}
+
 router.get("/:id", async (req, res) => {
     try {
         const { id } = req.params;
@@ -67,10 +77,8 @@ router.get("/:id", async (req, res) => {
         if (!bot) return tunedErr(res, 404, "Bot not found");
 
         bot = await bot.populate("orders");
-        const currAmt = (bot.orders[bot.orders.length - 1] as IObj | undefined)
-            ?.ccy_amt;
 
-        res.json({ ...bot.toJSON(), curr_amt: currAmt ?? bot.curr_amt });
+        res.json({ ...bot.toJSON(), curr_amt: await calcCurrAmt(bot) });
     } catch (error) {
         console.log(error);
         return tunedErr(res, 500, "Failed to get bot");
@@ -95,10 +103,8 @@ router.post("/:id/clear-orders", authMid, async (req, res) => {
     }
 
     bot = await bot.populate("orders");
-    const currAmt = (bot.orders[bot.orders.length - 1] as IObj | undefined)
-        ?.ccy_amt;
 
-    res.json({ ...bot.toJSON(), curr_amt: currAmt ?? bot.curr_amt });
+    res.json({ ...bot.toJSON(), curr_amt: await calcCurrAmt(bot) });
 });
 
 router.post("/:id/edit", authMid, async (req, res) => {
@@ -176,7 +182,7 @@ router.post("/:id/edit", authMid, async (req, res) => {
             //await ws.rmvBot(bot.id)
         }
 
-        res.json((await bot.populate("orders")).toJSON());
+        res.json({...(await bot.populate("orders")).toJSON() , curr_amt: await calcCurrAmt(bot)});
     } catch (error) {
         console.log(error);
         return tunedErr(res, 500, "Failed to edit bot");

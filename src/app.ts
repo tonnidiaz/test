@@ -48,14 +48,7 @@ import { DEV, setJobs } from "./utils/constants";
 import dotenv from "dotenv";
 import { Bot, Order } from "./models";
 import { addBotJob } from "./utils/orders/funcs";
-//import { wsOkx } from "./classes/main-okx";
 import { botLog } from "./utils/functions";
-import { wsOkx } from "./classes/main-okx";
-import { wsBybit } from "./classes/main-bybit";
-import { platforms } from "./utils/consts";
-import { Bybit } from "./classes/bybit";
-import { OKX } from "./classes/okx";
-import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 
 dotenv.config();
 // view engine setup
