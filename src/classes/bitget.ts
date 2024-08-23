@@ -46,35 +46,38 @@ export class Bitget {
         savePath?: string | undefined;
         isBybit?: boolean;
     }) {
-
-        try{
-            
-            interval = interval ?? this.bot.interval
+        try {
+            interval = interval ?? this.bot.interval;
             end = end ?? Date.now() - interval * 60000;
 
             let klines: any[] = [];
             let done = false;
-            symbol = symbol ?? this.getSymbol()
-            
-            const _interval = getInterval(interval, this.bot.platform)
+            symbol = symbol ?? this.getSymbol();
+
+            const _interval = getInterval(interval, this.bot.platform);
             console.log(`[ BITGET GETTING KLINES.. FOR ` + symbol);
-    
+
             const res = await this.client.getSpotCandles({
                 symbol,
-                granularity:_interval,
+                granularity: _interval,
                 endTime: `${end + interval * 60000}`,
             });
-    
+
             const { data } = res;
             klines = [...data];
-    
+
             let d = [...klines];
-            console.log(d[d.length - 1]);
+            const last = Number(d[d.length - 1][0]);
+
+            botLog(this.bot, { end: parseDate(end), last: parseDate(last) });
+            if (end >= last + interval * 60000) {
+                botLog(this.bot, "END > LAST");
+                return await this.getKlines({ start, end, interval, symbol });
+            }
             return d;
-        }catch(e: any){
+        } catch (e: any) {
             console.log(e);
         }
-        
     }
 
     async getBal(ccy?: string) {
@@ -114,7 +117,7 @@ export class Bitget {
                 size: amt.toString(),
                 price: price?.toString(),
                 clientOid: clOrderId,
-                force: 'gtc'
+                force: "gtc",
             });
 
             if (res.code != "00000") {
@@ -164,23 +167,24 @@ export class Bitget {
             console.log(error);
         }
     }
-async cancelOrder({ordId}: {ordId: string}){
-    try{
-        const res = await this.client.spotCancelOrder({symbol: this.getSymbol(), orderId: ordId})
-        if (res.code != "00000") {
-            console.log(res);
-            return;
+    async cancelOrder({ ordId }: { ordId: string }) {
+        try {
+            const res = await this.client.spotCancelOrder({
+                symbol: this.getSymbol(),
+                orderId: ordId,
+            });
+            if (res.code != "00000") {
+                console.log(res);
+                return;
+            }
+
+            return res.data.orderId;
+        } catch (e: any) {
+            console.log(e);
+            botLog(this.bot, "FAILED TO CANCEL ORDER");
         }
-
-        return res.data.orderId
-
     }
-    catch(e: any){
-        console.log(e)
-        botLog(this.bot, "FAILED TO CANCEL ORDER")
-    }
-}
-    getSymbol (){
-        return getSymbol([this.bot.base, this.bot.ccy], this.bot.platform)
+    getSymbol() {
+        return getSymbol([this.bot.base, this.bot.ccy], this.bot.platform);
     }
 }

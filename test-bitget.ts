@@ -19,7 +19,7 @@ const _bybitInstrus = bybitInstrus.length;
 const bot = new Bot({
         name: "TBOT",
         interval: 5,
-        base: "OPTIMUS",
+        base: "AITECH",
         ccy: "USDT",
         platform: "bitget",
     });
@@ -100,12 +100,12 @@ async function klines(){
 }
 
 
-//klines()
+klines()
 
 
 const bitgetId = "1210973572597989379", marketBuy = "1210975861232549892", marketSell = "1210976388569808899";
 //place({get: false})
-place({get: true, oid: marketBuy})
+//place({get: true, oid: marketBuy})
 /* 
 BUY
 
