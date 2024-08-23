@@ -302,11 +302,12 @@ export const parseFilledOrder = (res: IObj, plat: string) => {
             cTime: Number(res.createTime),
         };
     } else if (plat == "bitget") {
+        const feeDetail = JSON.parse(res.feeDetail)
         data = {
             id: res.orderId,
             fillPx: Number(res.priceAvg),
             fillSz: Number(res.baseVolume),
-            fee: Number(res.feeDetail.newFees.t),
+            fee: Number(feeDetail.newFees.t),
             fillTime: Number(res.uTime),
             cTime: Number(res.cTime),
         };

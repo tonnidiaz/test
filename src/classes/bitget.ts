@@ -11,7 +11,7 @@ import { DEV } from "@/utils/constants";
 
 export class Bitget {
     name = "BITGET";
-    maker: number = 0.1 / 100; 
+    maker: number = 0.1 / 100;
     taker: number = 0.1 / 100;
     client: RestClientV2;
     apiKey: string;
@@ -19,17 +19,17 @@ export class Bitget {
     passphrase: string;
     bot: IBot;
 
-    constructor(bot: IBot ) {
-        this.apiKey =  process.env.BITGET_API_KEY!;
+    constructor(bot: IBot) {
+        this.apiKey = process.env.BITGET_API_KEY!;
         this.apiSecret = process.env.BITGET_API_SECRET!;
         this.passphrase = process.env.BITGET_PASSPHRASE!;
-
-        this.bot = bot
-
-        this.client = new RestClientV2({apiKey: this.apiKey, apiSecret: this.apiSecret, apiPass: this.passphrase});
+        this.bot = bot;
+        this.client = new RestClientV2({
+            apiKey: this.apiKey,
+            apiSecret: this.apiSecret,
+            apiPass: this.passphrase,
+        });
     }
-
-
 
     async getKlines({
         start,
@@ -46,41 +46,35 @@ export class Bitget {
         savePath?: string | undefined;
         isBybit?: boolean;
     }) {
-        end = end ?? Date.now() - interval * 60000;
 
-        const END = end;
-        const diff = (10000 - 30) * interval * 60000;
-        const MIN_DATE = end - diff;
+        try{
+            
+            interval = interval ?? this.bot.interval
+            end = end ?? Date.now() - interval * 60000;
 
+            let klines: any[] = [];
+            let done = false;
+            symbol = symbol ?? this.getSymbol()
+            
+            const _interval = getInterval(interval, this.bot.platform)
+            console.log(`[ BITGET GETTING KLINES.. FOR ` + symbol);
     
-
-        let klines: any[] = [];
-        let done = false;
-        let cnt = 0;
-        console.log(
-            `[ BITGET GETTING KLINES.. FOR ` +
-                symbol
-        );
-
-        if (start) {
-            start =
-                (isBybit ? start : start) /* - interval * 60 * 1000 */ -
-                20 * interval * 60000; /* ACCORDING TO RETURNED DATA */
-        }
-
-            const res = await this.client.getSpotHistoricCandles({
+            const res = await this.client.getSpotCandles({
                 symbol,
-                granularity: getInterval(interval, "bitget"),
-                endTime: end,
+                granularity:_interval,
+                endTime: `${end + interval * 60000}`,
             });
-
+    
             const { data } = res;
             klines = [...data];
+    
+            let d = [...klines];
+            console.log(d[d.length - 1]);
+            return d;
+        }catch(e: any){
+            console.log(e);
+        }
         
-
-        let d = [...klines];
-        console.log(d[d.length - 1]);
-        return d;
     }
 
     async getBal(ccy?: string) {
@@ -105,21 +99,23 @@ export class Bitget {
         sl?: number,
         clOrderId?: string
     ) {
-        const pair = [this.bot.base, this.bot.ccy]
+        const pair = [this.bot.base, this.bot.ccy];
         const od = { price, sl, amt, side };
 
-        const ordType = price == undefined ? 'market' : 'limit'
+        const ordType = price == undefined ? "market" : "limit";
         botLog(this.bot, `PLACING ORDER: ${JSON.stringify(od)}`);
         try {
             const { order_type } = this.bot;
-          
-          const  res = await this.client.spotSubmitOrder({
+
+            const res = await this.client.spotSubmitOrder({
                 symbol: getSymbol(pair, this.bot.platform),
-                orderType:  ordType,
+                orderType: ordType,
                 side: capitalizeFirstLetter(side),
                 size: amt.toString(),
                 price: price?.toString(),
-                clientOid: clOrderId});
+                clientOid: clOrderId,
+                force: 'gtc'
+            });
 
             if (res.code != "00000") {
                 console.log(res);
@@ -145,7 +141,7 @@ export class Bitget {
                 console.log(res);
                 return;
             }
-            const list =  res.data;
+            const list = res.data;
 
             if (!list[0]) {
                 console.log(res);
@@ -156,8 +152,9 @@ export class Bitget {
 
             if (DEV) console.log(d);
             if (list[0].status != "filled") {
-                
-                botLog(this.bot, "Order not yet filled", {status: list[0].status});
+                botLog(this.bot, "Order not yet filled", {
+                    status: list[0].status,
+                });
                 return "live";
             }
 
@@ -166,5 +163,24 @@ export class Bitget {
         } catch (error) {
             console.log(error);
         }
+    }
+async cancelOrder({ordId}: {ordId: string}){
+    try{
+        const res = await this.client.spotCancelOrder({symbol: this.getSymbol(), orderId: ordId})
+        if (res.code != "00000") {
+            console.log(res);
+            return;
+        }
+
+        return res.data.orderId
+
+    }
+    catch(e: any){
+        console.log(e)
+        botLog(this.bot, "FAILED TO CANCEL ORDER")
+    }
+}
+    getSymbol (){
+        return getSymbol([this.bot.base, this.bot.ccy], this.bot.platform)
     }
 }
