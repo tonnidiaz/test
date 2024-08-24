@@ -130,6 +130,7 @@ router.post("/:id/edit", authMid, async (req, res) => {
                 const jobIndex = jobs.findIndex((el) => el.id == jobId);
                 jobs[jobIndex] = { ...bool, active: false };
                 botLog(bot, `Job ${bool.id} cancelled`);
+                bot.deactivated_at = parseDate(new Date())
             } else if (val) {
                 console.log("Resuming JOB...");
                 if (!bool) await addBotJob(bot as any);
@@ -140,12 +141,15 @@ router.post("/:id/edit", authMid, async (req, res) => {
                     }
                     const jobIndex = jobs.findIndex((el) => el.id == jobId);
                     jobs[jobIndex] = { ...bool, active: true };
+                  
                 }
+                  bot.activated_at = parseDate(new Date())
+                  bot.deactivated_at = undefined
             }
             bot.set(key, val);
 
             botLog(bot, "DONE ADDING/PAUSING JOB");
-            bot.activated_at = parseDate(new Date())
+            
         } else if (key == "multi") {
             for (let k of Object.keys(val)) {
                 const v = val[k];

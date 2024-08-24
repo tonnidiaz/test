@@ -102,7 +102,7 @@ export const updateBuyOrder = async (order: IOrder, res: IOrderDetails) => {
     order.buy_price = res.fillPx;
     order.buy_fee = Math.abs(fee);
     order.base_amt = base_amt;
-    order.new_ccy_amt = res.fillSz * res.fillPx;
+    //order.new_ccy_amt = res.fillSz * res.fillPx;
     order.side = "sell";
     order.buy_timestamp = ts;
     await order.save()

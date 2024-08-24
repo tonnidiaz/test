@@ -24,7 +24,8 @@ export const BotSchema = new Schema(
         curr_amt: { type: Number, default: 0 },
         platform: { type: String, default: 'bybit'},
         order_type: { type: String, enum: ['Market', 'Limit'], default: 'Market'},
-        activated_at: {type: String, default: ""}
+        activated_at: {type: String, },
+        deactivated_at: {type: String, },
     },
     { timestamps: true }
 );

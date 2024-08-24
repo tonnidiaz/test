@@ -103,7 +103,8 @@ export const updateOrder = async ({
                     }
                 }
             } else {
-                await updateSellOrder(order, res);
+                botLog(bot, "FILLED")
+                await updateBuyOrder(order, res);
             }
         } else if (order && pos && order.order_id) {
             
@@ -129,6 +130,7 @@ export const updateOrder = async ({
                     }
                 }
             } else {
+                botLog(bot, "FILLED")
                 await updateSellOrder(order, res);
             }
         }
