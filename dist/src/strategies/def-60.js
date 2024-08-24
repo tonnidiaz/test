@@ -71,3 +71,4 @@ class DefTester60 extends class_1.Backtest {
     }
 }
 exports.DefTester60 = DefTester60;
+//# sourceMappingURL=def-60.js.map

@@ -17,3 +17,4 @@ wsSpot.on("message", (e) => {
 wsSpot.on("error", (e) => {
     console.log("WS: ERROR", e);
 });
+//# sourceMappingURL=ws-test-bybit.js.map

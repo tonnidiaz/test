@@ -19,3 +19,4 @@ const OTPSchema = new mongoose_1.Schema({
 exports.OTPSchema = OTPSchema;
 const OTP = (0, mongoose_1.model)("OTP", OTPSchema);
 exports.OTP = OTP;
+//# sourceMappingURL=otp.js.map

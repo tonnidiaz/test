@@ -201,3 +201,4 @@ router.post("/:id/delete", auth_mid_1.authMid, async (req, res) => {
     }
 });
 exports.default = router;
+//# sourceMappingURL=bots.js.map

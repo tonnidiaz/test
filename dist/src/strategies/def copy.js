@@ -53,3 +53,4 @@ class DefTester extends class_1.Backtest {
     }
 }
 exports.DefTester = DefTester;
+//# sourceMappingURL=def%20copy.js.map

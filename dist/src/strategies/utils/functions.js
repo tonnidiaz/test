@@ -94,3 +94,4 @@ const fillSellOrder = ({ prevrow, exit, exitLimit, base, enterTs, pricePrecision
     };
 };
 exports.fillSellOrder = fillSellOrder;
+//# sourceMappingURL=functions.js.map

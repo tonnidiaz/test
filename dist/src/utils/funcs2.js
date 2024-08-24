@@ -335,3 +335,4 @@ const getAmtToBuyWith = (bot, order) => {
     return order ? order.new_ccy_amt - Math.abs(order.sell_fee) : bot.start_bal;
 };
 exports.getAmtToBuyWith = getAmtToBuyWith;
+//# sourceMappingURL=funcs2.js.map

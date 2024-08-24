@@ -85,3 +85,4 @@ const orderType = 'buy'; // or 'sell'
 const startTime = '2023-01-01T00:00:00';
 const endTime = '2023-01-01T23:59:59';
 simulateLimitOrder(orderPrice, orderType);
+//# sourceMappingURL=coin-api.js.map

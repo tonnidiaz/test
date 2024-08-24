@@ -15,3 +15,4 @@ exports.Order = Order;
 const Test = (0, mongoose_1.model)("Test", test_1.TestSchema);
 exports.Test = Test;
 const o = new Order();
+//# sourceMappingURL=index.js.map

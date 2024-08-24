@@ -93,3 +93,4 @@ class Impr5 extends class_1.Backtest {
     }
 }
 exports.Impr5 = Impr5;
+//# sourceMappingURL=impr-5.js.map

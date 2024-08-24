@@ -6,3 +6,4 @@ exports.TestSchema = new mongoose_1.Schema({
     name: { type: String, default: '' },
     cars: { type: [{ _id: false, name: String, speed: Number }], default: [] },
 }, { timestamps: true, versionKey: false });
+//# sourceMappingURL=test.js.map

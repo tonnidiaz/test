@@ -37,3 +37,4 @@ exports.strategy = strategy;
 }
 
 */ 
+//# sourceMappingURL=funcs-test%20copy%202.js.map

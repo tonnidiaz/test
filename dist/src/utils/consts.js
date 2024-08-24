@@ -14,3 +14,4 @@ exports.platforms = {
     bitget: test_bitget_1.TestBitget,
     mexc: test_mexc_1.TestMexc,
 };
+//# sourceMappingURL=consts.js.map

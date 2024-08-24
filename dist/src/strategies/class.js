@@ -281,3 +281,4 @@ class Backtest {
     inloop({ i }) { }
 }
 exports.Backtest = Backtest;
+//# sourceMappingURL=class.js.map

@@ -3963,3 +3963,4 @@ exports.valrInstrus = [
         currencyPairType: "SPOT",
     },
 ];
+//# sourceMappingURL=valr-instrus.js.map

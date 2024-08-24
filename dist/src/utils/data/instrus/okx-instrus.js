@@ -14523,3 +14523,4 @@ exports.okxInstrus = [
         "uly": ""
     }
 ];
+//# sourceMappingURL=okx-instrus.js.map

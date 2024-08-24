@@ -53,3 +53,4 @@ exports.TRAILING_STOP_PERC = .1; //getTrailingStop(interval);
 exports.MAX_PROFIT_PERC = (5000000 * 100) / 1000;
 exports.SELL_AT_LAST_BUY = true, exports.PUT_ASIDE = false;
 exports.ETH_RATE = 2000;
+//# sourceMappingURL=constants.js.map

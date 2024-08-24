@@ -139,3 +139,4 @@ router.post("/verify-email", async (req, res) => {
 router.use("/password", password_1.default);
 router.use("/otp", otp_1.default);
 exports.default = router;
+//# sourceMappingURL=index.js.map

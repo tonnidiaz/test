@@ -181,3 +181,4 @@ exports.strategies = [
     new MACD_MA(),
     new HL(), new HL_HA(),
 ];
+//# sourceMappingURL=macd.js.map

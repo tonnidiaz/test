@@ -68,3 +68,4 @@ class DefTester extends class_1.Backtest {
     }
 }
 exports.DefTester = DefTester;
+//# sourceMappingURL=def-VELO-5m-12k.js.map

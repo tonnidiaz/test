@@ -153,3 +153,4 @@ class Bitget {
     }
 }
 exports.Bitget = Bitget;
+//# sourceMappingURL=bitget.js.map

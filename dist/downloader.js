@@ -130,3 +130,4 @@ intervals = [60];
 dld({ platNm: 'bybit', symbols, years, intervals, skip: true });
 //createDf(2024,15,"SOLUSDT")
 //afterKlines()
+//# sourceMappingURL=downloader.js.map

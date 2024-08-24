@@ -109,3 +109,4 @@ class TestGateio extends test_platforms_1.Platform {
     }
 }
 exports.TestGateio = TestGateio;
+//# sourceMappingURL=test-gateio.js.map

@@ -88,3 +88,4 @@ class Def5Adv extends class_1.Backtest {
     }
 }
 exports.Def5Adv = Def5Adv;
+//# sourceMappingURL=def5-adv.js.map

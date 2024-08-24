@@ -105,3 +105,4 @@ const updateBotAtClose = async (bot, order, c) => {
         console.log(e);
     }
 };
+//# sourceMappingURL=funcs2.js.map

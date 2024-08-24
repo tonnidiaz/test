@@ -299,3 +299,4 @@ catch (e) {
     (0, functions_1.timedLog)("FAILED TO INIT WS");
     console.log(e);
 }
+//# sourceMappingURL=main-bybit.js.map

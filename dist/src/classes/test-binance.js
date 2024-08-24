@@ -135,3 +135,4 @@ class TestBinance extends test_platforms_1.Platform {
     }
 }
 exports.TestBinance = TestBinance;
+//# sourceMappingURL=test-binance.js.map

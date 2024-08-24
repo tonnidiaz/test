@@ -40,3 +40,4 @@ const UserSchema = new mongoose_1.Schema({
     bots: { type: [mongoose_1.Schema.ObjectId], ref: "Bot" }
 }, { timestamps: true });
 exports.UserSchema = UserSchema;
+//# sourceMappingURL=user.js.map

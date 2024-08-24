@@ -79,3 +79,4 @@ class Cloud5 extends class_1.Backtest {
     }
 }
 exports.Cloud5 = Cloud5;
+//# sourceMappingURL=cloud-5.js.map

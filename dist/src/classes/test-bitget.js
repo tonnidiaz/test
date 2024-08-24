@@ -117,3 +117,4 @@ class TestBitget extends test_platforms_1.Platform {
     }
 }
 exports.TestBitget = TestBitget;
+//# sourceMappingURL=test-bitget.js.map

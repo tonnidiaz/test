@@ -52,3 +52,4 @@ class ThreeSum extends strategy_1.Strategy {
     }
 }
 exports.strategies = [new ANY()]; // [ new BB_SMA(), new ThreeSum()];
+//# sourceMappingURL=ce-sma.js.map

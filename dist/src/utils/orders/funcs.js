@@ -335,3 +335,4 @@ const placeTrade = async ({ bot, ts, amt, side, price, plat, sl, ordType = "Mark
     }
 };
 exports.placeTrade = placeTrade;
+//# sourceMappingURL=funcs.js.map

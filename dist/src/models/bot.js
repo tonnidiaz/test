@@ -25,3 +25,4 @@ exports.BotSchema = new mongoose_1.Schema({
     platform: { type: String, default: 'bybit' },
     order_type: { type: String, enum: ['Market', 'Limit'], default: 'Market' }
 }, { timestamps: true });
+//# sourceMappingURL=bot.js.map

@@ -70,3 +70,4 @@ router.post("/verify", async (req, res) => {
     res.json({ user: { ...user.toJSON() }, token });
 });
 exports.default = router;
+//# sourceMappingURL=otp.js.map

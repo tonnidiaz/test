@@ -88,3 +88,4 @@ router
     }
 });
 exports.default = router;
+//# sourceMappingURL=password.js.map

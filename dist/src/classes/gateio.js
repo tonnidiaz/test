@@ -124,3 +124,4 @@ class Gateio {
     }
 }
 exports.Gateio = Gateio;
+//# sourceMappingURL=gateio.js.map

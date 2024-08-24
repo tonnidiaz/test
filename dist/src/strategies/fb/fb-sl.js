@@ -204,3 +204,4 @@ const strategy = ({ df, balance, buyCond, pair, maker = constants_1.MAKER_FEE_RA
     return _data;
 };
 exports.strategy = strategy;
+//# sourceMappingURL=fb-sl.js.map

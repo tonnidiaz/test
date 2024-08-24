@@ -7,3 +7,4 @@ var UserPermissions;
     UserPermissions[UserPermissions["write"] = 1] = "write";
     UserPermissions[UserPermissions["delete"] = 2] = "delete";
 })(UserPermissions || (exports.UserPermissions = UserPermissions = {}));
+//# sourceMappingURL=enums.js.map

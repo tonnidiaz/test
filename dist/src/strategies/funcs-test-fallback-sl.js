@@ -229,3 +229,4 @@ const strategy = ({ df, balance, buyCond, sellCond, pair, maker = constants_1.MA
     return _data;
 };
 exports.strategy = strategy;
+//# sourceMappingURL=funcs-test-fallback-sl.js.map

@@ -58,3 +58,4 @@
 //                 botLog(bot, "SELL ORDER PLACED")
 //             }
 //         }
+//# sourceMappingURL=old.js.map

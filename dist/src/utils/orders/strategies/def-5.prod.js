@@ -106,3 +106,4 @@ export const prodStrategy = async ({pos, order, bot}: {order?: IOrder | null, bo
     botLog(bot, prodStrategy)
 }
  */
+//# sourceMappingURL=def-5.prod.js.map

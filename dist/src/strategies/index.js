@@ -18,3 +18,4 @@ exports.parentStrategies = {
     cloud5: cloud_5_1.Cloud5,
     impr5: impr_5_1.Impr5,
 };
+//# sourceMappingURL=index.js.map

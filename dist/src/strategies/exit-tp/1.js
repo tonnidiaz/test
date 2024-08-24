@@ -197,3 +197,4 @@ const strategy = ({ df, balance, buyCond, sellCond, lev = 1, pair, maker = const
     return _data;
 };
 exports.strategy = strategy;
+//# sourceMappingURL=1.js.map

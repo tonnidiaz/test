@@ -526,3 +526,4 @@ const getSymbol = (pair, plat) => {
 exports.getSymbol = getSymbol;
 const clearTerminal = () => { process.stdout.write('\x1Bc'); };
 exports.clearTerminal = clearTerminal;
+//# sourceMappingURL=functions.js.map

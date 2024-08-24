@@ -28,3 +28,4 @@ exports.OrderSchema = new mongoose_1.Schema({
     is_closed: { type: Boolean, default: false },
     bot: { type: mongoose_1.Schema.ObjectId, required: true, ref: "Bot" }
 }, { timestamps: true, versionKey: false });
+//# sourceMappingURL=order.js.map

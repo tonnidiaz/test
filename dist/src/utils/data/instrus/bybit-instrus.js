@@ -13412,3 +13412,4 @@ exports.bybitInstrus = [
         }
     }
 ]; //.map(el=>({...el, baseCoin: el.baseCoin.trim(), quoteCoin: el.quoteCoin.trim()}))
+//# sourceMappingURL=bybit-instrus.js.map

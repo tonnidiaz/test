@@ -16357,3 +16357,4 @@ exports.bitgetInstrus = [
         areaSymbol: "no",
     },
 ];
+//# sourceMappingURL=bitget-instrus.js.map
