@@ -63,9 +63,9 @@ async function place({ get = false, oid="" }: { get?: boolean, oid?: string }) {
     const bot = new Bot({
         name: "TBOT",
         interval: 5,
-        base: "CLOUD",
+        base: "PTU",
         ccy: "USDT",
-        platform: "mexc",
+        platform: "bybit",
     });
     const plat = new objPlats[bot.platform](bot);
     let base = 0,
@@ -151,7 +151,7 @@ async function klines(){
 
 
 //klines()
-place({get: true, oid: "C02__455212287674880000049"})
+place({get: true, oid: "1759820931292990720"})
 
 /* 
 BUY

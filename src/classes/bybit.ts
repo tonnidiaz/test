@@ -69,10 +69,10 @@ export class Bybit {
         botLog(this.bot, `PLACING ORDER: ${JSON.stringify(od)}`);
         try {
             const { order_type } = this.bot;
-          
+          const is_market = price == undefined
           const  res = await this.client.submitOrder({
                 symbol: this.getSymbol(),
-                orderType:  price == undefined ? 'Market' : "Limit",
+                orderType:  is_market ? 'Market' : "Limit",
                 side: capitalizeFirstLetter(side),
                 qty: amt.toString(),
                 price: price?.toString(),

@@ -292,14 +292,14 @@ export const parseFilledOrder = (res: IObj, plat: string) => {
             cTime: Number(res.cTime),
         };
     } else if (plat == "bybit") {
-        res = res as AccountOrderV5;
+        res = res as AccountOrderV5; 
         data = {
             id: res.orderId,
             fillPx: Number(res.avgPrice),
             fillSz: Number(res.cumExecQty),
             fee: Number(res.cumExecFee),
             fillTime: Number(res.updatedTime),
-            cTime: Number(res.createTime),
+            cTime: Number(res.createdTime),
         };
     } else if (plat == "bitget") {
         const feeDetail = JSON.parse(res.feeDetail)

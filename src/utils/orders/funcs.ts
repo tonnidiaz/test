@@ -252,51 +252,52 @@ export const placeTrade = async ({
         }
 
         if (side == "buy") {
-            const _entry = price;
+            // const _entry = price;
 
-            const _base = amt / price;
-            if (_base < minSz ||  amt < (minAmt ?? 1)) {
-                const msg = `BASE: ${_base} < MIN_SZ: ${minSz}`;
-                return botLog(bot, msg);
-            } else if (_base > maxSz) {
-                const msg = `BASE: ${_base} > MAX_SZ: ${maxSz}`;
+            // const _base = amt / price;
+            // if (_base < minSz ||  amt < (minAmt ?? 1)) {
+            //     const msg = `BASE: ${_base} < MIN_SZ: ${minSz}`;
+            //     return botLog(bot, msg);
+            // } else if (_base > maxSz) {
+            //     const msg = `BASE: ${_base} > MAX_SZ: ${maxSz}`;
 
-                botLog(bot, msg);
+            //     botLog(bot, msg);
 
-                amt = maxSz * (1 - 0.5 / 100) * _entry;
-                amt = toFixed(amt, pxPr);
-                return await placeTrade({
-                    bot,
-                    ts,
-                    amt,
-                    side,
-                    price,
-                    plat,
-                    sl,
-                    ordType,
-                });
-            }
+            //     amt = maxSz * (1 - 0.5 / 100) * _entry;
+            //     amt = toFixed(amt, pxPr);
+            //     return await placeTrade({
+            //         bot,
+            //         ts,
+            //         amt,
+            //         side,
+            //         price,
+            //         plat,
+            //         sl,
+            //         ordType,
+            //     });
+            // }
         } else {
 
-            // SELL
-            let _base = amt;
-            const _bal = _base * price;
-            if (_bal <( minAmt ?? 1)){
-                botLog(bot, "EKSE, THIS SHIT < MIN")
-                return;
-            }
-            else if (_bal > maxAmt) {
-                console.log(`BAL ${_bal} > MAX_AMT ${maxAmt}`);
-                _base = (maxAmt * (1 - 0.5 / 100)) / price;
+            // // SELL
+            // let _base = amt;
+            // const _bal = _base * price;
+            // if (_bal <( minAmt ?? 1)){
+            //     botLog(bot, "EKSE, THIS SHIT < MIN")
+            //     return;
+            // }
+            // else if (_bal > maxAmt) {
+            //     console.log(`BAL ${_bal} > MAX_AMT ${maxAmt}`);
+            //     _base = (maxAmt * (1 - 0.5 / 100)) / price;
 
-                _base = toFixed(_base, basePrecision);
-                amt = _base;
-            }
+            //     _base = toFixed(_base, basePrecision);
+            //     amt = _base;
+            // }
         }
 
         botLog(bot, `Placing a ${amt} ${side}  order at ${price}...`);
         sl = toFixed(sl ?? 0, pxPr);
         price = toFixed(price, pxPr);
+        const _amt= amt
         amt = ordType == "Market" ? amt : side == "sell" ? amt : amt / price;
 
         amt = toFixed(amt, basePrecision);
@@ -313,7 +314,7 @@ export const placeTrade = async ({
                       bot: bot.id,
                       base: bot.base,
                       ccy: bot.ccy,
-                      ccy_amt: amt
+                      ccy_amt: _amt
                   })
                 : orders[orders.length - 1];
 
