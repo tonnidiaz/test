@@ -69,11 +69,11 @@ export const ImprProd = async ({
              return botLog(bot, "FAILED TO PLACE BUY ORDER");
          } 
          order = (await Order.findById(r).exec())!;
-         pos = true;
+         //pos = true;
          }else{
              botLog(bot, "NOT PLACING BUY , OPEN >= TRAIL")
          }
-         
+         return
     }
 
     if (order && pos && entry) {

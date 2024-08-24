@@ -38,6 +38,7 @@ export class Impr5 extends Backtest {
             }
 
        /// if (!this.isGreen) return;
+       return
         }
 
         if (this.pos) {
