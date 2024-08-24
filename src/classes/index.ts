@@ -44,7 +44,7 @@ export class OrderPlacer {
                 cancelJob(getJob(bot._id.toString())!.job);
 
                 if (bot.active) {
-                    const res = await updateOrder({bot})
+                    const res = await updateOrder({bot, cancel: true})
                    await afterOrderUpdate({bot})
                 }
             }

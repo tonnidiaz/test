@@ -49,7 +49,10 @@ export const ImprProd = async ({
 
     botLog(bot, { str, pos, trail, o, isO });
 
-    if (!pos && str.buyCond(prevrow)) {
+    const hasBuyId = order?.buy_order_id?.length != 0
+    const hasSellId = order?.order_id?.length != 0
+    botLog(bot, {hasBuyId, hasSellId})
+    if (!pos && !hasBuyId && str.buyCond(prevrow)) {
         botLog(bot, "KAYA RA BUY");
 
         const amt = getAmtToBuyWith(bot, order);
@@ -76,7 +79,7 @@ export const ImprProd = async ({
          return
     }
 
-    if (order && pos && entry) {
+    if (order && pos && entry && !hasSellId) {
         let exitLimit = 0;
 
         const e = Math.max(prevrow.o, prevrow.c);
