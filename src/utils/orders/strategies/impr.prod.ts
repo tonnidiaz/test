@@ -49,8 +49,8 @@ export const ImprProd = async ({
 
     botLog(bot, { str, pos, trail, o, isO });
 
-    const hasBuyId = order?.buy_order_id?.length != 0
-    const hasSellId = order?.order_id?.length != 0
+    const hasBuyId = !order ? false : order.buy_order_id
+    const hasSellId = !order ? false : order.order_id
     botLog(bot, {hasBuyId, hasSellId})
     if (!pos && !hasBuyId && str.buyCond(prevrow)) {
         botLog(bot, "KAYA RA BUY");
