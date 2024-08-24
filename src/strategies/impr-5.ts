@@ -21,7 +21,7 @@ export class Impr5 extends Backtest {
             let m = this.minSz;
             this.entry = this.row.o;
 
-            if (o < trail  && this.prevrow.c <= this.prevrow.o 
+            if (o < trail  && this.prevrow.c <= this.prevrow.o && v > 0
                 //&& (l < o || (v > 0 && o == h && l == o && c == o))
                 ){
                 this.entryLimit = o
@@ -77,11 +77,11 @@ export class Impr5 extends Backtest {
                     const E = !this.isGreen ? 2 : o
                    this.exit = o * (1 + E/100);
                    //isSl = true
-                  is_market = E == 0
+                  //is_market = E == 0
                    
                 }else{
                     this.exit = o// * (1 + .2)
-                    is_market = true 
+                   // is_market = true 
                 }
                 
                 //isSl = false
@@ -93,7 +93,7 @@ export class Impr5 extends Backtest {
             const exit = this.exit
             
             console.log({isSl, exit: this.exit, trail, _sl})
-            if (
+            if ( v > 0 &&
                 this.exit != 0 &&
                 (is_market || (h >= exit// || (h >= exit && v > 0 && h == o && l == o && c ==o )
             )) &&

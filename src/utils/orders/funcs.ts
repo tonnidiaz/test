@@ -33,7 +33,7 @@ import {
     getBotPlat,
 } from "../funcs2";
 import { objStrategies } from "@/strategies";
-import { updateOrderInDb } from "./funcs2";
+import { updateSellOrder, updateBuyOrder } from "./funcs2";
 import { objPlats } from "../consts2";
 
 export const getJob = (id: string) => jobs.find((el) => el.id == id);
@@ -80,8 +80,31 @@ export const updateOrder = async ({
 
         const plat = getBotPlat(bot);
 
-        if (order && !pos) {
+        if (order && !pos && order.buy_order_id) {
             // CURRENTLY NOT PLACING LIMIT BUY ORDERS
+            botLog(bot, "CHECKING LIMIT BUY ORDER", order.buy_order_id)
+            const ordId = order.buy_order_id;
+            const res = await plat.getOrderbyId(ordId);
+            if (!res) {
+                botLog(bot, "FAILED TO GET BUY ORDER");
+            } else if (res == "live") {
+                botLog(bot, "BUY ORDER STILL ACTIVE");
+
+                if (cancel) {
+                    botLog(bot, "CANCELLING ORDER...");
+                    const r = await plat.cancelOrder({ ordId });
+                    if (r) {
+                        botLog(bot, "BUY ORDER CANCELLED");
+                        order.buy_order_id = undefined;
+                        await order.save()
+                        console.log({oid: order.buy_order_id})
+                    } else {
+                        botLog(bot, "FAILED TO CANCEL BUY ORDER");
+                    }
+                }
+            } else {
+                await updateSellOrder(order, res);
+            }
         } else if (order && pos && order.order_id) {
             
 
@@ -106,7 +129,7 @@ export const updateOrder = async ({
                     }
                 }
             } else {
-                await updateOrderInDb(order, res);
+                await updateSellOrder(order, res);
             }
         }
 
@@ -326,20 +349,7 @@ export const placeTrade = async ({
                     }
                     if (res != "live") {
                         _filled = true;
-                        const ts = {
-                            i: order.buy_timestamp?.i,
-                            o: parseDate(new Date(res.fillTime)),
-                        };
-                        console.log("TS", ts);
-                        const fee = res.fee;
-                        let base_amt = res.fillSz;
-                        order.buy_order_id = res.id;
-                        order.buy_price = res.fillPx;
-                        order.buy_fee = Math.abs(fee);
-                        order.base_amt = base_amt;
-                        order.new_ccy_amt = res.fillSz * res.fillPx;
-                        order.side = "sell";
-                        order.buy_timestamp = ts;
+                       await updateBuyOrder(order, res)
                     }
                 }
             }
@@ -358,7 +368,7 @@ export const placeTrade = async ({
                 }
                 if (res && res != "live") {
                     _filled = true;
-                    await updateOrderInDb(order, res);
+                    await updateSellOrder(order, res);
                     //return { isClosed: true, lastOrder: order };
                 }
             }

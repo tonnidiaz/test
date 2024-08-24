@@ -63,7 +63,7 @@ export const ImprProd = async ({
              side: "buy",
              price: entry,
              plat: plat,
-             ordType: "Market",
+             ordType: "Limit",
          });
          if (!r) {
              return botLog(bot, "FAILED TO PLACE BUY ORDER");
@@ -97,11 +97,11 @@ export const ImprProd = async ({
                 const E = !isGreen ? 2 : 0
                 exit = o * (1 + E/100);
                 isSl = true
-                is_market = E == 0
+                //is_market = E == 0
                
             }else{
                 exit = o
-                is_market = true 
+                //is_market = true 
             }
         }
         else{

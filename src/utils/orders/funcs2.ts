@@ -90,7 +90,25 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     // }
 };
 
-export const updateOrderInDb = async (order: IOrder, res: IOrderDetails) => {
+export const updateBuyOrder = async (order: IOrder, res: IOrderDetails) => {
+    const ts = {
+        i: order.buy_timestamp?.i,
+        o: parseDate(new Date(res.fillTime)),
+    };
+    console.log("TS", ts);
+    const fee = res.fee;
+    let base_amt = res.fillSz;
+    order.buy_order_id = res.id;
+    order.buy_price = res.fillPx;
+    order.buy_fee = Math.abs(fee);
+    order.base_amt = base_amt;
+    order.new_ccy_amt = res.fillSz * res.fillPx;
+    order.side = "sell";
+    order.buy_timestamp = ts;
+    await order.save()
+    console.log("BUY ORDER UPDATED")
+}
+export const updateSellOrder = async (order: IOrder, res: IOrderDetails) => {
     const fee = Math.abs(res.fee); // In USDT
 
     /* Buy/Base fee already removed when placing sell order  */
@@ -109,6 +127,7 @@ export const updateOrderInDb = async (order: IOrder, res: IOrderDetails) => {
     order.profit = toFixed(profit, 2);
     order.order_id = res.id;
     await order.save();
+    console.log("SELL ORDER UPDATED")
 };
 
 const updateBotAtClose = async (bot: IBot, order: IOrder, c: number) => {
