@@ -23,7 +23,8 @@ export const BotSchema = new Schema(
         start_bal: { type: Number, default: 10 },
         curr_amt: { type: Number, default: 0 },
         platform: { type: String, default: 'bybit'},
-        order_type: { type: String, enum: ['Market', 'Limit'], default: 'Market'}
+        order_type: { type: String, enum: ['Market', 'Limit'], default: 'Market'},
+        activated_at: {type: String, default: ""}
     },
     { timestamps: true }
 );

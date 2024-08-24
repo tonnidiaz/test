@@ -9,7 +9,7 @@ import express from "express";
 import schedule from "node-schedule";
 import { wsOkx } from "@/classes/main-okx";
 import { wsBybit } from "@/classes/main-bybit";
-import { getAmtToBuyWith } from "@/utils/funcs2";
+import { getAmtToBuyWith, parseDate } from "@/utils/funcs2";
 
 const router = express.Router();
 
@@ -62,7 +62,7 @@ router.post("/create", authMid, async (req, res) => {
 
 const calcCurrAmt = async (bot: IBot)=>{
     const order = await Order.findById(bot.orders[bot.orders.length -1]).exec()
-    let amt = order?.is_closed ? getAmtToBuyWith(bot, order) : order?.ccy_amt
+    let amt =  getAmtToBuyWith(bot, order) 
     const pxPr = getPricePrecision([bot.base, bot.ccy], bot.platform)
 
     return toFixed(amt ?? 0, pxPr ?? 2)
@@ -145,6 +145,7 @@ router.post("/:id/edit", authMid, async (req, res) => {
             bot.set(key, val);
 
             botLog(bot, "DONE ADDING/PAUSING JOB");
+            bot.activated_at = parseDate(new Date())
         } else if (key == "multi") {
             for (let k of Object.keys(val)) {
                 const v = val[k];
