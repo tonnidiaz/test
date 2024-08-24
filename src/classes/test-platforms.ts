@@ -118,7 +118,7 @@ export class TestOKX extends Platform {
         const bybit_passphrase = process.env.BYBIT_PASSPHRASE!;
             const client = new RestClientV5({
                 demoTrading: this.demo,
-                testnet: false,
+                testnet: this.demo,
                 key: bybit_apiKey, secret: bybit_apiSecret
             });
             console.log({ client: "client", demo: this.demo }, "\n");

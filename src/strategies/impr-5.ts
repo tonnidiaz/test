@@ -1,12 +1,13 @@
 import { ceil } from "@/utils/functions";
 import { Backtest } from "./class";
+import { WCS1 } from "@/utils/constants";
 
 export class Impr5 extends Backtest {
 
     inloop({ i }: { i: number }): void {
         console.log("inloop")
         const _row = this.row;
-        const { h, c, o } = _row;
+        const { h, c, o, l, v } = _row;
         const TRAIL = 0.1; // .1
         const trail = ceil(
             this.prevrow.h * (1 - TRAIL / 100),
@@ -20,12 +21,17 @@ export class Impr5 extends Backtest {
             let m = this.minSz;
             this.entry = this.row.o;
 
-            if (o < trail  && this.prevrow.c <= this.prevrow.o)
+            if (o < trail  && this.prevrow.c <= this.prevrow.o 
+                //&& (l < o || (v > 0 && o == h && l == o && c == o))
+                ){
+                this.entryLimit = o
+                const _entry = false ? h : this.entry
             this._fillBuy({
                 amt: this.balance,
                 _row: this.row,
-                _entry: this.entry,
+                _entry: _entry,
             });
+        }
 
             else{
                 console.log("CANNOT BUY")
@@ -68,14 +74,14 @@ export class Impr5 extends Backtest {
            
             else if (openCond) {
                 if (o < minTP){
-                    const E = !this.isGreen ? 2 : 0
+                    const E = !this.isGreen ? 2 : o
                    this.exit = o * (1 + E/100);
-                   isSl = true
-                   is_market = E == 0
+                   //isSl = true
+                  is_market = E == 0
                    
                 }else{
-                    this.exit = o
-                     is_market = true 
+                    this.exit = o// * (1 + .2)
+                    is_market = true 
                 }
                 
                 //isSl = false
@@ -83,18 +89,23 @@ export class Impr5 extends Backtest {
                 this.exit = this.exitLimit
                 isSl = true
             }
+
+            const exit = this.exit
             
             console.log({isSl, exit: this.exit, trail, _sl})
             if (
                 this.exit != 0 &&
-                (is_market || h >= this.exit) &&
+                (is_market || (h >= exit// || (h >= exit && v > 0 && h == o && l == o && c ==o )
+            )) &&
                 (isSl || this.exit >= _sl)
             ) {
                 
                 this.isSl = this.exit < this.entry;
 
                 if (is_market){
+                    this.exitLimit = o
                     console.log("FILLING MARKET SELL ORDER AT OPEN")
+                    //if (WCS1) this.exit = l
                     this._fillSell({_base: this.base, _exit: this.exit, _row, isSl: this.isSl})
                 }
                 else{

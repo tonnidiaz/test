@@ -1,4 +1,5 @@
 import { Test } from "@/models";
+import axios from "axios";
 import { Router } from "express";
 
 const router = Router()
@@ -22,5 +23,22 @@ let model = (await Test.find().exec())[0]
 
 })
 
+router.get('/kline', async (req, res)=>{
+    try{
+        const { demo } = req.query
+        const url = "https://api.bybit.com"
+        const testnet = "https://api-testnet.bybit.com"
+        const _url = demo == 'true' ? testnet : url
+        console.log({demo, _url})
+        const params = {symbol: "SOLUSDT", interval: '15', category: 'spot'}
+        const _res = await axios.get(`${_url}/v5/market/kline`, {params})
+        console.log(_res.data)
+     res.send("OHK")
+    }
+    catch(e){
+        console.log(e)
+        res.status(500).json({msg: "SOMETHING WRONG"})
+    }
+})
 export default router
 

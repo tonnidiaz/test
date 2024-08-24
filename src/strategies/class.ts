@@ -328,7 +328,9 @@ export class Backtest {
             if (this.row.v == 0){
                 this.zero_vols += 1
             }
-            if (this.prevrow.v == 0) continue
+            if (this.prevrow.v == 0
+                // && this.row.v == 0
+                ) continue
             this.inloop({ i });
         }
         const oKeys = Object.keys(this.mData.data);
