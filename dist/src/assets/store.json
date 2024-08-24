@@ -1,0 +1,33 @@
+{
+    "store": {
+        "slogan": "A TUNED COFFEE FOR YOUR TASTEBUDS!",
+        "name": "TuKoffee",
+        "phone": "0769196476",
+        "email": "tonnidiazed@gmail.com",
+        "real_email": "tonnidiazed@gmail.com",
+        
+        "site": "",
+        "image": {
+            "url": "https://res.cloudinary.com/sketchi/image/upload/v1694715912/TunedBass/TuKoffee/DEV/images/products/TuKoffee_-_product_-_epoch-1694715908591.jpg",
+            "publicId": "TunedBass/TuKoffee/DEV/images/products/TuKoffee_-_product_-_epoch-1694715908591"
+        }
+    },
+    "address": "23 Albtrech Street, City and Suburban, Johannesburg, Maboneng Precinct, 2091",
+    "owner": {
+        "name": "Thabiso Koza",
+        "phone": "0769196476",
+        "email": "tonnidiazed@gmail.com"
+    },
+    "socials": {
+        "Facebook": "TuKoffee",
+        "Twitter": "TuKoffee", 
+        "Instagram": "TuKoffee",
+        "LinkedIn": "TuKoffee"
+    },
+    "developer": {
+        "name": "Thabiso Koza",
+        "phone": "0769196476",
+        "email": "tonnidiazed@gmail.com",
+        "site": "https://thabiso.vercel.app"
+    }
+}

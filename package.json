@@ -3,8 +3,8 @@
     "version": "0.0.0",
     "private": true,
     "scripts": {
-        "start": "nodemon src/index.ts",
-        "build": "rimraf dist && tsc",
+        "start": "node -r ./config-paths.js ./dist/index.js",
+        "build": "rimraf ./dist/ && npx tsc && copyfiles -u 1 ./src/views/**/* ./src/public/**/* ./src/assets/**/* ./dist/src",
         "ts.check": "tsc --project tsconfig.json",
         "add-build": "git add dist",
         "dev": "tsx watch index.ts",
