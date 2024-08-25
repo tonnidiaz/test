@@ -74,7 +74,7 @@ const tuMacd = (df: ICandle[]) => {
 };
 export const tuPath = (pth: string) => path.resolve(...pth.split("/"));
 
-export const parseKlines = (klines: (string | number)[][]) => {
+export const parseKlines = (klines: (string | number)[][], useInvalid: boolean = false) => {
     try {
         console.log(parseKlines, { len: klines.length });
         let invalid = false;
@@ -119,11 +119,12 @@ export const parseKlines = (klines: (string | number)[][]) => {
                         curr: parseDate(new Date(curr)),
                     });
                     console.log("KLINE DATA INVALID");
+                    if (!useInvalid)
                     return df;
                 }
             }
         }
-
+        if (!invalid)
         console.log("\nKLINES OK\n");
 
         return df;

@@ -48,7 +48,7 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
             T,
             save,
             demo,
-            parent
+            parent, useInvalid
         } = data;
 
         demo = demo ?? false;
@@ -172,7 +172,7 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
         }
 
         client?.emit(ep, "Analyzing data...");
-        klines = isParsed && useFile ? klines : parseKlines(klines);
+        klines = isParsed && useFile ? klines : parseKlines(klines, useInvalid);
         let df = tuCE(isHa && useFile ? klines : heikinAshi(klines));
 
         const quote = pair[1];
@@ -266,7 +266,8 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
             clId,
             show, 
             parent,
-            only
+            only,
+            useInvalid
         } = data;
         const startPair = data.from;
         let _data: {
@@ -473,7 +474,7 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
                 if (!klines.length) continue;
                 const _klines = async (klines: string[][]) => {
                     console.log(_klines);
-                    const _ks = parseKlines(klines);
+                    const _ks = parseKlines(klines, useInvalid);
 
                     if (klines.length != _ks.length) {
                         console.log(`[${pair}] KLINES IVALID`);
