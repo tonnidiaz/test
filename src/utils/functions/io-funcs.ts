@@ -27,6 +27,7 @@ import { TestGateio } from "@/classes/test-gateio";
 import { gateioInstrus } from "@/utils/data/instrus/gateio-instrus";
 import { bitgetInstrus } from "@/utils/data/instrus/bitget-instrus";
 import { mexcInstrus } from "../data/instrus/mexc-instrus";
+import { getInstrus } from "../funcs3";
 let prevData: IObj | null = null;
 
 export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
@@ -338,36 +339,7 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
                 okxCoins = await require(okxCoinsPath);
             }
 
-            _instruments = [];
-
-            switch (_platName) {
-                case "bybit":
-                    _instruments = bybitInstrus.filter(el=> el.status == 'Trading').map((el) => [
-                        el.baseCoin,
-                        el.quoteCoin,
-                    ]);
-                    break;
-                case "binance":
-                    _instruments = binanceInfo.symbols
-                        .filter((el) => el.isSpotTradingAllowed == true)
-                        .map((el) => [el.baseAsset, el.quoteAsset]);
-                    break;
-                case "gateio":
-                    _instruments = gateioInstrus
-                        .filter((el) => el.trade_status == "tradable")
-                        .map((el) => [el.base, el.quote]);
-                    break;
-                case "bitget":
-                    _instruments = bitgetInstrus
-                        .filter((el) => el.status == "online")
-                        .map((el) => [el.baseCoin, el.quoteCoin]);
-                    break;
-                case "mexc":
-                    _instruments = mexcInstrus
-                        .filter((el) => el.status == '1' && el.isSpotTradingAllowed)
-                        .map((el) => [el.baseAsset, el.quoteAsset]);
-                    break;
-            }
+            _instruments = getInstrus(_platName)
 
             // if (okxCoins != null) {
             //     _instruments = _instruments.filter(

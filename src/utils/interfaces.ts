@@ -38,3 +38,10 @@ export interface IOpenBot {
     exitLimit: number;
     klines: any[][];
 }
+
+export interface IPlat {
+    name: string;
+    base: number;
+    quote: number;
+    df: ICandle[]
+}

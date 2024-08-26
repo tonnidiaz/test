@@ -3,17 +3,22 @@ import { bitgetInstrus } from "@/utils/data/instrus/bitget-instrus";
 import { gateioInstrus } from "@/utils/data/instrus/gateio-instrus";
 import { okxInstrus } from "@/utils/data/instrus/okx-instrus";
 import { bybitInstrus } from "@/utils/data/instrus/bybit-instrus";
+import { existsSync } from "fs";
 import { parseDate, parseKlines } from "@/utils/funcs2";
 import {
     getCoinPrecision,
     getPricePrecision,
+    getSymbol,
     randomNum,
+    readJson,
     toFixed,
 } from "@/utils/functions";
 import { scheduleJob } from "node-schedule";
 import { mexcInstrus } from "@/utils/data/instrus/mexc-instrus";
 import { Bot } from "@/models";
 import { objPlats } from "@/utils/consts2";
+import { ARBIT_ZERO_FEES, klinesRootDir, noFees } from "@/utils/constants";
+import { ICandle } from "@/utils/interfaces";
 
 const _gateioInstrus = gateioInstrus.filter(
     (el) => el.trade_status == "tradable"
@@ -59,7 +64,13 @@ async function fun() {
     console.log(r);
 }
 
-async function place({ get = false, oid="" }: { get?: boolean, oid?: string }) {
+async function place({
+    get = false,
+    oid = "",
+}: {
+    get?: boolean;
+    oid?: string;
+}) {
     const bot = new Bot({
         name: "TBOT",
         interval: 5,
@@ -122,8 +133,8 @@ async function place({ get = false, oid="" }: { get?: boolean, oid?: string }) {
 }
         */
     } else {
-        amt = 9.73 //BASE
-        px = 0.1028
+        amt = 9.73; //BASE
+        px = 0.1028;
         r = await plat.placeOrder(amt, px, "sell");
     }
 
@@ -132,7 +143,7 @@ async function place({ get = false, oid="" }: { get?: boolean, oid?: string }) {
 
 //place({get: false});
 
-async function klines(){
+async function klines() {
     const bot = new Bot({
         name: "TBOT",
         interval: 5,
@@ -142,16 +153,15 @@ async function klines(){
     });
     const plat = new objPlats[bot.platform](bot);
 
-    const r = await plat.getTicker()//getKlines({end: Date.parse("2024-08-22 02:10:00+02:00")})
-    console.log(r)
-    return
-    const df = parseKlines(r ?? [])
-    console.log(df[df.length - 1].ts)
+    const r = await plat.getTicker(); //getKlines({end: Date.parse("2024-08-22 02:10:00+02:00")})
+    console.log(r);
+    return;
+    const df = parseKlines(r ?? []);
+    console.log(df[df.length - 1].ts);
 }
 
-
 //klines()
-place({get: true, oid: "1759820931292990720"})
+//place({get: true, oid: "1759820931292990720"})
 
 /* 
 BUY
@@ -185,3 +195,4 @@ BUY
   cTime: 1724313002000
 }
 */
+

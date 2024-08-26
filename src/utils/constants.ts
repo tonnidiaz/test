@@ -74,3 +74,5 @@ export const MAX_PROFIT_PERC = (5000000 * 100) / 1000
 export const SELL_AT_LAST_BUY = true , PUT_ASIDE = false
 
 export const ETH_RATE = 2000
+
+export const ARBIT_ZERO_FEES = true, IMMEDIATE_SELL = true;

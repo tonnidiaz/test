@@ -40,6 +40,7 @@ const dld = async ({
 }) => {
     
     symbols = symbols.map((el) => el.includes('/') ? el : `${el}/USDT`);
+    const sub = demo ? 'demo' : 'live'
     for (let year of years) {
         for (let symb of symbols) {
             for (let interval of intervals) {
@@ -50,8 +51,8 @@ const dld = async ({
 
                 symb = getSymbol(pair, platNm);
 
-                const fname = `${symb}_${interval}m.json`;
-                const klinesPath = `${klinesRootDir}/${platNm}/${year}/${fname}`;
+                const fname = `${symb}_${interval}m-${sub}.json`;
+                const klinesPath = `${klinesRootDir}/${platNm}/${year}/${sub}/${fname}`;
                 const dfsPath = `${dfsRootDir}/${platNm}/${year}/${fname}`;
                 if ( skip && existsSync(klinesPath)) {
                     console.log(`\n${klinesPath} EXISTS. SKIPPING...\n`);
@@ -184,9 +185,9 @@ const mergeTrades = ({symbol, year, platNm = "binance"}: {symbol: string, year: 
 
 
 let years = [2024],
-    symbols = ["TURBOS", "PEPE", "FLOKI", ""],//["GSTS", "PLY", "SOL", "ELT"],
-    intervals = [60];
+    symbols = ["ONE"],//["GSTS", "PLY", "SOL", "ELT"],
+    intervals = [5];
 
-dld({platNm: 'bybit', symbols, years,intervals, skip: true})
+dld({platNm: 'binance', symbols, years,intervals, skip: true, demo: false})
 //createDf(2024,15,"SOLUSDT")
 //afterKlines()
