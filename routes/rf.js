@@ -16,7 +16,7 @@ router.get('/kline', async function(req, res, next) {
     const baseURL = demo ? "https://api-testnet.bybit.com" : "https://api.bytick.com"
     try{
         console.log({demo})
-        const client = new RestClientV5({key: API_KEY, secret: API_SECRET, demoTrading: demo, testnet: demo}, {baseURL})
+        const client = new RestClientV5({key: API_KEY, secret: API_SECRET, demoTrading: demo, testnet: demo})
 
         const symbol = "SOLUSDT", interval= 5, category = 'spot';
 
