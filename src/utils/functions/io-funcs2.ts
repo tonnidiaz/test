@@ -37,6 +37,8 @@ export const onTriArbitCointest = async (
         ep,
         save,
         clId,
+        offline,
+        skip_saved,
     } = data;
 
     try {
@@ -65,6 +67,7 @@ export const onTriArbitCointest = async (
             ret_data = {
                 ...ret_data,
                 data: _data,
+                ep,
                 clId,
                 orders: ret_data.orders ?? orders,
             };
@@ -105,6 +108,7 @@ export const onTriArbitCointest = async (
         const Plat = new platforms[plat]({ demo });
 
         for (let instru of instrusWithBQuote) {
+            try{
             // RESET BALANCE
             bal = START_BAL;
             let w = 0,
@@ -190,32 +194,85 @@ export const onTriArbitCointest = async (
                 demo,
             });
 
-            if (!existsSync(klinesPathA)) {
+            if (offline && !existsSync(klinesPathA)) {
                 msg = `${klinesPathA} DOES NOT EXIST`;
                 client?.emit(ep, { err: msg });
                 console.log(msg);
                 continue;
             }
-            if (!existsSync(klinesPathB)) {
+            if (offline && !existsSync(klinesPathB)) {
                 msg = `${klinesPathB} DOES NOT EXIST`;
                 client?.emit(ep, { err: msg });
                 console.log(msg);
                 continue;
             }
-            if (!existsSync(klinesPathC)) {
+            if (offline && !existsSync(klinesPathC)) {
                 msg = `${klinesPathC} DOES NOT EXIST`;
                 client?.emit(ep, { err: msg });
                 console.log(msg);
                 continue;
             }
 
-            const ksA = await readJson(klinesPathA);
-            const ksB = await readJson(klinesPathB);
-            const ksC = await readJson(klinesPathC);
+            const symboA = getSymbol(pairA, plat);
+            const symboB = getSymbol(pairB, plat);
+            const symboC = getSymbol(pairC, plat);
 
-            let dfA = parseKlines(ksA ?? []);
-            let dfB = parseKlines(ksB ?? []);
-            let dfC = parseKlines(ksC ?? []);
+            const startTs = Date.parse(start);
+            const endTs = Date.parse(end);
+
+            const ksA =
+                offline || (skip_saved && existsSync(klinesPathA))
+                    ? await readJson(klinesPathA)
+                    : await Plat.getKlines({
+                          start: startTs,
+                          end: endTs,
+                          symbol: symboA,
+                          interval,
+                          savePath: save ? klinesPathA : undefined,
+                      });
+            const ksB =
+                offline || (skip_saved && existsSync(klinesPathB))
+                    ? await readJson(klinesPathB)
+                    : await Plat.getKlines({
+                          start: startTs,
+                          end: endTs,
+                          symbol: symboB,
+                          interval,
+                          savePath: save ? klinesPathB : undefined,
+                      });
+            const ksC =
+                offline || (skip_saved && existsSync(klinesPathC))
+                    ? await readJson(klinesPathC)
+                    : await Plat.getKlines({
+                          start: startTs,
+                          end: endTs,
+                          symbol: symboC,
+                          interval,
+                          savePath: save ? klinesPathC : undefined,
+                      });
+
+            if (!ksA) {
+                msg = `FAILED TO GET KLINES FOR ${pairA}`;
+                client?.emit(ep, { err: msg });
+                console.log(msg);
+                continue;
+            }
+            if (!ksB) {
+                msg = `FAILED TO GET KLINES FOR ${pairB}`;
+                client?.emit(ep, { err: msg });
+                console.log(msg);
+                continue;
+            }
+            if (!ksC) {
+                msg = `FAILED TO GET KLINES FOR ${pairC}`;
+                client?.emit(ep, { err: msg });
+                console.log(msg);
+                continue;
+            }
+
+            let dfA = parseKlines(ksA);
+            let dfB = parseKlines(ksB);
+            let dfC = parseKlines(ksC);
 
             const startMs = Date.parse(start);
             const endMs = Date.parse(end);
@@ -256,113 +313,117 @@ export const onTriArbitCointest = async (
 
             const iLen = Math.min(dfA.length, dfB.length, dfC.length);
             for (let i = 0; i < iLen; i++) {
-                const rowA = dfA[i];
-                const rowB = dfB[i];
-                const rowC = dfC[i];
+                try {
+                    const rowA = dfA[i];
+                    const rowB = dfB[i];
+                    const rowC = dfC[i];
 
-                const pxA = rowA.o;
-                const pxB = rowB.o;
-                const pxC = rowC.o;
-                const ts = rowA.ts;
+                    const pxA = rowA.o;
+                    const pxB = rowB.o;
+                    const pxC = rowC.o;
+                    const ts = rowA.ts;
 
-                if (rowB.ts != ts || rowC.ts != ts) {
-                    msg = "TIMESTAMPS DONT MATCH";
-                    client?.emit(ep, { err: msg });
-                    return;
+                    if (rowB.ts != ts || rowC.ts != ts) {
+                        msg = "TIMESTAMPS DONT MATCH";
+                        client?.emit(ep, { err: msg });
+                       continue//TODO return;
+                    }
+                    console.log("\n", { ts });
+                    let _quote = 0,
+                        baseA = 0,
+                        baseB = 0;
+                    let perc = 0;
+
+                    const flipped = false;
+                    if (flipped) {
+                        const baseC = (bal / rowC.o) * (1 - TAKER);
+                        const quoteB = baseC * rowB.o * (1 - MAKER);
+                        _quote = quoteB * rowA.o * (1 - MAKER);
+                    } else {
+                        const _amt = 1;
+                        const _B = _amt / pxA; //  BUY B WITH A
+                        const _C = _B / pxB; // BUY C WITH B
+                        const _A = _C * pxC; // SELL C FOR A
+                        // 242.660
+                        perc = Number((((_A - _amt) / _amt) * 100).toFixed(2));
+                        //console.log({ _amt, _A, perc });
+                    }
+
+                    if (perc >= 0.3) {
+                        console.log({ perc: `${perc}%` });
+                        console.log({ A, B, C });
+                        console.log("GOING IN...\n");
+                        baseA = bal / rowA.o;
+                        if (baseA < minSzA || bal < minAmtA) {
+                            console.log("CANNOT BUY A: LESS THAN MIN_AMT", {
+                                baseA,
+                                minSzA,
+                                amtA: bal,
+                                minAmtA,
+                            });
+                            continue;
+                        }
+
+                        baseA *= 1 - TAKER;
+                        baseA = toFixed(baseA, basePrA);
+
+                        baseB = baseA / rowB.o;
+                        if (baseB < minSzB || baseA < minAmtB) {
+                            console.log("CANNOT BUY B: LESS THAN MIN_AMT", {
+                                baseB,
+                                minSzB,
+                                amtB: baseA,
+                                minAmtB,
+                            });
+                            continue;
+                        }
+
+                        baseB *= 1 - TAKER;
+                        baseB = toFixed(baseB, basePrB);
+
+                        _quote = baseB * rowC.o;
+                        if (baseB < minSzC || _quote < minAmtC) {
+                            console.log("CANNOT BUY B: LESS THAN MIN_AMT", {
+                                baseC: baseB,
+                                minSzC,
+                                amtC: _quote,
+                                minAmtC,
+                            });
+                            continue;
+                        }
+                        _quote *= 1 - MAKER;
+                        _quote = toFixed(_quote, pxPrC);
+
+                        bal = _quote;
+                        console.log({ bal, START_BAL });
+                        if (only) {
+                            orders.push({
+                                ts,
+                                side: [
+                                    `[${pairA}] BUY {H: ${rowA.h}, L: ${rowA.l}, V: ${rowA.v}}`,
+                                    `[${pairB}] BUY {H: ${rowB.h}, L: ${rowB.l}, V: ${rowB.v}}`,
+                                    `[${pairC}] SELL {H: ${rowC.h}, L: ${rowC.l}, V: ${rowC.v}}`,
+                                ],
+                                px: [
+                                    `${pairA[1]} ${pxA}`,
+                                    `${pairB[1]} ${pxB}`,
+                                    `${pairC[1]} ${pxC}`,
+                                ],
+                                amt: [
+                                    `${pairA[0]} ${baseA}`,
+                                    `${pairB[0]} ${baseB}`,
+                                    `${pairC[1]} ${_quote}`,
+                                ],
+                            });
+                        }
+                        trades += 1;
+                    }
+                    gains.push(perc);
+                } catch (e) {
+                    console.log(e);
+                    continue;
                 }
-                console.log("\n", { ts });
-                let _quote = 0,
-                    baseA = 0,
-                    baseB = 0;
-                let perc = 0;
-
-                const flipped = false;
-                if (flipped) {
-                    const baseC = (bal / rowC.o) * (1 - TAKER);
-                    const quoteB = baseC * rowB.o * (1 - MAKER);
-                    _quote = quoteB * rowA.o * (1 - MAKER);
-                } else {
-                    const _amt = 1;
-                    const _B = _amt / pxA; //  BUY B WITH A
-                    const _C = _B / pxB; // BUY C WITH B
-                    const _A = _C * pxC; // SELL C FOR A
-                    // 242.660
-                    perc = Number((((_A - _amt) / _amt) * 100).toFixed(2));
-                    //console.log({ _amt, _A, perc });
-                }
-
-                if (perc >= 0.3) {
-                    console.log({ perc: `${perc}%` });
-                    console.log({ A, B, C });
-                    console.log("GOING IN...\n");
-                    baseA = bal / rowA.o;
-                    if (baseA < minSzA || bal < minAmtA) {
-                        console.log("CANNOT BUY A: LESS THAN MIN_AMT", {
-                            baseA,
-                            minSzA,
-                            amtA: bal,
-                            minAmtA,
-                        });
-                        continue;
-                    }
-
-                    baseA *= 1 - TAKER;
-                    baseA = toFixed(baseA, basePrA);
-
-                    baseB = baseA / rowB.o;
-                    if (baseB < minSzB || baseA < minAmtB) {
-                        console.log("CANNOT BUY B: LESS THAN MIN_AMT", {
-                            baseB,
-                            minSzB,
-                            amtB: baseA,
-                            minAmtB,
-                        });
-                        continue;
-                    }
-
-                    baseB *= 1 - TAKER;
-                    baseB = toFixed(baseB, basePrB);
-
-                    _quote = baseB * rowC.o;
-                    if (baseB < minSzC || _quote < minAmtC) {
-                        console.log("CANNOT BUY B: LESS THAN MIN_AMT", {
-                            baseC: baseB,
-                            minSzC,
-                            amtC: _quote,
-                            minAmtC,
-                        });
-                        continue;
-                    }
-                    _quote *= 1 - MAKER;
-                    _quote = toFixed(_quote, pxPrC);
-
-                    bal = _quote;
-                    console.log({ bal, START_BAL });
-                    if (only) {
-                        orders.push({
-                            ts,
-                            side: [
-                                `[${pairA}] BUY {H: ${rowA.h}, L: ${rowA.l}, V: ${rowA.v}}`,
-                                `[${pairB}] BUY {H: ${rowB.h}, L: ${rowB.l}, V: ${rowB.v}}`,
-                                `[${pairC}] SELL {H: ${rowC.h}, L: ${rowC.l}, V: ${rowC.v}}`,
-                            ],
-                            px: [
-                                `${pairA[1]} ${pxA}`,
-                                `${pairB[1]} ${pxB}`,
-                                `${pairC[1]} ${pxC}`,
-                            ],
-                            amt: [
-                                `${pairA[0]} ${baseA}`,
-                                `${pairB[0]} ${baseB}`,
-                                `${pairC[1]} ${_quote}`,
-                            ],
-                        });
-                    }
-                    trades += 1;
-                }
-                gains.push(perc);
             }
-
             console.log("\nPAIR:", pairB, "DONE");
             client?.emit(ep, `PAIR: ${pairB} DONE`);
             // FOR EACH PAIR SET
@@ -373,6 +434,15 @@ export const onTriArbitCointest = async (
             parseData(orders);
             _save();
         }
+
+        
+        catch (e) {
+            console.log(e);
+            continue;
+        }
+    }
+        
+
         parseData();
         _save();
         client?.emit(ep, ret_data);

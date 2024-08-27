@@ -1,7 +1,7 @@
 import { IBot } from "@/models/bot";
 import { ensureDirExists } from "@/utils/orders/funcs";
 import { getInterval, parseDate, parseFilledOrder } from "@/utils/funcs2";
-import { botLog, timedLog } from "@/utils/functions";
+import { botLog, getSymbol, timedLog } from "@/utils/functions";
 import { writeFileSync } from "fs";
 import { RestClient, WebsocketClient } from "okx-api";
 import type { AlgoOrderResult, OrderDetails, OrderResult } from "okx-api";
@@ -158,18 +158,22 @@ export class OKX {
 
     async getOrderbyId( 
         orderId: string,
-        isAlgo = false
+        isAlgo = false,
+        pair?: string[]
     ): Promise<IOrderDetails | null | "live" | undefined> {
         try {
+
+            pair = pair ?? [this.bot.base, this.bot.ccy]
             let data: IOrderDetails | null = null;
             let finalRes: OrderDetails | null = null;
             console.log(this.bot.name, `IS_ALGO: ${isAlgo}`, orderId);
 
+            const symbo = getSymbol(pair, this.bot.platform)
             const res = isAlgo
                 ? await this.client.getAlgoOrderDetails({ algoId: orderId })
                 : await this.client.getOrderDetails({
                       ordId: orderId!,
-                      instId: this.getSymbol(),
+                      instId: symbo,
                   });
             if (DEV) {
                 console.log(`DEV: ${this.bot.name}`);

@@ -92,13 +92,15 @@ export class Bybit {
         }
     }
 
-    async getOrderbyId(orderId: string, isAlgo = false) {
+    async getOrderbyId(orderId: string, isAlgo = false, pair?: string[]) {
         try {
             let data: IOrderDetails | null = null;
+            pair = pair ?? [this.bot.base, this.bot.ccy]
 
-            botLog(this.bot, "GETTING ORDER...");
+            botLog(this.bot, "GETTING ORDER FOR", pair);
+            const symbo = getSymbol(pair, this.bot.platform)
             const res = await this.client.getActiveOrders({
-                symbol: this.getSymbol(),
+                symbol: symbo,
                 category: this.bot.category as any,
                 orderId: orderId,
             });

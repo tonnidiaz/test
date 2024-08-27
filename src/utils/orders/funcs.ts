@@ -149,8 +149,10 @@ export const placeTrade = async ({
     side,
     price,
     plat,
+    pair,
     sl,
     ordType = "Market",
+    tradeNum = 1,
 }: {
     bot: IBot;
     ts: string;
@@ -158,12 +160,14 @@ export const placeTrade = async ({
     sl?: number;
     side: "buy" | "sell";
     price: number;
+    pair?: string[],
     plat: OKX | Bybit;
     ordType?: "Limit" | "Market";
+    tradeNum?: number
 }) => {
     try {
         const orders = await findBotOrders(bot);
-        const pair = [bot.base, bot.ccy];
+        pair = pair ?? [bot.base, bot.ccy];
         const minSz = getMinSz(pair, bot.platform);
         const maxSz = getMaxSz(pair, bot.platform);
         const maxAmt = getMaxAmt(pair, bot.platform);
@@ -179,7 +183,7 @@ export const placeTrade = async ({
         ) {
             return;
         }
-        let aside = bot.aside.find(
+        /* let aside = bot.aside.find(
             (el) => el.base == pair[0] && el.ccy == pair[1]
         );
         if (!aside) {
@@ -202,12 +206,12 @@ export const placeTrade = async ({
             total_quote = { base: bot.base, ccy: bot.ccy, amt: bot.start_bal };
             bot.total_quote.push(total_quote);
             await bot.save();
-        }
+        } */
 
-        botLog(bot, "PLACE_TRADE", { amt, price, side });
+        botLog(bot, "PLACE_TRADE", {pair, amt, price, side });
 
         const putAside = async (amt: number) => {
-            if (!aside) return
+           /*  if (!aside) return
             botLog(bot, `PUTTING ${amt} ASIDE...`);
             order.new_ccy_amt = order.new_ccy_amt - amt; // LEAVE THE FEE
             aside.amt = aside!.amt + amt;
@@ -222,7 +226,7 @@ export const placeTrade = async ({
             await order.save();
             await bot.save();
 
-            botLog(bot, `${amt} PUT ASIDE`);
+            botLog(bot, `${amt} PUT ASIDE`); */
         };
 
         if (ordType == "Limit" && price == 0) {
@@ -306,10 +310,13 @@ export const placeTrade = async ({
 
         const clOrderId = Date.now().toString();
 
+        const isArbitrage = bot.type == "arbitrage"
         const order =
             side == "buy"
                 ? new Order({
-                      _entry: price,
+                      _entry: isArbitrage ? 0 : price,
+                      entry_px_a: isArbitrage && tradeNum == 1 ? price : 0,
+                      entry_px_b: isArbitrage && tradeNum == 2 ? price : 0,
                       buy_timestamp: { i: ts },
                       side: side,
                       bot: bot.id,
@@ -321,7 +328,8 @@ export const placeTrade = async ({
 
         order.cl_order_id = clOrderId;
         if (side == "sell") {
-            order._exit = price;
+            order._exit = isArbitrage ? 0 : price;
+            order.exit_px_c = isArbitrage ? price : 0
         }
         await order.save();
         if (side == "buy") bot.orders.push(order._id)
@@ -345,7 +353,7 @@ export const placeTrade = async ({
                 while (!_filled) {
                     await sleep(1000);
                     botLog(bot, "CHECKING MARKET BUY ORDER...");
-                    const res = await plat.getOrderbyId(orderId);
+                    const res = await plat.getOrderbyId(orderId,false, pair);
 
                     if (!res) {
                         _filled = true;

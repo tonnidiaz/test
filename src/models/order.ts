@@ -28,7 +28,13 @@ export const OrderSchema = new Schema(
         new_ccy_amt: { type: Number, default: 0 }, // BALANCE AFTER SELL, WITH FEES
         base_amt: { type: Number, default: 0 },
         is_closed: { type: Boolean, default: false },
-        bot: { type: Schema.ObjectId, required: true, ref: "Bot" }
+        bot: { type: Schema.ObjectId, required: true, ref: "Bot" },
+        buy_px_a: {type: Number, default: 0},
+        buy_px_b: {type: Number, default: 0},
+        entry_px_a: {type: Number, default: 0}, // ESTIMATED PRICES
+        entry_px_b: {type: Number, default: 0}, // ESTIMATED PRICES
+        sell_px_c: {type: Number, default: 0},
+        exit_px_c: {type: Number, default: 0}, // ESTIMATED PRICES
     },
     { timestamps: true, versionKey: false }
 );

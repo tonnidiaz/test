@@ -196,3 +196,28 @@ BUY
 }
 */
 
+const okxQuotes = ['AUD',  'AED', 'HKD',
+  'BRL',  'EUR', 'TRY',
+  'USDC', 'BTC', 'ETH',
+  'OKB',  'DAI']
+
+  const bybitQuotes = [
+    'BTC',  'USDC',
+    'DAI',  'EUR',
+    'BRZ',  'ETH',
+    'USDE', 'BRL'
+  ]
+const binanceQuotes = [
+    'BTC',  'ETH', 'BNB',   'TUSD',
+    'USDC', 'XRP', 'TRX',   'TRY',
+    'EUR',  'ZAR', 'IDRT',  'UAH',
+    'DAI',  'BRL', 'DOGE',  'PLN',
+    'RON',  'ARS', 'FDUSD', 'AEUR',
+    'JPY',  'MXN', 'CZK',   'COP'
+  ]
+//const others = okxInstrus.filter(el => el.quoteCcy != "USDT" && el.state == 'live').map(el=> el.quoteCcy)
+//const others = bybitInstrus.filter(el => el.quoteCoin != "USDT" && el.status.toLowerCase() == 'trading').map(el=> el.quoteCoin)
+// const others = binanceInstrus.filter(el => el.quoteAsset != "USDT" && el.status.toLowerCase() == 'trading' && el.isSpotTradingAllowed).map(el=> el.quoteAsset)
+// console.log(Array.from(new Set(others)))
+
+console.log(Array.from(new Set([...okxQuotes, ...bybitQuotes, ...binanceQuotes])))
