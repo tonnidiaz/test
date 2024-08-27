@@ -75,6 +75,7 @@ const tuMacd = (df: ICandle[]) => {
 export const tuPath = (pth: string) => path.resolve(...pth.split("/"));
 
 export const parseKlines = (klines: (string | number)[][], useInvalid: boolean = false) => {
+    if (!klines.length) return []
     try {
         console.log(parseKlines, { len: klines.length });
         let invalid = false;

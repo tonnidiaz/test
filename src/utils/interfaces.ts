@@ -43,5 +43,17 @@ export interface IPlat {
     name: string;
     base: number;
     quote: number;
-    df: ICandle[]
+    med: number,
+    df: ICandle[],
+    medDf: ICandle[],
+}
+
+export interface ICcy {
+    ccy: string;
+    chain: string;
+    maxFee: number;
+    minFee: number;
+    minDep: number;
+    minWd: number;
+    maxWd: number;
 }

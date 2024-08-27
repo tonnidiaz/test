@@ -165,36 +165,53 @@ import {
     getPricePrecision,
     readJson,
     getCoinPrecision,
+    clearTerminal,
 } from "@/utils/functions";
 import { okxInstrus } from "@/utils/data/instrus/okx-instrus";
 import { bybitInstrus } from "@/utils/data/instrus/bybit-instrus";
 import { ensureDirExists } from "@/utils/orders/funcs";
+import { XRP_WITHDRAW_FEE } from "@/utils/constants";
+import { IObj } from "@/utils/interfaces";
 
 // BYBIT, BINANCE 15min PEPE works
 // BYBIT, BINANCE 15min UMA works
+
+
+
+const coin = {pair: ["THETA", "USDT"], fee: {base: .24, quote: XRP_WITHDRAW_FEE}}
 async function run() {
-    const data = {
-        platB: "bybit", 
-        platA: "binance",
+    clearTerminal()
+    const one=  false
+    const data: IObj = {
+        
+        
+        platA: "bybit",
+        platB: "binance", 
         interval: 60, 
-        start: "2024-01-01 00:00:00+02:00",
+        start: "2024-01-01 00:00:00+02:00", 
         end: "2024-10-28 23:59:00+02:00",
-        only: undefined, //["JOE", "USDT"],
-        save: true,
+        only:  one ? ["SC", "USDT"] :  undefined,
+        save: !one,
         demo: false,
         join: false,
-        bal: 50,
+        bal: 50, 
+        prefix: 'SELL_NEXT',
+        MED_PAIR: ["SC", "USDT"]
     };
 
-    const { platA, platB, interval, start, end, demo, bal, only, save, join } = data;
-
+    let {MED_PAIR, platA, platB, interval, start, end, demo, bal, only, save, join, prefix } = data;
+    const startPair = data.from;
+    prefix = prefix ? `${prefix}_` : ''
     const QUOTE_FEE = 0,
         BASE_FEE = 0;
-
+    let msg = ""
+    
     const year = Number(start.split("-")[0]);
 
     let instrusA = getInstrus(platA);
     let instrusB = getInstrus(platB);
+    instrusA = instrusA.filter(el=> el[1] == "USDT")
+    instrusB = instrusB.filter(el=> el[1] == "USDT")
 
     if (only) {
         instrusA = instrusA.filter(
@@ -213,17 +230,57 @@ async function run() {
             instrusA.findIndex((el2) => el2.toString() == el.toString()) != -1
     );
 
+    let _data: { pair: string[]; profit: number; trades: number }[] = [];
+    let last: string[] | undefined;
+
+    const savePath = `_data/rf/arbit/coins/${year}/${prefix}${platA}-${platB}_${interval}m.json`;
+
+    if ((only || join) && existsSync(savePath)){
+        _data = (await readJson(savePath)).sort((a, b) =>
+            a.pair > b.pair ? 1 : -1
+        );
+
+        if (join){
+            console.log("\nCONTINUING WHERE WE LEFT OF...\n");
+        
+        last = _data[_data.length - 1]?.pair;
+        }
+    }
+
+
+    if (!only) {
+        if (startPair) {
+            instrusA=instrusA.slice(
+                typeof startPair == "number"
+                    ? startPair
+                    :instrusA.findIndex((el) => el[0] == startPair[0])
+            );
+            instrusB=instrusB.slice(
+                typeof startPair == "number"
+                    ? startPair
+                    :instrusB.findIndex((el) => el[0] == startPair[0])
+            );
+        } else if (last) {
+        instrusA =instrusA.slice(
+            instrusA.findIndex((el) => el.toString() == last!.toString())
+            );
+        instrusB =instrusB.slice(
+            instrusB.findIndex((el) => el.toString() == last!.toString())
+            );
+
+            msg = `STARTING AT: $instrusA[0]} -> last: ${last}`;
+            console.log(msg);
+            //client?.emit(ep, msg)
+        }
+    }
     const iLen = instrusA.length;
     const instrus = instrusA.sort();
-
-    const savePath = `_data/rf/arbit/coins/${year}/${platA}-${platB}_${interval}m.json`;
-    if (join){
-
-    }
+    
+ 
     console.log(instrus.length);
     ensureDirExists(savePath);
 
-    let _data: { pair: string[]; profit: number; trades: number }[] = [];
+    
 
 
     const _save = ()=>{
@@ -231,7 +288,27 @@ async function run() {
             {writeFileSync(savePath, JSON.stringify(_data)); console.log("SAVED\n")}
     }
 
-    let zvA = 0, zvB //ZERO  VOLS
+    
+    const medA_klines_path =  getKlinesPath({plat: platA, interval, year, pair: MED_PAIR, demo})
+
+    if (!existsSync(medA_klines_path)){
+        //return console.log("MED_PAIR", MED_PAIR, `FILE NOT FOUND ON ${platA}`)
+    }
+    
+    const medB_klines_path =  getKlinesPath({plat: platB, interval, year, pair: MED_PAIR, demo})
+
+    if (!existsSync(medB_klines_path)){
+        //return console.log("MED_PAIR", MED_PAIR, `FILE NOT FOUND ON ${platB}`)
+    }
+
+    const medKA: any[] = []//await readJson(medA_klines_path)
+    const medKB: any[] = []//await readJson(medB_klines_path)
+
+    let medDfA = parseKlines(medKA)
+    let medDfB = parseKlines(medKB)
+
+    
+
     for (let i = 0; i < iLen; i++) {
         const pair = instrus[i];
         console.log("\nBEGIN PAIR", pair);
@@ -260,12 +337,10 @@ async function run() {
         }
         if (!existsSync(k1Path)) {
             console.log(k1Path, "DOES NOT EXIST");
-
             continue;
         }
         if (!existsSync(k2Path)) {
             console.log(k2Path, "DOES NOT EXIST");
-
             continue;
         }
 
@@ -290,6 +365,15 @@ async function run() {
             return tsMs >= startMs && tsMs <= endMs;
         });
 
+        medDfB = medDfB.filter((el) => {
+            const tsMs = Date.parse(el.ts);
+            return tsMs >= startMs && tsMs <= endMs;
+        });
+        medDfA = medDfA.filter((el) => {
+            const tsMs = Date.parse(el.ts);
+            return tsMs >= startMs && tsMs <= endMs;
+        });
+
         // START AT THE LATEST START
         const realStartMs = Math.max(
             Date.parse(dfA[0].ts),
@@ -306,6 +390,15 @@ async function run() {
             return tsMs >= realStartMs;
         });
 
+        medDfB = medDfB.filter((el) => {
+            const tsMs = Date.parse(el.ts);
+            return tsMs >= realStartMs
+        });
+        medDfA = medDfA.filter((el) => {
+            const tsMs = Date.parse(el.ts);
+            return tsMs >= realStartMs
+        });
+
         const bt = new Arbit({
             platA,
             platB,
@@ -314,6 +407,8 @@ async function run() {
             bal,
             dfA,
             dfB,
+            medDfA,
+            medDfB,
             basePr,
             pxPr,
         });

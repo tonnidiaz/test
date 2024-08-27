@@ -1,11 +1,23 @@
 
+## NOTES
+- **BYBIT** - Has high USDT withdraw fees
 ## COINS THAT WORK
 - UMA-USDT
 - HOT-USDT
 
 ## GOOD TO WITHDRAW
-- JOE, ONE, CITY, SC?
 
+### OKX
+- JOE, ONE, SC
+### BYBIT
+- ACA, CITY, ENJ, JUV, DCR, PSG, GNS, LUNC, SCRT, 
+
+### OKX-BYBIT
+- ENJ, BABYDOGE
+
+### BITGET-OKX
+- CETUS
+## PLAN
 - Init quote1 as balance
 - Buy on plat1:
     - base1 +=, bal1 -=

@@ -209,4 +209,12 @@ export class Bybit {
             return res.result.orderId;
         } catch (error) {}
     }
+
+    async getCurrencies(){
+        try{
+            const res = await this.client.getCoinInfo()
+            return res
+        }catch(e){console.log(e)}
+    }
+
 }

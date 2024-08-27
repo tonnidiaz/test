@@ -109,7 +109,9 @@ export class TestOKX extends Platform {
         savePath?: string | undefined;
         isBybit?: boolean;
     }) {
-        const bybit_apiKey = this.demo
+
+        try{
+            const bybit_apiKey = this.demo
             ? process.env.BYBIT_API_KEY_DEV!
             : process.env.BYBIT_API_KEY!;
         const bybit_apiSecret = this.demo
@@ -214,6 +216,10 @@ export class TestOKX extends Platform {
             let d = [...klines];
             console.log(d[d.length - 1]);
             return d;
+        }catch(e){
+            console.log(e)
+        }
+        
         
     }
     async getTrades({

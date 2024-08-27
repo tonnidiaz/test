@@ -24,37 +24,43 @@ import { TestBinance } from "@/classes/test-binance";
 import { TestBybit, TestOKX } from "@/classes/test-platforms";
 import { ITrade } from "@/utils/interfaces";
 import { platforms } from "@/utils/consts";
-
-
+import { okxInstrus } from "@/utils/data/instrus/okx-instrus";
+import { binanceInstrus } from "@/utils/data/instrus/binance-instrus";
 
 const dld = async ({
     parse = false,
     platNm = "binance",
     demo = false,
-    symbols, intervals, years, skip
+    symbols,
+    intervals,
+    years,
+    skip,
 }: {
-    symbols: string[], years: number[], intervals: number[],
+    symbols: string[];
+    years: number[];
+    intervals: number[];
     parse?: boolean;
-    platNm?: "binance" | "okx" | "bybit" | "gateio" | 'bitget';
-    skip?: boolean, demo?: boolean
+    platNm?: string;
+    skip?: boolean;
+    demo?: boolean;
 }) => {
-    
-    symbols = symbols.map((el) => el.includes('/') ? el : `${el}/USDT`);
-    const sub = demo ? 'demo' : 'live'
+    symbols = symbols.map((el) => (el.includes("/") ? el : `${el}/USDT`));
+    const sub = demo ? "demo" : "live";
     for (let year of years) {
         for (let symb of symbols) {
             for (let interval of intervals) {
                 console.log(`\nDownloading ${symb}, ${year}, ${interval}m\n`);
 
                 const pair = symb.split("/");
-                console.log({msymb: pair});
+                console.log({ msymb: pair });
 
                 symb = getSymbol(pair, platNm);
 
                 const fname = `${symb}_${interval}m-${sub}.json`;
                 const klinesPath = `${klinesRootDir}/${platNm}/${year}/${sub}/${fname}`;
                 const dfsPath = `${dfsRootDir}/${platNm}/${year}/${fname}`;
-                if ( skip && existsSync(klinesPath)) {
+                console.log({skip, demo})
+                if (skip && existsSync(klinesPath)) {
                     console.log(`\n${klinesPath} EXISTS. SKIPPING...\n`);
                     continue;
                 }
@@ -65,7 +71,7 @@ const dld = async ({
                     ccy: pair[1],
                     interval,
                 });
-                const plat = new platforms[platNm]({demo})
+                const plat = new platforms[platNm]({ demo });
                 const month =
                     platNm == "okx" ? (year < 2022 ? "07" : "01") : "01";
                 let klines = await plat.getKlines({
@@ -76,9 +82,7 @@ const dld = async ({
                     savePath: klinesPath,
                 });
                 if (parse && klines) {
-                    const df = tuCE(
-                        heikinAshi(parseKlines(klines))
-                    );
+                    const df = tuCE(heikinAshi(parseKlines(klines)));
                     ensureDirExists(dfsPath);
                     writeFileSync(dfsPath, JSON.stringify(df));
                 }
@@ -129,20 +133,32 @@ function afterKlines() {
     }
 }
 
-const getTrades = async ({symbol, start, end, platNm = "binance"}: {symbol: string, platNm?: string, start: number, end: number}) => {
-    const startDate = parseDate(new Date(start))
-    const endDate = parseDate(new Date(end))
-    const year = startDate.split('-')[0]
-    const plat = new platforms[platNm].obj({})
-    const savePath = tradesRootDir + `/${platNm}/${year}/${symbol}_${start}-${end}.json`
-    console.log({savePath});
+const getTrades = async ({
+    symbol,
+    start,
+    end,
+    platNm = "binance",
+}: {
+    symbol: string;
+    platNm?: string;
+    start: number;
+    end: number;
+}) => {
+    const startDate = parseDate(new Date(start));
+    const endDate = parseDate(new Date(end));
+    const year = startDate.split("-")[0];
+    const plat = new platforms[platNm].obj({});
+    const savePath =
+        tradesRootDir + `/${platNm}/${year}/${symbol}_${start}-${end}.json`;
+    console.log({ savePath });
     const r = await plat.getTrades({
         symbol,
-        start, end, savePath 
+        start,
+        end,
+        savePath,
     });
     console.log(r[0], r[r.length - 1]);
 };
-
 
 async function test() {
     /* const klines = await bin.getKlines("SOLUSDT", undefined, Date.parse("2024-06-04 14:47:00+02:00"))
@@ -156,38 +172,62 @@ const saveFp =
     "src/data/dfs/binance/SOL-USDT_15m_2024-05-01 00 00 00+02:00_2024-06-11 23 59 00+02:00.json";
 //klinesToDf(fp, saveFp)
 
+const mergeTrades = ({
+    symbol,
+    year,
+    platNm = "binance",
+}: {
+    symbol: string;
+    year: number;
+    platNm?: string;
+}) => {
+    const dir = `${tradesRootDir}/${platNm}/${year}`;
+    if (!existsSync(dir)) return console.log(`${dir} DOES NOT EXIST`);
 
-const mergeTrades = ({symbol, year, platNm = "binance"}: {symbol: string, year: number, platNm?: string }) =>{
+    const finalPath = `${dir}/trades.json`;
+    let trades: ITrade[] = [];
 
-    const dir = `${tradesRootDir}/${platNm}/${year}`
-    if (!existsSync(dir))
-        return console.log(`${dir} DOES NOT EXIST`);
-
-    const finalPath = `${dir}/trades.json`
-    let trades : ITrade[] = []
-
-    for (let file of readdirSync(dir)){
-        if (file.startsWith(symbol)){
-          console.log(file);
-        const json: ITrade[] = require(`${dir}/${file}`)
-        trades = [...trades, ...json].sort((a, b)=> Date.parse(a.ts) - Date.parse(b.ts))
-        writeFileSync(finalPath, JSON.stringify(trades))
-        console.log("SAVED\n");  
+    for (let file of readdirSync(dir)) {
+        if (file.startsWith(symbol)) {
+            console.log(file);
+            const json: ITrade[] = require(`${dir}/${file}`);
+            trades = [...trades, ...json].sort(
+                (a, b) => Date.parse(a.ts) - Date.parse(b.ts)
+            );
+            writeFileSync(finalPath, JSON.stringify(trades));
+            console.log("SAVED\n");
         }
-        
     }
     console.log("DONE MERGING TRADES");
-}
+};
 
 //mergeTrades({symbol: "SOLUSDT", year: 2021})
 
 //getTrades({symbol: "SOLUSDT", start: Date.parse("2021-01-03 00:31:18+02:00"), end: Date.parse("2021-01-10 23:59:00+02:00") });
 
-
 let years = [2024],
-    symbols = ["ONE"],//["GSTS", "PLY", "SOL", "ELT"],
-    intervals = [5];
+    symbols = ["DOGE", "ETH", "DOGE/ETH"], //["GSTS", "PLY", "SOL", "ELT"],
+    intervals = [60];
 
-dld({platNm: 'binance', symbols, years,intervals, skip: true, demo: false})
+const plats = ["binance"];
+
+const fn = async () => {
+    //const symbos = okxInstrus.filter(el=> el.state == 'live' && el.quoteCcy == 'ETH').map(el=> `${el.baseCcy}/${el.quoteCcy}`)
+    const symbos = binanceInstrus.filter(el=> el.status == 'TRADING' && el.quoteAsset == 'ETH').map(el=> `${el.baseAsset}/${el.quoteAsset}`)
+    for (let plat of plats) {
+
+           await dld({
+            platNm: plat,
+            symbols: symbos,
+            years,
+            intervals,
+            skip: true,
+            demo: false,
+        }); 
+        
+    }
+};
+
 //createDf(2024,15,"SOLUSDT")
 //afterKlines()
+fn()

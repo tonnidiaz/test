@@ -297,4 +297,11 @@ export class OKX {
     getSymbol() {
         return `${this.bot.base}-${this.bot.ccy}`;
     }
+
+   async getCurrencies(){
+        try{
+            const res = await this.client.getCurrencies()
+            return res
+        }catch(e){console.log(e)}
+    }
 }

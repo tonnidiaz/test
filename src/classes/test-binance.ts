@@ -29,9 +29,9 @@ export class TestBinance extends Platform {
     }) {
         try {
             if (savePath) {
-                console.log("DELETING PREVIOUS DATA...");
+                //console.log("DELETING PREVIOUS DATA...");
                 try {
-                    unlinkSync(savePath);
+                    //unlinkSync(savePath);
                 } catch (e) {
                     console.log("ERROR REMOVING FILE");
                 }
@@ -63,7 +63,7 @@ export class TestBinance extends Platform {
                     firstTs = data[data.length - 1][6];
                     if (savePath) {
                         writeFileSync(savePath, JSON.stringify(klines));
-                        console.log("Sved");
+                        console.log("SAVED");
                     }
                     cnt += 1;
                 }
