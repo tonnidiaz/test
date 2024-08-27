@@ -570,6 +570,7 @@ export const onArbitCointest  = async (data: IObj, client?: Socket, io?: Server)
     const ep = "arbit-cointest"
     try{
         clearTerminal()
+        console.log("PID:", process.pid)
         if (data.type == "tri"){
             console.log("TRIANGULAR ARBITRAGE\n")
             return await onTriArbitCointest({...data, ep}, client)
