@@ -17,7 +17,7 @@ import {
     tuPath,
 } from "@/utils/funcs2";
 
-import { getSymbol, readJson } from "@/utils/functions";
+import { clearTerminal, getSymbol, readJson } from "@/utils/functions";
 
 import { existsSync, readdirSync, writeFileSync } from "fs";
 import { TestBinance } from "@/classes/test-binance";
@@ -26,6 +26,7 @@ import { ITrade } from "@/utils/interfaces";
 import { platforms } from "@/utils/consts";
 import { okxInstrus } from "@/utils/data/instrus/okx-instrus";
 import { binanceInstrus } from "@/utils/data/instrus/binance-instrus";
+import { bybitInstrus } from "@/utils/data/instrus/bybit-instrus";
 
 const dld = async ({
     parse = false,
@@ -211,9 +212,13 @@ let years = [2024],
 
 const plats = ["binance"];
 
+clearTerminal()
+console.log("PID:", process.pid)
 const fn = async () => {
-    //const symbos = okxInstrus.filter(el=> el.state == 'live' && el.quoteCcy == 'ETH').map(el=> `${el.baseCcy}/${el.quoteCcy}`)
-    const symbos = binanceInstrus.filter(el=> el.status == 'TRADING' && el.quoteAsset == 'ETH').map(el=> `${el.baseAsset}/${el.quoteAsset}`)
+    //const symbos = okxInstrus.filter(el=> el.state == 'live' && el.quoteCcy == 'BTC').map(el=> `${el.baseCcy}/${el.quoteCcy}`)
+    //const symbos = bybitInstrus.filter(el=> el.status == 'Trading' && el.quoteCoin == 'BTC').map(el=> `${el.baseCoin}/${el.quoteCoin}`).sort()
+    const symbos = binanceInstrus.filter(el=> el.status == 'TRADING' && el.quoteAsset == 'BTC' && el.isSpotTradingAllowed).map(el=> `${el.baseAsset}/${el.quoteAsset}`).sort()
+    console.log("LEN:", symbos.length)
     for (let plat of plats) {
 
            await dld({

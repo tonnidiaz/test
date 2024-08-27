@@ -28,6 +28,7 @@ import { gateioInstrus } from "@/utils/data/instrus/gateio-instrus";
 import { bitgetInstrus } from "@/utils/data/instrus/bitget-instrus";
 import { mexcInstrus } from "../data/instrus/mexc-instrus";
 import { getInstrus } from "../funcs3";
+import { onTriArbitCointest } from "./io-funcs2";
 let prevData: IObj | null = null;
 
 export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
@@ -563,3 +564,19 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
         client?.emit(ep, { err: "Something went wrong" });
     }
 };
+
+
+export const onArbitCointest  = async (data: IObj, client?: Socket, io?: Server) => {
+    const ep = "arbit-cointest"
+    try{
+        clearTerminal()
+        if (data.type == "tri"){
+            console.log("TRIANGULAR ARBITRAGE\n")
+            return await onTriArbitCointest({...data, ep}, client)
+        }
+    }
+    catch (e: any) {
+        console.log(e.response?.data ?? e);
+        client?.emit(ep, { err: "Something went wrong" });
+    }
+}

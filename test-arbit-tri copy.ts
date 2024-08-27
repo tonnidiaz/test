@@ -94,13 +94,13 @@ const bybitBTCBases = ["ALGO","DOT","ETH","LTC","MANA","MATIC","MNT","SAND","SOL
 clearTerminal()
 let g_data: {pair: string, profit: number, trades: number}[] = []
 
-async function run({A = "USDT", B = "ETH", C, _plat, save }:{A?: string, B?: string, C?: string, _plat?: string, save?: boolean}) {
+async function run({A = "USDT", B = "ETH", C, _plat }:{A?: string, B?: string, C?: string, _plat?: string}) {
     
-    const one=  false
+    const one=  true
     const data = {
         
         plat: _plat ?? "binance", 
-        interval: 5, 
+        interval: 60, 
         start: "2024-01-01 00:00:00+02:00", 
         end: "2024-10-28 23:59:00+02:00",
         save: !one,
@@ -113,9 +113,7 @@ async function run({A = "USDT", B = "ETH", C, _plat, save }:{A?: string, B?: str
         pairC: [C!, A!]//pairC: ["PAXG", "USDT"]
     };
 
-    let {plat, interval, start, end, demo, bal, join, prefix, pairA, pairB, pairC } = data;
-    
-    save = save != undefined ? save : data.save
+    let {plat, interval, start, end, demo, bal, save, join, prefix, pairA, pairB, pairC } = data;
     prefix = prefix ? `${prefix}_` : ''
 
     const MAKER = ARBIT_ZERO_FEES ? 0 : .1/100, TAKER = ARBIT_ZERO_FEES ? 0 : .1/100
@@ -226,7 +224,7 @@ async function run({A = "USDT", B = "ETH", C, _plat, save }:{A?: string, B?: str
          _quote = (quoteB * rowA.o) * (1 - MAKER)  
         }else{
 
-            const _amt = 1
+            const _amt = 50
             const _B = _amt / A //  BUY B WITH A
             const _C = _B / B // BUY C WITH B
             const _A = _C * C// SELL C FOR A
@@ -238,17 +236,18 @@ async function run({A = "USDT", B = "ETH", C, _plat, save }:{A?: string, B?: str
             _quote = (baseB * rowC.o) * (1 - MAKER)  
         }
         
+        const pr = (_quote - bal) / bal * 100
 
         console.log({perc: `${perc}%`})
+        //console.log({pr: pr.toFixed(2) + "%"})
 
-        if (perc >= .2){
+        if (pr >= .2){
             console.log("GOING IN...")
             bal = toFixed(_quote, 2)
-            console.log({bal, START_BAL})
             trades += 1
         }
-        if (perc >= 0){
-            gains.push(perc)
+        if (pr >= 0){
+            gains.push(pr)
         }
 
     }
@@ -258,7 +257,7 @@ async function run({A = "USDT", B = "ETH", C, _plat, save }:{A?: string, B?: str
     _save()
 
     const prAves = findAve(gains)
-    const profit = toFixed(bal - START_BAL, 2)
+    const profit = bal - START_BAL
     
     const symbo =  getSymbol([C!, B!], 'okx')
     g_data.push({pair: symbo, profit, trades})
@@ -268,7 +267,6 @@ async function run({A = "USDT", B = "ETH", C, _plat, save }:{A?: string, B?: str
      const saveFp = `_data/rf/arbit-tri/coins/${plat}/${year}/${B}_${interval}m.json`
     ensureDirExists(saveFp)
     writeFileSync(saveFp, JSON.stringify(g_data)   ) 
-    console.log("SAVED")
     }
    
 
@@ -278,10 +276,10 @@ async function run({A = "USDT", B = "ETH", C, _plat, save }:{A?: string, B?: str
 
 console.log("PID:", process.pid)
 const fn = async ()=>{
-    const bases = ["MANA"]// binanceBTCBases//bybitBTCBases
+    const bases = ["MANA"] //bybitBTCBases
    for (let base of bases){
     console.log("\nBEGIN BASE:", base)
-    await run({C: base, B: "BTC", _plat: 'bybit', save: false});  
+    await run({C: base, B: "BTC", _plat: 'bybit'});  
 } 
 }
 

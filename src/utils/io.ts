@@ -18,7 +18,7 @@ import { clearTerminal, getPricePrecision, getSymbol, readJson, toFixed } from "
 import { objStrategies, parentStrategies, strategies } from "@/strategies";
 import { TestOKX } from "@/classes/test-platforms";
 import { platforms } from "./consts";
-import {onBacktest, onCointest} from './functions/io-funcs'
+import {onArbitCointest, onBacktest, onCointest} from './functions/io-funcs'
 
 const corsOptions: CorsOptions = { origin: "*" };
 const io = new Server({ cors: corsOptions }); // yes, no server arg here; it's not required
@@ -52,6 +52,7 @@ io.on("connection", (client) => {
 
     client.on("backtest", async (d)=>prevData = await onBacktest(d, client));
     client.on("cointest", async (d)=>prevData = await onCointest(d, client));
+    client.on("arbit-cointest", async (d)=>prevData = await onArbitCointest(d, client));
 
     client.on("strategies", (e) => {
         client.emit("strategies", { data: strategies });

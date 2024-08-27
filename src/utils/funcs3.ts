@@ -67,3 +67,14 @@ export const getInstrus = (_platName: string)=>{
             }
             return _instruments
 }
+
+export const getMakerFee = (plat: string) =>{
+    plat = plat.toLowerCase()
+    let fee = .1/100
+    return fee
+}
+export const getTakerFee = (plat: string) =>{
+    plat = plat.toLowerCase()
+    let fee = .1/100
+    return fee
+}

@@ -31,3 +31,6 @@
 - Withdraw from plat2:
     - quote2 -= _quote2
     - quote1 += _quote2 - fee
+
+## TRIANGULAR COINS
+- CYBER-ETH, EOS-ETH
