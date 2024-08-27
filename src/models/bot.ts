@@ -26,6 +26,12 @@ export const BotSchema = new Schema(
         order_type: { type: String, enum: ['Market', 'Limit'], default: 'Market'},
         activated_at: {type: String, },
         deactivated_at: {type: String, },
+        type: {type: String, enum: ["normal", "arbitrage"], default: "normal"},
+        arbitrage_type: {type: String, enum: ["tri", "cross"], default: "cross"},
+        A: {type: String, default: "USDT"},
+        B: {type: String, default: "BTC"},
+        C: {type: String, default: "DOGE"},
+        min_arbit_perc: {type: Number, default: .3}
     },
     { timestamps: true }
 );

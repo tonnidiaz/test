@@ -72,6 +72,7 @@ export const updateOrder = async ({
     cancel?: boolean;
 }) => {
     /* CHECK PREV ORDERS */
+    if (bot.type == "arbitrage") return;
     try {
         botLog(bot, "CHECKING PREV ORDERS");
 

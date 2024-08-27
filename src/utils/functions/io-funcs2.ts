@@ -4,7 +4,15 @@ import { IObj } from "../interfaces";
 import { ARBIT_ZERO_FEES } from "../constants";
 import { getInstrus, getKlinesPath, getMakerFee, getTakerFee } from "../funcs3";
 import { ensureDirExists } from "../orders/funcs";
-import { getCoinPrecision, getMinAmt, getMinSz, getPricePrecision, getSymbol, readJson, toFixed } from "../functions";
+import {
+    getCoinPrecision,
+    getMinAmt,
+    getMinSz,
+    getPricePrecision,
+    getSymbol,
+    readJson,
+    toFixed,
+} from "../functions";
 import { existsSync, writeFileSync } from "fs";
 import { parseKlines } from "../funcs2";
 import { platforms } from "../consts";
@@ -41,19 +49,25 @@ export const onTriArbitCointest = async (
         const QUOTE_FEE = 0,
             BASE_FEE = 0;
 
-        bal = Number(bal)
+        bal = Number(bal);
         const START_BAL = bal;
 
         let msg = "";
+
         let _data: { pair: string; profit: number; trades: number }[] = [];
         let ret_data: IObj = {};
         const year = Number(start.split("-")[0]);
 
         const savePath = `_data/rf/arbit-tri/coins/${plat}/${year}/${prefix}${B}_${interval}m.json`;
 
-        const parseData = (orders?: any[] ) => {
+        const parseData = (orders?: any[]) => {
             _data = _data.sort((a, b) => (a.profit > b.profit ? -1 : 1));
-            ret_data = { ...ret_data, data: _data, clId, orders: ret_data.orders ?? orders };
+            ret_data = {
+                ...ret_data,
+                data: _data,
+                clId,
+                orders: ret_data.orders ?? orders,
+            };
             return ret_data;
         };
 
@@ -91,6 +105,11 @@ export const onTriArbitCointest = async (
         const Plat = new platforms[plat]({ demo });
 
         for (let instru of instrusWithBQuote) {
+            // RESET BALANCE
+            bal = START_BAL;
+            let w = 0,
+                l = 0;
+
             let orders: {
                 ts: string;
                 side: string[];
@@ -106,38 +125,48 @@ export const onTriArbitCointest = async (
                 pairB = [C, B],
                 pairC = [C, A];
 
-            const pxPrA = getPricePrecision(pairA, plat)
-            const basePrA = getCoinPrecision(pairA, "limit", plat)
+            const pxPrA = getPricePrecision(pairA, plat);
+            const basePrA = getCoinPrecision(pairA, "limit", plat);
 
-            const pxPrB = getPricePrecision(pairB, plat)
-            const basePrB = getCoinPrecision(pairB, "limit", plat)
-            
-            const pxPrC = getPricePrecision(pairC, plat)
-            const basePrC = getCoinPrecision(pairC, "limit", plat)
+            const pxPrB = getPricePrecision(pairB, plat);
+            const basePrB = getCoinPrecision(pairB, "limit", plat);
 
-            const minAmtA = getMinAmt(pairA, plat), minSzA = getMinSz(pairA, plat);
-            const minAmtB = getMinAmt(pairB, plat), minSzB = getMinSz(pairB, plat);
-            const minAmtC = getMinAmt(pairC, plat), minSzC = getMinSz(pairC, plat);
-            
+            const pxPrC = getPricePrecision(pairC, plat);
+            const basePrC = getCoinPrecision(pairC, "limit", plat);
+
+            const minAmtA = getMinAmt(pairA, plat),
+                minSzA = getMinSz(pairA, plat);
+            const minAmtB = getMinAmt(pairB, plat),
+                minSzB = getMinSz(pairB, plat);
+            const minAmtC = getMinAmt(pairC, plat),
+                minSzC = getMinSz(pairC, plat);
+
             if (
-                pxPrA == null || basePrA == null ||
-                pxPrB == null || basePrB == null ||
-                pxPrC == null || basePrC == null ||
-                minAmtA == null || minSzA == null ||
-                minAmtB == null || minSzB == null ||
-                minAmtC == null || minSzC == null
-
-            )
-            {
-                msg = "CAN'T FIND PRECISION FOR ONE OF THE PAIRS"
-                console.log(msg)
-                client?.emit(ep, {err: msg})
-                continue
+                pxPrA == null ||
+                basePrA == null ||
+                pxPrB == null ||
+                basePrB == null ||
+                pxPrC == null ||
+                basePrC == null ||
+                minAmtA == null ||
+                minSzA == null ||
+                minAmtB == null ||
+                minSzB == null ||
+                minAmtC == null ||
+                minSzC == null
+            ) {
+                msg = "CAN'T FIND PRECISION FOR ONE OF THE PAIRS";
+                console.log(msg);
+                client?.emit(ep, { err: msg });
+                continue;
             }
             console.log("BEGIN PAIR:", pairB, "\n");
             client?.emit(ep, `BEGIN PAIR: ${pairB}`);
-            console.log({pairA, pairB, pairC})
-            console.log({minAmtA, minSzA, minAmtB, minSzB, minAmtC, minSzC}, "\n")
+            console.log({ pairA, pairB, pairC });
+            console.log(
+                { minAmtA, minSzA, minAmtB, minSzB, minAmtC, minSzC },
+                "\n"
+            );
 
             const klinesPathA = getKlinesPath({
                 plat,
@@ -165,19 +194,19 @@ export const onTriArbitCointest = async (
                 msg = `${klinesPathA} DOES NOT EXIST`;
                 client?.emit(ep, { err: msg });
                 console.log(msg);
-                continue
+                continue;
             }
             if (!existsSync(klinesPathB)) {
                 msg = `${klinesPathB} DOES NOT EXIST`;
                 client?.emit(ep, { err: msg });
                 console.log(msg);
-                continue
+                continue;
             }
             if (!existsSync(klinesPathC)) {
                 msg = `${klinesPathC} DOES NOT EXIST`;
                 client?.emit(ep, { err: msg });
                 console.log(msg);
-                continue
+                continue;
             }
 
             const ksA = await readJson(klinesPathA);
@@ -231,12 +260,17 @@ export const onTriArbitCointest = async (
                 const rowB = dfB[i];
                 const rowC = dfC[i];
 
-                const ts = rowA.ts;
                 const pxA = rowA.o;
                 const pxB = rowB.o;
                 const pxC = rowC.o;
+                const ts = rowA.ts;
 
-                console.log("\n", { a: rowA.ts, b: rowB.ts, c: rowC.ts });
+                if (rowB.ts != ts || rowC.ts != ts) {
+                    msg = "TIMESTAMPS DONT MATCH";
+                    client?.emit(ep, { err: msg });
+                    return;
+                }
+                console.log("\n", { ts });
                 let _quote = 0,
                     baseA = 0,
                     baseB = 0;
@@ -257,60 +291,76 @@ export const onTriArbitCointest = async (
                     //console.log({ _amt, _A, perc });
                 }
 
-                
-
                 if (perc >= 0.3) {
                     console.log({ perc: `${perc}%` });
-                    console.log({A, B,C})
+                    console.log({ A, B, C });
                     console.log("GOING IN...\n");
-                    baseA = (bal / rowA.o)
-                    if (baseA < minSzA || bal < minAmtA){
-                        console.log("CANNOT BUY A: LESS THAN MIN_AMT", {baseA, minSzA, amtA:bal, minAmtA})
-                        continue
+                    baseA = bal / rowA.o;
+                    if (baseA < minSzA || bal < minAmtA) {
+                        console.log("CANNOT BUY A: LESS THAN MIN_AMT", {
+                            baseA,
+                            minSzA,
+                            amtA: bal,
+                            minAmtA,
+                        });
+                        continue;
                     }
 
-                    baseA *= (1 - TAKER);
-                    baseA = toFixed(baseA, basePrA)
+                    baseA *= 1 - TAKER;
+                    baseA = toFixed(baseA, basePrA);
 
-                    baseB = (baseA / rowB.o)
-                    if (baseB < minSzB || baseA < minAmtB){
-                        console.log("CANNOT BUY B: LESS THAN MIN_AMT", {baseB, minSzB, amtB: baseA, minAmtB})
-                        continue
+                    baseB = baseA / rowB.o;
+                    if (baseB < minSzB || baseA < minAmtB) {
+                        console.log("CANNOT BUY B: LESS THAN MIN_AMT", {
+                            baseB,
+                            minSzB,
+                            amtB: baseA,
+                            minAmtB,
+                        });
+                        continue;
                     }
 
-                    baseB *= (1 - TAKER);
-                    baseB = toFixed(baseB, basePrB)
+                    baseB *= 1 - TAKER;
+                    baseB = toFixed(baseB, basePrB);
 
-                    _quote = baseB * rowC.o
-                    if (baseB < minSzC || _quote < minAmtC){
-                    console.log("CANNOT BUY B: LESS THAN MIN_AMT", {baseC: baseB, minSzC, amtC: _quote, minAmtC})
-                      continue
+                    _quote = baseB * rowC.o;
+                    if (baseB < minSzC || _quote < minAmtC) {
+                        console.log("CANNOT BUY B: LESS THAN MIN_AMT", {
+                            baseC: baseB,
+                            minSzC,
+                            amtC: _quote,
+                            minAmtC,
+                        });
+                        continue;
                     }
-                    _quote *= (1 - MAKER);
-                    _quote = toFixed(_quote, pxPrC)
-                    
-                    bal = _quote
+                    _quote *= 1 - MAKER;
+                    _quote = toFixed(_quote, pxPrC);
+
+                    bal = _quote;
                     console.log({ bal, START_BAL });
-                    if (only)
-                   { orders.push({
-                        ts,
-                        side: [
-                            `[${pairA}] BUY {H: ${rowA.h}, L: ${rowA.l}, V: ${rowA.v}}`,
-                            `[${pairB}] BUY {H: ${rowB.h}, L: ${rowB.l}, V: ${rowB.v}}`,
-                            `[${pairC}] SELL {H: ${rowC.h}, L: ${rowC.l}, V: ${rowC.v}}`,
-                        ],
-                        px: [
-                            `${pairA[1]} ${pxA}`,
-                            `${pairB[1]} ${pxB}`,
-                            `${pairC[1]} ${pxC}`,
-                        ],
-                        amt: [`${pairA[0]} ${baseA}`,
-                            `${pairB[0]} ${baseB}`,
-                            `${pairC[1]} ${_quote}`,],
-                    });}
+                    if (only) {
+                        orders.push({
+                            ts,
+                            side: [
+                                `[${pairA}] BUY {H: ${rowA.h}, L: ${rowA.l}, V: ${rowA.v}}`,
+                                `[${pairB}] BUY {H: ${rowB.h}, L: ${rowB.l}, V: ${rowB.v}}`,
+                                `[${pairC}] SELL {H: ${rowC.h}, L: ${rowC.l}, V: ${rowC.v}}`,
+                            ],
+                            px: [
+                                `${pairA[1]} ${pxA}`,
+                                `${pairB[1]} ${pxB}`,
+                                `${pairC[1]} ${pxC}`,
+                            ],
+                            amt: [
+                                `${pairA[0]} ${baseA}`,
+                                `${pairB[0]} ${baseB}`,
+                                `${pairC[1]} ${_quote}`,
+                            ],
+                        });
+                    }
                     trades += 1;
                 }
-                    gains.push(perc);
+                gains.push(perc);
             }
 
             console.log("\nPAIR:", pairB, "DONE");

@@ -4,6 +4,7 @@ import { getExactDate, parseDate, parseFilledOrder } from "@/utils/funcs2";
 import {
     botLog,
     capitalizeFirstLetter,
+    getSymbol,
 } from "@/utils/functions";
 import { RestClientV5 } from "bybit-api";
 import type { OrderResultV5 } from "bybit-api";
@@ -139,31 +140,28 @@ export class Bybit {
     async getKlines({
         start,
         end,
-        savePath,
         interval,
-        symbol,
+        pair,
         limit = 1000
     }: {
         end?: number;
         start?: number;
         interval?: number;
-        symbol?: string;
-        savePath?: string;
+        pair?: string[];
         limit?: number
     }) {
         end = end ?? getExactDate(this.bot.interval).getTime() - this.bot.interval * 60 * 1000; 
         let klines: any[] = [];
         let cnt = 0;
         interval = interval ?? this.bot.interval;
-        symbol = symbol ?? this.getSymbol();
+        const symbol = pair ? getSymbol(pair, this.bot.platform) : this.getSymbol();
 
         
-            console.log("GETTING KLINES...");
+            console.log("GETTING KLINES FOR:", symbol);
             const res = await this.client.getKline({
                 symbol,
                 interval: interval as any,
                 end: end,
-                //start: start,
                 limit: 200,
                 category: this.bot.category as any,
             });
@@ -178,9 +176,8 @@ export class Bybit {
             botLog(this.bot, "END > LAST")
             return await this.getKlines({ start,
                 end,
-                savePath,
                 interval,
-                symbol,
+                pair,
                 limit })
         }
         return limit == 1 ? d[d.length - 1] : d;
