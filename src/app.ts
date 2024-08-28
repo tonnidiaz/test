@@ -63,7 +63,7 @@ app.use(
 );
 /*------------------ mongodb ----------------------- */
 async function connectMongo() {
-    let mongoURL = (DEV ? process.env.MONGO_URL_LOCAL : process.env.MONGO_URL)!;
+    let mongoURL = (DEV && false? process.env.MONGO_URL_LOCAL : process.env.MONGO_URL)!;
     try {
         console.log(mongoURL);
         await mongoose.connect(mongoURL, { dbName: "tb" }); 
