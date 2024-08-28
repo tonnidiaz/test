@@ -66,7 +66,7 @@ export const onTriArbitCointest = async (
         const year = Number(start.split("-")[0]);
 
         const A = _A ?? "USDT";
-
+        console.log({A})
         const savePath = `_data/rf/arbit-tri/coins/${plat}/${year}/${prefix}${B}-${A}_${interval}m.json`;
 
         const parseData = (orders?: any[]) => {
@@ -343,7 +343,7 @@ export const onTriArbitCointest = async (
                     console.log("\n", { ts });
                     console.log({pairA, pairB, pairC})
                     console.log({pxA, pxB, pxC})
-                    
+
                     let _quote = 0,
                         baseA = 0,
                         baseB = 0;
