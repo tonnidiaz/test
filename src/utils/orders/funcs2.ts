@@ -35,12 +35,18 @@ import { def5Prod } from "./strategies/def-5.prod";
 import { prodStrategy as prodStr60 } from "./strategies/def-60";
 import { cloud5Prod } from "./strategies/cloud-5.prod";
 import { ImprProd } from "./strategies/impr.prod";
+import { afterOrderUpdateArbit } from "./funcs3";
 //import { wsOkx } from "@/classes/main-okx";
 
 const useDef5 = false,
     useDef60 = true;
 
 export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
+
+    const is_arb = bot.type == 'arbitrage'
+
+    if (is_arb) return afterOrderUpdateArbit({bot})
+
     const plat = new objPlats[bot.platform](bot);
     //await sleep(500)
     botLog(bot, "SIM: GETTING KLINES...");

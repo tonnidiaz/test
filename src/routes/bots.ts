@@ -43,7 +43,14 @@ router.post("/create", authMid, async (req, res) => {
             bot.set(k, body[k]);
         }
 
-        [bot.base, bot.ccy] = body.pair ?? body.symbol;
+        const is_arb = bot.type == "arbitrage";
+
+        const pair: string[] = is_arb
+            ? [bot.B, bot.A]
+            : body.pair ?? body.symbol;
+
+        [bot.base, bot.ccy] = pair;
+
         const user = await User.findOne({ username: body.user }).exec();
         if (!user) return tunedErr(res, 400, "User account not available");
         bot.user = user.id;
@@ -60,7 +67,7 @@ router.post("/create", authMid, async (req, res) => {
 
         bot.start_bal = bot.start_amt;
 
-        if (bot.type == "arbitrage") {
+        if (is_arb) {
             botLog(bot, "CREATING CHILD BOTS...");
             if (bot.arbitrage_type == "tri") {
                 const pairA = [bot.B, bot.A],
@@ -214,7 +221,13 @@ router.post("/:id/edit", authMid, async (req, res) => {
         const ws = bot.platform == "bybit" ? wsBybit : wsOkx;
         await ws.rmvBot(bot.id);
 
-        const ts = parseDate(new Date())
+        const ts = parseDate(new Date());
+
+        const is_arb = bot.type == "arbitrage";
+
+        const pair: string[] = is_arb ? [bot.B, bot.A] : [bot.base, bot.ccy];
+
+        [bot.base, bot.ccy] = pair;
         if (key == "active") {
             if (bool && !val) {
                 // Deactivate JOB
@@ -225,11 +238,11 @@ router.post("/:id/edit", authMid, async (req, res) => {
                 botLog(bot, `Job ${bool.id} cancelled`);
                 bot.deactivated_at = ts;
 
-                for (let oid of bot.children){
-                    const child = await Bot.findById(oid).exec()
+                for (let oid of bot.children) {
+                    const child = await Bot.findById(oid).exec();
                     if (!child) continue;
-                    child.deactivated_at = ts
-                    await child.save()
+                    child.deactivated_at = ts;
+                    await child.save();
                 }
             } else if (val) {
                 console.log("Resuming JOB...");
@@ -245,12 +258,12 @@ router.post("/:id/edit", authMid, async (req, res) => {
                 bot.activated_at = ts;
                 bot.deactivated_at = undefined;
 
-                for (let oid of bot.children){
-                    const child = await Bot.findById(oid).exec()
+                for (let oid of bot.children) {
+                    const child = await Bot.findById(oid).exec();
                     if (!child) continue;
-                    child.activated_at = ts
-                    child.deactivated_at = undefined
-                    await child.save()
+                    child.activated_at = ts;
+                    child.deactivated_at = undefined;
+                    await child.save();
                 }
             }
             bot.set(key, val);

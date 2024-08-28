@@ -38,8 +38,8 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
         }
 
         const platA = new objPlats[_botA.platform](_botA);
-        const platB = new objPlats[_botB.platform](_botA);
-        const platC = new objPlats[_botC.platform](_botA);
+        const platB = new objPlats[_botB.platform](_botB);
+        const platC = new objPlats[_botC.platform](_botC);
 
         const pxPrA = getPricePrecision(pairA, platName);
         const basePrA = getCoinPrecision(pairA, "limit", platName);
@@ -80,26 +80,30 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
         botLog(bot, "GETTING KLINES FOR EACH PAIR...\n");
         const end = getExactDate(bot.interval);
 
-        const ksA = await platA.getKlines({ end: end.getTime(), pair: pairA });
+        const ksA = await platA.getKlines({ end: end.getTime() });
         if (!ksA) {
             return botLog(bot, "FAILED TO GET KLINES FOR", pairA);
         }
-        const ksB = await platB.getKlines({ end: end.getTime(), pair: pairB });
+        const ksB = await platB.getKlines({ end: end.getTime() });
         if (!ksB) {
             return botLog(bot, "FAILED TO GET KLINES FOR", pairB);
         }
-        const ksC = await platC.getKlines({ end: end.getTime(), pair: pairC });
+        const ksC = await platC.getKlines({ end: end.getTime() });
         if (!ksC) {
             return botLog(bot, "FAILED TO GET KLINES FOR", pairC);
+        }
+        botLog(bot, "GOT ALL KLINES")
+        if (!ksA.length || !ksB.length || !ksC.length){
+            return botLog(bot, "ONE OF THE KLINES IS EMPTY", {a: ksA.length, b: ksB.length, c: ksC.length})
         }
 
         let dfA = parseKlines(ksA);
         let dfB = parseKlines(ksB);
         let dfC = parseKlines(ksC);
 
-        const rowA = dfA[0];
-        const rowB = dfB[0];
-        const rowC = dfC[0];
+        const rowA = dfA[dfA.length - 1];
+        const rowB = dfB[dfB.length - 1];
+        const rowC = dfC[dfC.length - 1];
 
         const pxA = rowA.o;
         const pxB = rowB.o;
@@ -110,6 +114,7 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
             return botLog(bot, "TIMESTAMPS DO NOT MATCH");
         }
         console.log("\n", { ts });
+        botLog(bot, {pxA, pxB, pxC})
 
         let _quote = 0,
             baseA = 0,
@@ -123,7 +128,7 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
 
         perc = Number((((_quote - AMT) / AMT) * 100).toFixed(2));
 
-        botLog(bot, { perc: `${perc}%`, baseA, baseB });
+        botLog(bot, { perc: `${perc}%`, baseA, baseB, _quote });
 
         if (perc >= bot.min_arbit_perc) {
             console.log({ pairA, pairB, pairC });

@@ -1,6 +1,6 @@
 import { IBot } from "@/models/bot";
 import { ensureDirExists } from "@/utils/orders/funcs";
-import { getInterval, parseDate, parseFilledOrder } from "@/utils/funcs2";
+import { getInterval, parseDate, parseFilledOrder, getExactDate } from "@/utils/funcs2";
 import { botLog, getSymbol, timedLog } from "@/utils/functions";
 import { writeFileSync } from "fs";
 import { RestClient, WebsocketClient } from "okx-api";
@@ -58,12 +58,12 @@ export class OKX {
         }
     }
 
-    async getTicker(){
-        botLog(this.bot, "GETTING TICKER...")
-        const res = await this.client.getTicker(this.getSymbol())
-        const ticker = Number(res[0].last)
-        console.log({ticker});
-        return ticker
+    async getTicker() {
+        botLog(this.bot, "GETTING TICKER...");
+        const res = await this.client.getTicker(this.getSymbol());
+        const ticker = Number(res[0].last);
+        console.log({ ticker });
+        return ticker;
     }
 
     async cancelOrder({ ordId, isAlgo }: { ordId: string; isAlgo?: boolean }) {
@@ -156,19 +156,18 @@ export class OKX {
         }
     }
 
-    async getOrderbyId( 
+    async getOrderbyId(
         orderId: string,
         isAlgo = false,
         pair?: string[]
     ): Promise<IOrderDetails | null | "live" | undefined> {
         try {
-
-            pair = pair ?? [this.bot.base, this.bot.ccy]
+            pair = pair ?? [this.bot.base, this.bot.ccy];
             let data: IOrderDetails | null = null;
             let finalRes: OrderDetails | null = null;
             console.log(this.bot.name, `IS_ALGO: ${isAlgo}`, orderId);
 
-            const symbo = getSymbol(pair, this.bot.platform)
+            const symbo = getSymbol(pair, this.bot.platform);
             const res = isAlgo
                 ? await this.client.getAlgoOrderDetails({ algoId: orderId })
                 : await this.client.getOrderDetails({
@@ -211,90 +210,59 @@ export class OKX {
         console.log(res);
     }
 
-
-    async getKline(){
-        const end = Date.now()
-        return await this.getKlines({end, limit: 1})
+    async getKline() {
+        const end = Date.now();
+        return await this.getKlines({ end, limit: 1 });
     }
     async getKlines({
         start,
         end,
-        savePath,
         interval,
-        symbol, limit = 100
+        limit = 100,
+        pair,
     }: {
         end?: number;
         start?: number;
         interval?: number;
-        symbol?: string;
-        savePath?: string;
-        limit?: number
+        pair?: string[];
+        limit?: number;
     }) {
-        end = end ?? Date.now() - this.bot.interval * 60 * 1000;
+        
+        
         let klines: any[] = [];
         let cnt = 0;
         interval = interval ?? this.bot.interval;
-        symbol = symbol ?? this.getSymbol();
+        end = end ?? getExactDate(interval).getTime() - interval * 60 * 1000; 
+        end += (interval * 60000)
+        const symbol = pair
+            ? getSymbol(pair, this.bot.platform)
+            : this.getSymbol();
+        console.log("GETTING KLINES FOR:", symbol);
         botLog(this.bot, "GETTING KLINES.. FOR " + symbol);
 
-        if (start) {
-            let firstTs = start;
-            while (firstTs <= end) {
-                console.log(`GETTING ${cnt + 1} KLINES...`);
-                const after = firstTs + (limit! - 1) * interval * 60 * 1000;
-                console.log(
-                    `Before: ${parseDate(
-                        new Date(firstTs)
-                    )} \t After: ${parseDate(new Date(after))}`
-                );
-                const res = await this.client.getCandles(
-                    symbol,
-                    getInterval(interval, "okx"),
-                    {
-                        before: `${firstTs}`,
-                        after: `${after}`,
-                        limit: `${limit}`,
-                    }
-                );
-                let data = res;
-                if (!data.length) break;
-                klines.push(...[...data].reverse());
-
-                firstTs = Number(data[0][0]) + interval * 60 * 1000;
-                console.log(new Date(firstTs).toISOString());
-                if (savePath) {
-                    ensureDirExists(savePath);
-                    writeFileSync(savePath, JSON.stringify(klines));
-                    console.log("Saved");
-                }
-                cnt += 1;
+        const res = await this.client.getCandles(
+            symbol,
+            getInterval(interval, "okx"),
+            {
+                before: start ? `${start}` : undefined,
+                after: end ? `${end}` : undefined,
             }
-        } else {
-            const res = await this.client.getCandles(
-                symbol,
-                getInterval(interval, "okx"),
-                {
-                    before: start ? `${start}` : undefined,
-                    after: end ? `${end}` : undefined,
-                }
-            );
-            let data = res;
-            klines = [...data].reverse();
-        }
+        );
+        let data = res;
+        klines = [...data].reverse();
 
         let d = [...klines];
-        const lastCandle = d[d.length - 1];
-        //console.log({lastCandle});
-        if (false&& Number(lastCandle[8]) == 0) {
-            botLog(this.bot, "LAST CANDLE NOT YET CLOSED");
-            return await this.getKlines({
-                start,
-                end,
-                savePath,
-                interval,
-                symbol,
-            });
+
+        const last = Number(d[d.length - 1][0]);
+
+        botLog(this.bot, { end: parseDate(end), last: parseDate(last) });
+        if (end >= last + 2 * interval * 60000) {
+            botLog(this.bot, "END > LAST");
+            end -= interval * 60000
+            return await this.getKlines({ start, end, interval, pair, limit });
         }
+        const lastCandle = d[d.length - 1];
+
         return limit == 1 ? d[d.length - 1] : d;
     }
 
@@ -302,10 +270,12 @@ export class OKX {
         return `${this.bot.base}-${this.bot.ccy}`;
     }
 
-   async getCurrencies(){
-        try{
-            const res = await this.client.getCurrencies()
-            return res
-        }catch(e){console.log(e)}
+    async getCurrencies() {
+        try {
+            const res = await this.client.getCurrencies();
+            return res;
+        } catch (e) {
+            console.log(e);
+        }
     }
 }
