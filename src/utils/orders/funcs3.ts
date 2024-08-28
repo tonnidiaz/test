@@ -17,6 +17,7 @@ import {
 } from "../funcs2";
 import { placeTrade } from "./funcs";
 import { Bot, Order } from "@/models";
+import mongoose from "mongoose";
 
 export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
     try {
@@ -179,6 +180,8 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
 
             const ts = parseDate(new Date());
 
+            const arbit_ord: mongoose.Types.ObjectId [] = []
+
             const resA = await placeTrade({
                 amt: bal,
                 ordType: "Market",
@@ -191,10 +194,13 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
             });
 
             if (!resA)
-                return botLog(bot, "Failed to place buy order for: [A]", pairA);
+                return botLog(bot, "Failed to place BUY order for: [A]", pairA);
             const orderA = await getLastOrder(_botA);
-
             if (!orderA) return botLog(bot, "Failed to get orderA");
+            orderA.side = "buy"
+            orderA.is_closed = true
+            await orderA.save()
+            arbit_ord.push(orderA.id)
             // The base from A becomes the Quote for B
             const amtB = orderA.base_amt - Math.abs(orderA.buy_fee);
             const resB = await placeTrade({
@@ -209,11 +215,15 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
             });
 
             if (!resB)
-                return botLog(bot, "Failed to place buy order for: [B]", pairB);
+                return botLog(bot, "Failed to place BUY order for: [B]", pairB);
             const orderB = await getLastOrder(_botB);
 
             if (!orderB) return botLog(bot, "Failed to get orderB");
-
+            orderB.side = "buy"
+            orderB.is_closed = true
+            await orderB.save()
+            
+            arbit_ord.push(orderB.id)
             // Sell base_amt from B At C to get A back
             const amtC = orderB.base_amt - Math.abs(orderB.buy_fee);
             const resC = await placeTrade({
@@ -228,8 +238,21 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
             });
 
             if (!resC)
-                return botLog(bot, "Failed to place buy order for: [C]", pairC);
+                return botLog(bot, "Failed to place SELL order for: [C]", pairC);
 
+            const orderC = await getLastOrder(_botC);
+
+            if (!orderC) return botLog(bot, "Failed to get order C");
+            orderC.side = "sell"
+            orderC.is_closed = true
+            orderC.ccy_amt = bal
+            await orderC.save()
+            arbit_ord.push(orderA.id)
+
+            arbit_ord.push(orderC.id)
+            
+            bot.arbit_orders.push(arbit_ord)
+            await bot.save()
             botLog(bot, "ALL ORDERS PLACED SUCCESSFULLY!!");
         }
     } catch (e) {

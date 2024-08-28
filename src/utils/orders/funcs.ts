@@ -153,6 +153,7 @@ export const placeTrade = async ({
     bot: IBot;
     ts: string;
     amt?: number;
+    ccyAmt?: number;
     sl?: number;
     side: "buy" | "sell";
     price: number;
@@ -300,10 +301,11 @@ export const placeTrade = async ({
 
         const clOrderId = Date.now().toString();
 
-        const order =
-            side == "buy"
+        const isBotC = side == 'sell' && bot.is_child
+        let order =
+            side == "buy" || isBotC
                 ? new Order({
-                      _entry: price,
+                      _entry: isBotC ? 0 : price,
                       buy_timestamp: { i: ts },
                       side: side,
                       bot: bot.id,
@@ -313,12 +315,15 @@ export const placeTrade = async ({
                   })
                 : orders[orders.length - 1];
 
-        order.cl_order_id = clOrderId;
         if (side == "sell") {
+            
             order._exit = price;
         }
+        
+        order.cl_order_id = clOrderId;
+
         await order.save();
-        if (side == "buy") bot.orders.push(order._id);
+        if (side == "buy" || isBotC) bot.orders.push(order._id);
         const px = ordType == "Market" ? undefined : price;
 
         const orderId = await plat.placeOrder(amt, px, side, sl, clOrderId);

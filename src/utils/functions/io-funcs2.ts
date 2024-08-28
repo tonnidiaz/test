@@ -53,7 +53,7 @@ export const onTriArbitCointest = async (
             TAKER = ARBIT_ZERO_FEES ? 0 : getTakerFee(plat);
 
             const MIN_PERC = perc ? Number(perc) : ARBIT_MIN_PERC
-        const QUOTE_FEE = 0,
+        const QUOTE_FEE = 0, 
             BASE_FEE = 0;
 
         bal = Number(bal);

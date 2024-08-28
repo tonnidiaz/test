@@ -42,10 +42,9 @@ const useDef5 = false,
     useDef60 = true;
 
 export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
+    const is_arb = bot.type == "arbitrage";
 
-    const is_arb = bot.type == 'arbitrage'
-
-    if (is_arb) return afterOrderUpdateArbit({bot})
+    if (is_arb) return afterOrderUpdateArbit({ bot });
 
     const plat = new objPlats[bot.platform](bot);
     //await sleep(500)
@@ -62,9 +61,9 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     let prevrow = df[df.length - 2];
     let row: ICandle = df[df.length - 1];
     botLog(bot, { prevrow: prevrow.ts, row: row.ts });
-    if (prevrow.v == 0){
-        botLog(bot, "VOL: SKIPPING")
-        return
+    if (prevrow.v == 0) {
+        botLog(bot, "VOL: SKIPPING");
+        return;
     }
     df = tuCE(heikinAshi(df));
 
@@ -75,7 +74,6 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
 
     prevrow = df[df.length - 2];
     row = df[df.length - 1]; //{ts: parseDate(end), o, h: o, l:o, c: o, v: prevrow.v, ha_o: o,ha_h: o, ha_l:o, ha_c: o };
-    
 
     let order = await getLastOrder(bot);
     let pos = orderHasPos(order);
@@ -87,7 +85,7 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     const params = { row, prevrow, bot, order, pos, pxPr, basePr };
     //await cloud5Prod(params)
     //await def5Prod(params);
-    await ImprProd(params)
+    await ImprProd(params);
 
     // if (useDef5) {
     //     await prodStr5(params);
@@ -96,7 +94,11 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     // }
 };
 
-export const updateBuyOrder = async (order: IOrder, res: IOrderDetails, tradeNum?: number)=> {
+export const updateBuyOrder = async (
+    order: IOrder,
+    res: IOrderDetails,
+    tradeNum?: number
+) => {
     const ts = {
         i: order.buy_timestamp?.i,
         o: parseDate(new Date(res.fillTime)),
@@ -111,9 +113,9 @@ export const updateBuyOrder = async (order: IOrder, res: IOrderDetails, tradeNum
     //order.new_ccy_amt = res.fillSz * res.fillPx;
     order.side = "sell";
     order.buy_timestamp = ts;
-    await order.save()
-    console.log("BUY ORDER UPDATED")
-}
+    await order.save();
+    console.log("BUY ORDER UPDATED");
+};
 export const updateSellOrder = async (order: IOrder, res: IOrderDetails) => {
     const fee = Math.abs(res.fee); // In USDT
 
@@ -129,11 +131,14 @@ export const updateSellOrder = async (order: IOrder, res: IOrderDetails) => {
     /* order == currentOrder */
     const bal = order.new_ccy_amt - Math.abs(res.fee);
     const profit =
-        ((order.sell_price - order.buy_price) / order.buy_price) * 100; // ((bal - order.ccy_amt) / order.ccy_amt * 100) ;
+        !order.buy_order_id || order.buy_order_id.length == 0
+            ? 0
+            : ((order.sell_price - order.buy_price) / order.buy_price) * 100; // ((bal - order.ccy_amt) / order.ccy_amt * 100) ;
+
     order.profit = toFixed(profit, 2);
     order.order_id = res.id;
     await order.save();
-    console.log("SELL ORDER UPDATED")
+    console.log("SELL ORDER UPDATED");
 };
 
 const updateBotAtClose = async (bot: IBot, order: IOrder, c: number) => {

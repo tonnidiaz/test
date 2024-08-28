@@ -15,8 +15,35 @@ import schedule from "node-schedule";
 import { wsOkx } from "@/classes/main-okx";
 import { wsBybit } from "@/classes/main-bybit";
 import { getAmtToBuyWith, parseDate } from "@/utils/funcs2";
+import { IOrder } from "@/models/order";
 
 const router = express.Router();
+
+const parseBot = async (bot: IBot, deep = true) => {
+    const is_arb = bot.type == "arbitrage";
+    bot = await bot.populate("orders");
+    //bot = await bot.populate("arbit_orders");
+    let arbit_orders: IObj[] = [];
+    if (deep) {
+        for (let lst of bot.arbit_orders) {
+            const ords: IObj[] = [];
+            for (let oid of lst) {
+                const ord = await Order.findById(oid).exec();
+                if (ord) {
+                    ords.push(ord.toJSON());
+                }
+            }
+            if (ords.length) {
+                arbit_orders.push(ords);
+            }
+        }
+    } else {
+        arbit_orders = bot.arbit_orders;
+    }
+
+    return { ...bot.toJSON(), orders: is_arb ? arbit_orders : bot.orders };
+};
+
 
 router.get("/", async (req, res) => {
     try {
@@ -29,7 +56,11 @@ router.get("/", async (req, res) => {
         const bots = user
             ? await Bot.find({ user: user.id }).exec()
             : await Bot.find().exec();
-        res.json(bots.map((e) => e.toJSON()).reverse());
+        res.json(
+            (
+                await Promise.all(bots.map(async (e) => await parseBot(e, false)))
+            ).reverse()
+        );
     } catch (error) {
         return tunedErr(res, 500, "Failed to get bots");
     }
@@ -162,9 +193,9 @@ router.get("/:id", async (req, res) => {
         let bot = await Bot.findById(id).exec();
         if (!bot) return tunedErr(res, 404, "Bot not found");
 
-        bot = await bot.populate("orders");
+        const _bot = await parseBot(bot);
 
-        res.json({ ...bot.toJSON(), curr_amt: await calcCurrAmt(bot) });
+        res.json({ ..._bot, curr_amt: await calcCurrAmt(bot) });
     } catch (error) {
         console.log(error);
         return tunedErr(res, 500, "Failed to get bot");
@@ -195,16 +226,16 @@ router.post("/:id/clear-orders", authMid, async (req, res) => {
         await bot.save();
     }
 
-    bot = await bot.populate("orders");
+    const _bot = await parseBot(bot);
 
-    res.json({ ...bot.toJSON(), curr_amt: await calcCurrAmt(bot) });
+    res.json({ ..._bot, curr_amt: await calcCurrAmt(bot) });
 });
 
 router.post("/:id/edit", authMid, async (req, res) => {
     try {
         const { id } = req.params;
 
-        const bot = await Bot.findById(id).exec();
+        let bot = await Bot.findById(id).exec();
         if (!bot) return tunedErr(res, 404, "Bot not found");
         if (bot.is_child)
             return tunedErr(
@@ -311,8 +342,9 @@ router.post("/:id/edit", authMid, async (req, res) => {
             //await ws.rmvBot(bot.id)
         }
 
+        const _bot = await parseBot(bot);
         res.json({
-            ...(await bot.populate("orders")).toJSON(),
+            ..._bot,
             curr_amt: await calcCurrAmt(bot),
         });
     } catch (error) {
