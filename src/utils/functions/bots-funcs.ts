@@ -2,11 +2,20 @@ import { Bot } from "@/models";
 import { IBot } from "@/models/bot";
 import { botLog } from "../functions";
 
-export const createChildBots = async (bot: IBot) =>{
+export const createChildBots = async (bot: IBot) => {
     botLog(bot, "CREATING CHILD BOTS...");
-    if (bot.arbit_orders.length) return botLog(bot, "CANNOT MODIFY CHILD BOTS WHILE ORDER STILL HAS ORDERS")
+    if (bot.arbit_orders.length)
+        return botLog(
+            bot,
+            "CANNOT MODIFY CHILD BOTS WHILE ORDER STILL HAS ORDERS"
+        );
     if (bot.arbitrage_type == "tri") {
-        bot.children = []
+        for (let child of bot.children) {
+            botLog(bot, "DELETING CHILD", child);
+            const c = await Bot.findByIdAndRemove(child);
+            botLog(bot, "CHILD", c?.name, "DELETED");
+        }
+        bot.children = [];
         const pairA = [bot.B, bot.A],
             pairB = [bot.C, bot.B],
             pairC = [bot.C, bot.A];
@@ -71,5 +80,5 @@ export const createChildBots = async (bot: IBot) =>{
         await botC.save();
         bot.children.push(botC.id);
     }
-    await bot.save()
-}
+    await bot.save();
+};
