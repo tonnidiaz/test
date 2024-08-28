@@ -40,6 +40,7 @@ export const onTriArbitCointest = async (
         clId,
         offline,
         skip_saved,
+        save_klines,
         perc
     } = data;
 
@@ -220,6 +221,10 @@ export const onTriArbitCointest = async (
                 continue;
             }
 
+            ensureDirExists(klinesPathA)
+            ensureDirExists(klinesPathB)
+            ensureDirExists(klinesPathC)
+
             const symboA = getSymbol(pairA, plat);
             const symboB = getSymbol(pairB, plat);
             const symboC = getSymbol(pairC, plat);
@@ -235,7 +240,7 @@ export const onTriArbitCointest = async (
                           end: endTs,
                           symbol: symboA,
                           interval,
-                          savePath: save ? klinesPathA : undefined,
+                          savePath: save_klines ? klinesPathA : undefined,
                       });
             const ksB =
                 offline || (skip_saved && existsSync(klinesPathB))
@@ -245,7 +250,7 @@ export const onTriArbitCointest = async (
                           end: endTs,
                           symbol: symboB,
                           interval,
-                          savePath: save ? klinesPathB : undefined,
+                          savePath: save_klines ? klinesPathB : undefined,
                       });
             const ksC =
                 offline || (skip_saved && existsSync(klinesPathC))
@@ -255,7 +260,7 @@ export const onTriArbitCointest = async (
                           end: endTs,
                           symbol: symboC,
                           interval,
-                          savePath: save ? klinesPathC : undefined,
+                          savePath: save_klines ? klinesPathC : undefined,
                       });
 
             if (!ksA) {
@@ -336,6 +341,9 @@ export const onTriArbitCointest = async (
                        continue//TODO return;
                     }
                     console.log("\n", { ts });
+                    console.log({pairA, pairB, pairC})
+                    console.log({pxA, pxB, pxC})
+                    
                     let _quote = 0,
                         baseA = 0,
                         baseB = 0;

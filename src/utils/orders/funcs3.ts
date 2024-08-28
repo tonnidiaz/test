@@ -92,9 +92,13 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
         if (!ksC) {
             return botLog(bot, "FAILED TO GET KLINES FOR", pairC);
         }
-        botLog(bot, "GOT ALL KLINES")
-        if (!ksA.length || !ksB.length || !ksC.length){
-            return botLog(bot, "ONE OF THE KLINES IS EMPTY", {a: ksA.length, b: ksB.length, c: ksC.length})
+        botLog(bot, "GOT ALL KLINES");
+        if (!ksA.length || !ksB.length || !ksC.length) {
+            return botLog(bot, "ONE OF THE KLINES IS EMPTY", {
+                a: ksA.length,
+                b: ksB.length,
+                c: ksC.length,
+            });
         }
 
         let dfA = parseKlines(ksA);
@@ -114,7 +118,8 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
             return botLog(bot, "TIMESTAMPS DO NOT MATCH");
         }
         console.log("\n", { ts });
-        botLog(bot, {pxA, pxB, pxC})
+        botLog(bot, { pairA, pairB, pairC });
+        botLog(bot, { pxA, pxB, pxC });
 
         let _quote = 0,
             baseA = 0,
@@ -210,7 +215,7 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
             if (!orderB) return botLog(bot, "Failed to get orderB");
 
             // Sell base_amt from B At C to get A back
-            const amtC = orderB.base_amt - Math.abs(orderB.buy_fee)
+            const amtC = orderB.base_amt - Math.abs(orderB.buy_fee);
             const resC = await placeTrade({
                 amt: amtC,
                 ordType: "Market",
@@ -225,7 +230,7 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
             if (!resC)
                 return botLog(bot, "Failed to place buy order for: [C]", pairC);
 
-            botLog(bot, "ALL ORDERS PLACED SUCCESSFULLY!!")
+            botLog(bot, "ALL ORDERS PLACED SUCCESSFULLY!!");
         }
     } catch (e) {
         botLog(bot, e);
