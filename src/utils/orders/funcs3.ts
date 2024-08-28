@@ -137,7 +137,6 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
         botLog(bot, { perc: `${perc}%`, baseA, baseB, _quote });
 
         if (perc >= bot.min_arbit_perc) {
-            console.log({ pairA, pairB, pairC });
             botLog(bot, "GOING IN...");
 
             // botC is the SELL bot
