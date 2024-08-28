@@ -249,6 +249,12 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
             orderC.side = "sell";
             orderC.is_closed = true;
             orderC.ccy_amt = bal;
+
+            orderC.est_profit = perc;
+            const currAmt = orderC.new_ccy_amt - Math.abs(orderC.sell_fee)
+            let profit = (currAmt - orderC.ccy_amt) / orderC.ccy_amt * 100
+            profit = Number(profit.toFixed(2)) 
+            orderC.profit = profit
             await orderC.save();
             arbit_ord.push(orderC.id);
 

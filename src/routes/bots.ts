@@ -114,8 +114,10 @@ router.post("/create", authMid, async (req, res) => {
 });
 
 const calcCurrAmt = async (bot: IBot) => {
+
+    const lastOrderId = bot.type == 'normal' ? bot.orders[bot.orders.length - 1] : bot.arbit_orders[bot.arbit_orders.length - 1][2]
     const order = await Order.findById(
-        bot.orders[bot.orders.length - 1]
+        lastOrderId
     ).exec();
     let amt = getAmtToBuyWith(bot, order);
     const pxPr = getPricePrecision([bot.base, bot.ccy], bot.platform);
