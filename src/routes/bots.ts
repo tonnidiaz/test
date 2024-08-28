@@ -213,6 +213,8 @@ router.post("/:id/edit", authMid, async (req, res) => {
 
         const ws = bot.platform == "bybit" ? wsBybit : wsOkx;
         await ws.rmvBot(bot.id);
+
+        const ts = parseDate(new Date())
         if (key == "active") {
             if (bool && !val) {
                 // Deactivate JOB
@@ -221,7 +223,14 @@ router.post("/:id/edit", authMid, async (req, res) => {
                 const jobIndex = jobs.findIndex((el) => el.id == jobId);
                 jobs[jobIndex] = { ...bool, active: false };
                 botLog(bot, `Job ${bool.id} cancelled`);
-                bot.deactivated_at = parseDate(new Date());
+                bot.deactivated_at = ts;
+
+                for (let oid of bot.children){
+                    const child = await Bot.findById(oid).exec()
+                    if (!child) continue;
+                    child.deactivated_at = ts
+                    await child.save()
+                }
             } else if (val) {
                 console.log("Resuming JOB...");
                 if (!bool) await addBotJob(bot as any);
@@ -233,8 +242,16 @@ router.post("/:id/edit", authMid, async (req, res) => {
                     const jobIndex = jobs.findIndex((el) => el.id == jobId);
                     jobs[jobIndex] = { ...bool, active: true };
                 }
-                bot.activated_at = parseDate(new Date());
+                bot.activated_at = ts;
                 bot.deactivated_at = undefined;
+
+                for (let oid of bot.children){
+                    const child = await Bot.findById(oid).exec()
+                    if (!child) continue;
+                    child.activated_at = ts
+                    child.deactivated_at = undefined
+                    await child.save()
+                }
             }
             bot.set(key, val);
 
@@ -325,7 +342,8 @@ router.post("/:id/delete", authMid, async (req, res) => {
                 console.log("CHILD BOT ORDER deleted");
             }
         }
-        return res.send("BOT DELETED");
+        const bots = await Bot.find().exec();
+        res.json(bots.map((e) => e.toJSON()).reverse());
     } catch (error) {
         console.log(error);
         return tunedErr(res, 500, "Failed to delete bot");
