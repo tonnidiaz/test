@@ -250,8 +250,6 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
             orderC.is_closed = true;
             orderC.ccy_amt = bal;
             await orderC.save();
-            arbit_ord.push(orderA.id);
-
             arbit_ord.push(orderC.id);
 
             bot.arbit_orders.push(arbit_ord);
