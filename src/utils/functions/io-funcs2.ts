@@ -1,7 +1,7 @@
 import { Socket } from "socket.io";
 import { Server } from "ws";
 import { IObj } from "../interfaces";
-import { ARBIT_ZERO_FEES } from "../constants";
+import { ARBIT_ZERO_FEES, ARBIT_MIN_PERC } from "../constants";
 import { getInstrus, getKlinesPath, getMakerFee, getTakerFee } from "../funcs3";
 import { ensureDirExists } from "../orders/funcs";
 import {
@@ -34,11 +34,13 @@ export const onTriArbitCointest = async (
         join,
         prefix,
         B,
+        A: _A,
         ep,
         save,
         clId,
         offline,
         skip_saved,
+        perc
     } = data;
 
     try {
@@ -48,6 +50,8 @@ export const onTriArbitCointest = async (
 
         const MAKER = ARBIT_ZERO_FEES ? 0 : getMakerFee(plat),
             TAKER = ARBIT_ZERO_FEES ? 0 : getTakerFee(plat);
+
+            const MIN_PERC = perc ? Number(perc) : ARBIT_MIN_PERC
         const QUOTE_FEE = 0,
             BASE_FEE = 0;
 
@@ -56,11 +60,13 @@ export const onTriArbitCointest = async (
 
         let msg = "";
 
-        let _data: { pair: string; profit: number; trades: number }[] = [];
+        let _data: { pair: string; profit: number; trades: number, w: number, l: number }[] = [];
         let ret_data: IObj = {};
         const year = Number(start.split("-")[0]);
 
-        const savePath = `_data/rf/arbit-tri/coins/${plat}/${year}/${prefix}${B}_${interval}m.json`;
+        const A = _A ?? "USDT";
+
+        const savePath = `_data/rf/arbit-tri/coins/${plat}/${year}/${prefix}${B}-${A}_${interval}m.json`;
 
         const parseData = (orders?: any[]) => {
             _data = _data.sort((a, b) => (a.profit > b.profit ? -1 : 1));
@@ -119,10 +125,11 @@ export const onTriArbitCointest = async (
                 side: string[];
                 px: string[];
                 amt: string[];
+                perc: number
             }[] = [];
             let trades = 0,
                 gains: number[] = [];
-            const A = "USDT",
+            const
                 C = instru[0];
 
             const pairA = [B, A],
@@ -349,7 +356,7 @@ export const onTriArbitCointest = async (
                         //console.log({ _amt, _A, perc });
                     }
 
-                    if (perc >= 0.3) {
+                    if (perc >= MIN_PERC) {
                         console.log({ perc: `${perc}%` });
                         console.log({ A, B, C });
                         console.log("GOING IN...\n");
@@ -394,11 +401,15 @@ export const onTriArbitCointest = async (
                         _quote *= 1 - MAKER;
                         _quote = toFixed(_quote, pxPrC);
 
+                        if (_quote >= bal) w += 1
+                        else l += 1
+
                         bal = _quote;
                         console.log({ bal, START_BAL });
                         if (only) {
                             orders.push({
                                 ts,
+                                perc,
                                 side: [
                                     `[${pairA}] BUY {H: ${rowA.h}, L: ${rowA.l}, V: ${rowA.v}}`,
                                     `[${pairB}] BUY {H: ${rowB.h}, L: ${rowB.l}, V: ${rowB.v}}`,
@@ -428,9 +439,9 @@ export const onTriArbitCointest = async (
             client?.emit(ep, `PAIR: ${pairB} DONE`);
             // FOR EACH PAIR SET
             const profit = toFixed(bal - START_BAL, 2);
-
+            console.log({profit})
             const symbo = getSymbol([C, B], "okx");
-            _data.push({ pair: symbo, profit, trades });
+            _data.push({ pair: symbo, profit, trades, w, l });
             parseData(orders);
             _save();
         }

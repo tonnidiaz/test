@@ -76,4 +76,4 @@ export const SELL_AT_LAST_BUY = true , PUT_ASIDE = false
 export const ETH_RATE = 2000, XRP_WITHDRAW_FEE = .25
 
 export const ARBIT_ZERO_FEES = false, IMMEDIATE_SELL = false;
-export const MAX_QUOTE = 100000000
+export const MAX_QUOTE = 100000000, ARBIT_MIN_PERC = .3

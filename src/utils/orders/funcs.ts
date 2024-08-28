@@ -72,7 +72,6 @@ export const updateOrder = async ({
     cancel?: boolean;
 }) => {
     /* CHECK PREV ORDERS */
-    if (bot.type == "arbitrage") return;
     try {
         botLog(bot, "CHECKING PREV ORDERS");
 
@@ -83,7 +82,7 @@ export const updateOrder = async ({
 
         if (order && !pos && order.buy_order_id) {
             // CURRENTLY NOT PLACING LIMIT BUY ORDERS
-            botLog(bot, "CHECKING LIMIT BUY ORDER", order.buy_order_id)
+            botLog(bot, "CHECKING LIMIT BUY ORDER", order.buy_order_id);
             const ordId = order.buy_order_id;
             const res = await plat.getOrderbyId(ordId);
             if (!res) {
@@ -97,21 +96,19 @@ export const updateOrder = async ({
                     if (r) {
                         botLog(bot, "BUY ORDER CANCELLED");
                         order.buy_order_id = undefined;
-                        await order.save()
-                        console.log({oid: order.buy_order_id})
+                        await order.save();
+                        console.log({ oid: order.buy_order_id });
                     } else {
                         botLog(bot, "FAILED TO CANCEL BUY ORDER");
                     }
                 }
             } else {
-                botLog(bot, "FILLED")
+                botLog(bot, "FILLED");
                 await updateBuyOrder(order, res);
             }
         } else if (order && pos && order.order_id) {
-            
-
             const ordId = order.order_id;
-            botLog(bot, "CHECKING SELL ORDER...", {ordId});
+            botLog(bot, "CHECKING SELL ORDER...", { ordId });
             const res = await plat.getOrderbyId(ordId);
             if (!res) {
                 botLog(bot, "FAILED TO GET SELL ORDER");
@@ -124,14 +121,14 @@ export const updateOrder = async ({
                     if (r) {
                         botLog(bot, "SELL ORDER CANCELLED");
                         order.order_id = undefined;
-                        await order.save()
-                        console.log({oid: order.order_id})
+                        await order.save();
+                        console.log({ oid: order.order_id });
                     } else {
                         botLog(bot, "FAILED TO CANCEL SELL ORDER");
                     }
                 }
             } else {
-                botLog(bot, "FILLED")
+                botLog(bot, "FILLED");
                 await updateSellOrder(order, res);
             }
         }
@@ -149,10 +146,9 @@ export const placeTrade = async ({
     side,
     price,
     plat,
-    pair,
+    pair: _pair,
     sl,
     ordType = "Market",
-    tradeNum = 1,
 }: {
     bot: IBot;
     ts: string;
@@ -160,14 +156,13 @@ export const placeTrade = async ({
     sl?: number;
     side: "buy" | "sell";
     price: number;
-    pair?: string[],
     plat: OKX | Bybit;
+    pair?: string[];
     ordType?: "Limit" | "Market";
-    tradeNum?: number
 }) => {
     try {
         const orders = await findBotOrders(bot);
-        pair = pair ?? [bot.base, bot.ccy];
+        const pair = _pair ?? [bot.base, bot.ccy];
         const minSz = getMinSz(pair, bot.platform);
         const maxSz = getMaxSz(pair, bot.platform);
         const maxAmt = getMaxAmt(pair, bot.platform);
@@ -183,7 +178,7 @@ export const placeTrade = async ({
         ) {
             return;
         }
-        /* let aside = bot.aside.find(
+        let aside = bot.aside.find(
             (el) => el.base == pair[0] && el.ccy == pair[1]
         );
         if (!aside) {
@@ -206,12 +201,12 @@ export const placeTrade = async ({
             total_quote = { base: bot.base, ccy: bot.ccy, amt: bot.start_bal };
             bot.total_quote.push(total_quote);
             await bot.save();
-        } */
+        }
 
-        botLog(bot, "PLACE_TRADE", {pair, amt, price, side });
+        botLog(bot, "PLACE_TRADE", { amt, price, side });
 
         const putAside = async (amt: number) => {
-           /*  if (!aside) return
+            if (!aside) return;
             botLog(bot, `PUTTING ${amt} ASIDE...`);
             order.new_ccy_amt = order.new_ccy_amt - amt; // LEAVE THE FEE
             aside.amt = aside!.amt + amt;
@@ -226,7 +221,7 @@ export const placeTrade = async ({
             await order.save();
             await bot.save();
 
-            botLog(bot, `${amt} PUT ASIDE`); */
+            botLog(bot, `${amt} PUT ASIDE`);
         };
 
         if (ordType == "Limit" && price == 0) {
@@ -258,16 +253,13 @@ export const placeTrade = async ({
 
         if (side == "buy") {
             // const _entry = price;
-
             // const _base = amt / price;
             // if (_base < minSz ||  amt < (minAmt ?? 1)) {
             //     const msg = `BASE: ${_base} < MIN_SZ: ${minSz}`;
             //     return botLog(bot, msg);
             // } else if (_base > maxSz) {
             //     const msg = `BASE: ${_base} > MAX_SZ: ${maxSz}`;
-
             //     botLog(bot, msg);
-
             //     amt = maxSz * (1 - 0.5 / 100) * _entry;
             //     amt = toFixed(amt, pxPr);
             //     return await placeTrade({
@@ -282,7 +274,6 @@ export const placeTrade = async ({
             //     });
             // }
         } else {
-
             // // SELL
             // let _base = amt;
             // const _bal = _base * price;
@@ -293,7 +284,6 @@ export const placeTrade = async ({
             // else if (_bal > maxAmt) {
             //     console.log(`BAL ${_bal} > MAX_AMT ${maxAmt}`);
             //     _base = (maxAmt * (1 - 0.5 / 100)) / price;
-
             //     _base = toFixed(_base, basePrecision);
             //     amt = _base;
             // }
@@ -302,7 +292,7 @@ export const placeTrade = async ({
         botLog(bot, `Placing a ${amt} ${side}  order at ${price}...`);
         sl = toFixed(sl ?? 0, pxPr);
         price = toFixed(price, pxPr);
-        const _amt= amt
+        const _amt = amt;
         amt = ordType == "Market" ? amt : side == "sell" ? amt : amt / price;
 
         amt = toFixed(amt, basePrecision);
@@ -310,30 +300,26 @@ export const placeTrade = async ({
 
         const clOrderId = Date.now().toString();
 
-        const isArbitrage = bot.type == "arbitrage"
         const order =
             side == "buy"
                 ? new Order({
-                      _entry: isArbitrage ? 0 : price,
-                      entry_px_a: isArbitrage && tradeNum == 1 ? price : 0,
-                      entry_px_b: isArbitrage && tradeNum == 2 ? price : 0,
+                      _entry: price,
                       buy_timestamp: { i: ts },
                       side: side,
                       bot: bot.id,
                       base: bot.base,
                       ccy: bot.ccy,
-                      ccy_amt: _amt
+                      ccy_amt: _amt,
                   })
                 : orders[orders.length - 1];
 
         order.cl_order_id = clOrderId;
         if (side == "sell") {
-            order._exit = isArbitrage ? 0 : price;
-            order.exit_px_c = isArbitrage ? price : 0
+            order._exit = price;
         }
         await order.save();
-        if (side == "buy") bot.orders.push(order._id)
-        const px = ordType == "Market" ? undefined : price
+        if (side == "buy") bot.orders.push(order._id);
+        const px = ordType == "Market" ? undefined : price;
 
         const orderId = await plat.placeOrder(amt, px, side, sl, clOrderId);
 
@@ -353,7 +339,7 @@ export const placeTrade = async ({
                 while (!_filled) {
                     await sleep(1000);
                     botLog(bot, "CHECKING MARKET BUY ORDER...");
-                    const res = await plat.getOrderbyId(orderId,false, pair);
+                    const res = await plat.getOrderbyId(orderId);
 
                     if (!res) {
                         _filled = true;
@@ -361,7 +347,7 @@ export const placeTrade = async ({
                     }
                     if (res != "live") {
                         _filled = true;
-                       await updateBuyOrder(order, res)
+                        await updateBuyOrder(order, res);
                     }
                 }
             }
@@ -412,7 +398,7 @@ export const placeTrade = async ({
 
             const profitPerc = ((quote_amt - START_BAL) / START_BAL) * 100;
             if (profitPerc >= 100) {
-               // await putAside(quote_amt / 2.5);
+                // await putAside(quote_amt / 2.5);
             }
         }
 

@@ -15,7 +15,6 @@ export const BotSchema = new Schema(
         ce_length: { type: Number, default: 1 },
         strategy: { type: Number, default: 5 },
         user: { type: Schema.ObjectId, ref: "User" },
-        parent: { type: Schema.ObjectId, ref: "Bot" },
         orders: { type: [Schema.ObjectId], ref: "Order" },
         aside: {type: [{base: String, ccy: String, amt: {type: Number, default: 0, _id: false}}], default: []},
         total_base: {type: [{base: String, ccy: String, amt: {type: Number, default: 0, _id: false}}], default: []},
@@ -32,9 +31,7 @@ export const BotSchema = new Schema(
         A: {type: String, default: "USDT"},
         B: {type: String, default: "BTC"},
         C: {type: String, default: "DOGE"},
-        min_arbit_perc: {type: Number, default: .3},
-        is_child: {type: Boolean, default: false},
-        children: { type: [Schema.ObjectId], ref: "Bot" },
+        min_arbit_perc: {type: Number, default: .3}
     },
     { timestamps: true }
 );

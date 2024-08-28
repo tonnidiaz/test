@@ -90,7 +90,7 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     // }
 };
 
-export const updateBuyOrder = async (order: IOrder, res: IOrderDetails) => {
+export const updateBuyOrder = async (order: IOrder, res: IOrderDetails, tradeNum?: number)=> {
     const ts = {
         i: order.buy_timestamp?.i,
         o: parseDate(new Date(res.fillTime)),

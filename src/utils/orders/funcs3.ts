@@ -16,6 +16,7 @@ import {
     parseKlines,
 } from "../funcs2";
 import { placeTrade } from "./funcs";
+import { Bot, Order } from "@/models";
 
 export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
     try {
@@ -23,7 +24,22 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
             pairB = [bot.C, bot.B],
             pairC = [bot.C, bot.A];
         const platName = bot.platform.toLowerCase();
-        const plat = new objPlats[platName]();
+
+        const _botA = await Bot.findById(bot.children[0]).exec();
+        const _botB = await Bot.findById(bot.children[1]).exec();
+        const _botC = await Bot.findById(bot.children[2]).exec();
+
+        if (!_botA || !_botB || !_botC) {
+            return botLog(bot, "ONE OF THE CHILD BOTS IS MISSING", {
+                A: bot.children[0],
+                B: bot.children[1],
+                C: bot.children[2],
+            });
+        }
+
+        const platA = new objPlats[_botA.platform](_botA);
+        const platB = new objPlats[_botB.platform](_botA);
+        const platC = new objPlats[_botC.platform](_botA);
 
         const pxPrA = getPricePrecision(pairA, platName);
         const basePrA = getCoinPrecision(pairA, "limit", platName);
@@ -64,15 +80,15 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
         botLog(bot, "GETTING KLINES FOR EACH PAIR...\n");
         const end = getExactDate(bot.interval);
 
-        const ksA = await plat.getKlines({ end: end.getTime(), pair: pairA });
+        const ksA = await platA.getKlines({ end: end.getTime(), pair: pairA });
         if (!ksA) {
             return botLog(bot, "FAILED TO GET KLINES FOR", pairA);
         }
-        const ksB = await plat.getKlines({ end: end.getTime(), pair: pairB });
+        const ksB = await platB.getKlines({ end: end.getTime(), pair: pairB });
         if (!ksB) {
             return botLog(bot, "FAILED TO GET KLINES FOR", pairB);
         }
-        const ksC = await plat.getKlines({ end: end.getTime(), pair: pairC });
+        const ksC = await platC.getKlines({ end: end.getTime(), pair: pairC });
         if (!ksC) {
             return botLog(bot, "FAILED TO GET KLINES FOR", pairC);
         }
@@ -112,10 +128,12 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
         if (perc >= bot.min_arbit_perc) {
             console.log({ pairA, pairB, pairC });
             botLog(bot, "GOING IN...");
-            let order = await getLastOrder(bot);
+
+            // botC is the SELL bot
+            let order = await getLastOrder(_botC);
             let pos = orderHasPos(order);
 
-            const bal = getAmtToBuyWith(bot, order);
+            const bal = getAmtToBuyWith(_botC, order);
             baseA = bal / pxA;
             if (baseA < minSzA || bal < minAmtA) {
                 botLog(bot, "CANNOT BUY A: LESS THAN MIN_AMT", {
@@ -149,16 +167,60 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
                 return;
             }
 
+            const ts = parseDate(new Date());
+
             const resA = await placeTrade({
                 amt: bal,
                 ordType: "Market",
                 price: pxA,
                 pair: pairA,
-                bot,
-                plat,
-                side: 'buy',
-                ts: parseDate(new Date()),
+                bot: _botA,
+                plat: platA,
+                side: "buy",
+                ts,
             });
+
+            if (!resA)
+                return botLog(bot, "Failed to place buy order for: [A]", pairA);
+            const orderA = await getLastOrder(_botA);
+
+            if (!orderA) return botLog(bot, "Failed to get orderA");
+            // The base from A becomes the Quote for B
+            const amtB = orderA.base_amt - Math.abs(orderA.buy_fee);
+            const resB = await placeTrade({
+                amt: amtB,
+                ordType: "Market",
+                price: pxB,
+                pair: pairB,
+                bot: _botB,
+                plat: platB,
+                side: "buy",
+                ts,
+            });
+
+            if (!resB)
+                return botLog(bot, "Failed to place buy order for: [B]", pairB);
+            const orderB = await getLastOrder(_botB);
+
+            if (!orderB) return botLog(bot, "Failed to get orderB");
+
+            // Sell base_amt from B At C to get A back
+            const amtC = orderB.base_amt - Math.abs(orderB.buy_fee)
+            const resC = await placeTrade({
+                amt: amtC,
+                ordType: "Market",
+                price: pxC,
+                pair: pairC,
+                bot: _botC,
+                plat: platC,
+                side: "sell",
+                ts,
+            });
+
+            if (!resC)
+                return botLog(bot, "Failed to place buy order for: [C]", pairC);
+
+            botLog(bot, "ALL ORDERS PLACED SUCCESSFULLY!!")
         }
     } catch (e) {
         botLog(bot, e);
