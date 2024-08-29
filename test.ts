@@ -147,20 +147,19 @@ async function klines() {
     const bot = new Bot({
         name: "TBOT",
         interval: 5,
-        base: "CLOUD",
-        ccy: "USDT",
-        platform: "mexc",
+        base: "1INCH",
+        ccy: "USDC",
+        platform: "okx",
+        demo: false
     });
     const plat = new objPlats[bot.platform](bot);
 
-    const r = await plat.getTicker(); //getKlines({end: Date.parse("2024-08-22 02:10:00+02:00")})
-    console.log(r);
-    return;
+    const r = await plat.getKlines({end: Date.parse("2024-08-20 02:10:00+02:00")})
     const df = parseKlines(r ?? []);
-    console.log(df[df.length - 1].ts);
+    console.log(df[df.length - 1]?.ts);
 }
 
-//klines()
+klines()
 //place({get: true, oid: "1759820931292990720"})
 
 /* 
@@ -220,4 +219,4 @@ const binanceQuotes = [
 // const others = binanceInstrus.filter(el => el.quoteAsset != "USDT" && el.status.toLowerCase() == 'trading' && el.isSpotTradingAllowed).map(el=> el.quoteAsset)
 // console.log(Array.from(new Set(others)))
 
-console.log(Array.from(new Set([...okxQuotes, ...bybitQuotes, ...binanceQuotes])))
+//console.log(Array.from(new Set([...okxQuotes, ...bybitQuotes, ...binanceQuotes])))

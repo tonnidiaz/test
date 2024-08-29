@@ -8,7 +8,7 @@ import {
     getPricePrecision,
     toFixed,
     tunedErr,
-} from "@/utils/functions";
+} from "@/utils/functions"; 
 import { IObj } from "@/utils/interfaces";
 import express from "express";
 import schedule from "node-schedule";
@@ -200,6 +200,7 @@ router.post("/:id/edit", authMid, async (req, res) => {
 
         const fd = req.body;
         const { key, val } = fd;
+        //botLog(bot, "EDIT BOT:", {key, val})
         const jobId = `${bot._id}`;
         const bool = jobs.find((el) => el.id == jobId);
         botLog(bot, "UNSUB TO PREV SYMBOL TICKERS...");
@@ -211,6 +212,7 @@ router.post("/:id/edit", authMid, async (req, res) => {
 
         const is_arb = bot.type == "arbitrage";
 
+        const commonFields = ['platform', 'interval', 'name', 'demo', 'category', 'start_amt', 'start_bal', 'A', 'B', 'C']
         
         if (key == "active") {
             if (bool && !val) {
@@ -261,6 +263,32 @@ router.post("/:id/edit", authMid, async (req, res) => {
                     bot.set("ccy", v[1]);
                 }
                 bot.set(k, v);
+                if (commonFields.includes(k)){
+                    const childA = await Bot.findById(bot.children[0]).exec()
+                    const childB = await Bot.findById(bot.children[1]).exec()
+                    const childC = await Bot.findById(bot.children[2]).exec()
+
+                   
+                    if (!childA || !childB || !childC){
+                        bot.active = false
+                        await bot.save()
+
+                        botLog(bot, "ONE OF THE CHILD BOTS NOT FOUND")
+                        return tunedErr(res, 400, "ONE OF THE CHILD BOTS NOT FOUND")
+                    }
+                    const children = [childA, childB, childC]
+                    if (k == 'name' || k == 'A' || k == 'B' || k == 'C'){
+
+                    }
+                    else{
+                        for (let b of children){
+                            b!.set(k, v)
+                        }
+                    }
+                    for (let b of children){
+                        await b.save()
+                    }
+                }
             }
         }
         await bot.save();
@@ -298,6 +326,7 @@ router.post("/:id/edit", authMid, async (req, res) => {
         const pair: string[] = is_arb ? [bot.B, bot.A] : [bot.base, bot.ccy];
 
         [bot.base, bot.ccy] = pair;
+        //TODO: COMMENT OUT
         const { A, B, C } = bot;
         botLog(bot, { oldA, oldB, oldC });
         botLog(bot, { A, B, C });
@@ -308,6 +337,7 @@ router.post("/:id/edit", authMid, async (req, res) => {
         }
 
         await bot.save()
+        //botLog(bot, bot.toJSON())
 
         const _bot = await parseBot(bot);
         res.json({

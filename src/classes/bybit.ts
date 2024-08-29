@@ -159,7 +159,7 @@ export class Bybit {
         const symbol = pair ? getSymbol(pair, this.bot.platform) : this.getSymbol();
 
         
-            console.log("GETTING KLINES FOR:", symbol);
+            console.log("[BYBIT]: GETTING KLINES FOR:", symbol);
             const res = await this.client.getKline({
                 symbol,
                 interval: interval as any,
@@ -168,6 +168,9 @@ export class Bybit {
                 category: this.bot.category as any,
             });
             let data = res.result.list;
+            if (!data) {
+                console.log(res)
+                return botLog(this.bot, `FAILED TO GET KLIES FOR: ${symbol} ON BYBIT`)}
             klines = [...data].reverse();
         const d = [...klines]; //.reverse()
 

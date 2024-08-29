@@ -227,43 +227,52 @@ export class OKX {
         pair?: string[];
         limit?: number;
     }) {
-        
-        
-        let klines: any[] = [];
-        let cnt = 0;
-        interval = interval ?? this.bot.interval;
-        end = end ?? getExactDate(interval).getTime() - interval * 60 * 1000; 
-        end += (interval * 60000)
         const symbol = pair
-            ? getSymbol(pair, this.bot.platform)
-            : this.getSymbol();
-        console.log("GETTING KLINES FOR:", symbol);
-        botLog(this.bot, "GETTING KLINES.. FOR " + symbol);
-
-        const res = await this.client.getCandles(
-            symbol,
-            getInterval(interval, "okx"),
-            {
-                before: start ? `${start}` : undefined,
-                after: end ? `${end}` : undefined,
+                ? getSymbol(pair, this.bot.platform)
+                : this.getSymbol();
+        try{
+            let klines: any[] = [];
+            let cnt = 0;
+            interval = interval ?? this.bot.interval;
+            end = end ?? getExactDate(interval).getTime() - interval * 60 * 1000; 
+            end += (interval * 60000)
+            
+    
+            botLog(this.bot, "[OKX] GETTING KLINES.. FOR " + symbol);
+    
+            const res = await this.client.getCandles(
+                symbol,
+                getInterval(interval, "okx"),
+                {
+                    before: start ? `${start}` : undefined,
+                    after: end ? `${end}` : undefined,
+                }
+            );
+            let data = res;
+            klines = [...data].reverse();
+    
+            let d = [...klines];
+            if (!d.length) {
+                console.log(res)
+                return botLog(this.bot, "FAILED TO GET KLINES FOR ", symbol, "ON OKX")}
+            const last = Number(d[d.length - 1][0]);
+    
+            botLog(this.bot, { end: parseDate(end), last: parseDate(last) });
+            if (end >= last + 2 * interval * 60000) {
+                botLog(this.bot, "END > LAST");
+                end -= interval * 60000
+                return await this.getKlines({ start, end, interval, pair, limit });
             }
-        );
-        let data = res;
-        klines = [...data].reverse();
-
-        let d = [...klines];
-
-        const last = Number(d[d.length - 1][0]);
-
-        botLog(this.bot, { end: parseDate(end), last: parseDate(last) });
-        if (end >= last + 2 * interval * 60000) {
-            botLog(this.bot, "END > LAST");
-            end -= interval * 60000
-            return await this.getKlines({ start, end, interval, pair, limit });
+            const lastCandle = d[d.length - 1];
+    
+            return limit == 1 ? d[d.length - 1] : d;
         }
-        const lastCandle = d[d.length - 1];
+        catch(e){
+            botLog(this.bot, "FAILED TO GET KLINES FOR ", symbol, "ON OKX")
+            botLog(this.bot, e)
+            
 
-        return limit == 1 ? d[d.length - 1] : d;
+        }
     }
 
     getSymbol() {
