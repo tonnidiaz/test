@@ -9,7 +9,7 @@ audio/**
 coverage
 .env
 *.env
-dist
+#dist
 build
 _data
 # Benchmarking

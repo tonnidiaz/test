@@ -3,13 +3,7 @@
     "version": "0.0.0",
     "private": true,
     "scripts": {
-        "clean": "rimraf ./dist/",
-        "cp": "copyfiles -u 1 ./src/views/**/* ./src/public/**/* ./src/assets/**/* ./dist/src",
-        "dev": "tsx watch index.ts",
-        "koyeb-logs": "koyeb services logs 66051f71-bbd0-4112-84b4-a679b355f8fb",
-        "ngrok": "ngrok http 8000 --domain=arriving-repeatedly-raccoon.ngrok-free.app",
-        "build": "tsc && tsc-alias",
-        "start": "node dist/index.js"
+        "start": "node -r ./config-paths.js index.js"
     },
     "dependencies": {
         "@amcharts/amcharts5": "^5.9.12",
@@ -62,7 +56,6 @@
         "pre-commit": "^1.2.2",
         "rimraf": "^5.0.5",
         "ts-node": "^10.9.1",
-        "tsc-alias": "^1.8.10",
         "tsx": "^3.14.0",
         "typescript": "^5.2.2"
     }

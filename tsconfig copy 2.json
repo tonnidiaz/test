@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "allowSyntheticDefaultImports": true,
+        "target": "es2022",
+        "rootDir": "./",
+        "moduleResolution": "node",
+        "baseUrl": ".",
+        "outDir": "dist",
+        "paths": { "@/*": ["src/*"], "~/*": ["src/*"], "*": ["node_modules/*", "src/types/*"] },
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "strict": true,
+        "noImplicitAny": false,
+        "skipLibCheck": true,
+        "resolveJsonModule": true,
+        "isolatedModules": true ,
+        "sourceMap": true
+
+    },  
+    "include": ["src/**/*.ts", "./*.ts", "src/models/bot copy.old", "src/models/order copy.ts.old"]
+}
+  
