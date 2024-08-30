@@ -234,8 +234,9 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
             await bot.save();
             if (!res) return botLog(bot, "FAILED TO PLACE ORDERS")
             botLog(bot, "ALL ORDERS PLACED SUCCESSFULLY!!");
-            return bot.id;
+            
         }
+        return bot.id;
     } catch (e) {
         botLog(bot, e);
     }
