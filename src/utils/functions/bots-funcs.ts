@@ -9,7 +9,7 @@ export const createChildBots = async (bot: IBot) => {
             bot,
             "CANNOT MODIFY CHILD BOTS WHILE ORDER STILL HAS ORDERS"
         );
-    if (bot.arbitrage_type == "tri") {
+    if (bot.arbit_settings?._type == "tri") {
         for (let child of bot.children) {
             botLog(bot, "DELETING CHILD", child);
             const c = await Bot.findByIdAndDelete(child).exec();
