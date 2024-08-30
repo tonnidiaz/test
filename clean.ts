@@ -49,19 +49,19 @@ const cleanOrders = async () =>{
 const cleanOldArbitOrders = async () =>{
     const bots = await Bot.find({type: 'arbitrage'}).exec()
     for (let bot of bots){
-        const arbitOrds :any[]= []
-        console.log(bot.name)
-        if (!bot.arbit_orders.length) continue
+        // const arbitOrds :any[]= []
+        // console.log(bot.name)
+        // if (!bot.arbit_orders.length) continue
         
-        //console.log(bot.arbit_orders)
-        for (let ord of bot.arbit_orders){
-            if (!ord.a){
-                ord = ord.toObject()
-                console.log(ord[0])
-             const arbOrd = {a: ord[0], b: ord[1], c: ord[2]}
-                arbitOrds.push(arbOrd)
-            }
-        }
+        // //console.log(bot.arbit_orders)
+        // for (let ord of bot.arbit_orders){
+        //     if (!ord.a){
+        //         ord = ord.toObject()
+        //         console.log(ord[0])
+        //      const arbOrd = {a: ord[0], b: ord[1], c: ord[2]}
+        //         arbitOrds.push(arbOrd)
+        //     }
+        // }
         //console.log(arbitOrds, '\n')
       //bot.arbit_orders = arbitOrds
      await bot.save()
