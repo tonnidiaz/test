@@ -1,12 +1,30 @@
 import { platforms } from "@/utils/constants";
-import mn, { HydratedDocument, HydratedDocumentFromSchema, InferSchemaType, Schema, Types } from "mongoose";
+import mn, {
+    HydratedDocument,
+    HydratedDocumentFromSchema,
+    InferSchemaType,
+    Schema,
+    Types,
+} from "mongoose";
 
 const TriArbitOrder = {
-    a: {type: Schema.ObjectId, required: true, ref: 'Order'},
-    b: {type: Schema.ObjectId, required: true, ref: 'Order'},
-    c: {type: Schema.ObjectId, required: true, ref: 'Order'},
-    _id: false
-}
+    a: { type: Schema.ObjectId, required: true, ref: "Order" },
+    b: { type: Schema.ObjectId, required: true, ref: "Order" },
+    c: { type: Schema.ObjectId, required: true, ref: "Order" },
+    _id: false,
+};
+
+const ArbitSettings = {
+    flipped: Boolean,
+    min_perc: { type: Number, default: 1 },
+    _type: {
+        type: String,
+        enum: ["tri", "cross"],
+        default: "tri",
+    },
+    _id: false,
+};
+
 export const BotSchema = new Schema(
     {
         name: { type: String, required: true },
@@ -23,32 +41,61 @@ export const BotSchema = new Schema(
         user: { type: Schema.ObjectId, ref: "User" },
         parent: { type: Schema.ObjectId, ref: "Bot" },
         orders: { type: [Schema.ObjectId], ref: "Order" },
-        arbit_orders: { type: [TriArbitOrder]},
-        aside: {type: [{base: String, ccy: String, amt: {type: Number, default: 0, _id: false}}], default: []},
-        total_base: {type: [{base: String, ccy: String, amt: {type: Number, default: 0, _id: false}}], default: []},
-        total_quote: {type: [{base: String, ccy: String, amt: {type: Number, default: 0, _id: false}}], default: []},
+        arbit_orders: { type: [TriArbitOrder] },
+        aside: {
+            type: [
+                {
+                    base: String,
+                    ccy: String,
+                    amt: { type: Number, default: 0, _id: false },
+                },
+            ],
+            default: [],
+        },
+        total_base: {
+            type: [
+                {
+                    base: String,
+                    ccy: String,
+                    amt: { type: Number, default: 0, _id: false },
+                },
+            ],
+            default: [],
+        },
+        total_quote: {
+            type: [
+                {
+                    base: String,
+                    ccy: String,
+                    amt: { type: Number, default: 0, _id: false },
+                },
+            ],
+            default: [],
+        },
         start_amt: { type: Number, default: 10 },
         start_bal: { type: Number, default: 10 },
         curr_amt: { type: Number, default: 0 },
-        platform: { type: String, default: 'bybit'},
-        order_type: { type: String, enum: ['Market', 'Limit'], default: 'Market'},
-        activated_at: {type: String, },
-        deactivated_at: {type: String, },
-        type: {type: String, enum: ["normal", "arbitrage"], default: "normal"},
-        arbitrage_type: {type: String, enum: ["tri", "cross"], default: "cross"},
-        A: {type: String, default: "USDT"},
-        B: {type: String, default: "BTC"},
-        C: {type: String, default: "DOGE"},
-        min_arbit_perc: {type: Number, default: .3},
-        is_child: {type: Boolean, default: false},
+        platform: { type: String, default: "bybit" },
+        order_type: {
+            type: String,
+            enum: ["Market", "Limit"],
+            default: "Market",
+        },
+        activated_at: { type: String },
+        deactivated_at: { type: String },
+        type: {
+            type: String,
+            enum: ["normal", "arbitrage"],
+            default: "normal",
+        },
+        A: { type: String, default: "USDT" },
+        B: { type: String, default: "BTC" },
+        C: { type: String, default: "DOGE" },
+        is_child: { type: Boolean, default: false },
         children: { type: [Schema.ObjectId], ref: "Bot" },
+        arbit_settings: ArbitSettings,
     },
     { timestamps: true }
 );
 
-
-
-export interface IBot extends HydratedDocumentFromSchema<typeof BotSchema>{
-
-}
-
+export interface IBot extends HydratedDocumentFromSchema<typeof BotSchema> {}

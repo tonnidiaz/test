@@ -417,10 +417,10 @@ export const onTriArbitCointest = async (
 
                         ///const noZeroVol = prev_rowA.v != 0 && prev_rowB.v != 0 && prev_rowC.v != 0
 
-                        const SLIP = 2
-                        const slipA = rowA.v == 0 ? .5/100 : 0
-                        const slipB = rowB.v == 0 ? .5/100 : 0
-                        const slipC = rowC.v == 0 ? .5/100 : 0
+                        const SLIP = .5
+                        const slipA = rowA.v == 0 ? SLIP/100 : 0
+                        const slipB = rowB.v == 0 ? SLIP/100 : 0
+                        const slipC = rowC.v == 0 ? SLIP/100 : 0
 
                         const day = new Date(rowA.ts).getDay()
                         const is_weekend = day == 6 || day == 7
@@ -430,7 +430,7 @@ export const onTriArbitCointest = async (
                             console.log({ A, B, C });
                             console.log("GOING IN...\n");
 
-                            if (flipped) {
+                            if (flipped ) {
                                 // Buy ALGO at C
                                 baseB = bal / pxC
                                 if (baseB < minSzC || bal < minAmtC) {

@@ -18,7 +18,9 @@ import {
 import { placeTrade } from "./funcs";
 import { Bot, Order } from "@/models";
 import mongoose from "mongoose";
-
+import { OKX } from "@/classes/okx";
+import { Bybit } from "@/classes/bybit";
+import { placeArbitOrders, placeArbitOrdersFlipped } from "./funcs4";
 
 export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
     try {
@@ -123,6 +125,10 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
         const cPxB = prev_rowB.c;
         const cPxC = prev_rowC.c;
 
+        const oPxA = prev_rowA.o;
+        const oPxB = prev_rowB.o;
+        const oPxC = prev_rowC.o;
+
         const _isGreenA = prev_rowA.c >= prev_rowA.o;
         const _isGreenB = prev_rowB.c >= prev_rowB.o;
         const _isGreenC = prev_rowC.c >= prev_rowC.o;
@@ -142,11 +148,45 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
         let perc = 0;
 
         const AMT = 1;
-        baseA = AMT / cPxA//pxA;
-        baseB = baseA / cPxB//pxB;
-        _quote = baseB * cPxC//pxC;
+        baseA = AMT / cPxA; //pxA;
+        baseB = baseA / cPxB; //pxB;
+        _quote = baseB * cPxC; //pxC;
 
-        perc = Number((((_quote - AMT) / AMT) * 100).toFixed(2));
+        const { arbit_settings } = bot;
+
+        if (!arbit_settings) return;
+
+        let oA = 0,
+            cA = 0,
+            oB = 0,
+            cB = 0,
+            oC = 0,
+            cC = 0;
+
+        if (arbit_settings.flipped) {
+            oC = AMT / oPxC;
+            oB = oC * oPxB;
+            oA = oB * oPxA;
+
+            cC = AMT / cPxC;
+            cB = cC * cPxB;
+            cA = cB * cPxA;
+        } else {
+            cB = AMT / cPxA; //  BUY B WITH A
+            cC = cB / cPxB; // BUY C WITH B
+            cA = cC * cPxC; // SELL C FOR A
+
+            oB = AMT / oPxA; //  BUY B WITH A
+            oC = oB / oPxB; // BUY C WITH B
+            oA = oC * oPxC; // SELL C FOR A
+            // 242.660
+
+            //console.log({ AMT, _A, perc });
+        }
+        const o_perc = Number((((oA - AMT) / AMT) * 100).toFixed(2));
+        const c_perc = Number((((cA - AMT) / AMT) * 100).toFixed(2));
+        const percCond = c_perc >= arbit_settings.min_perc;
+
         botLog(bot, { prev_ts: prev_rowA.ts });
         botLog(bot, { cPxA, cPxB, cPxC });
         botLog(bot, { pxA, pxB, pxC });
@@ -155,7 +195,7 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
         botLog(bot, { perc: `${perc}%`, mustEnter }, "\n");
         botLog(bot, { baseA, baseB, _quote });
 
-        if (perc >= bot.min_arbit_perc) {
+        if (percCond) {
             botLog(bot, "GOING IN...");
 
             // botC is the SELL bot
@@ -163,120 +203,49 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
             let pos = orderHasPos(order);
 
             const bal = getAmtToBuyWith(_botC, order);
-            baseA = bal / pxA;
-            if (baseA < minSzA || bal < minAmtA) {
-                botLog(bot, "CANNOT BUY A: LESS THAN MIN_AMT", {
-                    baseA,
-                    minSzA,
-                    amtA: bal,
-                    minAmtA,
-                });
-                return;
+
+            const params = {
+                bot,
+                bal,
+                pairA,
+                pairB,
+                pairC,
+                platA,
+                platB,
+                platC,
+                _botA,
+                _botB,
+                _botC,
+                perc,
+                cPxA,
+                cPxB,
+                cPxC,
+            
+                minAmtA,
+                minAmtB,
+                minAmtC,
+            
+                minSzA,
+                minSzB,
+                minSzC,
             }
 
-            baseB = baseA / pxB;
-            if (baseB < minSzB || baseA < minAmtB) {
-                botLog(bot, "CANNOT BUY B: LESS THAN MIN_AMT", {
-                    baseB,
-                    minSzB,
-                    amtB: baseA,
-                    minAmtB,
-                });
-                return;
+            let res: any = null
+            /* PLACE ORDERS */
+            if (arbit_settings.flipped){
+                res = await placeArbitOrdersFlipped(params)
+            }else{
+                res = await placeArbitOrders(params)
             }
-
-            _quote = baseB * pxC;
-            if (baseB < minSzC || _quote < minAmtC) {
-                botLog(bot, "CANNOT SELL C: LESS THAN MIN_AMT", {
-                    baseC: baseB,
-                    minSzC,
-                    amtC: _quote,
-                    minAmtC,
-                });
-                return;
-            }
-
-            const ts = parseDate(new Date());
-
-            const resA = await placeTrade({
-                amt: bal,
-                ordType: "Market",
-                price: pxA,
-                pair: pairA,
-                bot: _botA,
-                plat: platA,
-                side: "buy",
-                ts,
-            });
-
-            if (!resA)
-                return botLog(bot, "Failed to place BUY order for: [A]", pairA);
-            const orderA = await getLastOrder(_botA);
-            if (!orderA) return botLog(bot, "Failed to get orderA");
-            orderA.side = "buy";
-            orderA.is_closed = true;
-            await orderA.save();
-            // The base from A becomes the Quote for B
-            const amtB = orderA.base_amt - Math.abs(orderA.buy_fee);
-            const resB = await placeTrade({
-                amt: amtB,
-                ordType: "Market",
-                price: pxB,
-                pair: pairB,
-                bot: _botB,
-                plat: platB,
-                side: "buy",
-                ts,
-            });
-
-            if (!resB)
-                return botLog(bot, "Failed to place BUY order for: [B]", pairB);
-            const orderB = await getLastOrder(_botB);
-
-            if (!orderB) return botLog(bot, "Failed to get orderB");
-            orderB.side = "buy";
-            orderB.is_closed = true;
-            await orderB.save();
-
-            // Sell base_amt from B At C to get A back
-            const amtC = orderB.base_amt - Math.abs(orderB.buy_fee);
-            const resC = await placeTrade({
-                amt: amtC,
-                ordType: "Market",
-                price: pxC,
-                pair: pairC,
-                bot: _botC,
-                plat: platC,
-                side: "sell",
-                ts,
-            });
-
-            if (!resC)
-                return botLog(
-                    bot,
-                    "Failed to place SELL order for: [C]",
-                    pairC
-                );
-
-            const orderC = await getLastOrder(_botC);
-
-            if (!orderC) return botLog(bot, "Failed to get order C");
-            orderC.side = "sell";
-            orderC.is_closed = true;
-            orderC.ccy_amt = bal;
-
-            orderC.est_profit = perc;
-            const currAmt = orderC.new_ccy_amt - Math.abs(orderC.sell_fee);
-            let profit = ((currAmt - orderC.ccy_amt) / orderC.ccy_amt) * 100;
-            profit = Number(profit.toFixed(2));
-            orderC.profit = profit;
-            await orderC.save();
-            bot.arbit_orders.push({a: orderA.id, b: orderB.id, c: orderC.id});
+            /* END PLACE ORDERS */
             await bot.save();
+            if (!res) return botLog(bot, "FAILED TO PLACE ORDERS")
             botLog(bot, "ALL ORDERS PLACED SUCCESSFULLY!!");
-            return bot.id
+            return bot.id;
         }
     } catch (e) {
         botLog(bot, e);
     }
 };
+
+

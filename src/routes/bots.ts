@@ -271,7 +271,9 @@ router.post("/:id/edit", authMid, async (req, res) => {
                 if (k == "pair" || k == "symbol") {
                     bot.set("base", v[0]);
                     bot.set("ccy", v[1]);
+                    continue
                 }
+                
                 bot.set(k, v);
                 if (commonFields.includes(k)) {
                     const childA = await Bot.findById(bot.children[0]).exec();
