@@ -144,16 +144,16 @@ export class TestOKX extends Platform {
                 //2024-04-23 05:50:00+02:00
                 let firstTs = start;
                 if (savePath && existsSync(savePath)){
-                    const savedKlines = await readJson(savePath)
+                    // const savedKlines = await readJson(savePath)
 
-                    if (savedKlines?.length){
-                        const lastSaved = savedKlines[savedKlines.length - 1]
-                        const lastTsMs = Number(lastSaved[0])
-                        const lastTs = parseDate(lastTsMs)
-                        console.log({lastTs})
-                        firstTs = lastTsMs//Math.max(start, lastTsMs)
+                    // if (savedKlines?.length){
+                    //     const lastSaved = savedKlines[savedKlines.length - 1]
+                    //     const lastTsMs = Number(lastSaved[0])
+                    //     const lastTs = parseDate(lastTsMs)
+                    //     console.log({lastTs})
+                    //     firstTs = lastTsMs//Math.max(start, lastTsMs)
 
-                    }
+                    // }
                     
                 }
                 
