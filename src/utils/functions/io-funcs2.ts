@@ -460,7 +460,6 @@ export const onTriArbitCointest = async (
                                 baseB *= 1 - TAKER;
                                 baseB = toFixed(baseB, basePrC);
 
-                                // BUY BASE OF PAIR A (QUOTE of B) at B
                                 // Sell ALGO at B to get BTC
                                 baseA = baseB * pxB;
                                 if (baseB < minSzB || baseA < minAmtB) {

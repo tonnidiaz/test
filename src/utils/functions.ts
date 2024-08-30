@@ -560,7 +560,7 @@ export function getMinAmt(pair: string[], plat: string) {
             break;
         case "okx":
             const _i3 = instru as (typeof okxInstrus)[0];
-            sz = 1//Number(_i3.min);
+            sz = _quote == 'USDT' ? 1 : 0//Number(_i3.min);
             break;
     }
     return sz;
