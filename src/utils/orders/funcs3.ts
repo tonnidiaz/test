@@ -19,6 +19,7 @@ import { placeTrade } from "./funcs";
 import { Bot, Order } from "@/models";
 import mongoose from "mongoose";
 
+
 export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
     try {
         const platName = bot.platform.toLowerCase();
@@ -110,9 +111,22 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
         const rowB = dfB[dfB.length - 1];
         const rowC = dfC[dfC.length - 1];
 
+        const prev_rowA = dfA[dfA.length - 2];
+        const prev_rowB = dfB[dfB.length - 2];
+        const prev_rowC = dfC[dfC.length - 2];
+
         const pxA = rowA.o;
         const pxB = rowB.o;
         const pxC = rowC.o;
+
+        const cPxA = prev_rowA.c;
+        const cPxB = prev_rowB.c;
+        const cPxC = prev_rowC.c;
+
+        const _isGreenA = prev_rowA.c >= prev_rowA.o;
+        const _isGreenB = prev_rowB.c >= prev_rowB.o;
+        const _isGreenC = prev_rowC.c >= prev_rowC.o;
+
         const ts = rowA.ts;
 
         if (rowB.ts != ts || rowC.ts != ts) {
@@ -120,7 +134,7 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
         }
         console.log("\n", { ts });
         botLog(bot, { pairA, pairB, pairC });
-        botLog(bot, { pxA, pxB, pxC });
+        const mustEnter = (!_isGreenA && _isGreenC) || _isGreenB;
 
         let _quote = 0,
             baseA = 0,
@@ -128,15 +142,20 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
         let perc = 0;
 
         const AMT = 1;
-        baseA = AMT / pxA;
-        baseB = baseA / pxB;
-        _quote = baseB * pxC;
+        baseA = AMT / cPxA//pxA;
+        baseB = baseA / cPxB//pxB;
+        _quote = baseB * cPxC//pxC;
 
         perc = Number((((_quote - AMT) / AMT) * 100).toFixed(2));
+        botLog(bot, { prev_ts: prev_rowA.ts });
+        botLog(bot, { cPxA, cPxB, cPxC });
+        botLog(bot, { pxA, pxB, pxC });
 
-        botLog(bot, { perc: `${perc}%`, baseA, baseB, _quote });
+        botLog(bot, { _isGreenA, _isGreenB, _isGreenC });
+        botLog(bot, { perc: `${perc}%`, mustEnter }, "\n");
+        botLog(bot, { baseA, baseB, _quote });
 
-        if (perc >= bot.min_arbit_perc) {
+        if (perc >= bot.min_arbit_perc && mustEnter) {
             botLog(bot, "GOING IN...");
 
             // botC is the SELL bot
@@ -179,8 +198,6 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
 
             const ts = parseDate(new Date());
 
-            const arbit_ord: mongoose.Types.ObjectId[] = [];
-
             const resA = await placeTrade({
                 amt: bal,
                 ordType: "Market",
@@ -199,7 +216,6 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
             orderA.side = "buy";
             orderA.is_closed = true;
             await orderA.save();
-            arbit_ord.push(orderA.id);
             // The base from A becomes the Quote for B
             const amtB = orderA.base_amt - Math.abs(orderA.buy_fee);
             const resB = await placeTrade({
@@ -222,7 +238,6 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
             orderB.is_closed = true;
             await orderB.save();
 
-            arbit_ord.push(orderB.id);
             // Sell base_amt from B At C to get A back
             const amtC = orderB.base_amt - Math.abs(orderB.buy_fee);
             const resC = await placeTrade({
@@ -251,16 +266,15 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
             orderC.ccy_amt = bal;
 
             orderC.est_profit = perc;
-            const currAmt = orderC.new_ccy_amt - Math.abs(orderC.sell_fee)
-            let profit = (currAmt - orderC.ccy_amt) / orderC.ccy_amt * 100
-            profit = Number(profit.toFixed(2)) 
-            orderC.profit = profit
+            const currAmt = orderC.new_ccy_amt - Math.abs(orderC.sell_fee);
+            let profit = ((currAmt - orderC.ccy_amt) / orderC.ccy_amt) * 100;
+            profit = Number(profit.toFixed(2));
+            orderC.profit = profit;
             await orderC.save();
-            arbit_ord.push(orderC.id);
-
-            bot.arbit_orders.push(arbit_ord);
+            bot.arbit_orders.push({a: orderA.id, b: orderB.id, c: orderC.id});
             await bot.save();
             botLog(bot, "ALL ORDERS PLACED SUCCESSFULLY!!");
+            return bot.id
         }
     } catch (e) {
         botLog(bot, e);

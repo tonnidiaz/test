@@ -7,6 +7,7 @@ import { botJobSpecs, test } from "@/utils/constants";
 import { botLog } from "@/utils/functions";
 import { afterOrderUpdate } from "@/utils/orders/funcs2";
 import { findBotOrders } from "@/utils/funcs2";
+import { deactivateBot } from "@/utils/funcs3";
 
 export class OrderPlacer {
     cnt: number = 0;
@@ -44,8 +45,13 @@ export class OrderPlacer {
                 cancelJob(getJob(bot._id.toString())!.job);
 
                 if (bot.active) {
-                    const res = await updateOrder({bot, cancel: true})
-                   await afterOrderUpdate({bot})
+                    await deactivateBot(bot)
+                    await updateOrder({bot, cancel: true})
+                    const res = await afterOrderUpdate({bot})
+                    if (res){
+                        bot.active = true
+                        await bot.save()
+                    }
                 }
             }
         } catch (err) {

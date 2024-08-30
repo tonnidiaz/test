@@ -151,6 +151,8 @@ export const ImprProd = async ({
             }
         }
     }
+
+    return bot.id
 };
 /* 
 export const prodStrategy = async ({pos, order, bot}: {order?: IOrder | null, bot: IBot, pos: boolean, row: ICandle, prevrow: ICandle}) =>{

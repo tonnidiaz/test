@@ -1,7 +1,7 @@
 import { MAKER_FEE_RATE, TAKER_FEE_RATE } from "@/utils/constants";
 import { ensureDirExists } from "@/utils/orders/funcs";
 import { getInterval, parseDate } from "@/utils/funcs2";
-import { botLog } from "@/utils/functions";
+import { botLog, readJson } from "@/utils/functions";
 import axios, { AxiosResponse } from "axios";
 import crypto from "crypto";
 
@@ -16,6 +16,7 @@ import {
 import { Candle, RestClient, Trade } from "okx-api";
 import dotenv from "dotenv";
 import { ITrade } from "@/utils/interfaces";
+import {existsSync} from 'fs'
 
 dotenv.config();
 
@@ -140,7 +141,22 @@ export class TestOKX extends Platform {
             }
 
             if (start) {
+                //2024-04-23 05:50:00+02:00
                 let firstTs = start;
+                if (savePath && existsSync(savePath)){
+                    const savedKlines = await readJson(savePath)
+
+                    if (savedKlines?.length){
+                        const lastSaved = savedKlines[savedKlines.length - 1]
+                        const lastTsMs = Number(lastSaved[0])
+                        const lastTs = parseDate(lastTsMs)
+                        console.log({lastTs})
+                        firstTs = lastTsMs//Math.max(start, lastTsMs)
+
+                    }
+                    
+                }
+                
                 while (firstTs <= end) {
                     
                     const limit = isBybit ? 1000 : 100;

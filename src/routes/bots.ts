@@ -8,7 +8,7 @@ import {
     getPricePrecision,
     toFixed,
     tunedErr,
-} from "@/utils/functions"; 
+} from "@/utils/functions";
 import { IObj } from "@/utils/interfaces";
 import express from "express";
 import schedule from "node-schedule";
@@ -17,32 +17,27 @@ import { wsBybit } from "@/classes/main-bybit";
 import { getAmtToBuyWith, parseDate } from "@/utils/funcs2";
 import { IOrder } from "@/models/order";
 import { createChildBots } from "@/utils/functions/bots-funcs";
+import mongoose from "mongoose";
 
 const router = express.Router();
 
 const parseBot = async (bot: IBot, deep = true) => {
-    const is_arb = bot.type == "arbitrage";
     bot = await bot.populate("orders");
-    //bot = await bot.populate("arbit_orders");
-    let arbit_orders: IObj[] = [];
-    if (deep) {
-        for (let lst of bot.arbit_orders) {
-            const ords: IObj[] = [];
-            for (let oid of lst) {
-                const ord = await Order.findById(oid).exec();
-                if (ord) {
-                    ords.push(ord.toJSON());
-                }
-            }
-            if (ords.length) {
-                arbit_orders.push(ords);
-            }
+    try {
+        if (deep){
+          for (let i = 0; i < bot.arbit_orders.length; i++)
+        {
+            bot = await bot.populate(`arbit_orders.${i}.a`)
+            bot = await bot.populate(`arbit_orders.${i}.b`)
+            bot = await bot.populate(`arbit_orders.${i}.c`)
+        }  
         }
-    } else {
-        arbit_orders = bot.arbit_orders;
+       
+    } catch (e) {
+        console.log(e);
     }
 
-    return { ...bot.toJSON(), orders: is_arb ? arbit_orders : bot.orders };
+    return { ...bot.toJSON(), orders: bot.type == 'arbitrage' ? bot.arbit_orders : bot.orders };
 };
 
 router.get("/", async (req, res) => {
@@ -64,6 +59,7 @@ router.get("/", async (req, res) => {
             ).reverse()
         );
     } catch (error) {
+        console.log(error);
         return tunedErr(res, 500, "Failed to get bots");
     }
 });
@@ -114,11 +110,11 @@ router.post("/create", authMid, async (req, res) => {
 });
 
 const calcCurrAmt = async (bot: IBot) => {
-
-    const lastOrderId = bot.type == 'normal' ? bot.orders[bot.orders.length - 1] : bot.arbit_orders[bot.arbit_orders.length - 1]?.at(2)
-    const order = await Order.findById(
-        lastOrderId
-    ).exec();
+    const lastOrderId =
+        bot.type == "normal"
+            ? bot.orders[bot.orders.length - 1]
+            : bot.arbit_orders[bot.arbit_orders.length - 1]?.c;
+    const order = await Order.findById(lastOrderId).exec();
     let amt = getAmtToBuyWith(bot, order);
     const pxPr = getPricePrecision([bot.base, bot.ccy], bot.platform);
 
@@ -156,12 +152,11 @@ router.post("/:id/clear-orders", authMid, async (req, res) => {
     for (let oid of bot.orders) {
         console.log(oid);
         console.log(`DELETING ORDER ` + oid);
-        await Order.findByIdAndRemove(oid).exec();
+        await Order.findByIdAndDelete(oid).exec();
         console.log("Order deleted");
         bot.orders = bot?.orders.filter((el) => el != oid);
         await bot.save();
     }
-
 
     for (let oid of bot.children) {
         const child = await Bot.findById(oid).exec();
@@ -169,14 +164,18 @@ router.post("/:id/clear-orders", authMid, async (req, res) => {
         // DELETE CHILD BOT ORDERS
         for (let oid of child.orders) {
             console.log(`DELETING CHILD BOT ORDER ` + oid);
-            await Order.findByIdAndRemove(oid).exec();
+            await Order.findByIdAndDelete(oid).exec();
             console.log("CHILD BOT ORDER deleted");
             child.orders = child?.orders.filter((el) => el != oid);
             await child.save();
         }
+        child.set('orders', [])
+        await child.save()
     }
-    bot.arbit_orders = []
-    await bot.save()
+    bot.set("orders", []);
+    bot.set("arbit_orders", []);
+
+    await bot.save();
 
     const _bot = await parseBot(bot);
 
@@ -212,8 +211,19 @@ router.post("/:id/edit", authMid, async (req, res) => {
 
         const is_arb = bot.type == "arbitrage";
 
-        const commonFields = ['platform', 'interval', 'name', 'demo', 'category', 'start_amt', 'start_bal', 'A', 'B', 'C']
-        
+        const commonFields = [
+            "platform",
+            "interval",
+            "name",
+            "demo",
+            "category",
+            "start_amt",
+            "start_bal",
+            "A",
+            "B",
+            "C",
+        ];
+
         if (key == "active") {
             if (bool && !val) {
                 // Deactivate JOB
@@ -263,30 +273,31 @@ router.post("/:id/edit", authMid, async (req, res) => {
                     bot.set("ccy", v[1]);
                 }
                 bot.set(k, v);
-                if (commonFields.includes(k)){
-                    const childA = await Bot.findById(bot.children[0]).exec()
-                    const childB = await Bot.findById(bot.children[1]).exec()
-                    const childC = await Bot.findById(bot.children[2]).exec()
+                if (commonFields.includes(k)) {
+                    const childA = await Bot.findById(bot.children[0]).exec();
+                    const childB = await Bot.findById(bot.children[1]).exec();
+                    const childC = await Bot.findById(bot.children[2]).exec();
 
-                   
-                    if (!childA || !childB || !childC){
-                        bot.active = false
-                        await bot.save()
+                    if (!childA || !childB || !childC) {
+                        bot.active = false;
+                        await bot.save();
 
-                        botLog(bot, "ONE OF THE CHILD BOTS NOT FOUND")
-                        return tunedErr(res, 400, "ONE OF THE CHILD BOTS NOT FOUND")
+                        botLog(bot, "ONE OF THE CHILD BOTS NOT FOUND");
+                        return tunedErr(
+                            res,
+                            400,
+                            "ONE OF THE CHILD BOTS NOT FOUND"
+                        );
                     }
-                    const children = [childA, childB, childC]
-                    if (k == 'name' || k == 'A' || k == 'B' || k == 'C'){
-
-                    }
-                    else{
-                        for (let b of children){
-                            b!.set(k, v)
+                    const children = [childA, childB, childC];
+                    if (k == "name" || k == "A" || k == "B" || k == "C") {
+                    } else {
+                        for (let b of children) {
+                            b!.set(k, v);
                         }
                     }
-                    for (let b of children){
-                        await b.save()
+                    for (let b of children) {
+                        await b.save();
                     }
                 }
             }
@@ -336,7 +347,7 @@ router.post("/:id/edit", authMid, async (req, res) => {
             }
         }
 
-        await bot.save()
+        await bot.save();
         //botLog(bot, bot.toJSON())
 
         const _bot = await parseBot(bot);
@@ -366,7 +377,7 @@ router.post("/:id/delete", authMid, async (req, res) => {
 
         for (let oid of orders) {
             console.log(`DELETING ORDER ` + oid);
-            await Order.findByIdAndRemove(oid).exec();
+            await Order.findByIdAndDelete(oid).exec();
             console.log("Order deleted");
         }
         for (let oid of children) {
@@ -374,13 +385,13 @@ router.post("/:id/delete", authMid, async (req, res) => {
             if (!child) continue;
 
             console.log(`DELETING CHILD BOT ` + oid);
-            await Bot.findByIdAndRemove(oid).exec();
+            await Bot.findByIdAndDelete(oid).exec();
             console.log("CHILD BOT deleted");
 
             // DELETE CHILD BOT ORDERS
             for (let oid of child.orders) {
                 console.log(`DELETING CHILD BOT ORDER ` + oid);
-                await Order.findByIdAndRemove(oid).exec();
+                await Order.findByIdAndDelete(oid).exec();
                 console.log("CHILD BOT ORDER deleted");
             }
         }

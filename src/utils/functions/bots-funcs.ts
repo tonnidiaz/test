@@ -12,7 +12,7 @@ export const createChildBots = async (bot: IBot) => {
     if (bot.arbitrage_type == "tri") {
         for (let child of bot.children) {
             botLog(bot, "DELETING CHILD", child);
-            const c = await Bot.findByIdAndRemove(child).exec();
+            const c = await Bot.findByIdAndDelete(child).exec();
             botLog(bot, "CHILD", c?.name, "DELETED");
         }
         bot.children = [];

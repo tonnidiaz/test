@@ -1,6 +1,12 @@
 import { platforms } from "@/utils/constants";
 import mn, { HydratedDocument, HydratedDocumentFromSchema, InferSchemaType, Schema, Types } from "mongoose";
 
+const TriArbitOrder = {
+    a: {type: Schema.ObjectId, required: true, ref: 'Order'},
+    b: {type: Schema.ObjectId, required: true, ref: 'Order'},
+    c: {type: Schema.ObjectId, required: true, ref: 'Order'},
+    _id: false
+}
 export const BotSchema = new Schema(
     {
         name: { type: String, required: true },
@@ -17,7 +23,7 @@ export const BotSchema = new Schema(
         user: { type: Schema.ObjectId, ref: "User" },
         parent: { type: Schema.ObjectId, ref: "Bot" },
         orders: { type: [Schema.ObjectId], ref: "Order" },
-        arbit_orders: { type: [[Schema.ObjectId]], ref: "Order" },
+        arbit_orders: { type: [TriArbitOrder]},
         aside: {type: [{base: String, ccy: String, amt: {type: Number, default: 0, _id: false}}], default: []},
         total_base: {type: [{base: String, ccy: String, amt: {type: Number, default: 0, _id: false}}], default: []},
         total_quote: {type: [{base: String, ccy: String, amt: {type: Number, default: 0, _id: false}}], default: []},

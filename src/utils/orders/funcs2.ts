@@ -36,12 +36,17 @@ import { prodStrategy as prodStr60 } from "./strategies/def-60";
 import { cloud5Prod } from "./strategies/cloud-5.prod";
 import { ImprProd } from "./strategies/impr.prod";
 import { afterOrderUpdateArbit } from "./funcs3";
+import mongoose from "mongoose";
 //import { wsOkx } from "@/classes/main-okx";
 
 const useDef5 = false,
     useDef60 = true;
 
-export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
+export const afterOrderUpdate = async ({
+    bot,
+}: {
+    bot: IBot;
+}): Promise<mongoose.Types.ObjectId | undefined | void | null> => {
     const is_arb = bot.type == "arbitrage";
 
     if (is_arb) return afterOrderUpdateArbit({ bot });
@@ -85,7 +90,7 @@ export const afterOrderUpdate = async ({ bot }: { bot: IBot }) => {
     const params = { row, prevrow, bot, order, pos, pxPr, basePr };
     //await cloud5Prod(params)
     //await def5Prod(params);
-    await ImprProd(params);
+    return await ImprProd(params);
 
     // if (useDef5) {
     //     await prodStr5(params);

@@ -1,8 +1,9 @@
 import { Bot, Order } from "@/models"
+import { configDotenv } from "dotenv";
 import mongoose from "mongoose";
 
-const DEV = true
-
+const DEV = false
+configDotenv()
 async function connectMongo() {
     let mongoURL = (DEV ? process.env.MONGO_URL_LOCAL : process.env.MONGO_URL)!;
     try {
@@ -23,7 +24,7 @@ const remChildBots = async () =>{
         const bot = await Bot.findById(child.parent).exec()
         if (!bot || !bot.children.includes(child.id)){
             console.log("DELETING CHILD", child.name)
-            await Bot.findByIdAndRemove(child.id).exec()
+            await Bot.findByIdAndDelete(child.id).exec()
             console.log("CHILD REMOVED")
         }
     }
@@ -38,16 +39,42 @@ const cleanOrders = async () =>{
         const bot = await Bot.findById(ord.bot).exec()
         if (!bot || !bot.orders.includes(ord.id)){
             console.log("DELETING ORDER", ord.id)
-            await Order.findByIdAndRemove(ord.id).exec()
+            await Order.findByIdAndDelete(ord.id).exec()
             console.log("ORDER DELETED")
         }
     }
     console.log("ORDERS DONE")
 }
+
+const cleanOldArbitOrders = async () =>{
+    const bots = await Bot.find({type: 'arbitrage'}).exec()
+    for (let bot of bots){
+        const arbitOrds :any[]= []
+        console.log(bot.name)
+        if (!bot.arbit_orders.length) continue
+        
+        //console.log(bot.arbit_orders)
+        for (let ord of bot.arbit_orders){
+            if (!ord.a){
+                ord = ord.toObject()
+                console.log(ord[0])
+             const arbOrd = {a: ord[0], b: ord[1], c: ord[2]}
+                arbitOrds.push(arbOrd)
+            }
+        }
+        //console.log(arbitOrds, '\n')
+      //bot.arbit_orders = arbitOrds
+     await bot.save()
+    }
+}
 const clean = async () =>{
     await connectMongo()
+    await cleanOldArbitOrders()
+    console.log("DONE")
+    return;
     await remChildBots()
     await cleanOrders()
 }
 
 clean()
+
