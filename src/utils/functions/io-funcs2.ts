@@ -17,6 +17,8 @@ import { existsSync, writeFileSync } from "fs";
 import { parseKlines } from "../funcs2";
 import { platforms } from "../consts";
 
+enum startAt {A, B, C}
+
 export const onTriArbitCointest = async (
     data: IObj,
     client?: Socket,
@@ -56,7 +58,7 @@ export const onTriArbitCointest = async (
         const MIN_PERC = perc ? Number(perc) : ARBIT_MIN_PERC;
         const QUOTE_FEE = 0,
             BASE_FEE = 0;
-
+        const _startAt = startAt.A
         bal = Number(bal);
         const START_BAL = bal;
 
