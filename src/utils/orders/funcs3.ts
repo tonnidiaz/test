@@ -197,16 +197,9 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
 
         if (percCond) {
             botLog(bot, "GOING IN...");
-
-            // botC is the SELL bot
-            let order = await getLastOrder(_botC);
-            let pos = orderHasPos(order);
-
-            const bal = getAmtToBuyWith(_botC, order);
-
+   perc = c_perc
             const params = {
                 bot,
-                bal,
                 pairA,
                 pairB,
                 pairC,

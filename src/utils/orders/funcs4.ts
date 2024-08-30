@@ -1,13 +1,12 @@
 import { Bybit } from "@/classes/bybit";
 import { OKX } from "@/classes/okx";
 import { IBot } from "@/models/bot";
-import { parseDate, getLastOrder } from "../funcs2";
+import { parseDate, getLastOrder, getAmtToBuyWith } from "../funcs2";
 import { botLog } from "../functions";
 import { placeTrade } from "./funcs";
 
 export const placeArbitOrders = async ({
     bot,
-    bal,
     pairA,
     pairB,
     pairC,
@@ -37,8 +36,6 @@ export const placeArbitOrders = async ({
     platA: OKX | Bybit;
     platB: OKX | Bybit;
     platC: OKX | Bybit;
-
-    bal: number;
     perc: number;
 
     cPxA: number;
@@ -58,7 +55,8 @@ export const placeArbitOrders = async ({
     pairC: string[];
 }) => {
     botLog(bot, "PLACING NORMAL ORDERS...\n")
-
+    let order = await getLastOrder(_botC);
+    const bal = getAmtToBuyWith(_botC, order);
     const ts = parseDate(new Date());
 
     const resA = await placeTrade({
@@ -134,7 +132,6 @@ export const placeArbitOrders = async ({
 
 export const placeArbitOrdersFlipped = async ({
     bot,
-    bal,
     pairA,
     pairB,
     pairC,
@@ -165,7 +162,6 @@ export const placeArbitOrdersFlipped = async ({
     platB: OKX | Bybit;
     platC: OKX | Bybit;
 
-    bal: number;
     perc: number;
 
     cPxA: number;
@@ -186,6 +182,8 @@ export const placeArbitOrdersFlipped = async ({
 }) => {
     botLog(bot, "PLACING FLIPPED ORDERS...\n")
 
+    let order = await getLastOrder(_botA);
+    const bal = getAmtToBuyWith(_botA, order);
 
     const ts = parseDate(new Date());
 
