@@ -398,7 +398,13 @@ router.post("/:id/delete", authMid, async (req, res) => {
             }
         }
         const bots = await Bot.find().exec();
-        res.json(bots.map((e) => e.toJSON()).reverse());
+        res.json(
+            (
+                await Promise.all(
+                    bots.map(async (e) => await parseBot(e, false))
+                )
+            ).reverse()
+        );
     } catch (error) {
         console.log(error);
         return tunedErr(res, 500, "Failed to delete bot");

@@ -78,10 +78,10 @@ export class TestOKX extends Platform {
         super({ demo });
         this.flag = demo ? "1" : "0";
         this.apiKey = demo
-            ? process.env.OKX_API_KEY_DEV!
+            ? process.env.OKX_API_KEY_DEMO!
             : process.env.OKX_API_KEY!;
         this.apiSecret = demo
-            ? process.env.OKX_API_SECRET_DEV!
+            ? process.env.OKX_API_SECRET_DEMO!
             : process.env.OKX_API_SECRET!;
         this.passphrase = process.env.OKX_PASSPHRASE!;
 
@@ -113,10 +113,10 @@ export class TestOKX extends Platform {
 
         try{
             const bybit_apiKey = this.demo
-            ? process.env.BYBIT_API_KEY_DEV!
+            ? process.env.BYBIT_API_KEY_DEMO!
             : process.env.BYBIT_API_KEY!;
         const bybit_apiSecret = this.demo
-            ? process.env.BYBIT_API_SECRET_DEV!
+            ? process.env.BYBIT_API_SECRET_DEMO!
             : process.env.BYBIT_API_SECRET!;
         const bybit_passphrase = process.env.BYBIT_PASSPHRASE!;
             const client = new RestClientV5({
@@ -320,10 +320,10 @@ export class TestBybit extends Platform {
     constructor({ demo = false }: { demo?: boolean }) {
         super({ demo });
         const apiKey = demo
-            ? process.env.BYBIT_API_KEY_DEV!
+            ? process.env.BYBIT_API_KEY_DEMO!
             : process.env.BYBIT_API_KEY!;
         const apiSecret = demo
-            ? process.env.BYBIT_API_SECRET_DEV!
+            ? process.env.BYBIT_API_SECRET_DEMO!
             : process.env.BYBIT_API_SECRET!;
 
         this.client = new RestClientV5({

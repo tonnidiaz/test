@@ -19,10 +19,10 @@ export class TestBitget extends Platform {
         super({ demo });
         this.flag = demo ? "1" : "0";
         this.apiKey = demo
-            ? process.env.BITGET_API_KEY_DEV!
+            ? process.env.BITGET_API_KEY_DEMO!
             : process.env.BITGET_API_KEY!;
         this.apiSecret = demo
-            ? process.env.BITGET_API_SECRET_DEV!
+            ? process.env.BITGET_API_SECRET_DEMO!
             : process.env.BITGET_API_SECRET!;
         this.passphrase = process.env.BITGET_PASSPHRASE!;
 

@@ -2,7 +2,7 @@ import { Bybit } from "@/classes/bybit";
 import { OKX } from "@/classes/okx";
 import { IBot } from "@/models/bot";
 import { parseDate, getLastOrder, getAmtToBuyWith } from "../funcs2";
-import { botLog } from "../functions";
+import { botLog, toFixed } from "../functions";
 import { placeTrade } from "./funcs";
 
 export const placeArbitOrders = async ({
@@ -28,6 +28,14 @@ export const placeArbitOrders = async ({
     minSzA,
     minSzB,
     minSzC,
+    MAKER,
+    TAKER,
+    basePrA,
+    pxPrA,
+    basePrB,
+    pxPrB,
+    basePrC,
+    pxPrC,
 }: {
     bot: IBot;
     _botA: IBot;
@@ -53,11 +61,48 @@ export const placeArbitOrders = async ({
     pairA: string[];
     pairB: string[];
     pairC: string[];
+    TAKER: number;
+    MAKER: number;
+
+    basePrA: number;
+    pxPrA: number;
+    basePrB: number;
+    pxPrB: number;
+    basePrC: number;
+    pxPrC: number;
 }) => {
-    botLog(bot, "PLACING NORMAL ORDERS...\n")
+    botLog(bot, "PLACING NORMAL ORDERS...\n");
     let order = await getLastOrder(_botC);
     const bal = getAmtToBuyWith(_botC, order);
     const ts = parseDate(new Date());
+    let _base = 0,
+        _amt = 0;
+    _amt = bal;
+    _base = bal / cPxA;
+
+    botLog(bot, pairA);
+    botLog(bot, { _amt, _base, minAmtA, minSzA });
+    if (_amt < minAmtA || _base < minSzA) {
+        return botLog(bot, "LESS_ERROR; UNABLE TO PLACE BUY ORDER FOR A");
+    }
+
+    _amt = toFixed((_base *= 1 - TAKER), basePrA);
+    _base = _amt / cPxB;
+
+    botLog(bot, pairB);
+    botLog(bot, { _amt, _base, minAmtB, minSzB });
+    if (_amt < minAmtB || _base < minSzB) {
+        return botLog(bot, "LESS_ERROR; UNABLE TO PLACE BUY ORDER FOR B");
+    }
+
+    _base = toFixed((_base *= 1 - TAKER), basePrB);
+    _amt = _base * cPxC;
+
+    botLog(bot, pairC);
+    botLog(bot, { _amt, _base, minAmtC, minSzC });
+    if (_amt < minAmtC || _base < minSzC) {
+        return botLog(bot, "LESS_ERROR; UNABLE TO PLACE BUY ORDER FOR C");
+    }
 
     const resA = await placeTrade({
         amt: bal,
@@ -127,7 +172,7 @@ export const placeArbitOrders = async ({
     await orderC.save();
     bot.arbit_orders.push({ a: orderA.id, b: orderB.id, c: orderC.id });
 
-    return bot.id
+    return bot.id;
 };
 
 export const placeArbitOrdersFlipped = async ({
@@ -153,6 +198,14 @@ export const placeArbitOrdersFlipped = async ({
     minSzA,
     minSzB,
     minSzC,
+    MAKER,
+    TAKER,
+    basePrA,
+    pxPrA,
+    basePrB,
+    pxPrB,
+    basePrC,
+    pxPrC,
 }: {
     bot: IBot;
     _botA: IBot;
@@ -179,10 +232,19 @@ export const placeArbitOrdersFlipped = async ({
     pairA: string[];
     pairB: string[];
     pairC: string[];
+    TAKER: number;
+    MAKER: number;
+    basePrA: number;
+    pxPrA: number;
+    basePrB: number;
+    pxPrB: number;
+    basePrC: number;
+    pxPrC: number;
 }) => {
-    botLog(bot, "PLACING FLIPPED ORDERS...\n")
+    botLog(bot, "PLACING FLIPPED ORDERS...\n");
 
     let order = await getLastOrder(_botA);
+
     const bal = getAmtToBuyWith(_botA, order);
 
     const ts = parseDate(new Date());
@@ -259,5 +321,5 @@ export const placeArbitOrdersFlipped = async ({
 
     bot.arbit_orders.push({ a: orderC.id, b: orderB.id, c: orderA.id });
 
-    return bot.id
+    return bot.id;
 };

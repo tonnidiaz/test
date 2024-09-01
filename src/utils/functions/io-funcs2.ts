@@ -428,7 +428,7 @@ export const onTriArbitCointest = async (
 
                         ///const noZeroVol = prev_rowA.v != 0 && prev_rowB.v != 0 && prev_rowC.v != 0
 
-                        const SLIP = 0.5;
+                        const SLIP = .5//0.5;
                         const slipA = rowA.v == 0 ? SLIP / 100 : 0;
                         const slipB = rowB.v == 0 ? SLIP / 100 : 0;
                         const slipC = rowC.v == 0 ? SLIP / 100 : 0;
@@ -456,7 +456,7 @@ export const onTriArbitCointest = async (
                                     );
                                     continue;
                                 }
-
+                                baseB *= 1 - slipC
                                 baseB *= 1 - TAKER;
                                 baseB = toFixed(baseB, basePrC);
 
@@ -474,7 +474,7 @@ export const onTriArbitCointest = async (
                                     );
                                     continue;
                                 }
-
+                                baseA *= 1 - slipB
                                 baseA *= 1 - MAKER;
                                 baseA = toFixed(baseA, pxPrB);
 
@@ -493,7 +493,7 @@ export const onTriArbitCointest = async (
                                     );
                                     continue;
                                 }
-
+                                _quote *= 1 - slipA
                                 _quote *= 1 - MAKER;
                                 _quote = toFixed(_quote, pxPrA);
                             } else {
@@ -566,9 +566,9 @@ export const onTriArbitCointest = async (
                                         perc,
                                         est_perc,
                                         side: [
-                                            `[${pairC}] BUY {H: ${rowC.h}, L: ${rowC.l}, V: ${rowC.v}}`,
-                                            `[${pairB}] SELL {H: ${rowB.h}, L: ${rowB.l}, V: ${rowB.v}}`,
-                                            `[${pairA}] SELL {H: ${rowA.h}, L: ${rowA.l}, V: ${rowA.v}}`,
+                                            `[${pairC}] BUY {H: ${rowC.h}, L: ${rowC.l}, V: ${rowC.v || 'null'}}`,
+                                            `[${pairB}] SELL {H: ${rowB.h}, L: ${rowB.l}, V: ${rowB.v || 'null'}}`,
+                                            `[${pairA}] SELL {H: ${rowA.h}, L: ${rowA.l}, V: ${rowA.v || 'null'}}`,
                                         ],
                                         px: [
                                             `${pairC[1]} ${cPxC}\n${pairC[1]} ${pxC}`,
@@ -587,9 +587,9 @@ export const onTriArbitCointest = async (
                                         perc,
                                         est_perc,
                                         side: [
-                                            `[${pairA}] BUY {H: ${rowA.h}, L: ${rowA.l}, V: ${rowA.v}}`,
-                                            `[${pairB}] BUY {H: ${rowB.h}, L: ${rowB.l}, V: ${rowB.v}}`,
-                                            `[${pairC}] SELL {H: ${rowC.h}, L: ${rowC.l}, V: ${rowC.v}}`,
+                                            `[${pairA}] BUY {H: ${rowA.h}, L: ${rowA.l}, V: ${rowA.v || 'null'}}`,
+                                            `[${pairB}] BUY {H: ${rowB.h}, L: ${rowB.l}, V: ${rowB.v || 'null'}}`,
+                                            `[${pairC}] SELL {H: ${rowC.h}, L: ${rowC.l}, V: ${rowC.v || 'null'}}`,
                                         ],
                                         px: [
                                             `${pairA[1]} ${cPxA}\n${pairA[1]} ${pxA}`,

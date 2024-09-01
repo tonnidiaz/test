@@ -49,8 +49,8 @@ export class WsOKX {
 
         console.log("DEV");
         console.log(
-            env.OKX_API_KEY_DEV,
-            env.OKX_API_SECRET_DEV,
+            env.OKX_API_KEY_DEMO,
+            env.OKX_API_SECRET_DEMO,
             this.passphrase
         );
         this.ws = new WebsocketClient({
@@ -66,9 +66,9 @@ export class WsOKX {
         this.wsDemo = new WebsocketClient({
             accounts: [
                 {
-                    apiKey: env.OKX_API_KEY_DEV!,
+                    apiKey: env.OKX_API_KEY_DEMO!,
                     apiPass: this.passphrase,
-                    apiSecret: env.OKX_API_SECRET_DEV!,
+                    apiSecret: env.OKX_API_SECRET_DEMO!,
                 },
             ],
             market: "demo",

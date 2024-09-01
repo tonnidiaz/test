@@ -45,12 +45,13 @@ export class OrderPlacer {
                 cancelJob(getJob(bot._id.toString())!.job);
 
                 if (bot.active) {
-                    await deactivateBot(bot)
-                    await updateOrder({bot, cancel: true})
-                    const res = await afterOrderUpdate({bot})
-                    if (res){
-                        bot.active = true
-                        await bot.save()
+                    await deactivateBot(bot);
+                    await updateOrder({ bot, cancel: true });
+                    const res = await afterOrderUpdate({ bot });
+                    if (res) {
+                        bot.active = true;
+                        bot.deactivated_at = undefined; // Like it was never deactivated
+                        await bot.save();
                     }
                 }
             }

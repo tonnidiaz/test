@@ -5,7 +5,7 @@ import BigNumber from 'bignumber.js'
 
 export function fillBuyOrder({
     entry,
-    prevrow,
+    prevrow: row,
     taker,
     enterTs,
     balance,
@@ -46,11 +46,11 @@ export function fillBuyOrder({
     //console.log(`BASE: ${base}`);
 
     const data = { ...mData };
-    const ts = prevrow.ts;
+    const ts = row.ts;
     const part = isA == undefined ? '' : isA ? "[A]" : "[B]"
 
     data.data.push({
-        side: `buy \t {h:${prevrow.h}, l: ${prevrow.l}}`,
+        side: `buy \t {h:${row.h}, l: ${row.l}, v: ${row.v || 'null'}}`,
         fill: entryLimit,
         base,
         enterTs,
@@ -63,7 +63,7 @@ export function fillBuyOrder({
     return { pos, base, mData: data, _cnt: 0, fee: fee.toNumber() * entry };
 }
 export const fillSellOrder = ({
-    prevrow,
+    prevrow: row,
     exit,
     exitLimit,
     base,
@@ -120,13 +120,13 @@ export const fillSellOrder = ({
 
     balance = toFixed(balance.toNumber(), ( pricePrecision!));
     console.log(`AFTER FEE: ${balance}\n`)
-    const ts = prevrow["ts"];
+    const ts = row["ts"];
     
     const _entry = o ?? entry
     const perc = ((exit - _entry)/_entry * 100).toFixed(2)
     const part = isA == undefined ? '' : isA ? "[A]" : "[B]"
     mData["data"].push({
-        side: `sell \t {h:${prevrow.h}, l: ${prevrow.l}}`,
+        side: `sell \t {h:${row.h}, l: ${row.l}, v: ${row.v || 'null'}}`,
         fill: exitLimit,
         enterTs,
         ts,

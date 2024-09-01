@@ -10,6 +10,8 @@ import { configDotenv } from "dotenv";
 import { IOrderDetails } from "@/utils/interfaces";
 configDotenv();
 
+const {env} = process
+
 export class OKX {
     bot: IBot;
     flag: "1" | "0";
@@ -29,12 +31,12 @@ export class OKX {
         this.bot = bot;
         this.flag = this.bot.demo ? "1" : "0";
         this.apiKey = this.bot.demo
-            ? process.env.OKX_API_KEY_DEV!
-            : process.env.OKX_API_KEY!;
+            ? env.OKX_API_KEY_DEMO!
+            : env.OKX_API_KEY!;
         this.apiSecret = this.bot.demo
-            ? process.env.OKX_API_SECRET_DEV!
-            : process.env.OKX_API_SECRET!;
-        this.passphrase = process.env.OKX_PASSPHRASE!;
+            ? env.OKX_API_SECRET_DEMO!
+            : env.OKX_API_SECRET!;
+        this.passphrase = this.bot.demo ? env.OKX_PASSPHRASE_DEMO! : env.OKX_PASSPHRASE!;
 
         this.client = new RestClient(
             {

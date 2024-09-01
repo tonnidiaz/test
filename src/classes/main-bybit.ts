@@ -47,7 +47,7 @@ export class WsBybit {
         this.ok = false;
         const { env } = process;
 
-        console.log(env.BYBIT_API_KEY_DEV, env.BYBIT_API_SECRET_DEV);
+        console.log(env.BYBIT_API_KEY_DEMO, env.BYBIT_API_SECRET_DEMO);
     }
 
     async initWs() {

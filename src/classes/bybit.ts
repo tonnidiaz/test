@@ -29,10 +29,10 @@ export class Bybit {
         this.bot = bot;
         this.flag = this.bot.demo ? "1" : "0";
         this.apiKey = this.bot.demo
-            ? process.env.BYBIT_API_KEY_DEV!
+            ? process.env.BYBIT_API_KEY_DEMO!
             : process.env.BYBIT_API_KEY!;
         this.apiSecret = this.bot.demo
-            ? process.env.BYBIT_API_SECRET_DEV!
+            ? process.env.BYBIT_API_SECRET_DEMO!
             : process.env.BYBIT_API_SECRET!;
         this.passphrase = process.env.BYBIT_PASSPHRASE!;
 
