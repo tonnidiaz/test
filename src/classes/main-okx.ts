@@ -39,7 +39,7 @@ export class WsOKX {
     inst: WsOKX;
     ok: boolean;
     botsWithPos: IOpenBot[] = [];
-
+    
     constructor() {
         this.ok = false;
         this.inst = this;

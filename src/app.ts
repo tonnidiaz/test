@@ -49,6 +49,7 @@ import dotenv from "dotenv";
 import { Bot, Order } from "./models";
 import { addBotJob } from "./utils/orders/funcs";
 import { botLog } from "./utils/functions";
+import { WsArbit, initWsPlats, wsPlats } from "./classes/ws-plat";
 
 dotenv.config();
 // view engine setup
@@ -66,7 +67,7 @@ async function connectMongo() {
     let mongoURL = (DEV ? process.env.MONGO_URL_LOCAL : process.env.MONGO_URL)!;
     try {
         console.log(mongoURL);
-        await mongoose.connect(mongoURL, { dbName: "tb" }); 
+        await mongoose.connect(mongoURL, { dbName: "tb" });
         console.log("\nConnection established\n");
     } catch (e) {
         console.log("Could not establish connection");
@@ -127,17 +128,22 @@ const job = schedule.scheduleJob("* * * * * *", function(){
 jobs.push({job, id: "1"}) */
 
 const main = async () => {
-    
     const activeBots = await Bot.find({ active: true }).exec();
     setJobs([]);
+    await initWsPlats()
+
     for (let bot of activeBots) {
-        //const plat = bot.platform == 'bybit' ? wsBybit : wsOkx
+        const wsPlat: WsArbit = wsPlats[bot.platform]
+
         await addBotJob(bot);
         botLog(bot, "INITIALIZING WS...");
-    
-             if (bot.orders.length) {
+        if (bot.type == 'arbitrage' && bot.arbit_settings?._type == 'tri'){
+            await wsPlat.addBot(bot, true)
+        }
+
+        if (bot.orders.length) {
             const lastOrder = await Order.findById(
-                bot.orders[bot.orders.length - 1 ]
+                bot.orders[bot.orders.length - 1]
             ).exec();
             if (
                 lastOrder &&
@@ -146,11 +152,8 @@ const main = async () => {
                 lastOrder.sell_price != 0
             ) {
                 //await plat.addBot(bot.id, true);
-                
             }
-        }  
-        
-      
+        }
     }
 };
 

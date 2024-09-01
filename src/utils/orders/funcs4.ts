@@ -2,75 +2,91 @@ import { Bybit } from "@/classes/bybit";
 import { OKX } from "@/classes/okx";
 import { IBot } from "@/models/bot";
 import { parseDate, getLastOrder, getAmtToBuyWith } from "../funcs2";
-import { botLog, toFixed } from "../functions";
+import {
+    botLog,
+    getCoinPrecision,
+    getMinAmt,
+    getMinSz,
+    getPricePrecision,
+    toFixed,
+} from "../functions";
 import { placeTrade } from "./funcs";
+import { Bot } from "@/models";
+import { objPlats } from "../consts2";
 
 export const placeArbitOrders = async ({
     bot,
     pairA,
     pairB,
     pairC,
-    platA,
-    platB,
-    platC,
-    _botA,
-    _botB,
-    _botC,
     perc,
     cPxA,
     cPxB,
     cPxC,
-
-    minAmtA,
-    minAmtB,
-    minAmtC,
-
-    minSzA,
-    minSzB,
-    minSzC,
-    MAKER,
-    TAKER,
-    basePrA,
-    pxPrA,
-    basePrB,
-    pxPrB,
-    basePrC,
-    pxPrC,
 }: {
     bot: IBot;
-    _botA: IBot;
-    _botB: IBot;
-    _botC: IBot;
-    platA: OKX | Bybit;
-    platB: OKX | Bybit;
-    platC: OKX | Bybit;
     perc: number;
 
     cPxA: number;
     cPxB: number;
     cPxC: number;
-
-    minAmtA: number;
-    minAmtB: number;
-    minAmtC: number;
-
-    minSzA: number;
-    minSzB: number;
-    minSzC: number;
-
     pairA: string[];
     pairB: string[];
     pairC: string[];
-    TAKER: number;
-    MAKER: number;
-
-    basePrA: number;
-    pxPrA: number;
-    basePrB: number;
-    pxPrB: number;
-    basePrC: number;
-    pxPrC: number;
 }) => {
+    const _botA = await Bot.findById(bot.children[0]).exec();
+    const _botB = await Bot.findById(bot.children[1]).exec();
+    const _botC = await Bot.findById(bot.children[2]).exec();
+
+    if (!_botA || !_botB || !_botC) {
+        return botLog(bot, "ONE OF THE CHILD BOTS IS MISSING", {
+            A: bot.children[0],
+            B: bot.children[1],
+            C: bot.children[2],
+        });
+    }
+
+    const platA = new objPlats[_botA.platform](_botA);
+    const platB = new objPlats[_botB.platform](_botB);
+    const platC = new objPlats[_botC.platform](_botC);
+
+    const { platform } = bot;
+
+    const pxPrA = getPricePrecision(pairA, platform);
+    const basePrA = getCoinPrecision(pairA, "limit", platform);
+
+    const pxPrB = getPricePrecision(pairB, platform);
+    const basePrB = getCoinPrecision(pairB, "limit", platform);
+
+    const pxPrC = getPricePrecision(pairC, platform);
+    const basePrC = getCoinPrecision(pairC, "limit", platform);
+
+    const minAmtA = getMinAmt(pairA, platform),
+        minSzA = getMinSz(pairA, platform);
+    const minAmtB = getMinAmt(pairB, platform),
+        minSzB = getMinSz(pairB, platform);
+    const minAmtC = getMinAmt(pairC, platform),
+        minSzC = getMinSz(pairC, platform);
+
+    if (
+        pxPrA == null ||
+        basePrA == null ||
+        pxPrB == null ||
+        basePrB == null ||
+        pxPrC == null ||
+        basePrC == null ||
+        minAmtA == null ||
+        minSzA == null ||
+        minAmtB == null ||
+        minSzB == null ||
+        minAmtC == null ||
+        minSzC == null
+    ) {
+        return botLog(
+            bot,
+            "CANNOT GET PRECISION OR MIN/MAX AMT/SZ FOR ONE OF THE PAIRS"
+        );
+    }
     botLog(bot, "PLACING NORMAL ORDERS...\n");
     let order = await getLastOrder(_botC);
     const bal = getAmtToBuyWith(_botC, order);
@@ -80,6 +96,8 @@ export const placeArbitOrders = async ({
     _amt = bal;
     _base = bal / cPxA;
 
+    const MAKER = 0.1 / 100,
+        TAKER = 0.1 / 100;
     botLog(bot, pairA);
     botLog(bot, { _amt, _base, minAmtA, minSzA });
     if (_amt < minAmtA || _base < minSzA) {

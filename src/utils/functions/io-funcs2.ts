@@ -430,7 +430,7 @@ export const onTriArbitCointest = async (
 
                         const SLIP = .5//0.5;
                         const slipA = rowA.v == 0 ? SLIP / 100 : 0;
-                        const slipB = rowB.v == 0 ? SLIP / 100 : 0;
+                        const slipB = rowB.v == 0 ? SLIP * 2 / 100 : 0;
                         const slipC = rowC.v == 0 ? SLIP / 100 : 0;
 
                         const day = new Date(rowA.ts).getDay();

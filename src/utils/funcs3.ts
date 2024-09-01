@@ -86,3 +86,12 @@ export const deactivateBot = async (bot: IBot) => {
 
     botLog(bot, "BOT DEACTIVATED\n");
 };
+export const reactivateBot = async (bot: IBot, deep = false) => {
+    botLog(bot, "\nREACTIVATING...");
+    bot.active = true;
+    bot.deactivated_at = undefined
+    if (deep) bot.activated_at = parseDate(Date.now());
+    await bot.save();
+
+    botLog(bot, "BOT REACTIVATED\n");
+};

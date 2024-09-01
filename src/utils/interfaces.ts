@@ -1,27 +1,38 @@
 import { ObjectId } from "mongoose";
 
-export interface IObj {[key: string]: any}
-export interface ICandle {ts: string,
-    o: number, h: number, l: number, c: number,
-    ha_o: number, ha_h: number, ha_l: number, ha_c: number,
-    [key: string]: number | any
+export interface IObj {
+    [key: string]: any;
 }
-export interface IAddress  {
-
-    place_name: string,
-    center: [number],
-    street: string,
-    suburb: string,
-    city: string,
-    line2: string,
-    state: string,
-    postcode: number,
-    phone: string,
-    name: string,
+export interface ICandle {
+    ts: string;
+    o: number;
+    h: number;
+    l: number;
+    c: number;
+    ha_o: number;
+    ha_h: number;
+    ha_l: number;
+    ha_c: number;
+    [key: string]: number | any;
+}
+export interface IAddress {
+    place_name: string;
+    center: [number];
+    street: string;
+    suburb: string;
+    city: string;
+    line2: string;
+    state: string;
+    postcode: number;
+    phone: string;
+    name: string;
 }
 
 export interface ITrade {
-    ts: string, symbol: string, px: number, sz: number
+    ts: string;
+    symbol: string;
+    px: number;
+    sz: number;
 }
 
 export interface IOrderDetails {
@@ -43,9 +54,9 @@ export interface IPlat {
     name: string;
     base: number;
     quote: number;
-    med: number,
-    df: ICandle[],
-    medDf: ICandle[],
+    med: number;
+    df: ICandle[];
+    medDf: ICandle[];
 }
 
 export interface ICcy {
@@ -56,4 +67,15 @@ export interface ICcy {
     minDep: number;
     minWd: number;
     maxWd: number;
+}
+
+interface Book {
+    px: number;
+    amt: number;
+    cnt: number;
+}
+export interface IOrderbook {
+    ts: string;
+    bids: Book[];
+    asks: Book[];
 }

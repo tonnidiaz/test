@@ -1,19 +1,24 @@
 import { IBot } from "@/models/bot";
 import { ensureDirExists } from "@/utils/orders/funcs";
-import { getInterval, parseDate, parseFilledOrder, getExactDate } from "@/utils/funcs2";
+import {
+    getInterval,
+    parseDate,
+    parseFilledOrder,
+    getExactDate,
+} from "@/utils/funcs2";
 import { botLog, getSymbol, timedLog } from "@/utils/functions";
 import { writeFileSync } from "fs";
 import { RestClient, WebsocketClient } from "okx-api";
 import type { AlgoOrderResult, OrderDetails, OrderResult } from "okx-api";
 import { DEV } from "@/utils/constants";
 import { configDotenv } from "dotenv";
-import { IOrderDetails } from "@/utils/interfaces";
+import { IOrderDetails, IOrderbook } from "@/utils/interfaces";
+import { Platform } from "./platforms";
 configDotenv();
 
-const {env} = process
+const { env } = process;
 
-export class OKX {
-    bot: IBot;
+export class OKX extends Platform {
     flag: "1" | "0";
     apiKey: string;
     apiSecret: string;
@@ -23,21 +28,15 @@ export class OKX {
     ws: WebsocketClient | null = null;
 
     constructor(bot: IBot) {
-        console.log(
-            `\nInit OKX For Bot=${bot.name}\tMode=${
-                bot.demo ? "demo" : "live"
-            }\n`
-        );
-        this.bot = bot;
+        super(bot);
         this.flag = this.bot.demo ? "1" : "0";
-        this.apiKey = this.bot.demo
-            ? env.OKX_API_KEY_DEMO!
-            : env.OKX_API_KEY!;
+        this.apiKey = this.bot.demo ? env.OKX_API_KEY_DEMO! : env.OKX_API_KEY!;
         this.apiSecret = this.bot.demo
             ? env.OKX_API_SECRET_DEMO!
             : env.OKX_API_SECRET!;
-        this.passphrase = this.bot.demo ? env.OKX_PASSPHRASE_DEMO! : env.OKX_PASSPHRASE!;
-
+        this.passphrase = this.bot.demo
+            ? env.OKX_PASSPHRASE_DEMO!
+            : env.OKX_PASSPHRASE!;
         this.client = new RestClient(
             {
                 apiKey: this.apiKey,
@@ -46,12 +45,10 @@ export class OKX {
             },
             this.bot.demo ? "demo" : "prod"
         );
-
-        botLog(this.bot, "OKX INITIALIZED");
     }
 
     async getBal(ccy?: string) {
-        console.log(`\nGETTING BALANCE FOR BOT=${this.bot.name}\n`);
+        await super.getBal(ccy);
         try {
             const res = await this.client.getBalance(ccy ?? this.bot.ccy);
             return Number(res[0].details[0].availBal);
@@ -69,6 +66,7 @@ export class OKX {
     }
 
     async cancelOrder({ ordId, isAlgo }: { ordId: string; isAlgo?: boolean }) {
+        await super.cancelOrder({ ordId, isAlgo });
         try {
             botLog(this.bot, "CANCELLING ORDER...");
             const res = await (isAlgo
@@ -96,8 +94,8 @@ export class OKX {
         clOrderId?: string
     ) {
         /* Place limit order at previous close */
-        const od = { price, sl, amt, side };
-        botLog(this.bot, `PLACING ORDER: ${JSON.stringify(od)}`);
+
+        await super.placeOrder(amt, price, side, sl, clOrderId);
         try {
             let res: OrderResult[] | AlgoOrderResult[];
 
@@ -163,11 +161,11 @@ export class OKX {
         isAlgo = false,
         pair?: string[]
     ): Promise<IOrderDetails | null | "live" | undefined> {
+        await super.getOrderbyId(orderId, isAlgo, pair);
         try {
             pair = pair ?? [this.bot.base, this.bot.ccy];
             let data: IOrderDetails | null = null;
             let finalRes: OrderDetails | null = null;
-            console.log(this.bot.name, `IS_ALGO: ${isAlgo}`, orderId);
 
             const symbo = getSymbol(pair, this.bot.platform);
             const res = isAlgo
@@ -229,19 +227,18 @@ export class OKX {
         pair?: string[];
         limit?: number;
     }) {
+        await super.getKlines({ start, end, interval, limit, pair });
         const symbol = pair
-                ? getSymbol(pair, this.bot.platform)
-                : this.getSymbol();
-        try{
+            ? getSymbol(pair, this.bot.platform)
+            : this.getSymbol();
+        try {
             let klines: any[] = [];
             let cnt = 0;
             interval = interval ?? this.bot.interval;
-            end = end ?? getExactDate(interval).getTime() - interval * 60 * 1000; 
-            end += (interval * 60000)
-            
-    
-            botLog(this.bot, "[OKX] GETTING KLINES.. FOR " + symbol);
-    
+            end =
+                end ?? getExactDate(interval).getTime() - interval * 60 * 1000;
+            end += interval * 60000;
+
             const res = await this.client.getCandles(
                 symbol,
                 getInterval(interval, "okx"),
@@ -252,28 +249,37 @@ export class OKX {
             );
             let data = res;
             klines = [...data].reverse();
-    
+
             let d = [...klines];
             if (!d.length) {
-                console.log(res)
-                return botLog(this.bot, "FAILED TO GET KLINES FOR ", symbol, "ON OKX")}
+                console.log(res);
+                return botLog(
+                    this.bot,
+                    "FAILED TO GET KLINES FOR ",
+                    symbol,
+                    "ON OKX"
+                );
+            }
             const last = Number(d[d.length - 1][0]);
-    
+
             botLog(this.bot, { end: parseDate(end), last: parseDate(last) });
             if (end >= last + 2 * interval * 60000) {
                 botLog(this.bot, "END > LAST");
-                end -= interval * 60000
-                return await this.getKlines({ start, end, interval, pair, limit });
+                end -= interval * 60000;
+                return await this.getKlines({
+                    start,
+                    end,
+                    interval,
+                    pair,
+                    limit,
+                });
             }
             const lastCandle = d[d.length - 1];
-    
-            return limit == 1 ? d[d.length - 1] : d;
-        }
-        catch(e){
-            botLog(this.bot, "FAILED TO GET KLINES FOR ", symbol, "ON OKX")
-            botLog(this.bot, e)
-            
 
+            return limit == 1 ? d[d.length - 1] : d;
+        } catch (e) {
+            botLog(this.bot, "FAILED TO GET KLINES FOR ", symbol, "ON OKX");
+            botLog(this.bot, e);
         }
     }
 
@@ -286,6 +292,22 @@ export class OKX {
             const res = await this.client.getCurrencies();
             return res;
         } catch (e) {
+            console.log(e);
+        }
+    }
+    async getOrderbook(
+        symbol?: string | undefined
+    ): Promise<void | IOrderbook | null | undefined> {
+        try {
+            const res = await this.client.getOrderBook(this._getSymbol(), "1");
+            const ob: IOrderbook = {
+                ts: parseDate(Number(res[0].ts)),
+                bids: res[0].bids.map((el) => ({ px: Number(el[0]), amt: Number(el[1]), cnt: Number(el[3]) })),
+                asks: res[0].asks.map((el) => ({ px: Number(el[0]), amt: Number(el[1]), cnt: Number(el[3]) })),
+            };
+            return ob
+        } catch (e) {
+            botLog(this.bot, "FAILED TO GET ORDERBOOK");
             console.log(e);
         }
     }
