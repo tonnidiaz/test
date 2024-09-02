@@ -14,7 +14,10 @@ import { Bot } from "@/models";
 import mongoose, { ObjectId } from "mongoose";
 import { Bybit } from "./bybit";
 import { getAmtToBuyWith, getLastOrder, parseDate } from "@/utils/funcs2";
-import { placeArbitOrders, placeArbitOrdersFlipped } from "@/utils/orders/funcs4";
+import {
+    placeArbitOrders,
+    placeArbitOrdersFlipped,
+} from "@/utils/orders/funcs4";
 import { deactivateBot, reactivateBot } from "@/utils/funcs3";
 import { IOrder } from "@/models/order";
 import { RawData } from "ws";
@@ -130,62 +133,61 @@ export class WsTriArbit {
             const A2 = (A * pxC) / (pxA * pxB);
 
             const perc = Number((((A2 - A) / A) * 100).toFixed(2));
-            const flipped = perc < 0
+            const flipped = perc < 0;
 
             botLog(bot, pairA, pairB, pairC);
             botLog(bot, { flipped });
-            botLog(bot, { perc: `${perc}%`, pxA, pxB, pxC});
+            botLog(bot, { perc: `${perc}%`, pxA, pxB, pxC });
 
             if (Math.abs(perc) >= bot.arbit_settings!.min_perc) {
-               // NOW CHECK IF THERE IS ENOUGH SIZES
-               let szA = 0, szB = 0, szC = 0, amt = 0;
-                let 
-                availSzA = 0,
-                availSzB = 0,
-                availSzC = 0
+                // NOW CHECK IF THERE IS ENOUGH SIZES
+                let szA = 0,
+                    szB = 0,
+                    szC = 0,
+                    amt = 0;
+                let availSzA = 0,
+                    availSzB = 0,
+                    availSzC = 0;
 
-               if (flipped){
-                pxC = bookC.ask.px // BUY
-                pxB = bookB.bid.px // SELL
-                pxA = bookA.bid.px // SELL
-                
-                availSzC = bookC.ask.amt
-                availSzB = bookB.bid.amt
-                availSzA = bookA.bid.amt
+                if (flipped) {
+                    pxC = bookC.ask.px; // BUY
+                    pxB = bookB.bid.px; // SELL
+                    pxA = bookA.bid.px; // SELL
 
-                const _botA = await Bot.findById(bot.children[0]).exec();
-                if (!_botA) return botLog(bot, "NO BOT A");
-                let order = await getLastOrder(_botA);
-                amt= getAmtToBuyWith(_botA, order)
+                    availSzC = bookC.ask.amt;
+                    availSzB = bookB.bid.amt;
+                    availSzA = bookA.bid.amt;
 
-                
-                szC = amt / pxC
-                szB = szC
-                szA = szB * pxB
-                
-               }
-               else{
-                pxA = bookA.ask.px // BUY
-                pxB = bookB.ask.px // BUY
-                pxC = bookC.bid.px // SELL
+                    const _botA = await Bot.findById(bot.children[0]).exec();
+                    if (!_botA) return botLog(bot, "NO BOT A");
+                    let order = await getLastOrder(_botA);
+                    amt = getAmtToBuyWith(_botA, order);
 
-                availSzA = bookA.ask.amt
-                availSzB = bookB.ask.amt
-                availSzC = bookC.bid.amt
+                    szC = amt / pxC;
+                    szB = szC;
+                    szA = szB * pxB;
+                } else {
+                    pxA = bookA.ask.px; // BUY
+                    pxB = bookB.ask.px; // BUY
+                    pxC = bookC.bid.px; // SELL
 
-                const _botC = await Bot.findById(bot.children[2]).exec();
-                if (!_botC) return botLog(bot, "NO BOT C");
-                let order = await getLastOrder(_botC);
-                amt= getAmtToBuyWith(_botC, order)
+                    availSzA = bookA.ask.amt;
+                    availSzB = bookB.ask.amt;
+                    availSzC = bookC.bid.amt;
 
-                szA = amt / pxA
-                szB = szA / pxB
-                szC = szB
-               }
+                    const _botC = await Bot.findById(bot.children[2]).exec();
+                    if (!_botC) return botLog(bot, "NO BOT C");
+                    let order = await getLastOrder(_botC);
+                    amt = getAmtToBuyWith(_botC, order);
 
-               botLog(bot, {pxA, pxB, pxC})
-               botLog(bot, {availSzA, availSzB, availSzC})
-               botLog(bot, {szA, szB, availSzC})
+                    szA = amt / pxA;
+                    szB = szA / pxB;
+                    szC = szB;
+                }
+
+                botLog(bot, { pxA, pxB, pxC });
+                botLog(bot, { availSzA, availSzB, availSzC });
+                botLog(bot, { szA, szB, availSzC });
                 if (availSzA > szA && availSzB > szB && availSzC > szC) {
                     botLog(bot, "WS: ALL GOOD, GOING IN...");
                     // DOUBLE-CHECK IF BOT IS ACTIVE
@@ -200,16 +202,28 @@ export class WsTriArbit {
                         bot: _bot,
                         pairA,
                         pairB,
-                        pairC,
+                        pairC, 
                         perc,
                         cPxA: pxA,
                         cPxB: pxB,
                         cPxC: pxC,
                     };
                     await deactivateBot(bot);
-                    const res = flipped ? await placeArbitOrdersFlipped(params) : await placeArbitOrders(params);
-                    if (res) await reactivateBot(bot);
-                    return res ? true : false;
+                    const res = flipped
+                        ? await placeArbitOrdersFlipped(params)
+                        : await placeArbitOrders(params);
+                    /* END PLACE ORDERS */
+                    await bot.save();
+                    if (!res) return botLog(bot, "FAILED TO PLACE ORDERS");
+                    botLog(bot, "ALL ORDERS PLACED SUCCESSFULLY!!");
+                    await reactivateBot(bot);
+
+                    // RE-FRESH BOT
+                    const _botFinal = await Bot.findById(bot.id).exec();
+                    if (!_botFinal) return false;
+                    this._updateBots({ ...abot, bot: _botFinal });
+                    await sleep(SLEEP_MS);
+                    return bot.id;
                 }
             }
 
@@ -406,7 +420,7 @@ export class WsTriArbit {
                 const ob = data as IOrderbook;
                 let enoughAsk: IBook | undefined;
 
-                switch (symbol) { 
+                switch (symbol) {
                     case symbolA:
                         abot.bookA = {
                             ask: ob.asks[0],
@@ -468,7 +482,7 @@ export class WsTriArbit {
         let symbol: string | undefined;
         if (!data) {
             //console.log({ parsedResp });
-            return 
+            return;
         }
 
         switch (this.plat) {

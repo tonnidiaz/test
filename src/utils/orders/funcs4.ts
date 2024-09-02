@@ -189,7 +189,7 @@ export const placeArbitOrders = async ({
     orderC.profit = profit;
     await orderC.save();
     bot.arbit_orders.push({ a: orderA.id, b: orderB.id, c: orderC.id });
-
+    await bot.save()
     return bot.id;
 };
 
@@ -345,6 +345,6 @@ export const placeArbitOrdersFlipped = async ({
     await orderA.save();
 
     bot.arbit_orders.push({ a: orderC.id, b: orderB.id, c: orderA.id });
-
+    await bot.save()
     return bot.id;
 };
