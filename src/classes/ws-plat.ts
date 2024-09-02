@@ -63,6 +63,7 @@ export class WsTriArbit {
     constructor(plat: string) {
         this.name = this.constructor.name;
         this.plat = plat;
+
         console.log(this.name);
         switch (plat) {
             case "okx":
@@ -87,12 +88,12 @@ export class WsTriArbit {
             this._log("INIT WS");
             const ws = this.ws;
 
-            ws?.on("open", () => {
+            ws?.on("open", async () => {
                 if (!this.ws) return;
 
                 this._log("ON OPEN");
                 for (let ch of ws.channels) {
-                    this.ws.sub(ch.channel, ch.data);
+                    await this.ws.sub(ch.channel, ch.data);
                 }
                 this.ws.channels = [];
 
@@ -118,6 +119,7 @@ export class WsTriArbit {
     async handleTickers({ symbol, abot }: { abot: IArbitBot; symbol: string }) {
         //DONT RESUME IF RETURN TRUE
         try {
+            botLog(abot.bot, "\nTickerHandler")
             const MAX_SLIP = 0.5;
 
             const { bot, pairA, pairB, pairC } = abot;
@@ -138,14 +140,26 @@ export class WsTriArbit {
                 return;
 
             const A1 = 1;
-            const _baseA = A1 / pxA;
-            const _baseB = _baseA / pxB;
+            let _baseA = 0, _baseB = 0;
+            _baseA = A1 / pxA;
+            _baseB = _baseA / pxB;
+
             const A2 = _baseB * pxC;
 
-            const perc = Number((((A2 - A1) / A1) * 100).toFixed(2));
+            // FLIPSIDE
+            _baseB = A1 / pxC
+            _baseA = _baseB * pxB
+            const FA2 = _baseA * pxA
+
+            const isFlipped = FA2 > A2
+            const A = Math.max(A2, FA2)
+
+            const perc = Number((((A - A1) / A1) * 100).toFixed(2));
 
             botLog(bot, pairA, pairB, pairC);
-            this._log({ perc: `${perc}%`, pxA, pxB, pxC, askA, askB, bidC });
+            botLog(bot, {isFlipped})
+            botLog(bot, { perc: `${perc}%`, pxA, pxB, pxC, askA, askB, bidC });
+
             if (perc >= bot.arbit_settings!.min_perc) {
                 const pxFromAskA = ceil(((askA - pxA) / pxA) * 100, 2);
                 const pxFromAskB = ceil(((askB - pxB) / pxB) * 100, 2);
@@ -159,6 +173,7 @@ export class WsTriArbit {
                     pxFromBidC,
                     sumCond,
                 });
+                return
                 if (
                     (pxFromAskA <= MAX_SLIP &&
                         pxFromAskB <= MAX_SLIP &&
@@ -276,25 +291,25 @@ export class WsTriArbit {
 
         if (channel1) {
             // Tickers channel, also returns ask n bid pxs
-            // if (platform == "okx") {
-            //     this.ws?.sub(channel1, { instId: symbolA });
-            //     this.ws?.sub(channel1, { instId: symbolB });
-            //     this.ws?.sub(channel1, { instId: symbolC });
-            // } else if (platform == "bybit") {
-            //     this.ws?.sub(channel1 + symbolA);
-            //     this.ws?.sub(channel1 + symbolB);
-            //     this.ws?.sub(channel1 + symbolC);
-            // }
+            if (platform == "okx") {
+                await this.ws?.sub(channel1, { instId: symbolA });
+                await this.ws?.sub(channel1, { instId: symbolB });
+                await this.ws?.sub(channel1, { instId: symbolC });
+            } else if (platform == "bybit") {
+                await this.ws?.sub(channel1 + symbolA);
+                await this.ws?.sub(channel1 + symbolB);
+                await this.ws?.sub(channel1 + symbolC);
+            }
         }
         if (channel2) {
             if (platform == "okx") {
-                // this.ws?.sub(channel2, { instId: symbolA });
-                // this.ws?.sub(channel2, { instId: symbolB });
-                this.ws?.sub(channel2, { instId: symbolC });
+                await this.ws?.sub(channel2, { instId: symbolA });
+                await this.ws?.sub(channel2, { instId: symbolB });
+                await this.ws?.sub(channel2, { instId: symbolC });
             } else if (platform == "bybit") {
-                // this.ws?.sub(channel2 + symbolA);
-                // this.ws?.sub(channel2 + symbolB);
-                this.ws?.sub(channel2 + symbolC);
+                await this.ws?.sub(channel2 + symbolA);
+                await this.ws?.sub(channel2 + symbolB);
+                await this.ws?.sub(channel2 + symbolC);
             }
         }
     }
@@ -466,6 +481,7 @@ export class WsTriArbit {
             }
 
             const { pxA, pxB, pxC, askA, askB, bidC } = abot;
+            console.log({ pxA, pxB, pxC, askA, askB, bidC });
             if (
                 pxA == undefined ||
                 pxB == undefined ||
@@ -477,19 +493,28 @@ export class WsTriArbit {
                 return;
 
             // UNSUB FIRST
-            await this.unsub(abot.bot);
-            const re = await this.handleTickers({
-                abot,
-                symbol,
-            });
+            //await this.unsub(abot.bot)
+            if (abot.active) {
+                abot.active = false;
+                const re = await this.handleTickers({
+                    abot,
+                    symbol,
+                });
+                if (re != false){
+                    abot.active = true
+                }
+                this._updateBots(abot)
 
-            if (re != false) {
-                // RE-SUB
-                this._log("\nRE-SUB\n");
-                await this.sub(abot.bot);
+                // if (re != false) {
+                //     // RE-SUB
+                //     this._log("\nRE-SUB\n");
+                //     await this.sub(abot.bot);
+                // }
             }
-            await sleep(SLEEP_MS);
+
+            //await sleep(SLEEP_MS);
         }
+        //await sleep(SLEEP_MS);
     }
 
     parseData(resp: RawData) {
@@ -497,7 +522,6 @@ export class WsTriArbit {
         let { data } = parsedResp;
         let topic: string | undefined;
         let symbol: string | undefined;
-        console.log({ parsedResp });
         if (!data) return console.log({ parsedResp });
 
         switch (this.plat) {
