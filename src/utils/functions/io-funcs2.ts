@@ -48,7 +48,7 @@ export const onTriArbitCointest = async (
         skip_saved,
         save_klines,
         perc,
-        flipped,
+       // flipped,
     } = data;
 
     try {
@@ -80,9 +80,7 @@ export const onTriArbitCointest = async (
 
         const A = _A ?? "USDT";
 
-        const savename = `${perc}%_${
-            flipped ? "FLIPPED_" : ""
-        }${prefix}${B}-${A}_${interval}m`;
+        const savename = `${perc}%_${prefix}${B}-${A}_${interval}m`;
         const savePath = `_data/rf/arbit-tri/coins/${plat}/${year}/${savename}.json`;
 
         const parseData = (orders?: any[]) => {
@@ -363,6 +361,8 @@ export const onTriArbitCointest = async (
                         const cPxC = prev_rowC.c;
                         const ts = rowA.ts;
 
+                        let flipped = false//(cPxA * cPxB) > cPxC
+
                         if (rowB.ts != ts || rowC.ts != ts) {
                             msg = "TIMESTAMPS DONT MATCH";
                             client?.emit(ep, { err: msg });
@@ -423,14 +423,14 @@ export const onTriArbitCointest = async (
 
                         console.log({ _isGreenA, _isGreenB, _isGreenC });
                         console.log({ o_perc, c_perc, mustEnter }, "\n");
-
-                        const percCond = c_perc >= MIN_PERC; // o_perc >= MIN_PERC && c_perc >= MIN_PERC
+                        flipped = c_perc < 0//(cPxA * cPxB) > cPxC
+                        const percCond = Math.abs(c_perc) >= MIN_PERC; // o_perc >= MIN_PERC && c_perc >= MIN_PERC
 
                         ///const noZeroVol = prev_rowA.v != 0 && prev_rowB.v != 0 && prev_rowC.v != 0
 
                         const SLIP = .5//0.5;
                         const slipA = rowA.v == 0 ? SLIP / 100 : 0;
-                        const slipB = rowB.v == 0 ? SLIP * 2 / 100 : 0;
+                        const slipB = rowB.v == 0 ? SLIP / 100 : 0;
                         const slipC = rowC.v == 0 ? SLIP / 100 : 0;
 
                         const day = new Date(rowA.ts).getDay();
@@ -440,7 +440,7 @@ export const onTriArbitCointest = async (
                             //console.log({ perc: `${perc}%` });
                             console.log({ A, B, C });
                             console.log("GOING IN...\n");
-
+                            
                             if (flipped) {
                                 // Buy ALGO at C
                                 baseB = bal / pxC;
@@ -560,7 +560,7 @@ export const onTriArbitCointest = async (
                             const est_perc = c_perc
                             
                             if (only) {
-                                if (flipped) {
+                                if (flipped) { 
                                     orders.push({
                                         ts,
                                         perc,

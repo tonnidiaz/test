@@ -7,14 +7,14 @@ import {
     sleep,
     timedLog,
 } from "@/utils/functions";
-import { IBook, IOpenBot, IOrderbook } from "@/utils/interfaces";
+import { IBook, IOpenBot, IOrderbook, IOrderpage } from "@/utils/interfaces";
 import { TuWs } from "./tu";
 import { DEV, TP } from "@/utils/constants";
 import { Bot } from "@/models";
 import mongoose, { ObjectId } from "mongoose";
 import { Bybit } from "./bybit";
 import { getAmtToBuyWith, getLastOrder, parseDate } from "@/utils/funcs2";
-import { placeArbitOrders } from "@/utils/orders/funcs4";
+import { placeArbitOrders, placeArbitOrdersFlipped } from "@/utils/orders/funcs4";
 import { deactivateBot, reactivateBot } from "@/utils/funcs3";
 import { IOrder } from "@/models/order";
 import { RawData } from "ws";
@@ -32,19 +32,10 @@ interface IArbitBot {
     bot: IBot;
     active?: boolean;
     order?: IOrder;
-    pxA?: number;
     startAmt?: number;
-    baseA?: number;
-    baseB?: number;
-    baseC?: number;
-    pxB?: number;
-    pxC?: number;
-    askA?: number;
-    bidA?: number;
-    askB?: number;
-    bidB?: number;
-    askC?: number;
-    bidC?: number;
+    bookA?: IOrderpage;
+    bookB?: IOrderpage;
+    bookC?: IOrderpage;
     pairA: string[];
     pairB: string[];
     pairC: string[];
@@ -119,67 +110,83 @@ export class WsTriArbit {
     async handleTickers({ symbol, abot }: { abot: IArbitBot; symbol: string }) {
         //DONT RESUME IF RETURN TRUE
         try {
-            botLog(abot.bot, "\nTickerHandler")
+            botLog(abot.bot, "\nTickerHandler");
             const MAX_SLIP = 0.5;
 
-            const { bot, pairA, pairB, pairC } = abot;
+            const { bot, pairA, pairB, pairC, bookA, bookB, bookC } = abot;
             let symbolA = getSymbol(abot.pairA, bot.platform);
             let symbolB = getSymbol(abot.pairB, bot.platform);
             let symbolC = getSymbol(abot.pairC, bot.platform);
 
             // CHECK IF TICKER IS CLOSE ENOUGH TO ASK OR BID
-            const { pxA, pxB, pxC, askA, askB, bidC } = abot;
-            if (
-                pxA == undefined ||
-                pxB == undefined ||
-                pxC == undefined ||
-                askA == undefined ||
-                askB == undefined ||
-                bidC == undefined
-            )
+            if (bookA == undefined || bookB == undefined || bookC == undefined)
                 return;
 
-            const A1 = 1;
-            let _baseA = 0, _baseB = 0;
-            _baseA = A1 / pxA;
-            _baseB = _baseA / pxB;
+            const A = 1;
+            // USE [ask, ask, bid]
+            let pxA = bookA.ask.px;
+            let pxB = bookB.ask.px;
+            let pxC = bookC.bid.px;
+            const A2 = (A * pxC) / (pxA * pxB);
 
-            const A2 = _baseB * pxC;
-
-            // FLIPSIDE
-            _baseB = A1 / pxC
-            _baseA = _baseB * pxB
-            const FA2 = _baseA * pxA
-
-            const isFlipped = FA2 > A2
-            const A = Math.max(A2, FA2)
-
-            const perc = Number((((A - A1) / A1) * 100).toFixed(2));
+            const perc = Number((((A2 - A) / A) * 100).toFixed(2));
+            const flipped = perc < 0
 
             botLog(bot, pairA, pairB, pairC);
-            botLog(bot, {isFlipped})
-            botLog(bot, { perc: `${perc}%`, pxA, pxB, pxC, askA, askB, bidC });
+            botLog(bot, { flipped });
+            botLog(bot, { perc: `${perc}%`, pxA, pxB, pxC});
 
-            if (perc >= bot.arbit_settings!.min_perc) {
-                const pxFromAskA = ceil(((askA - pxA) / pxA) * 100, 2);
-                const pxFromAskB = ceil(((askB - pxB) / pxB) * 100, 2);
-                const pxFromBidC = ceil(((pxC - bidC) / bidC) * 100, 2);
+            if (Math.abs(perc) >= bot.arbit_settings!.min_perc) {
+               // NOW CHECK IF THERE IS ENOUGH SIZES
+               let szA = 0, szB = 0, szC = 0, amt = 0;
+                let 
+                availSzA = 0,
+                availSzB = 0,
+                availSzC = 0
 
-                const sumCond = pxFromAskA + pxFromAskB + pxFromBidC < perc;
-                botLog(bot, {
-                    perc: `${perc}%`,
-                    pxFromAskA,
-                    pxFromAskB,
-                    pxFromBidC,
-                    sumCond,
-                });
-                return
-                if (
-                    (pxFromAskA <= MAX_SLIP &&
-                        pxFromAskB <= MAX_SLIP &&
-                        pxFromBidC <= MAX_SLIP) ||
-                    sumCond
-                ) {
+               if (flipped){
+                pxC = bookC.ask.px // BUY
+                pxB = bookB.bid.px // SELL
+                pxA = bookA.bid.px // SELL
+                
+                availSzC = bookC.ask.amt
+                availSzB = bookB.bid.amt
+                availSzA = bookA.bid.amt
+
+                const _botA = await Bot.findById(bot.children[0]).exec();
+                if (!_botA) return botLog(bot, "NO BOT A");
+                let order = await getLastOrder(_botA);
+                amt= getAmtToBuyWith(_botA, order)
+
+                
+                szC = amt / pxC
+                szB = szC
+                szA = szB * pxB
+                
+               }
+               else{
+                pxA = bookA.ask.px // BUY
+                pxB = bookB.ask.px // BUY
+                pxC = bookC.bid.px // SELL
+
+                availSzA = bookA.ask.amt
+                availSzB = bookB.ask.amt
+                availSzC = bookC.bid.amt
+
+                const _botC = await Bot.findById(bot.children[2]).exec();
+                if (!_botC) return botLog(bot, "NO BOT C");
+                let order = await getLastOrder(_botC);
+                amt= getAmtToBuyWith(_botC, order)
+
+                szA = amt / pxA
+                szB = szA / pxB
+                szC = szB
+               }
+
+               botLog(bot, {pxA, pxB, pxC})
+               botLog(bot, {availSzA, availSzB, availSzC})
+               botLog(bot, {szA, szB, availSzC})
+                if (availSzA > szA && availSzB > szB && availSzC > szC) {
                     botLog(bot, "WS: ALL GOOD, GOING IN...");
                     // DOUBLE-CHECK IF BOT IS ACTIVE
                     const _bot = await Bot.findById(bot.id).exec();
@@ -200,7 +207,7 @@ export class WsTriArbit {
                         cPxC: pxC,
                     };
                     await deactivateBot(bot);
-                    const res = await placeArbitOrders(params);
+                    const res = flipped ? await placeArbitOrdersFlipped(params) : await placeArbitOrders(params);
                     if (res) await reactivateBot(bot);
                     return res ? true : false;
                 }
@@ -258,8 +265,7 @@ export class WsTriArbit {
         let symbolB = getSymbol(pairB, bot.platform);
         let symbolC = getSymbol(pairC, bot.platform);
 
-        let channel1: string | undefined; // Tickers channel
-        let channel2: string | undefined; // Orderbook channel
+        let channel1: string | undefined; // Orderbook channel
         const { platform } = bot;
 
         const abot = this.arbitBots.find((el) => el.bot.id == bot.id);
@@ -280,17 +286,15 @@ export class WsTriArbit {
 
         switch (bot.platform) {
             case "okx":
-                channel1 = "tickers";
-                channel2 = "books5";
+                channel1 = "books5";
                 break;
             case "bybit":
-                channel1 = "tickers.";
-                channel2 = `orderbook.200.`;
+                channel1 = `orderbook.200.`;
                 break;
         }
 
         if (channel1) {
-            // Tickers channel, also returns ask n bid pxs
+            // Orderbook channel, also returns ask n bid pxs
             if (platform == "okx") {
                 await this.ws?.sub(channel1, { instId: symbolA });
                 await this.ws?.sub(channel1, { instId: symbolB });
@@ -299,17 +303,6 @@ export class WsTriArbit {
                 await this.ws?.sub(channel1 + symbolA);
                 await this.ws?.sub(channel1 + symbolB);
                 await this.ws?.sub(channel1 + symbolC);
-            }
-        }
-        if (channel2) {
-            if (platform == "okx") {
-                await this.ws?.sub(channel2, { instId: symbolA });
-                await this.ws?.sub(channel2, { instId: symbolB });
-                await this.ws?.sub(channel2, { instId: symbolC });
-            } else if (platform == "bybit") {
-                await this.ws?.sub(channel2 + symbolA);
-                await this.ws?.sub(channel2 + symbolB);
-                await this.ws?.sub(channel2 + symbolC);
             }
         }
     }
@@ -321,8 +314,7 @@ export class WsTriArbit {
         let symbolB = getSymbol(pairB, bot.platform);
         let symbolC = getSymbol(pairC, bot.platform);
 
-        let channel1: string | undefined; // Tickers channel
-        let channel2: string | undefined; // Orderbook channel
+        let channel1: string | undefined; // Orderbook channel
 
         const { platform } = bot;
         const abot = this.arbitBots.find((el) => el.bot.id == bot.id);
@@ -332,12 +324,10 @@ export class WsTriArbit {
         }
         switch (bot.platform) {
             case "okx":
-                channel1 = "tickers";
-                channel2 = "books5";
+                channel1 = "books5";
                 break;
             case "bybit":
-                channel1 = "tickers.";
-                channel2 = `orderbook.200.`;
+                channel1 = `orderbook.200.`;
                 break;
         }
         const pairs = [pairA, pairB, pairC].map((el) => el.toString());
@@ -376,17 +366,6 @@ export class WsTriArbit {
                 if (unsubC) this.ws?.unsub(channel1 + symbolC);
             }
         }
-        if (channel2) {
-            if (platform == "okx") {
-                if (unsubA) this.ws?.unsub(channel2, { instId: symbolA });
-                if (unsubB) this.ws?.unsub(channel2, { instId: symbolB });
-                if (unsubC) this.ws?.unsub(channel2, { instId: symbolC });
-            } else if (platform == "bybit") {
-                if (unsubA) this.ws?.unsub(channel2 + symbolA);
-                if (unsubB) this.ws?.unsub(channel2 + symbolB);
-                if (unsubC) this.ws?.unsub(channel2 + symbolC);
-            }
-        }
     }
     async rmvBot(botId: mongoose.Types.ObjectId) {
         this._log("REMOVING BOT", botId, "...");
@@ -413,8 +392,6 @@ export class WsTriArbit {
         const r = this.parseData(resp);
         if (!r) return;
         const { channel, data, symbol } = r;
-        console.log({ channel, symbol });
-        //await sleep(2000)
         //return;
         if (!symbol) return this._log("NO SYMBOL");
 
@@ -424,55 +401,29 @@ export class WsTriArbit {
             let symbolB = getSymbol(pairB, bot.platform);
             let symbolC = getSymbol(pairC, bot.platform);
 
-            if (channel == "tickers" && this.plat == bot.platform) {
-                switch (symbol) {
-                    case symbolA:
-                        abot.pxA = data;
-                        abot.baseA = abot.startAmt! / abot.pxA!; // EST. VALS
-                        break;
-                    case symbolB:
-                        abot.pxB = data;
-                        if (abot.pxB && abot.baseA) {
-                            abot.baseB = abot.baseA / abot.pxB;
-                            abot.baseC = abot.baseB;
-                        }
-                        break;
-                    case symbolC:
-                        abot.pxC = data;
-                        break;
-                }
-
-                // Update bots
-                this._updateBots(abot);
-            }
             if (channel == "orderbook" && this.plat == bot.platform) {
+                // Determine whether to use the flipped or not
                 const ob = data as IOrderbook;
                 let enoughAsk: IBook | undefined;
 
-                switch (symbol) {
+                switch (symbol) { 
                     case symbolA:
-                        enoughAsk = ob.asks.find(
-                            (el) => el.amt >= (abot.baseA ?? 0)
-                        );
-                        if (enoughAsk) {
-                            abot.askA = enoughAsk.px;
-                        }
+                        abot.bookA = {
+                            ask: ob.asks[0],
+                            bid: ob.bids[0],
+                        };
                         break;
                     case symbolB:
-                        enoughAsk = ob.asks.find(
-                            (el) => el.amt >= (abot.baseB ?? 0)
-                        );
-                        if (enoughAsk) {
-                            abot.askB = enoughAsk.px;
-                        }
+                        abot.bookB = {
+                            ask: ob.asks[0],
+                            bid: ob.bids[0],
+                        };
                         break;
                     case symbolC:
-                        enoughAsk = ob.bids.find(
-                            (el) => el.amt >= (abot.baseC ?? 0)
-                        );
-                        if (enoughAsk) {
-                            abot.bidC = enoughAsk.px;
-                        }
+                        abot.bookC = {
+                            ask: ob.asks[0],
+                            bid: ob.bids[0],
+                        };
                         break;
                 }
 
@@ -480,16 +431,9 @@ export class WsTriArbit {
                 this._updateBots(abot);
             }
 
-            const { pxA, pxB, pxC, askA, askB, bidC } = abot;
-            console.log({ pxA, pxB, pxC, askA, askB, bidC });
-            if (
-                pxA == undefined ||
-                pxB == undefined ||
-                pxC == undefined ||
-                askA == undefined ||
-                askB == undefined ||
-                bidC == undefined
-            )
+            const { bookA, bookB, bookC } = abot;
+
+            if (bookA == undefined || bookB == undefined || bookC == undefined)
                 return;
 
             // UNSUB FIRST
@@ -500,10 +444,10 @@ export class WsTriArbit {
                     abot,
                     symbol,
                 });
-                if (re != false){
-                    abot.active = true
+                if (re != false) {
+                    abot.active = true;
                 }
-                this._updateBots(abot)
+                this._updateBots(abot);
 
                 // if (re != false) {
                 //     // RE-SUB
@@ -522,7 +466,10 @@ export class WsTriArbit {
         let { data } = parsedResp;
         let topic: string | undefined;
         let symbol: string | undefined;
-        if (!data) return console.log({ parsedResp });
+        if (!data) {
+            //console.log({ parsedResp });
+            return 
+        }
 
         switch (this.plat) {
             case "okx":

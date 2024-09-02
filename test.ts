@@ -159,7 +159,7 @@ async function klines() {
     console.log(df[df.length - 1]?.ts);
 }
 
-klines()
+//klines()
 //place({get: true, oid: "1759820931292990720"})
 
 /* 
@@ -220,3 +220,24 @@ const binanceQuotes = [
 // console.log(Array.from(new Set(others)))
 
 //console.log(Array.from(new Set([...okxQuotes, ...bybitQuotes, ...binanceQuotes])))
+
+
+const checkIfFlipped = ({pxA, pxB, pxC}: {pxA: number, pxB: number, pxC: number}) =>{
+    let baseA = 0, baseB = 0
+    const A = 1
+
+    baseA = A/pxA
+    baseB = baseA / pxB
+    const A2 = baseB * pxC
+
+    baseB = A/pxC
+    baseA = baseB * pxB
+    const FA2 = baseA * pxA
+
+    const flipped = FA2 > A2
+    const flipped2 = (pxA * pxB) > pxC;
+    const _A2 = (A * pxC)/(pxA * pxB) 
+    console.log({A2, _A2});
+}
+
+checkIfFlipped({pxA: .5, pxB: .233, pxC: .244})

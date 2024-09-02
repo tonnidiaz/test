@@ -79,3 +79,7 @@ export interface IOrderbook {
     bids: IBook[];
     asks: IBook[];
 }
+
+export interface IOrderpage {
+    ask: IBook, bid: IBook
+}
