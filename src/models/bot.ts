@@ -16,6 +16,7 @@ const TriArbitOrder = {
 
 const ArbitSettings = {
     flipped: Boolean,
+    use_ws: {type: Boolean, default: false},
     min_perc: { type: Number, default: 1 },
     _type: {
         type: String,

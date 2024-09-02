@@ -7,8 +7,7 @@ import { botJobSpecs, test, useWS } from "@/utils/constants";
 import { botLog } from "@/utils/functions";
 import { afterOrderUpdate } from "@/utils/orders/funcs2";
 import { findBotOrders } from "@/utils/funcs2";
-import { deactivateBot } from "@/utils/funcs3";
-
+import { deactivateBot, reactivateBot } from "@/utils/funcs3";
 
 export class OrderPlacer {
     cnt: number = 0;
@@ -19,11 +18,15 @@ export class OrderPlacer {
         botLog(this.bot, "ORDER PLACER INITIALISED");
     }
 
-    async checkPlaceOrder() { 
-       
-        if(useWS) return
+    async checkPlaceOrder() {
         const bot = await Bot.findById(this.bot.id).exec();
-        if (!bot) return;
+        if (
+            !bot ||
+            (bot.type == "arbitrage" &&
+                bot.arbit_settings?._type == "tri" &&
+                bot.arbit_settings.use_ws)
+        )
+            return;
         const now = new Date();
         const currMin = now.getMinutes();
 
@@ -52,9 +55,7 @@ export class OrderPlacer {
                     await updateOrder({ bot, cancel: true });
                     const res = await afterOrderUpdate({ bot });
                     if (res) {
-                        bot.active = true;
-                        bot.deactivated_at = undefined; // Like it was never deactivated
-                        await bot.save();
+                        await reactivateBot(bot);
                     }
                 }
             }

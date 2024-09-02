@@ -49,7 +49,7 @@ import dotenv from "dotenv";
 import { Bot, Order } from "./models";
 import { addBotJob } from "./utils/orders/funcs";
 import { botLog } from "./utils/functions";
-import { WsArbit, initWsPlats, wsPlats } from "./classes/ws-plat";
+import { WsTriArbit, initWsTriArbit, wsTriArbits } from "./classes/ws-plat";
 
 dotenv.config();
 // view engine setup
@@ -130,10 +130,10 @@ jobs.push({job, id: "1"}) */
 const main = async () => {
     const activeBots = await Bot.find({ active: true }).exec();
     setJobs([]);
-    await initWsPlats()
+    await initWsTriArbit()
 
     for (let bot of activeBots) {
-        const wsPlat: WsArbit = wsPlats[bot.platform]
+        const wsPlat: WsTriArbit = wsTriArbits[bot.platform]
 
         await addBotJob(bot);
         botLog(bot, "INITIALIZING WS...");

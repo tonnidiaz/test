@@ -69,13 +69,13 @@ export interface ICcy {
     maxWd: number;
 }
 
-interface Book {
+export interface IBook {
     px: number;
     amt: number;
     cnt: number;
 }
 export interface IOrderbook {
     ts: string;
-    bids: Book[];
-    asks: Book[];
+    bids: IBook[];
+    asks: IBook[];
 }

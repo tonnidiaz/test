@@ -7,15 +7,17 @@ import {
     sleep,
     timedLog,
 } from "@/utils/functions";
-import { IOpenBot, IOrderbook } from "@/utils/interfaces";
+import { IBook, IOpenBot, IOrderbook } from "@/utils/interfaces";
 import { TuWs } from "./tu";
 import { DEV, TP } from "@/utils/constants";
 import { Bot } from "@/models";
 import mongoose, { ObjectId } from "mongoose";
 import { Bybit } from "./bybit";
-import { parseDate } from "@/utils/funcs2";
+import { getAmtToBuyWith, getLastOrder, parseDate } from "@/utils/funcs2";
 import { placeArbitOrders } from "@/utils/orders/funcs4";
 import { deactivateBot, reactivateBot } from "@/utils/funcs3";
+import { IOrder } from "@/models/order";
+import { RawData } from "ws";
 
 const OKX_WS_URL = "wss://ws.okx.com:8443/ws/v5/public";
 const OKX_WS_URL_DEMO = "wss://wspap.okx.com:8443/ws/v5/public";
@@ -23,11 +25,18 @@ const OKX_WS_URL_DEMO = "wss://wspap.okx.com:8443/ws/v5/public";
 const BYBIT_WS_URL = "wss://stream.bybit.com/v5/public/spot";
 const BYBIT_WS_URL_DEMO = "wss://stream-testnet.bybit.com/v5/public/spot";
 
+const SLEEP_MS = 2000;
 const demo = true;
 
 interface IArbitBot {
     bot: IBot;
+    active?: boolean;
+    order?: IOrder;
     pxA?: number;
+    startAmt?: number;
+    baseA?: number;
+    baseB?: number;
+    baseC?: number;
     pxB?: number;
     pxC?: number;
     askA?: number;
@@ -41,7 +50,7 @@ interface IArbitBot {
     pairC: string[];
 }
 
-export class WsArbit {
+export class WsTriArbit {
     name: string;
     ws: TuWs | undefined;
     ok: boolean = false;
@@ -49,9 +58,11 @@ export class WsArbit {
     isConnectError = false;
     wsURL: string | undefined;
     open = false;
+    plat: string;
 
     constructor(plat: string) {
         this.name = this.constructor.name;
+        this.plat = plat;
         console.log(this.name);
         switch (plat) {
             case "okx":
@@ -71,6 +82,8 @@ export class WsArbit {
 
             this.isConnectError = false;
             this.ws = new TuWs(this.wsURL);
+            this.ws.plat = this.plat;
+
             this._log("INIT WS");
             const ws = this.ws;
 
@@ -88,7 +101,7 @@ export class WsArbit {
             ws?.on("error", async (e) => {
                 this._log("ON ERROR", e);
                 this.isConnectError = e.stack?.split(" ")[2] == "ENOTFOUND";
-                await sleep(2000);
+                await sleep(SLEEP_MS);
             });
             ws?.on("close", async (e) => {
                 this.open = false;
@@ -96,100 +109,21 @@ export class WsArbit {
                 if (!this.isConnectError) await this.initWs();
             });
 
-            ws?.on("message", async (resp) => {
-                const { channel, data, symbol } = ws?.parseData(resp);
-                if (DEV) {
-                    if (!data) return this._log("NO DATA");
-                    if (channel == "books5") {
-                        const res = data;
-                        const ob: IOrderbook = {
-                            ts: parseDate(Number(res[0].ts)),
-                            bids: res[0].bids.map((el) => ({
-                                px: Number(el[0]),
-                                amt: Number(el[1]),
-                                cnt: Number(el[3]),
-                            })),
-                            asks: res[0].asks.map((el) => ({
-                                px: Number(el[0]),
-                                amt: Number(el[1]),
-                                cnt: Number(el[3]),
-                            })),
-                        };
-                        console.log(ob);
-                    } else if (channel == "tickers") {
-                        const ticker = data[0];
-                        const px = Number(ticker["last"]);
-                        const ask = Number(ticker["askPx"]);
-                        const bid = Number(ticker["bidPx"]);
-                        const symbol = ticker["instId"];
-                        const args = { instId: symbol };
-                        console.log("\nON TICKERS");
-                        this.ws?.unsub(channel, args);
-                        for (let abot of this.arbitBots) {
-                            const re = await this.handleTickers({
-                                px,
-                                ask,
-                                bid,
-                                symbol,
-                                abot,
-                            });
-                            if (re != false) {
-                                // RE-SUB
-                                await sleep(2000);
-                                this._log("\nRE-SUB\n");
-                                this.ws?.sub(channel, args);
-                            }
-                        }
-                    }
-                    //timedLog(candle);
-                }
-            });
+            ws?.on("message", async (r) => await this.onMessage(r));
         } catch (e) {
             console.log(e);
         }
     }
 
-    async handleTickers({
-        px,
-        symbol,
-        ask,
-        bid,
-        abot,
-    }: {
-        abot: IArbitBot;
-        px: number;
-        ask: number;
-        bid: number;
-        symbol: string;
-    }) {
+    async handleTickers({ symbol, abot }: { abot: IArbitBot; symbol: string }) {
         //DONT RESUME IF RETURN TRUE
         try {
-            // this._log({ symbol, px, ask, bid });
-
             const MAX_SLIP = 0.5;
 
             const { bot, pairA, pairB, pairC } = abot;
             let symbolA = getSymbol(abot.pairA, bot.platform);
             let symbolB = getSymbol(abot.pairB, bot.platform);
             let symbolC = getSymbol(abot.pairC, bot.platform);
-
-            switch (symbol) {
-                case symbolA:
-                    abot.pxA = px;
-                    abot.askA = ask;
-                    abot.bidA = bid;
-                    break;
-                case symbolB:
-                    abot.pxB = px;
-                    abot.askB = ask;
-                    abot.bidB = bid;
-                    break;
-                case symbolC:
-                    abot.pxC = px;
-                    abot.askC = ask;
-                    abot.bidC = bid;
-                    break;
-            }
 
             // CHECK IF TICKER IS CLOSE ENOUGH TO ASK OR BID
             const { pxA, pxB, pxC, askA, askB, bidC } = abot;
@@ -202,27 +136,34 @@ export class WsArbit {
                 bidC == undefined
             )
                 return;
-            this._log({ pxA, pxB, pxC, askA, askB, bidC });
+
             const A1 = 1;
             const _baseA = A1 / pxA;
             const _baseB = _baseA / pxB;
             const A2 = _baseB * pxC;
 
             const perc = Number((((A2 - A1) / A1) * 100).toFixed(2));
+
+            botLog(bot, pairA, pairB, pairC);
+            this._log({ perc: `${perc}%`, pxA, pxB, pxC, askA, askB, bidC });
             if (perc >= bot.arbit_settings!.min_perc) {
                 const pxFromAskA = ceil(((askA - pxA) / pxA) * 100, 2);
                 const pxFromAskB = ceil(((askB - pxB) / pxB) * 100, 2);
                 const pxFromBidC = ceil(((pxC - bidC) / bidC) * 100, 2);
+
+                const sumCond = pxFromAskA + pxFromAskB + pxFromBidC < perc;
                 botLog(bot, {
                     perc: `${perc}%`,
                     pxFromAskA,
                     pxFromAskB,
                     pxFromBidC,
+                    sumCond,
                 });
                 if (
-                    pxFromAskA <= MAX_SLIP &&
-                    pxFromAskB <= MAX_SLIP &&
-                    pxFromBidC <= MAX_SLIP
+                    (pxFromAskA <= MAX_SLIP &&
+                        pxFromAskB <= MAX_SLIP &&
+                        pxFromBidC <= MAX_SLIP) ||
+                    sumCond
                 ) {
                     botLog(bot, "WS: ALL GOOD, GOING IN...");
                     // DOUBLE-CHECK IF BOT IS ACTIVE
@@ -304,24 +245,57 @@ export class WsArbit {
 
         let channel1: string | undefined; // Tickers channel
         let channel2: string | undefined; // Orderbook channel
+        const { platform } = bot;
+
+        const abot = this.arbitBots.find((el) => el.bot.id == bot.id);
+        if (abot) {
+            if (!abot.order) {
+                const _botC = await Bot.findById(bot.children[2]).exec();
+                if (!_botC) return this._log("NO BOT C");
+
+                let order = await getLastOrder(_botC);
+                const bal = getAmtToBuyWith(_botC, order);
+                abot.order = order ?? undefined;
+                abot.startAmt = bal;
+            }
+
+            abot.active = true;
+            this._updateBots(abot);
+        }
 
         switch (bot.platform) {
             case "okx":
                 channel1 = "tickers";
                 channel2 = "books5";
                 break;
+            case "bybit":
+                channel1 = "tickers.";
+                channel2 = `orderbook.200.`;
+                break;
         }
 
         if (channel1) {
             // Tickers channel, also returns ask n bid pxs
-            this.ws?.sub(channel1, { instId: symbolA });
-            this.ws?.sub(channel1, { instId: symbolB });
-            this.ws?.sub(channel1, { instId: symbolC });
+            // if (platform == "okx") {
+            //     this.ws?.sub(channel1, { instId: symbolA });
+            //     this.ws?.sub(channel1, { instId: symbolB });
+            //     this.ws?.sub(channel1, { instId: symbolC });
+            // } else if (platform == "bybit") {
+            //     this.ws?.sub(channel1 + symbolA);
+            //     this.ws?.sub(channel1 + symbolB);
+            //     this.ws?.sub(channel1 + symbolC);
+            // }
         }
         if (channel2) {
-            // this.ws?.sub(channel2, { instId: symbolA });
-            // this.ws?.sub(channel2, { instId: symbolB });
-            // this.ws?.sub(channel2, { instId: symbolC });
+            if (platform == "okx") {
+                // this.ws?.sub(channel2, { instId: symbolA });
+                // this.ws?.sub(channel2, { instId: symbolB });
+                this.ws?.sub(channel2, { instId: symbolC });
+            } else if (platform == "bybit") {
+                // this.ws?.sub(channel2 + symbolA);
+                // this.ws?.sub(channel2 + symbolB);
+                this.ws?.sub(channel2 + symbolC);
+            }
         }
     }
     async unsub(bot: IBot) {
@@ -335,18 +309,68 @@ export class WsArbit {
         let channel1: string | undefined; // Tickers channel
         let channel2: string | undefined; // Orderbook channel
 
+        const { platform } = bot;
+        const abot = this.arbitBots.find((el) => el.bot.id == bot.id);
+        if (abot) {
+            abot.active = false;
+            this._updateBots(abot);
+        }
         switch (bot.platform) {
             case "okx":
                 channel1 = "tickers";
                 channel2 = "books5";
                 break;
+            case "bybit":
+                channel1 = "tickers.";
+                channel2 = `orderbook.200.`;
+                break;
         }
+        const pairs = [pairA, pairB, pairC].map((el) => el.toString());
+        const activePairs: string[] = [];
+        const activeBots = this.arbitBots.filter(
+            (el) => el.active && el.bot.id != bot.id
+        );
+        for (let abot of activeBots) {
+            activePairs.push(
+                abot.pairA.toString(),
+                abot.pairB.toString(),
+                abot.pairC.toString()
+            );
+        }
+
+        // if (pairs.includes())
+
+        const unsubA =
+            activePairs.findIndex((el) => el == pairA.toString()) == -1; // pairA not in any of active bots
+        const unsubB =
+            activePairs.findIndex((el) => el == pairB.toString()) == -1; // pairA not in any of active bots
+        const unsubC =
+            activePairs.findIndex((el) => el == pairC.toString()) == -1; // pairA not in any of active bots
+
+        console.log({ unsubA, unsubB, unsubC });
 
         if (channel1) {
             // Tickers channel, also returns ask n bid pxs
-            this.ws?.unsub(channel1, { instId: symbolA });
-            this.ws?.unsub(channel1, { instId: symbolB });
-            this.ws?.unsub(channel1, { instId: symbolC });
+            if (platform == "okx") {
+                if (unsubA) this.ws?.unsub(channel1, { instId: symbolA });
+                if (unsubB) this.ws?.unsub(channel1, { instId: symbolB });
+                if (unsubC) this.ws?.unsub(channel1, { instId: symbolC });
+            } else if (platform == "bybit") {
+                if (unsubA) this.ws?.unsub(channel1 + symbolA);
+                if (unsubB) this.ws?.unsub(channel1 + symbolB);
+                if (unsubC) this.ws?.unsub(channel1 + symbolC);
+            }
+        }
+        if (channel2) {
+            if (platform == "okx") {
+                if (unsubA) this.ws?.unsub(channel2, { instId: symbolA });
+                if (unsubB) this.ws?.unsub(channel2, { instId: symbolB });
+                if (unsubC) this.ws?.unsub(channel2, { instId: symbolC });
+            } else if (platform == "bybit") {
+                if (unsubA) this.ws?.unsub(channel2 + symbolA);
+                if (unsubB) this.ws?.unsub(channel2 + symbolB);
+                if (unsubC) this.ws?.unsub(channel2 + symbolC);
+            }
         }
     }
     async rmvBot(botId: mongoose.Types.ObjectId) {
@@ -359,19 +383,187 @@ export class WsArbit {
 
         this._log("BOT REMOVED\n");
     }
+
+    _updateBots(abot: IArbitBot) {
+        this.arbitBots = this.arbitBots.map((el) =>
+            el.bot.id == abot.bot.id ? abot : el
+        );
+    }
+
     _log(...args: any) {
         timedLog(`[WS][${this.name}] `, ...args);
     }
+
+    async onMessage(resp: RawData) {
+        const r = this.parseData(resp);
+        if (!r) return;
+        const { channel, data, symbol } = r;
+        console.log({ channel, symbol });
+        //await sleep(2000)
+        //return;
+        if (!symbol) return this._log("NO SYMBOL");
+
+        for (let abot of this.arbitBots) {
+            const { bot, pairA, pairB, pairC } = abot;
+            let symbolA = getSymbol(pairA, bot.platform);
+            let symbolB = getSymbol(pairB, bot.platform);
+            let symbolC = getSymbol(pairC, bot.platform);
+
+            if (channel == "tickers" && this.plat == bot.platform) {
+                switch (symbol) {
+                    case symbolA:
+                        abot.pxA = data;
+                        abot.baseA = abot.startAmt! / abot.pxA!; // EST. VALS
+                        break;
+                    case symbolB:
+                        abot.pxB = data;
+                        if (abot.pxB && abot.baseA) {
+                            abot.baseB = abot.baseA / abot.pxB;
+                            abot.baseC = abot.baseB;
+                        }
+                        break;
+                    case symbolC:
+                        abot.pxC = data;
+                        break;
+                }
+
+                // Update bots
+                this._updateBots(abot);
+            }
+            if (channel == "orderbook" && this.plat == bot.platform) {
+                const ob = data as IOrderbook;
+                let enoughAsk: IBook | undefined;
+
+                switch (symbol) {
+                    case symbolA:
+                        enoughAsk = ob.asks.find(
+                            (el) => el.amt >= (abot.baseA ?? 0)
+                        );
+                        if (enoughAsk) {
+                            abot.askA = enoughAsk.px;
+                        }
+                        break;
+                    case symbolB:
+                        enoughAsk = ob.asks.find(
+                            (el) => el.amt >= (abot.baseB ?? 0)
+                        );
+                        if (enoughAsk) {
+                            abot.askB = enoughAsk.px;
+                        }
+                        break;
+                    case symbolC:
+                        enoughAsk = ob.bids.find(
+                            (el) => el.amt >= (abot.baseC ?? 0)
+                        );
+                        if (enoughAsk) {
+                            abot.bidC = enoughAsk.px;
+                        }
+                        break;
+                }
+
+                // Update bots
+                this._updateBots(abot);
+            }
+
+            const { pxA, pxB, pxC, askA, askB, bidC } = abot;
+            if (
+                pxA == undefined ||
+                pxB == undefined ||
+                pxC == undefined ||
+                askA == undefined ||
+                askB == undefined ||
+                bidC == undefined
+            )
+                return;
+
+            // UNSUB FIRST
+            await this.unsub(abot.bot);
+            const re = await this.handleTickers({
+                abot,
+                symbol,
+            });
+
+            if (re != false) {
+                // RE-SUB
+                this._log("\nRE-SUB\n");
+                await this.sub(abot.bot);
+            }
+            await sleep(SLEEP_MS);
+        }
+    }
+
+    parseData(resp: RawData) {
+        const parsedResp = JSON.parse(resp.toString());
+        let { data } = parsedResp;
+        let topic: string | undefined;
+        let symbol: string | undefined;
+        console.log({ parsedResp });
+        if (!data) return console.log({ parsedResp });
+
+        switch (this.plat) {
+            case "okx":
+                topic = parsedResp.arg.channel;
+                symbol = parsedResp.arg.instId;
+
+                if (topic?.includes("book")) {
+                    topic = "orderbook";
+                    const ob: IOrderbook = {
+                        ts: parseDate(Number(data[0].ts)),
+                        bids: data[0].bids.map((el) => ({
+                            px: Number(el[0]),
+                            amt: Number(el[1]),
+                            cnt: Number(el[3]),
+                        })),
+                        asks: data[0].asks.map((el) => ({
+                            px: Number(el[0]),
+                            amt: Number(el[1]),
+                            cnt: Number(el[3]),
+                        })),
+                    };
+                    data = ob;
+                } else if (topic == "tickers") {
+                    data = Number(data[0].last);
+                }
+                break;
+            case "bybit":
+                topic = parsedResp.topic;
+                if (topic?.includes("orderbook")) {
+                    topic = "orderbook";
+
+                    symbol = data.s;
+                    const ob: IOrderbook = {
+                        ts: parseDate(Date.now()),
+                        bids: data.b.map((el) => ({
+                            px: Number(el[0]),
+                            amt: Number(el[1]),
+                            cnt: 1,
+                        })),
+                        asks: data.a.map((el) => ({
+                            px: Number(el[0]),
+                            amt: Number(el[1]),
+                            cnt: 1,
+                        })),
+                    };
+
+                    data = ob;
+                }
+
+                break;
+        }
+
+        if (!topic || !symbol) console.log("MISSING:", parsedResp);
+        return { channel: topic, symbol, data };
+    }
 }
 
-export const wsPlats = {
-    okx: new WsArbit("okx"),
-    bybit: new WsArbit("bybit"),
+export const wsTriArbits = {
+    okx: new WsTriArbit("okx"),
+    bybit: new WsTriArbit("bybit"),
 };
 
-export const initWsPlats = async () => {
+export const initWsTriArbit = async () => {
     try {
-        for (let ws of Object.values(wsPlats)) {
+        for (let ws of Object.values(wsTriArbits)) {
             await ws.initWs();
         }
     } catch (e) {

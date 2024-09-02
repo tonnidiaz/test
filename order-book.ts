@@ -19,7 +19,7 @@ ws.on("open", function open() {
     console.log("WebSocket connection opened");
     ws.send(
         JSON.stringify({
-            op: "subscribe",
+            op: "subscribe", 
             params: {binary: false},
             args: [
                 

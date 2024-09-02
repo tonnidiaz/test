@@ -18,7 +18,7 @@ import { getAmtToBuyWith, parseDate } from "@/utils/funcs2";
 import { IOrder } from "@/models/order";
 import { createChildBots } from "@/utils/functions/bots-funcs";
 import mongoose from "mongoose";
-import { WsArbit, wsPlats } from "@/classes/ws-plat";
+import { WsTriArbit, wsTriArbits } from "@/classes/ws-plat";
 
 const router = express.Router();
 
@@ -204,10 +204,10 @@ router.post("/:id/edit", authMid, async (req, res) => {
         const jobId = `${bot._id}`;
         const bool = jobs.find((el) => el.id == jobId);
         botLog(bot, "UNSUB TO PREV SYMBOL TICKERS...");
-        const wsPlat: WsArbit = wsPlats[bot.platform]
+        const wsTriArbit: WsTriArbit = wsTriArbits[bot.platform]
         //const ws = bot.platform == "bybit" ? wsBybit : wsOkx;
         //await ws.rmvBot(bot.id);
-        await wsPlat.rmvBot(bot.id)
+        await wsTriArbit.rmvBot(bot.id)
 
         const ts = parseDate(new Date());
 
@@ -320,8 +320,10 @@ router.post("/:id/edit", authMid, async (req, res) => {
                 }
             }
             botLog(bot, "RE-SUB TO TICKERS...");
+            if (bot.type == 'arbitrage' && bot.arbit_settings?._type == 'tri' && bot.arbit_settings.use_ws){
+                await wsTriArbit.addBot(bot)
+            }
             
-            await wsPlat.addBot(bot)
             if (bot.orders.length) {
                 const order = await Order.findById(
                     bot.orders[bot.orders.length - 1]

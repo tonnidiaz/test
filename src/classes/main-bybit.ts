@@ -72,7 +72,7 @@ export class WsBybit {
                 });
 
                 ws?.on("message", async (resp) => {
-                    const { topic, data } = ws?.parseData(resp);
+                    const { channel, data } = ws?.parseData(resp);
                     if (DEV) {
                         timedLog("WS UPDATE");
                         //timedLog(candle);
@@ -80,7 +80,7 @@ export class WsBybit {
                     for (let openBot of this.botsWithPos) {
                         const bot = await Bot.findById(openBot.id).exec();
                         if (!bot?.active) return;
-                        if (topic == this.getCandleChannelName(bot!) && data) {
+                        if (channel == this.getCandleChannelName(bot!) && data) {
                             const candle = data.map((el) =>
                                 [
                                     el.start,
