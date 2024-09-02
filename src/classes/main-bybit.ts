@@ -71,38 +71,38 @@ export class WsBybit {
                     if (!this.isConnectError) await this.initWs();
                 });
 
-                ws?.on("message", async (resp) => {
-                    const { channel, data } = ws?.parseData(resp);
-                    if (DEV) {
-                        timedLog("WS UPDATE");
-                        //timedLog(candle);
-                    }
-                    for (let openBot of this.botsWithPos) {
-                        const bot = await Bot.findById(openBot.id).exec();
-                        if (!bot?.active) return;
-                        if (channel == this.getCandleChannelName(bot!) && data) {
-                            const candle = data.map((el) =>
-                                [
-                                    el.start,
-                                    el.open,
-                                    el.high,
-                                    el.low,
-                                    el.close,
-                                    el.volume,
-                                    el.confirm,
-                                ].map((el) => Number(el))
-                            )[0];
-                            /* HANDLE TICKERS */
-                            const df = tuCE(
-                                heikinAshi(
-                                    parseKlines([...openBot.klines, candle])
-                                )
-                            );
+                // ws?.on("message", async (resp) => {
+                //     const { channel, data } = ws?.parseData(resp);
+                //     if (DEV) {
+                //         timedLog("WS UPDATE");
+                //         //timedLog(candle);
+                //     }
+                //     for (let openBot of this.botsWithPos) {
+                //         const bot = await Bot.findById(openBot.id).exec();
+                //         if (!bot?.active) return;
+                //         if (channel == this.getCandleChannelName(bot!) && data) {
+                //             const candle = data.map((el) =>
+                //                 [
+                //                     el.start,
+                //                     el.open,
+                //                     el.high,
+                //                     el.low,
+                //                     el.close,
+                //                     el.volume,
+                //                     el.confirm,
+                //                 ].map((el) => Number(el))
+                //             )[0];
+                //             /* HANDLE TICKERS */
+                //             const df = tuCE(
+                //                 heikinAshi(
+                //                     parseKlines([...openBot.klines, candle])
+                //                 )
+                //             );
 
-                            updateOpenBot(bot, openBot, df);
-                        }
-                    }
-                });
+                //             updateOpenBot(bot, openBot, df);
+                //         }
+                //     }
+                // });
             }
         } catch (e) {
             console.log(e);
