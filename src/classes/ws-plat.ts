@@ -604,7 +604,7 @@ export const wsTriArbits = {
 export const initWsTriArbit = async () => {
     try {
         for (let ws of Object.values(wsTriArbits)) {
-            await ws.initWs();
+            //await ws.initWs();
         }
     } catch (e) {
         timedLog("FAILED TO INIT WS");

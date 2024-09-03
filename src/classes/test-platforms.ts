@@ -43,6 +43,7 @@ export class Platform {
         symbol: string;
         savePath?: string;
     }): Promise<any[] | undefined | void> {
+        console.log(`[${this.constructor.name}] GETTING KLINES FOR`, {symbol, interval}, '\n')
         return;
     }
     async getTrades({
