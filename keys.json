@@ -1,0 +1,32 @@
+{
+    "bybit": {
+        "real" : {
+            "key0": ["lfxGDLlHlBOnssJAr1", "a6FpDsoo2UFygP6wn5JQjdcrNOKNR6alz1Nb"]
+        },
+        "demo": {
+            "key0": ["QzStEmc9NoDRyPAulg", "XCTG20xrrx01LVKX4IlN0RSiIaTXhvlYpwnK"],
+            "key1": ["sSEPHGAWzjY6WwlDDN", "c1DmowNehIKcMyfGIQ1Q6QFP4blRYXt9HLeP"]
+        }
+        
+    },
+    "binance" :{
+        "key0": ["Yc7HpYqDdKTh1HfZyjkNg0eDfs8yNJK5D7A4MpFNYPoHgYtmrA0FvXYjVEuk7YHn", "jaAE1n2bVEErdfFHlmvM1gWlIPbYhLntfbNsCf3Xm6DPhUdZ4tQGYVkpSZukahn5"]
+    },
+    "okx": {
+        "demo": {
+            "key0": ["0189aae2-49ea-45ad-9852-88c9dffeecc4", "12A5DCCB9FE76A18A7B66C32619DA55F"]
+        },
+        "live":{"key0":["476b89bb-1284-4618-a671-5129a37b209f", "9AD11AAAAF2C7AE8115DEE11D93D51F5"]}
+    },
+    "phemex": {
+        "demo": {
+            "key0": ["d305ec28-4446-4b9a-b299-d2d67be17ae3", "dKWWzWMniC53zuH9RuHmZH3bbhaXZWX9w8H6xEH2ksowZjM5YmViOS03MGQwLTRlZTItOGMzZi0zNzA2NDNkZmIyODc"]
+        }
+    },
+    "mexc": {
+        "key0": ["mx0vglHcLc0B1C2DdD", "d156f39edde0472aa0df9bfc1ba263c6"]
+    },
+    "kucoin": {
+        "key0": ["66d6db260ead2400015e90ea", "35dc9c1d-51aa-4fad-be79-280be6155b59"]
+    }
+}

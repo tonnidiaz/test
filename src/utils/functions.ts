@@ -606,6 +606,7 @@ export const getSymbol = (pair: string[], plat: string) => {
     let sep = "";
     switch (plat) {
         case "okx":
+        case "kucoin":
             sep = "-";
             break;
         case "gateio":

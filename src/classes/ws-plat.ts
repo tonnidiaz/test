@@ -27,9 +27,13 @@ const OKX_WS_URL_DEMO = "wss://wspap.okx.com:8443/ws/v5/public";
 
 const BYBIT_WS_URL = "wss://stream.bybit.com/v5/public/spot";
 const BYBIT_WS_URL_DEMO = "wss://stream-testnet.bybit.com/v5/public/spot";
+const BINANCE_WS_URL = "wss://stream.binance.com:9443";
+const KUCOIN_TOKEN =
+    "2neAiuYvAU61ZDXANAGAsiL4-iAExhsBXZxftpOeh_55i3Ysy2q2LEsEWU64mdzUOPusi34M_wGoSf7iNyEWJ7Hpi6VkzA_HnrsEt757fLDI01cJ3EoydNiYB9J6i9GjsxUuhPw3Blq6rhZlGykT3Vp1phUafnulOOpts-MEmEGpNUI84S6vrJTgyxX8E4rMJBvJHl5Vs9Y=.LmLBJkS2mQLCJn4B0fVRXw==";
+const KUCOIN_WS_URL = "wss://ws-api-spot.kucoin.com/?token=" + KUCOIN_TOKEN;
 
 const SLEEP_MS = 2000;
-const demo = true;
+const demo = false;
 
 interface IArbitBot {
     bot: IBot;
@@ -53,10 +57,16 @@ export class WsTriArbit {
     wsURL: string | undefined;
     open = false;
     plat: string;
+    reconnectInterval: number;
+    maxReconnectAttempts: number;
+    currentReconnectAttempts: number;
 
     constructor(plat: string) {
         this.name = this.constructor.name;
         this.plat = plat;
+        this.reconnectInterval = 5000; // 5 seconds by default
+        this.maxReconnectAttempts = 10; // Max reconnection attempts
+        this.currentReconnectAttempts = 0;
 
         console.log(this.name);
         switch (plat) {
@@ -65,6 +75,12 @@ export class WsTriArbit {
                 break;
             case "bybit":
                 this.wsURL = demo ? BYBIT_WS_URL_DEMO : BYBIT_WS_URL;
+                break;
+            case "binance":
+                this.wsURL = BINANCE_WS_URL;
+                break;
+            case "kucoin":
+                this.wsURL = KUCOIN_WS_URL;
                 break;
         }
     }
@@ -87,7 +103,7 @@ export class WsTriArbit {
 
                 this._log("ON OPEN");
                 for (let ch of ws.channels) {
-                    await this.ws.sub(ch.channel, ch.data);
+                    await this.ws.sub(ch.channel, ch.plat, ch.data);
                 }
                 this.ws.channels = [];
 
@@ -98,10 +114,11 @@ export class WsTriArbit {
                 this.isConnectError = e.stack?.split(" ")[2] == "ENOTFOUND";
                 await sleep(SLEEP_MS);
             });
-            ws?.on("close", async (e) => {
+            ws?.on("close", async (code, rsn) => {
                 this.open = false;
-                this._log("ON CLOSED", e);
-                if (!this.isConnectError) await this.initWs();
+                this._log(`[onClose] CODE: ${code}\nREASON: ${rsn}`);
+                // if (!this.isConnectError) await this.initWs();
+                this.reconnect();
             });
 
             ws?.on("message", async (r) => await this.onMessage(r));
@@ -109,7 +126,24 @@ export class WsTriArbit {
             console.log(e);
         }
     }
-
+    reconnect() {
+        if (this.currentReconnectAttempts < this.maxReconnectAttempts) {
+            console.log(
+                `Reconnecting in ${this.reconnectInterval / 1000} seconds...`
+            );
+            setTimeout(() => {
+                this.currentReconnectAttempts++;
+                console.log(
+                    `Reconnection attempt ${this.currentReconnectAttempts}/${this.maxReconnectAttempts}`
+                );
+                this.initWs();
+            }, this.reconnectInterval);
+        } else {
+            console.error(
+                "Max reconnect attempts reached. Stopping reconnection attempts."
+            );
+        }
+    }
     async handleTickers({ symbol, abot }: { abot: IArbitBot; symbol: string }) {
         //DONT RESUME IF RETURN TRUE
         try {
@@ -202,7 +236,7 @@ export class WsTriArbit {
                         bot: _bot,
                         pairA,
                         pairB,
-                        pairC, 
+                        pairC,
                         perc,
                         cPxA: pxA,
                         cPxB: pxB,
@@ -271,17 +305,6 @@ export class WsTriArbit {
 
     async sub(bot: IBot) {
         // SUB FOR A. B. C
-        const pairA = [bot.B, bot.A];
-        const pairB = [bot.C, bot.B];
-        const pairC = [bot.C, bot.A];
-
-        let symbolA = getSymbol(pairA, bot.platform);
-        let symbolB = getSymbol(pairB, bot.platform);
-        let symbolC = getSymbol(pairC, bot.platform);
-
-        let channel1: string | undefined; // Orderbook channel
-        const { platform } = bot;
-
         const abot = this.arbitBots.find((el) => el.bot.id == bot.id);
         if (abot) {
             if (!abot.order) {
@@ -298,44 +321,19 @@ export class WsTriArbit {
             this._updateBots(abot);
         }
 
-        switch (bot.platform) {
-            case "okx":
-                channel1 = "books5";
-                break;
-            case "bybit":
-                channel1 = `orderbook.200.`;
-                break;
-        }
-
-        if (channel1) {
-            // Orderbook channel, also returns ask n bid pxs
-            if (platform == "okx") {
-                await this.ws?.sub(channel1, { instId: symbolA });
-                await this.ws?.sub(channel1, { instId: symbolB });
-                await this.ws?.sub(channel1, { instId: symbolC });
-            } else if (platform == "bybit") {
-                await this.ws?.sub(channel1 + symbolA);
-                await this.ws?.sub(channel1 + symbolB);
-                await this.ws?.sub(channel1 + symbolC);
-            }
-        }
+        await this.subUnsub(bot, "sub");
     }
-    async unsub(bot: IBot) {
+
+    async subUnsub(bot: IBot, act: "sub" | "unsub" = "sub") {
+        let channel1: string | undefined; // Orderbook channel
+        const { platform } = bot;
         const pairA = [bot.B, bot.A];
         const pairB = [bot.C, bot.B];
         const pairC = [bot.C, bot.A];
+
         let symbolA = getSymbol(pairA, bot.platform);
         let symbolB = getSymbol(pairB, bot.platform);
         let symbolC = getSymbol(pairC, bot.platform);
-
-        let channel1: string | undefined; // Orderbook channel
-
-        const { platform } = bot;
-        const abot = this.arbitBots.find((el) => el.bot.id == bot.id);
-        if (abot) {
-            abot.active = false;
-            this._updateBots(abot);
-        }
         switch (bot.platform) {
             case "okx":
                 channel1 = "books5";
@@ -343,8 +341,24 @@ export class WsTriArbit {
             case "bybit":
                 channel1 = `orderbook.200.`;
                 break;
+            case "binance":
+                channel1 = `orderbook.200.`;
+                break;
+            case "kucoin":
+                channel1 = `/spotMarket/level2Depth5:`;
+                break;
         }
-        const pairs = [pairA, pairB, pairC].map((el) => el.toString());
+        if (!this.ws) return;
+        const fn = act == "sub" ? this.ws.sub : this.ws.unsub;
+        botLog(bot, `\n${act}ing...`);
+
+        if (act == "unsub") {
+            const abot = this.arbitBots.find((el) => el.bot.id == bot.id);
+            if (abot) {
+                abot.active = false;
+                this._updateBots(abot);
+            }
+        }
         const activePairs: string[] = [];
         const activeBots = this.arbitBots.filter(
             (el) => el.active && el.bot.id != bot.id
@@ -366,20 +380,27 @@ export class WsTriArbit {
         const unsubC =
             activePairs.findIndex((el) => el == pairC.toString()) == -1; // pairA not in any of active bots
 
-        console.log({ unsubA, unsubB, unsubC });
-
         if (channel1) {
-            // Tickers channel, also returns ask n bid pxs
+            // Orderbook channel, also returns ask n bid pxs
             if (platform == "okx") {
-                if (unsubA) this.ws?.unsub(channel1, { instId: symbolA });
-                if (unsubB) this.ws?.unsub(channel1, { instId: symbolB });
-                if (unsubC) this.ws?.unsub(channel1, { instId: symbolC });
-            } else if (platform == "bybit") {
-                if (unsubA) this.ws?.unsub(channel1 + symbolA);
-                if (unsubB) this.ws?.unsub(channel1 + symbolB);
-                if (unsubC) this.ws?.unsub(channel1 + symbolC);
+                if (act == "sub" || unsubA)
+                    await fn(channel1, platform, { instId: symbolA });
+                if (act == "sub" || unsubB)
+                    await fn(channel1, platform, { instId: symbolB });
+                if (act == "sub" || unsubC)
+                    await fn(channel1, platform, { instId: symbolC });
+            } else if (platform == "bybit" || platform == "kucoin") {
+                if (act == "sub" || unsubA)
+                    await fn(channel1 + symbolA, platform);
+                if (act == "sub" || unsubB)
+                    await fn(channel1 + symbolB, platform);
+                if (act == "sub" || unsubC)
+                    await fn(channel1 + symbolC, platform);
             }
         }
+    }
+    async unsub(bot: IBot) {
+        await this.subUnsub(bot, "unsub");
     }
     async rmvBot(botId: mongoose.Types.ObjectId) {
         this._log("REMOVING BOT", botId, "...");
@@ -434,6 +455,7 @@ export class WsTriArbit {
                         };
                         break;
                     case symbolC:
+                        console.log({ asks: ob.asks });
                         abot.bookC = {
                             ask: ob.asks[0],
                             bid: ob.bids[0],
@@ -446,6 +468,10 @@ export class WsTriArbit {
             }
 
             const { bookA, bookB, bookC } = abot;
+            //console.log("\n", { plat: this.plat, pairC });
+            //console.log({ bookC });
+            //await sleep(SLEEP_MS);
+            //return;
 
             if (bookA == undefined || bookB == undefined || bookC == undefined)
                 return;
@@ -477,8 +503,8 @@ export class WsTriArbit {
 
     parseData(resp: RawData) {
         const parsedResp = JSON.parse(resp.toString());
-        let { data } = parsedResp;
-        let topic: string | undefined;
+        let { data, topic, type } = parsedResp;
+        let channel: string | undefined;
         let symbol: string | undefined;
         if (!data) {
             //console.log({ parsedResp });
@@ -487,11 +513,11 @@ export class WsTriArbit {
 
         switch (this.plat) {
             case "okx":
-                topic = parsedResp.arg.channel;
+                channel = parsedResp.arg.channel;
                 symbol = parsedResp.arg.instId;
 
-                if (topic?.includes("book")) {
-                    topic = "orderbook";
+                if (channel?.includes("book")) {
+                    channel = "orderbook";
                     const ob: IOrderbook = {
                         ts: parseDate(Number(data[0].ts)),
                         bids: data[0].bids.map((el) => ({
@@ -506,14 +532,14 @@ export class WsTriArbit {
                         })),
                     };
                     data = ob;
-                } else if (topic == "tickers") {
+                } else if (channel == "tickers") {
                     data = Number(data[0].last);
                 }
                 break;
             case "bybit":
-                topic = parsedResp.topic;
-                if (topic?.includes("orderbook")) {
-                    topic = "orderbook";
+                channel = parsedResp.topic;
+                if (channel?.includes("orderbook")) {
+                    channel = "orderbook";
 
                     symbol = data.s;
                     const ob: IOrderbook = {
@@ -534,10 +560,38 @@ export class WsTriArbit {
                 }
 
                 break;
+            case "kucoin":
+                if (topic && topic.includes("level2Depth5")) {
+                    channel = "orderbook";
+                    symbol = topic.split(":")[1];
+                    const d = data.data;
+                    const ob: IOrderbook = {
+                        ts: parseDate(Date.now()),
+                        asks: d.asks.map((el) => ({
+                            px: Number(el[0]),
+                            amt: Number(el[1]),
+                            cnt: 1,
+                        })),
+                        bids: d.bids.map((el) => ({
+                            px: Number(el[0]),
+                            amt: Number(el[1]),
+                            cnt: 1,
+                        })),
+                    };
+
+                    data = ob;
+                }
+                break;
         }
 
-        if (!topic || !symbol) console.log("MISSING:", parsedResp);
-        return { channel: topic, symbol, data };
+        if (!channel || !symbol) console.log("MISSING:", parsedResp);
+        if (channel == "orderbook") {
+            //SORT ORDERBOOK
+            const ob: IOrderbook = data;
+            //console.log({bids: ob.bids, asks: ob.asks})
+            //data = { ...ob, asks: ob.asks.sort((a, b) => a.px - b.px), bids: ob.bids.sort((a, b) => b.px - a.px) };
+        }
+        return { channel: channel, symbol, data };
     }
 }
 
