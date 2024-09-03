@@ -58,7 +58,7 @@ export class TestKucoin extends Platform {
                 cnt++;
                 let after = firstTs + limit * interval * 60000;
                 const res = await this.client.getKlines({
-                    symbol: "SUSHI-USDT",
+                    symbol,
                     type: getInterval(interval, "kucoin"),
                     endAt: Math.round(after / 1000),
                     startAt: Math.round(firstTs / 1000),
