@@ -1,7 +1,7 @@
 import { IBot } from "@/models/bot";
 import { ensureDirExists } from "@/utils/orders/funcs";
 import { getExactDate, getInterval, parseDate, parseFilledOrder } from "@/utils/funcs2";
-import { botLog, capitalizeFirstLetter, getSymbol } from "@/utils/functions";
+import { botLog, capitalizeFirstLetter, getSymbol, sleep } from "@/utils/functions";
 import { SpotClient } from "kucoin-api";
 import { writeFileSync } from "fs";
 import { DEV, isStopOrder } from "@/utils/constants";
@@ -54,7 +54,6 @@ export class Kucoin extends Platform {
         try {
             const { order_type } = this.bot;
             const is_market = price == undefined;
-            const fn = test ? this.client.submitOrderTest : this.client.submitOrder;
             if (test){
                 console.log("TEST ORDER:\n")
             }
@@ -75,7 +74,13 @@ export class Kucoin extends Platform {
 
             return res.data.orderId;
         } catch (error) {
-            console.log(error);
+            botLog(this.bot,"FAILED TO PLACE ORDER", error);
+            await sleep(5000)
+            // Check if order was placed
+            const r = await this.client.getOrderByClientOid({clientOid: clOrderId!,})
+            if (r.code != '200000')
+                return botLog(this.bot, "ORDER WAS NOT PLACED")
+            return r.data.id
         }
     }
     async placeTestOrder( amt: number,
@@ -119,7 +124,8 @@ export class Kucoin extends Platform {
             data = parseFilledOrder(d, this.bot.platform);
             return data;
         } catch (error) {
-            console.log(error);
+            botLog(this.bot,"FAILED TO GET ORDER", error);
+           
         }
     }
     async getTicker() {
