@@ -28,6 +28,7 @@
         "http-errors": "~1.6.3",
         "indicatorts": "^2.2.1",
         "jsonwebtoken": "^9.0.1",
+        "kucoin-api": "^1.0.4",
         "mexc-api-sdk": "^1.0.3",
         "mongoose": "^7.4.2",
         "mongoose-update-if-current": "^1.4.0",

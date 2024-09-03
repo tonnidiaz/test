@@ -8,6 +8,7 @@ import { mexcInstrus } from "./data/instrus/mexc-instrus";
 import { okxInstrus } from "./data/instrus/okx-instrus";
 import { parseDate } from "./funcs2";
 import { botLog, getSymbol } from "./functions";
+import { kucoinInstrus } from "./data/instrus/kucoin-instrus";
 
 export const getKlinesPath = ({
     plat,
@@ -62,6 +63,11 @@ export const getInstrus = (_platName: string) => {
             _instruments = okxInstrus
                 .filter((el) => el.state == "live")
                 .map((el) => [el.baseCcy, el.quoteCcy]);
+            break;
+        case "kucoin":
+            _instruments = kucoinInstrus
+                .filter((el) => el.enableTrading)
+                .map((el) => [el.baseCurrency, el.quoteCurrency]);
             break;
     }
     return _instruments;

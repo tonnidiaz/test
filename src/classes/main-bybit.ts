@@ -116,12 +116,12 @@ export class WsBybit {
     }
     async sub(bot: IBot) {
         for (let ws of this.wsList) {
-            ws?.sub(this.getCandleChannelName(bot));
+            //ws?.sub(this.getCandleChannelName(bot));
         }
     }
     async unsub(bot: IBot) {
         for (let ws of this.wsList) {
-            ws?.unsub(this.getCandleChannelName(bot));
+            //ws?.unsub(this.getCandleChannelName(bot));
         }
     }
     getSymbol(bot: IBot) {

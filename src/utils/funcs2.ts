@@ -10,6 +10,7 @@ import { IOrder } from "@/models/order";
 import { objPlats } from "./consts2";
 import { objStrategies } from "@/strategies";
 import type { Order as GateOrder } from "gate-api";
+import type { SpotOrder as KucoinOrder } from "kucoin-api";
 
 const ddNum = (e: any) => {
     e = `${e}`.trim();
@@ -250,6 +251,9 @@ export const getInterval = (m: number, plt: string) => {
         case "bitget":
             interval = m >= 60 ? `${Math.floor(m / 60)}h` : `${m}min`;
             break;
+        case "kucoin":
+            interval = m >= 60 ? `${Math.floor(m / 60)}hour` : `${m}min`;
+            break;
         case "mexc":
             interval = `${m}m`;
             break;
@@ -324,7 +328,18 @@ export const parseFilledOrder = (res: IObj, plat: string) => {
             fillTime: Number(_r.updateTime),
             cTime: Number(_r.time),
         };
-    } else {
+    } else if (plat == 'kucoin') {
+        const _res = res as KucoinOrder;
+        const sz = Number(_res.size) || (Number(_res.funds) / Number(_res.price))
+        data = {
+            id: _res.id!,
+            fillPx: Number(_res.price!),
+            fillSz:sz,
+            fee: Number(_res.fee),
+            fillTime: Date.now(),
+            cTime: Number(_res.createdAt),
+        };
+    }else {
         // GATEIO
         const _res = res as GateOrder;
         data = {

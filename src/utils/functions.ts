@@ -4,6 +4,18 @@ import nodemailer from "nodemailer";
 import fs from "fs";
 const { env } = process;
 import { Response } from "express";
+import axios from "axios";
+import { ICandle, IObj } from "./interfaces";
+import { IBot } from "@/models/bot";
+import { okxInstrus } from "@/utils/data/instrus/okx-instrus";
+import { binanceInfo } from "./binance-info";
+import { bybitInstrus } from "./data/instrus/bybit-instrus";
+import { parseDate } from "./funcs2";
+import { bitgetInstrus } from "@/utils/data/instrus/bitget-instrus";
+import { gateioInstrus } from "@/utils/data/instrus/gateio-instrus";
+import { mexcInstrus } from "./data/instrus/mexc-instrus";
+import { binanceInstrus } from "./data/instrus/binance-instrus";
+import { kucoinInstrus } from "./data/instrus/kucoin-instrus";
 
 const test = false;
 
@@ -36,18 +48,6 @@ const genOTP = async (phone?: string, email?: string) => {
 export function clog(message?: any, ...params: any[]) {
     console.log(message, ...params);
 }
-
-import axios from "axios";
-import { ICandle, IObj } from "./interfaces";
-import { IBot } from "@/models/bot";
-import { okxInstrus } from "@/utils/data/instrus/okx-instrus";
-import { binanceInfo } from "./binance-info";
-import { bybitInstrus } from "./data/instrus/bybit-instrus";
-import { parseDate } from "./funcs2";
-import { bitgetInstrus } from "@/utils/data/instrus/bitget-instrus";
-import { gateioInstrus } from "@/utils/data/instrus/gateio-instrus";
-import { mexcInstrus } from "./data/instrus/mexc-instrus";
-import { binanceInstrus } from "./data/instrus/binance-instrus";
 
 const tunedErr = (res: Response, status: number, msg: string, e?: any) => {
     if (e) {
@@ -306,6 +306,10 @@ export function getCoinPrecision(
                 is_quote ? _i5.quoteAssetPrecision : _i5.baseAssetPrecision
             );
             break;
+        case "kucoin":
+            const _i6 = instru as (typeof kucoinInstrus)[0];
+            pr = precision(Number(is_quote ? _i6.quoteIncrement : _i6.baseIncrement));
+            break;
     }
     return pr;
 }
@@ -353,6 +357,15 @@ const getInstru = (pair: string[], plat: string) => {
                     el.isSpotTradingAllowed
             );
             break;
+
+        case "kucoin":
+            instru = kucoinInstrus.find(
+                (el) =>
+                    el.baseCurrency == _base &&
+                    el.quoteCurrency == _quote &&
+                    el.enableTrading
+            );
+            break;
     }
 
     return instru;
@@ -393,60 +406,67 @@ export function getPricePrecision(pair: string[], plat: string) {
             const _i5 = instru as (typeof mexcInstrus)[0];
             pr = Number(_i5.quotePrecision);
             break;
+        case "kucoin":
+            const _i6 = instru as (typeof kucoinInstrus)[0];
+            pr = precision(Number(_i6.priceIncrement));
+            break;
     }
     return pr;
 }
 
 export function getMinSz(pair: string[], plat: string) {
+    try {
+        if (test) return -Infinity;
+        const _base = pair[0],
+            _quote = pair[1];
+        let instru = getInstru(pair, plat);
 
-    try{
-       if (test) return -Infinity;
-    const _base = pair[0],
-        _quote = pair[1];
-    let instru = getInstru(pair, plat);
+        if (!instru) {
+            console.log(`\ngetMinSz: ${pair} not on ${plat}\n`);
+            return null;
+        }
 
-    if (!instru) {
-        console.log(`\ngetMinSz: ${pair} not on ${plat}\n`);
+        let sz: number | null = null;
+        switch (plat) {
+            case "binance":
+                const _i0 = instru as (typeof binanceInfo.symbols)[0];
+                sz = Number(
+                    _i0.filters.find(
+                        (el) => el.filterType == "MARKET_LOT_SIZE"
+                    )!.minQty
+                );
+                break;
+            case "bitget":
+                const _i1 = instru as (typeof bitgetInstrus)[0];
+                sz = Number(_i1.minTradeAmount);
+                break;
+            case "bybit":
+                const _i2 = instru as (typeof bybitInstrus)[0];
+                sz = Number(_i2.lotSizeFilter.minOrderQty);
+                break;
+            case "okx":
+                const _i3 = instru as (typeof okxInstrus)[0];
+                sz = Number(_i3.minSz);
+                break;
+
+            case "gateio":
+                const _i4 = instru as (typeof gateioInstrus)[0];
+                sz = Number(_i4.min_base_amount);
+                break;
+            case "mexc":
+                const _i5 = instru as (typeof mexcInstrus)[0];
+                sz = -Infinity; //Number(_i5.min_base_amount)
+                break;
+            case "kucoin":
+                const _i6 = instru as (typeof kucoinInstrus)[0];
+                sz = Number(_i6.baseMinSize);
+                break;
+        }
+        return sz;
+    } catch (e) {
+        console.log(e);
         return null;
     }
-
-    let sz: number | null = null;
-    switch (plat) {
-        case "binance":
-            const _i0 = instru as (typeof binanceInfo.symbols)[0];
-            sz = Number(
-                _i0.filters.find((el) => el.filterType == "MARKET_LOT_SIZE")!
-                    .minQty
-            );
-            break;
-        case "bitget":
-            const _i1 = instru as (typeof bitgetInstrus)[0];
-            sz = Number(_i1.minTradeAmount);
-            break;
-        case "bybit":
-            const _i2 = instru as (typeof bybitInstrus)[0];
-            sz = Number(_i2.lotSizeFilter.minOrderQty);
-            break;
-        case "okx":
-            const _i3 = instru as (typeof okxInstrus)[0];
-            sz = Number(_i3.minSz);
-            break;
-
-        case "gateio":
-            const _i4 = instru as (typeof gateioInstrus)[0];
-            sz = Number(_i4.min_base_amount);
-            break;
-        case "mexc":
-            const _i5 = instru as (typeof mexcInstrus)[0];
-            sz = -Infinity; //Number(_i5.min_base_amount)
-            break;
-    }
-    return sz; 
-    }catch(e){
-        console.log(e)
-        return null
-    }
-    
 }
 export function getMaxSz(pair: string[], plat: string) {
     if (test) return Infinity;
@@ -485,6 +505,10 @@ export function getMaxSz(pair: string[], plat: string) {
         case "mexc":
             const _i5 = instru as (typeof mexcInstrus)[0];
             sz = Infinity; //Number(_i5.max_base_amount)
+            break;
+        case "kucoin":
+            const _i6 = instru as (typeof kucoinInstrus)[0];
+            sz = Number(_i6.baseMaxSize);
             break;
     }
     return sz;
@@ -527,6 +551,10 @@ export function getMaxAmt(pair: string[], plat: string) {
             const _i5 = instru as (typeof mexcInstrus)[0];
             sz = Number(_i5.maxQuoteAmount);
             break;
+        case "kucoin":
+            const _i6 = instru as (typeof kucoinInstrus)[0];
+            sz = Number(_i6.quoteMaxSize);
+            break;
     }
     return sz;
 }
@@ -560,7 +588,11 @@ export function getMinAmt(pair: string[], plat: string) {
             break;
         case "okx":
             const _i3 = instru as (typeof okxInstrus)[0];
-            sz = _quote == 'USDT' ? 1 : 0//Number(_i3.min);
+            sz = _quote == "USDT" ? 1 : 0; //Number(_i3.min);
+            break;
+        case "kucoin":
+            const _i4 = instru as (typeof kucoinInstrus)[0];
+            sz = Number(_i4.quoteMinSize);
             break;
     }
     return sz;
