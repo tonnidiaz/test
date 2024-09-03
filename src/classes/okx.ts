@@ -99,6 +99,7 @@ export class OKX extends Platform {
         /* Place limit order at previous close */
 
         await super.placeOrder(amt, price, side, sl, clOrderId);
+        const symbol = getSymbol([this.bot.base, this.bot.ccy], this.bot.platform)
         try {
             let res: OrderResult[] | AlgoOrderResult[];
 
@@ -147,12 +148,12 @@ export class OKX extends Platform {
 
             if (res[0].sCode != "0") {
                 botLog(this.bot,"FAILED TO PLACE ORDER", res[0]);
-                this.retries += 1
-                if (this.retries <= this.maxRetries){
-                    botLog(this.bot, `Retrying [${this.retries} / ${this.maxRetries}]...`)
-                    await sleep(2000)
-                    return await this.placeOrder(amt, price, side, sl, clOrderId)
-                }
+                // this.retries += 1
+                // if (this.retries <= this.maxRetries){
+                //     botLog(this.bot, `Retrying [${this.retries} / ${this.maxRetries}]...`)
+                //     await sleep(2000)
+                //     return await this.placeOrder(amt, price, side, sl, clOrderId)
+                // }
                 return;
             }
             console.log(`\ORDER PLACED FOR BOT=${this.bot.name}\n`);
@@ -162,12 +163,18 @@ export class OKX extends Platform {
             return id;
         } catch (error) {
             botLog(this.bot,"FAILED TO PLACE ORDER", error);
-            this.retries += 1
-                if (this.retries <= this.maxRetries){
-                    botLog(this.bot, `Retrying [${this.retries} / ${this.maxRetries}]...`)
-                    await sleep(2000)
-                    return await this.placeOrder(amt, price, side, sl, clOrderId)
-                }
+            await sleep(5000)
+            // Check if order was placed
+            const r = await this.client.getOrderDetails({clOrdId: clOrderId, instId: symbol})
+            if (!r.length)
+                return botLog(this.bot, "ORDER WAS NOT PLACED")
+            return r[0].ordId
+            // this.retries += 1
+            //     if (this.retries <= this.maxRetries){
+            //         botLog(this.bot, `Retrying [${this.retries} / ${this.maxRetries}]...`)
+            //         await sleep(2000)
+            //         return await this.placeOrder(amt, price, side, sl, clOrderId)
+            //     }
         }
     }
 

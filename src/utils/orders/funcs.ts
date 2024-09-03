@@ -311,7 +311,8 @@ export const placeTrade = async ({
                       bot: bot.id,
                       base: bot.base,
                       ccy: bot.ccy,
-                      ccy_amt: _amt,
+                      ccy_amt: side == 'buy' ? _amt : 0,
+                      base_amt: side == 'sell' ? _amt : 0
                   })
                 : orders[orders.length - 1];
 

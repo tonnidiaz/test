@@ -32,7 +32,7 @@ const KUCOIN_TOKEN =
     "2neAiuYvAU61ZDXANAGAsiL4-iAExhsBXZxftpOeh_55i3Ysy2q2LEsEWU64mdzUOPusi34M_wGoSf7iNyEWJ7Hpi6VkzA_HnrsEt757fLDI01cJ3EoydNiYB9J6i9GjsxUuhPw3Blq6rhZlGykT3Vp1phUafnulOOpts-MEmEGpNUI84S6vrJTgyxX8E4rMJBvJHl5Vs9Y=.LmLBJkS2mQLCJn4B0fVRXw==";
 const KUCOIN_WS_URL = "wss://ws-api-spot.kucoin.com/?token=" + KUCOIN_TOKEN;
 
-const SLEEP_MS = 30 * 1000;
+const SLEEP_MS = 10 * 1000;
 const demo = false;
 
 interface IArbitBot {
@@ -94,13 +94,13 @@ export class WsTriArbit {
             this.isConnectError = false;
             this.ws = new TuWs(this.wsURL);
             this.ws.plat = this.plat;
-
+            if (!this.open)
             this._log("INIT WS");
             const ws = this.ws;
 
             ws?.on("open", async () => {
                 if (!this.ws) return;
-
+                if (!this.open)
                 this._log("ON OPEN");
                 for (let ch of ws.channels) {
                     await this.ws.sub(ch.channel, ch.plat, ch.data);
@@ -115,7 +115,7 @@ export class WsTriArbit {
                 await sleep(SLEEP_MS);
             });
             ws?.on("close", async (code, rsn) => {
-                this.open = false;
+                if (DEV)
                 this._log(`[onClose] CODE: ${code}\nREASON: ${rsn}`);
                 // if (!this.isConnectError) await this.initWs();
                 this.reconnect();
@@ -128,11 +128,13 @@ export class WsTriArbit {
     }
     reconnect() {
         if (this.currentReconnectAttempts < this.maxReconnectAttempts) {
+            if (DEV)
             console.log(
                 `Reconnecting in ${this.reconnectInterval / 1000} seconds...`
             );
             setTimeout(() => {
                 this.currentReconnectAttempts++;
+                if (DEV)
                 console.log(
                     `Reconnection attempt ${this.currentReconnectAttempts}/${this.maxReconnectAttempts}`
                 );
