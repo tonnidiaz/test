@@ -24,7 +24,7 @@ const bot = new Bot({
         ccy: "USDT",
         platform: "bitget",
     });
-const plat = new objPlats[bot.platform](bot);
+//const plat = new objPlats[bot.platform](bot);
 
 async function fun() {
 
@@ -49,20 +49,22 @@ async function fun() {
     console.log(r);
 }
 
-async function place({ get = false, oid="" }: { get?: boolean, oid?: string }) {
+async function place({ get = false, oid="", side ='buy', type = 'market' }: { get?: boolean, oid?: string, side?: 'buy' | 'sell', type?: 'market' | 'limit' }) {
  
     const bot = new Bot({
         name: "TBOT",
         interval: 5,
-        base: "SOL",
+        base: "SUSHI",
         ccy: "USDT",
         platform: "kucoin",
     });
     const plat = new Kucoin(bot)
     
     let base = 0,
-        px = 130.162,
-        amt = 5.111111111;
+        px = 0.5355,
+        amt = .3;
+
+    base = amt / px
 
     console.log({ px, base, amt });
 
@@ -76,7 +78,7 @@ async function place({ get = false, oid="" }: { get?: boolean, oid?: string }) {
 
     base = toFixed(base, basePr);
     px = toFixed(px, pxPr);
-    amt = toFixed(amt, basePr);
+    amt = toFixed(amt, pxPr);
     console.log({ px, base, amt });
 
     let r: any;
@@ -86,8 +88,13 @@ async function place({ get = false, oid="" }: { get?: boolean, oid?: string }) {
         r = !cancel ? await plat.getOrderbyId(oid) : await plat.cancelOrder({ordId: oid})
     
     } else {
+        base = 0.5277
         //amt= toFixed(17.46252, basePr)
-        r = await plat.placeTestOrder(amt, undefined, "buy");
+        if (side == 'buy' && type == 'limit' || side == 'sell')
+            amt= base
+
+        r = await plat.placeOrder(amt, (type == 'limit' ? px : undefined), side);
+        //r = await plat.getBal("USDT");
     }
 
     console.log(r);
@@ -109,12 +116,13 @@ async function klines(){
 }
 
 
-klines()
+//klines()
 
 
 const bitgetId = "1210973572597989379", marketBuy = "1210975861232549892", marketSell = "1210976388569808899";
-//place({get: false})
-//place({get: true, oid: marketBuy})
+const kucoinLmtBuy = "66d70fe4727fab000703ce73", kucoinMrktBuy = "66d712021ec7e00007b89435", kucoinMrktSell = '66d7125fb996d00007575bf3'
+//place({get: false, side: 'sell', type: 'market'})
+place({get: true, oid: kucoinMrktSell})
 /* 
 BUY
 

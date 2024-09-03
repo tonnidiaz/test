@@ -598,6 +598,7 @@ export class WsTriArbit {
 export const wsTriArbits = {
     okx: new WsTriArbit("okx"),
     bybit: new WsTriArbit("bybit"),
+    kucoin: new WsTriArbit("kucoin"),
 };
 
 export const initWsTriArbit = async () => {

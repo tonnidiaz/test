@@ -330,11 +330,14 @@ export const parseFilledOrder = (res: IObj, plat: string) => {
         };
     } else if (plat == 'kucoin') {
         const _res = res as KucoinOrder;
-        const sz = Number(_res.size) || (Number(_res.funds) / Number(_res.price))
+        const funds = Number(_res.dealFunds)
+        const sz = Number(_res.dealSize)
+
+        const price = Number(_res.price) || funds / sz
         data = {
             id: _res.id!,
-            fillPx: Number(_res.price!),
-            fillSz:sz,
+            fillPx: price,
+            fillSz: _res.side == 'buy' ? sz : funds,
             fee: Number(_res.fee),
             fillTime: Date.now(),
             cTime: Number(_res.createdAt),

@@ -50,7 +50,7 @@ export class TuWs extends WebSocket {
         console.log(`\nUNSUSCRIBING FROM ${channel}`, data, "\n");
         let json: IObj = {
             op: "unsubscribe",
-            args: this.plat == "bybit" ? [channel] : [{ channel, ...data }],
+            args: plat == "bybit" ? [channel] : [{ channel, ...data }],
         };
 
         switch (plat) {

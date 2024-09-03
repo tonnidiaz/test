@@ -10,19 +10,18 @@ import type { SpotOrder } from "kucoin-api";
 import { IOrderDetails } from "@/utils/interfaces";
 
 export class Kucoin extends Platform {
-    apiKey: string;
-    apiSecret: string;
     client: SpotClient;
 
     constructor(bot: IBot) {
         super(bot);
 
-        this.apiKey = process.env.KUCOIN_API_KEY!;
-        this.apiSecret = process.env.KUCOIN_API_SECRET!;
+        const apiKey = process.env.KUCOIN_API_KEY!;
+        const apiSecret = process.env.KUCOIN_API_SECRET!;
         const passphrase = process.env.KUCOIN_API_PASS!
+        console.log({apiKey, apiSecret, passphrase})
         this.client = new SpotClient({
-            apiKey: this.apiKey,
-            apiSecret: this.apiSecret,
+            apiKey: apiKey,
+            apiSecret: apiSecret,
             apiPassphrase: passphrase,
         });
     }
@@ -38,7 +37,7 @@ export class Kucoin extends Platform {
                 console.log(res);
                 return;
             }
-            return Number(res.data[0].available);
+            return Number(res.data[0]?.available ?? 0);
         } catch (error) {
             console.log(error);
         }
@@ -59,12 +58,12 @@ export class Kucoin extends Platform {
             if (test){
                 console.log("TEST ORDER:\n")
             }
-            const res = await fn({
+            const res = await this.client.submitOrder({
                 symbol: this.getSymbol(),
                 type: is_market ? "market" : "limit",
                 side,
-                size: side == 'sell' ? amt.toString() : undefined,
-                funds: side == 'buy' ? amt.toString() : undefined,
+                size: side == 'sell' || !is_market ? amt.toString() : undefined,
+                funds: side == 'buy' && is_market ? amt.toString() : undefined,
                 price: price?.toString(),
                 clientOid: clOrderId ?? `tb_ord_${Date.now()}`,
             });
@@ -193,7 +192,7 @@ export class Kucoin extends Platform {
     }
 
     getSymbol() {
-        return `${this.bot.base}${this.bot.ccy}`;
+        return getSymbol([this.bot.base, this.bot.ccy], this.bot.platform);
     }
     async cancelOrder({ ordId, isAlgo }: { ordId: string; isAlgo?: boolean }) {
         await super.cancelOrder({ ordId, isAlgo });
