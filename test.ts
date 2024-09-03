@@ -19,7 +19,7 @@ import { Bot } from "@/models";
 import { objPlats } from "@/utils/consts2";
 import { ARBIT_ZERO_FEES, klinesRootDir, noFees } from "@/utils/constants";
 import { ICandle } from "@/utils/interfaces";
-
+import {kucoinBTC} from './data/kucoin-btc'
 const _gateioInstrus = gateioInstrus.filter(
     (el) => el.trade_status == "tradable"
 ).length;
@@ -240,4 +240,22 @@ const checkIfFlipped = ({pxA, pxB, pxC}: {pxA: number, pxB: number, pxC: number}
     console.log({A2, _A2});
 }
 
-checkIfFlipped({pxA: .5, pxB: .233, pxC: .244})
+//checkIfFlipped({pxA: .5, pxB: .233, pxC: .244})
+let bal = 50
+const START = bal
+let perc = 1
+const TAKER= .1/100, MAKER = .1/100
+
+for (let i = 0; i < 1000; i++){
+    bal *= (1 - MAKER)
+    bal *= (1 - MAKER)
+    bal *= (1 - MAKER)
+    bal *= (1 - MAKER)
+    bal *= (1 + perc/100)
+}
+
+const profit =  bal - START
+console.log({profit})
+
+const goodCoins = kucoinBTC.slice(0, 20).map(el=> el.pair.split('-')[0])
+console.log(goodCoins)

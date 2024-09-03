@@ -8,12 +8,14 @@ import {
     getMinAmt,
     getMinSz,
     getPricePrecision,
+    sleep,
     toFixed,
 } from "../functions";
 import { placeTrade } from "./funcs";
 import { Bot } from "@/models";
 import { objPlats } from "../consts2";
 
+const SLEEP_MS = 5000
 export const placeArbitOrders = async ({
     bot,
     pairA,
@@ -139,6 +141,7 @@ export const placeArbitOrders = async ({
     orderA.side = "buy";
     orderA.is_closed = true;
     await orderA.save();
+    await sleep(SLEEP_MS)
     // The base from A becomes the Quote for B
     const amtB = orderA.base_amt - Math.abs(orderA.buy_fee);
     const resB = await placeTrade({
@@ -159,7 +162,7 @@ export const placeArbitOrders = async ({
     orderB.side = "buy";
     orderB.is_closed = true;
     await orderB.save();
-
+    await sleep(SLEEP_MS)
     // Sell base_amt from B At C to get A back
     const amtC = orderB.base_amt - Math.abs(orderB.buy_fee);
     const resC = await placeTrade({
@@ -293,7 +296,7 @@ export const placeArbitOrdersFlipped = async ({
     orderC.side = "buy";
     orderC.is_closed = true;
     await orderC.save();
-
+    await sleep(SLEEP_MS)
     // SELL C [APEX] FOR B [USDC] at B
     const amtB = orderC.base_amt - Math.abs(orderC.buy_fee);
     const resB = await placeTrade({
@@ -314,7 +317,7 @@ export const placeArbitOrdersFlipped = async ({
     orderB.side = "sell";
     orderB.is_closed = true;
     await orderB.save();
-
+    await sleep(SLEEP_MS)
     // Sell B [USDC] at A
     const amtA = orderB.new_ccy_amt - Math.abs(orderB.sell_fee);
     const resA = await placeTrade({

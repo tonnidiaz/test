@@ -1,3 +1,4 @@
+import { kucoinInstrus } from "@/utils/data/instrus/kucoin-instrus";
 import { getInterval, parseDate, parseKlines } from "@/utils/funcs2";
 import { clearTerminal } from "@/utils/functions";
 import { Kline, SpotClient } from "kucoin-api";
@@ -58,4 +59,10 @@ const getKlines = async () => {
     }
 };
 
-getKlines();
+//getKlines();
+const getQuoted = (quote='ETH') =>{
+    const koins = kucoinInstrus.filter(el => el.enableTrading && el.quoteCurrency == quote).map(el=> el.baseCurrency)
+    console.log(koins.length)
+}
+
+getQuoted()

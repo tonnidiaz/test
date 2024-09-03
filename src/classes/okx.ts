@@ -6,7 +6,7 @@ import {
     parseFilledOrder,
     getExactDate,
 } from "@/utils/funcs2";
-import { botLog, getSymbol, timedLog } from "@/utils/functions";
+import { botLog, getSymbol, sleep, timedLog } from "@/utils/functions";
 import { writeFileSync } from "fs";
 import { RestClient, WebsocketClient } from "okx-api";
 import type { AlgoOrderResult, OrderDetails, OrderResult } from "okx-api";
@@ -26,9 +26,12 @@ export class OKX extends Platform {
 
     client: RestClient;
     ws: WebsocketClient | null = null;
+    maxRetries = 5
+    retries: number
 
     constructor(bot: IBot) {
         super(bot);
+        this.retries = 0
         this.flag = this.bot.demo ? "1" : "0";
         this.apiKey = this.bot.demo ? env.OKX_API_KEY_DEMO! : env.OKX_API_KEY!;
         this.apiSecret = this.bot.demo
@@ -143,7 +146,13 @@ export class OKX extends Platform {
             }
 
             if (res[0].sCode != "0") {
-                console.log(res[0]);
+                botLog(this.bot,"FAILED TO PLACE ORDER", res[0]);
+                this.retries += 1
+                if (this.retries <= this.maxRetries){
+                    botLog(this.bot, `Retrying [${this.retries} / ${this.maxRetries}]...`)
+                    await sleep(2000)
+                    return await this.placeOrder(amt, price, side, sl, clOrderId)
+                }
                 return;
             }
             console.log(`\ORDER PLACED FOR BOT=${this.bot.name}\n`);
@@ -152,7 +161,13 @@ export class OKX extends Platform {
                 side == "buy" ? d.ordId : price ? d.algoId : d.ordId;
             return id;
         } catch (error) {
-            console.log(error);
+            botLog(this.bot,"FAILED TO PLACE ORDER", error);
+            this.retries += 1
+                if (this.retries <= this.maxRetries){
+                    botLog(this.bot, `Retrying [${this.retries} / ${this.maxRetries}]...`)
+                    await sleep(2000)
+                    return await this.placeOrder(amt, price, side, sl, clOrderId)
+                }
         }
     }
 

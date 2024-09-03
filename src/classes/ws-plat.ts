@@ -32,7 +32,7 @@ const KUCOIN_TOKEN =
     "2neAiuYvAU61ZDXANAGAsiL4-iAExhsBXZxftpOeh_55i3Ysy2q2LEsEWU64mdzUOPusi34M_wGoSf7iNyEWJ7Hpi6VkzA_HnrsEt757fLDI01cJ3EoydNiYB9J6i9GjsxUuhPw3Blq6rhZlGykT3Vp1phUafnulOOpts-MEmEGpNUI84S6vrJTgyxX8E4rMJBvJHl5Vs9Y=.LmLBJkS2mQLCJn4B0fVRXw==";
 const KUCOIN_WS_URL = "wss://ws-api-spot.kucoin.com/?token=" + KUCOIN_TOKEN;
 
-const SLEEP_MS = 2000;
+const SLEEP_MS = 30 * 1000;
 const demo = false;
 
 interface IArbitBot {
@@ -227,6 +227,7 @@ export class WsTriArbit {
                     // DOUBLE-CHECK IF BOT IS ACTIVE
                     const _bot = await Bot.findById(bot.id).exec();
                     if (!_bot || !_bot.active) {
+                        botLog(bot, "REMOVING BOT...", {notBot: !_bot, active: _bot?.active})
                         if (!_bot) {
                             this.rmvBot(bot.id);
                         }
@@ -241,7 +242,7 @@ export class WsTriArbit {
                         cPxA: pxA,
                         cPxB: pxB,
                         cPxC: pxC,
-                    };
+                    };                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
                     await deactivateBot(bot);
                     const res = flipped
                         ? await placeArbitOrdersFlipped(params)
@@ -254,7 +255,7 @@ export class WsTriArbit {
 
                     // RE-FRESH BOT
                     const _botFinal = await Bot.findById(bot.id).exec();
-                    if (!_botFinal) return false;
+                    if (!_botFinal) return false;                                                              
                     this._updateBots({ ...abot, bot: _botFinal });
                     await sleep(SLEEP_MS);
                     return bot.id;
@@ -349,7 +350,7 @@ export class WsTriArbit {
                 break;
         }
         if (!this.ws) return;
-        const fn = act == "sub" ? this.ws.sub : this.ws.unsub;
+        const fn = act == "sub" ? this.ws.sub.bind(this.ws) : this.ws.unsub.bind(this.ws);
         botLog(bot, `\n${act}ing...`);
 
         if (act == "unsub") {
@@ -455,7 +456,7 @@ export class WsTriArbit {
                         };
                         break;
                     case symbolC:
-                        console.log({ asks: ob.asks });
+                        //console.log({ asks: ob.asks });
                         abot.bookC = {
                             ask: ob.asks[0],
                             bid: ob.bids[0],
@@ -604,7 +605,7 @@ export const wsTriArbits = {
 export const initWsTriArbit = async () => {
     try {
         for (let ws of Object.values(wsTriArbits)) {
-            //await ws.initWs();
+            await ws.initWs();
         }
     } catch (e) {
         timedLog("FAILED TO INIT WS");

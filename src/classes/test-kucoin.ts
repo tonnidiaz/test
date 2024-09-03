@@ -41,7 +41,7 @@ export class TestKucoin extends Platform {
         symbol,
     }: {
         end?: number | undefined;
-        start?: number | undefined;
+        start: number;
         interval: number;
         symbol: string;
         savePath?: string | undefined;
