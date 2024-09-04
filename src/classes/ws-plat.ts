@@ -82,7 +82,7 @@ export class WsTriArbit {
         this.name = this.constructor.name;
         this.plat = plat;
         this.reconnectInterval = 5000; // 5 seconds by default
-        this.maxReconnectAttempts = 2; // Max reconnection attempts
+        this.maxReconnectAttempts = 10; // Max reconnection attempts
         this.currentReconnectAttempts = 0;
 
         this._log(this.name);
@@ -124,7 +124,7 @@ export class WsTriArbit {
                     await this.ws.sub(ch.channel, ch.plat, ch.data);
                 }
                 this.ws.channels = [];
-
+                this.currentReconnectAttempts = 0
                 this.open = true;
             });
             ws?.on("error", async (e) => {
