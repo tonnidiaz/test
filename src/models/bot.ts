@@ -106,3 +106,4 @@ export const BotSchema = new Schema(
 );
 
 export interface IBot extends HydratedDocumentFromSchema<typeof BotSchema> {}
+export interface ITriArbitOrder extends HydratedDocumentFromSchema<typeof TriArbitOrderSchema> {}

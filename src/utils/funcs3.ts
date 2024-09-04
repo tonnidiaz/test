@@ -1,4 +1,4 @@
-import { IBot } from "@/models/bot";
+import { IBot, ITriArbitOrder } from "@/models/bot";
 import { binanceInfo } from "./binance-info";
 import { klinesRootDir } from "./constants";
 import { bitgetInstrus } from "./data/instrus/bitget-instrus";
@@ -9,6 +9,8 @@ import { okxInstrus } from "./data/instrus/okx-instrus";
 import { parseDate } from "./funcs2";
 import { botLog, getSymbol } from "./functions";
 import { kucoinInstrus } from "./data/instrus/kucoin-instrus";
+import { TriArbitOrder, Order } from "@/models";
+import { max } from "indicatorts";
 
 export const getKlinesPath = ({
     plat,
@@ -95,9 +97,37 @@ export const deactivateBot = async (bot: IBot) => {
 export const reactivateBot = async (bot: IBot, deep = false) => {
     botLog(bot, "\nREACTIVATING...");
     bot.active = true;
-    bot.deactivated_at = undefined
+    bot.deactivated_at = undefined;
     if (deep) bot.activated_at = parseDate(Date.now());
     await bot.save();
 
     botLog(bot, "BOT REACTIVATED\n");
+};
+
+export const parseArbitOrder = async (order: ITriArbitOrder) => {
+    order = await order.populate("order.a");
+    order = await order.populate("order.b");
+    order = await order.populate("order.c");
+    return order;
+};
+export const parseOrders = async (_bot: IBot, _start: number, max: number) => {
+    const orders: any[] = [];
+
+    const end = _start + max;
+    //console.log("\n", _bot.name, _bot.parent)
+    if (_bot.type == "arbitrage") {
+        const ords = await TriArbitOrder.find({ bot: _bot.id }).exec();
+        for (let ord of ords.slice(_start, end)) {
+            ord = await parseArbitOrder(ord)
+            orders.push(ord.order);
+        }
+    } else {
+        const ords = await Order.find({
+            bot: _bot.id,
+            is_arbit: _bot.parent != undefined,
+        }).exec();
+        for (let ord of ords.slice(_start, end)) {
+            orders.push(ord);
+        }
+    }
 };

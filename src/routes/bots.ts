@@ -25,7 +25,7 @@ const router = express.Router();
 const parseBot = async (bot: IBot, deep = true) => {
     //bot = await bot.populate("orders");
     const is_arbit = bot.type == "arbitrage";
-    const orders: mongoose.Types.ObjectId[] = [];
+    let orders = 0
     try {
         // if (deep){
         //   for (let i = 0; i < bot.arbit_orders.length; i++)
@@ -36,14 +36,13 @@ const parseBot = async (bot: IBot, deep = true) => {
         // }
         // }
         if (is_arbit) {
-            const _orders = await TriArbitOrder.find({ bot: bot.id }).exec();
-            orders.push(..._orders.map((el) => el.id));
+            orders = await TriArbitOrder.countDocuments({ bot: bot.id });
         } else {
-            const _orders = await Order.find({
+            orders = await Order.countDocuments({
                 bot: bot.id,
                 is_arbit: bot.is_child,
-            }).exec();
-            orders.push(..._orders.map((el) => el.id));
+            })
+            
         }
     } catch (e) {
         console.log(e);

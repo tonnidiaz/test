@@ -15,11 +15,32 @@ import {
 } from "@/utils/functions";
 import { scheduleJob } from "node-schedule";
 import { mexcInstrus } from "@/utils/data/instrus/mexc-instrus";
-import { Bot, Order, TriArbitOrder } from "@/models";
 import { objPlats } from "@/utils/consts2";
 import { ARBIT_ZERO_FEES, klinesRootDir, noFees } from "@/utils/constants";
 import { ICandle } from "@/utils/interfaces";
-import {kucoinBTC} from './data/kucoin-btc'
+import { kucoinBTC } from "./data/kucoin-btc";
+
+import { Bot, Order, TriArbitOrder } from "@/models";
+import { clearTerminal } from "@/utils/functions";
+import { configDotenv } from "dotenv";
+import mongoose from "mongoose";
+import { parseArbitOrder } from "@/utils/funcs3";
+
+clearTerminal();
+configDotenv();
+async function connectMongo(DEV: boolean) {
+    console.log({ DEV });
+    let mongoURL = (DEV ? process.env.MONGO_URL_LOCAL : process.env.MONGO_URL)!;
+    try {
+        console.log(mongoURL);
+        await mongoose.connect(mongoURL, { dbName: "tb" });
+        console.log("\nConnection established\n");
+    } catch (e) {
+        console.log("Could not establish connection");
+        console.log(e);
+    }
+}
+
 const _gateioInstrus = gateioInstrus.filter(
     (el) => el.trade_status == "tradable"
 ).length;
@@ -150,11 +171,13 @@ async function klines() {
         base: "1INCH",
         ccy: "USDC",
         platform: "okx",
-        demo: false
+        demo: false,
     });
     const plat = new objPlats[bot.platform](bot);
 
-    const r = await plat.getKlines({end: Date.parse("2024-08-20 02:10:00+02:00")})
+    const r = await plat.getKlines({
+        end: Date.parse("2024-08-20 02:10:00+02:00"),
+    });
     const df = parseKlines(r ?? []);
     console.log(df[df.length - 1]?.ts);
 }
@@ -195,25 +218,47 @@ BUY
 }
 */
 
-const okxQuotes = ['AUD',  'AED', 'HKD',
-  'BRL',  'EUR', 'TRY',
-  'USDC', 'BTC', 'ETH',
-  'OKB',  'DAI']
+const okxQuotes = [
+    "AUD",
+    "AED",
+    "HKD",
+    "BRL",
+    "EUR",
+    "TRY",
+    "USDC",
+    "BTC",
+    "ETH",
+    "OKB",
+    "DAI",
+];
 
-  const bybitQuotes = [
-    'BTC',  'USDC',
-    'DAI',  'EUR',
-    'BRZ',  'ETH',
-    'USDE', 'BRL'
-  ]
+const bybitQuotes = ["BTC", "USDC", "DAI", "EUR", "BRZ", "ETH", "USDE", "BRL"];
 const binanceQuotes = [
-    'BTC',  'ETH', 'BNB',   'TUSD',
-    'USDC', 'XRP', 'TRX',   'TRY',
-    'EUR',  'ZAR', 'IDRT',  'UAH',
-    'DAI',  'BRL', 'DOGE',  'PLN',
-    'RON',  'ARS', 'FDUSD', 'AEUR',
-    'JPY',  'MXN', 'CZK',   'COP'
-  ]
+    "BTC",
+    "ETH",
+    "BNB",
+    "TUSD",
+    "USDC",
+    "XRP",
+    "TRX",
+    "TRY",
+    "EUR",
+    "ZAR",
+    "IDRT",
+    "UAH",
+    "DAI",
+    "BRL",
+    "DOGE",
+    "PLN",
+    "RON",
+    "ARS",
+    "FDUSD",
+    "AEUR",
+    "JPY",
+    "MXN",
+    "CZK",
+    "COP",
+];
 //const others = okxInstrus.filter(el => el.quoteCcy != "USDT" && el.state == 'live').map(el=> el.quoteCcy)
 //const others = bybitInstrus.filter(el => el.quoteCoin != "USDT" && el.status.toLowerCase() == 'trading').map(el=> el.quoteCoin)
 // const others = binanceInstrus.filter(el => el.quoteAsset != "USDT" && el.status.toLowerCase() == 'trading' && el.isSpotTradingAllowed).map(el=> el.quoteAsset)
@@ -221,59 +266,72 @@ const binanceQuotes = [
 
 //console.log(Array.from(new Set([...okxQuotes, ...bybitQuotes, ...binanceQuotes])))
 
+const checkIfFlipped = ({
+    pxA,
+    pxB,
+    pxC,
+}: {
+    pxA: number;
+    pxB: number;
+    pxC: number;
+}) => {
+    let baseA = 0,
+        baseB = 0;
+    const A = 1;
 
-const checkIfFlipped = ({pxA, pxB, pxC}: {pxA: number, pxB: number, pxC: number}) =>{
-    let baseA = 0, baseB = 0
-    const A = 1
+    baseA = A / pxA;
+    baseB = baseA / pxB;
+    const A2 = baseB * pxC;
 
-    baseA = A/pxA
-    baseB = baseA / pxB
-    const A2 = baseB * pxC
+    baseB = A / pxC;
+    baseA = baseB * pxB;
+    const FA2 = baseA * pxA;
 
-    baseB = A/pxC
-    baseA = baseB * pxB
-    const FA2 = baseA * pxA
-
-    const flipped = FA2 > A2
-    const flipped2 = (pxA * pxB) > pxC;
-    const _A2 = (A * pxC)/(pxA * pxB) 
-    console.log({A2, _A2});
-}
+    const flipped = FA2 > A2;
+    const flipped2 = pxA * pxB > pxC;
+    const _A2 = (A * pxC) / (pxA * pxB);
+    console.log({ A2, _A2 });
+};
 
 //checkIfFlipped({pxA: .5, pxB: .233, pxC: .244})
-let bal = 50
-const START = bal
-let perc = 1
-const TAKER= .1/100, MAKER = .1/100
+let bal = 50;
+const START = bal;
+let perc = 1;
+const TAKER = 0.1 / 100,
+    MAKER = 0.1 / 100;
 
-for (let i = 0; i < 1000; i++){
-    bal *= (1 - MAKER)
-    bal *= (1 - MAKER)
-    bal *= (1 - MAKER)
-    bal *= (1 - MAKER)
-    bal *= (1 + perc/100)
+for (let i = 0; i < 1000; i++) {
+    bal *= 1 - MAKER;
+    bal *= 1 - MAKER;
+    bal *= 1 - MAKER;
+    bal *= 1 - MAKER;
+    bal *= 1 + perc / 100;
 }
 
-const profit =  bal - START
-console.log({profit})
+const profit = bal - START;
+console.log({ profit });
 
-const goodCoins = kucoinBTC.slice(0, 20).map(el=> el.pair.split('-')[0])
+const goodCoins = kucoinBTC.slice(0, 20).map((el) => el.pair.split("-")[0]);
 //console.log(goodCoins)
 
-const testDb = async ()=>{
-    const bot = new Bot({name: "TBOT"})
-    const aord = new TriArbitOrder({bot: bot.id})
-    let ord: typeof aord.order;
-    const ordA = new Order()
-    const ordB = new Order()
-    const ordC = new Order()
-    ord = {...ord, a: ordA.id }
-    aord.order = ord
-    ord = {...ord, b: ordB.id }
-    aord.order = ord
-    ord = {...ord, c: ordC.id }
-    aord.order = ord
-    console.log(aord)
-}
+const testDb = async () => {
+    await connectMongo(true);
+    const page = 1;
+    const limit = 100;
+    const skip = (page - 1) * limit;
 
-testDb()
+    try {
+        const documents = await TriArbitOrder.find({})
+          .skip(skip)
+          .limit(limit)
+          .exec();
+    
+        const totalDocuments = await TriArbitOrder.countDocuments();
+        const ords = await Promise.all(documents.map(parseArbitOrder))
+        console.log(ords)
+      } catch (err: any) {
+       console.log(err.message)
+      }
+};
+
+testDb();
