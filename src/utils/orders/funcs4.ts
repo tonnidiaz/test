@@ -13,7 +13,7 @@ import { placeTrade } from "./funcs";
 import { Bot, TriArbitOrder } from "@/models";
 import { objPlats } from "../consts2";
 
-const SLEEP_MS = 2000;
+const SLEEP_MS = 500;
 export const placeArbitOrders = async ({
     bot,
     pairA,
@@ -128,7 +128,7 @@ export const placeArbitOrders = async ({
     }
 
     const arbitOrder = new TriArbitOrder({ bot: bot.id });
-
+    let aord: typeof arbitOrder.order;
     const resA = await placeTrade({
         amt: bal,
         ordType: "Market",
@@ -146,7 +146,8 @@ export const placeArbitOrders = async ({
     orderA.side = "buy";
     orderA.is_closed = true;
     await orderA.save();
-    arbitOrder.order = { ...arbitOrder.order, a: orderA.id };
+    aord = { ...aord, a: orderA.id };
+    arbitOrder.order = aord;
     await arbitOrder.save();
     await sleep(SLEEP_MS);
     // The base from A becomes the Quote for B
@@ -170,7 +171,8 @@ export const placeArbitOrders = async ({
     orderB.side = "buy";
     orderB.is_closed = true;
     await orderB.save();
-    arbitOrder.order = { ...arbitOrder.order, b: orderB.id };
+    aord = { ...aord, b: orderB.id };
+    arbitOrder.order = aord;
     await arbitOrder.save();
     await sleep(SLEEP_MS);
     // Sell base_amt from B At C to get A back
@@ -202,7 +204,8 @@ export const placeArbitOrders = async ({
     profit = Number(profit.toFixed(2));
     orderC.profit = profit;
     await orderC.save();
-    arbitOrder.order = { ...arbitOrder.order, c: orderC.id };
+    aord = { ...aord, c: orderC.id };
+    arbitOrder.order = aord;
     await arbitOrder.save();
     await bot.save();
     return bot.id;
@@ -288,7 +291,7 @@ export const placeArbitOrdersFlipped = async ({
     let bal = bot.balance;
     if (bot.balCcy != _botC.ccy)
         return botLog(bot, "BAL_ERROR:", { last: bot.balCcy, bot: _botC.ccy });
-    
+
     bal = toFixed(bal, pxPrC);
     const ts = parseDate(new Date());
 
@@ -323,7 +326,7 @@ export const placeArbitOrdersFlipped = async ({
     }
 
     const arbitOrder = new TriArbitOrder({ bot: bot.id });
-
+    let aord: typeof arbitOrder.order;
     // BUY C [APEX] at C
     const resC = await placeTrade({
         amt: bal,
@@ -344,8 +347,10 @@ export const placeArbitOrdersFlipped = async ({
     orderC.is_closed = true;
 
     await orderC.save();
-    arbitOrder.order = { ...arbitOrder.order, a: orderC.id };
+    aord = { ...aord, a: orderC.id };
+    arbitOrder.order = aord;
     await arbitOrder.save();
+
     await sleep(SLEEP_MS);
     // SELL C [APEX] FOR B [USDC] at B
     let amtB = orderC.base_amt - Math.abs(orderC.buy_fee);
@@ -368,8 +373,10 @@ export const placeArbitOrdersFlipped = async ({
     orderB.side = "sell";
     orderB.is_closed = true;
     await orderB.save();
-    arbitOrder.order = { ...arbitOrder.order, b: orderB.id };
+    aord = { ...aord, b: orderB.id };
+    arbitOrder.order = aord;
     await arbitOrder.save();
+
     await sleep(SLEEP_MS);
     // Sell B [USDC] at A
     let amtA = orderB.new_ccy_amt - Math.abs(orderB.sell_fee);
@@ -400,7 +407,8 @@ export const placeArbitOrdersFlipped = async ({
     profit = Number(profit.toFixed(2));
     orderA.profit = profit;
 
-    arbitOrder.order = { ...arbitOrder.order, c: orderA.id };
+    aord = { ...aord, c: orderA.id };
+    arbitOrder.order = aord;
     await arbitOrder.save();
     await orderA.save();
 

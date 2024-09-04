@@ -148,7 +148,10 @@ const clearOrders = async (bot: IBot) => {
         for (let childId of bot.children){
             console.log("DELETING CHILD ORDERS...")
             await Order.deleteMany({bot: childId}).exec()
+            await Bot.findByIdAndUpdate(childId, {balance: bot.start_amt}).exec()
         }
+        bot.balance = bot.start_amt
+        await bot.save()
         botLog(bot, "ORDERS CLEARED");
     } catch (e) {
         botLog(bot, "FAILED TO CLEAR ORDERS", e);
@@ -165,6 +168,7 @@ router.post("/:id/clear-orders", authMid, async (req, res) => {
             "CHILD BOT ORDERS CAN NOT BE INDIVIDUALLY CLEARD"
         );
     await clearOrders(bot);
+
 
     // for (let oid of bot.orders) {
     //     console.log(oid);
@@ -317,6 +321,7 @@ router.post("/:id/edit", authMid, async (req, res) => {
                         }
                     }
                     for (let b of children) {
+                        b.set("balance", b.start_amt)
                         await b.save();
                     }
                 }

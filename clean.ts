@@ -87,7 +87,7 @@ const cleanOldArbitOrders = async () =>{
         console.log({name: _bot.name}, 'DONE\n')
         //console.log({ords}, '\n')
     }
-    
+
     return
  
     // for (let bot of bots){

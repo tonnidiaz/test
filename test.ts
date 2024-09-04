@@ -15,7 +15,7 @@ import {
 } from "@/utils/functions";
 import { scheduleJob } from "node-schedule";
 import { mexcInstrus } from "@/utils/data/instrus/mexc-instrus";
-import { Bot } from "@/models";
+import { Bot, Order, TriArbitOrder } from "@/models";
 import { objPlats } from "@/utils/consts2";
 import { ARBIT_ZERO_FEES, klinesRootDir, noFees } from "@/utils/constants";
 import { ICandle } from "@/utils/interfaces";
@@ -258,4 +258,22 @@ const profit =  bal - START
 console.log({profit})
 
 const goodCoins = kucoinBTC.slice(0, 20).map(el=> el.pair.split('-')[0])
-console.log(goodCoins)
+//console.log(goodCoins)
+
+const testDb = async ()=>{
+    const bot = new Bot({name: "TBOT"})
+    const aord = new TriArbitOrder({bot: bot.id})
+    let ord: typeof aord.order;
+    const ordA = new Order()
+    const ordB = new Order()
+    const ordC = new Order()
+    ord = {...ord, a: ordA.id }
+    aord.order = ord
+    ord = {...ord, b: ordB.id }
+    aord.order = ord
+    ord = {...ord, c: ordC.id }
+    aord.order = ord
+    console.log(aord)
+}
+
+testDb()

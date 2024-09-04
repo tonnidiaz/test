@@ -13,7 +13,7 @@ import { DEV, TP } from "@/utils/constants";
 import { Bot } from "@/models";
 import mongoose, { ObjectId } from "mongoose";
 import { Bybit } from "./bybit";
-import {  getLastOrder, parseDate } from "@/utils/funcs2";
+import { getLastOrder, parseDate } from "@/utils/funcs2";
 import {
     placeArbitOrders,
     placeArbitOrdersFlipped,
@@ -30,23 +30,24 @@ const BYBIT_WS_URL = "wss://stream.bybit.com/v5/public/spot";
 const BYBIT_WS_URL_DEMO = "wss://stream-testnet.bybit.com/v5/public/spot";
 const BINANCE_WS_URL = "wss://stream.binance.com:9443";
 
-const KUCOIN_TOKEN_URL = 'https://api.kucoin.com/api/v1/bullet-public'
-let kucoinTokenTs = Date.now()
-let kucoinToken = ''
+const KUCOIN_TOKEN_URL = "https://api.kucoin.com/api/v1/bullet-public";
+let kucoinTokenTs = Date.now();
+let kucoinToken = "";
 
-const getKucoinToken = async () =>{
-    const diff = Date.now() - kucoinTokenTs
-    if (diff < 60 * 60000 && kucoinToken.length) return kucoinToken
-    try{
-        const r = await axios.post(KUCOIN_TOKEN_URL)
-        kucoinToken = r.data?.data?.token ?? ''
-        return kucoinToken
-    }catch(e){
-        console.log("FAILED TO GET KUCOIN TOKEN")
-        console.log(e)
+const getKucoinToken = async () => {
+    const diff = Date.now() - kucoinTokenTs;
+    if (diff < 60 * 60000 && kucoinToken.length) return kucoinToken;
+    try {
+        const r = await axios.post(KUCOIN_TOKEN_URL);
+        kucoinToken = r.data?.data?.token ?? "";
+        return kucoinToken;
+    } catch (e) {
+        console.log("FAILED TO GET KUCOIN TOKEN");
+        console.log(e);
     }
-}
-const KUCOIN_WS_URL = (tkn: any) => "wss://ws-api-spot.kucoin.com/?token=" + tkn;
+};
+const KUCOIN_WS_URL = (tkn: any) =>
+    "wss://ws-api-spot.kucoin.com/?token=" + tkn;
 
 const SLEEP_MS = 10 * 1000;
 const demo = false;
@@ -77,14 +78,14 @@ export class WsTriArbit {
     maxReconnectAttempts: number;
     currentReconnectAttempts: number;
 
-     constructor(plat: string) {
+    constructor(plat: string) {
         this.name = this.constructor.name;
         this.plat = plat;
         this.reconnectInterval = 5000; // 5 seconds by default
-        this.maxReconnectAttempts = 10; // Max reconnection attempts
+        this.maxReconnectAttempts = 2; // Max reconnection attempts
         this.currentReconnectAttempts = 0;
 
-        console.log(this.name);
+        this._log(this.name);
         switch (plat) {
             case "okx":
                 this.wsURL = demo ? OKX_WS_URL_DEMO : OKX_WS_URL;
@@ -96,7 +97,7 @@ export class WsTriArbit {
                 this.wsURL = BINANCE_WS_URL;
                 break;
             case "kucoin":
-                this.wsURL = 'url'
+                this.wsURL = "url";
                 break;
         }
     }
@@ -108,19 +109,17 @@ export class WsTriArbit {
             if (this.ws?.readyState == this.ws?.OPEN) this.ws?.close();
 
             this.isConnectError = false;
-            if (this.plat.toLocaleLowerCase() == 'kucoin'){
+            if (this.plat.toLocaleLowerCase() == "kucoin") {
                 this.wsURL = KUCOIN_WS_URL(await getKucoinToken());
             }
             this.ws = new TuWs(this.wsURL);
             this.ws.plat = this.plat;
-            if (!this.open)
-            this._log("INIT WS");
+            if (!this.open) this._log("INIT WS");
             const ws = this.ws;
 
             ws?.on("open", async () => {
                 if (!this.ws) return;
-                if (!this.open)
-                this._log("ON OPEN");
+                if (!this.open) this._log("ON OPEN");
                 for (let ch of ws.channels) {
                     await this.ws.sub(ch.channel, ch.plat, ch.data);
                 }
@@ -134,33 +133,34 @@ export class WsTriArbit {
                 await sleep(SLEEP_MS);
             });
             ws?.on("close", async (code, rsn) => {
-                if (DEV)
-                this._log(`[onClose] CODE: ${code}\nREASON: ${rsn}`);
+                if (DEV) this._log(`[onClose] CODE: ${code}\nREASON: ${rsn}`);
                 // if (!this.isConnectError) await this.initWs();
                 this.reconnect();
             });
 
             ws?.on("message", async (r) => await this.onMessage(r));
         } catch (e) {
-            console.log(e);
+            this._log(e);
         }
     }
     reconnect() {
         if (this.currentReconnectAttempts < this.maxReconnectAttempts) {
             if (DEV)
-            console.log(
-                `Reconnecting in ${this.reconnectInterval / 1000} seconds...`
-            );
+                this._log(
+                    `Reconnecting in ${
+                        this.reconnectInterval / 1000
+                    } seconds...`
+                );
             setTimeout(() => {
                 this.currentReconnectAttempts++;
                 if (DEV)
-                console.log(
-                    `Reconnection attempt ${this.currentReconnectAttempts}/${this.maxReconnectAttempts}`
-                );
+                    this._log(
+                        `Reconnection attempt ${this.currentReconnectAttempts}/${this.maxReconnectAttempts}`
+                    );
                 this.initWs();
             }, this.reconnectInterval);
         } else {
-            console.error(
+            this._log(
                 "Max reconnect attempts reached. Stopping reconnection attempts."
             );
         }
@@ -216,7 +216,7 @@ export class WsTriArbit {
                     const _botA = await Bot.findById(bot.children[0]).exec();
                     if (!_botA) return botLog(bot, "NO BOT A");
                     let order = await getLastOrder(_botA);
-                    amt = bot.balance
+                    amt = bot.balance;
 
                     szC = amt / pxC;
                     szB = szC;
@@ -233,7 +233,7 @@ export class WsTriArbit {
                     const _botC = await Bot.findById(bot.children[2]).exec();
                     if (!_botC) return botLog(bot, "NO BOT C");
                     let order = await getLastOrder(_botC);
-                    amt = bot.balance
+                    amt = bot.balance;
 
                     szA = amt / pxA;
                     szB = szA / pxB;
@@ -242,13 +242,16 @@ export class WsTriArbit {
 
                 botLog(bot, { pxA, pxB, pxC });
                 botLog(bot, { availSzA, availSzB, availSzC });
-                botLog(bot, { szA, szB, availSzC });
+                botLog(bot, { szA, szB, szC });
                 if (availSzA > szA && availSzB > szB && availSzC > szC) {
                     botLog(bot, "WS: ALL GOOD, GOING IN...");
                     // DOUBLE-CHECK IF BOT IS ACTIVE
                     const _bot = await Bot.findById(bot.id).exec();
                     if (!_bot || !_bot.active) {
-                        botLog(bot, "REMOVING BOT...", {notBot: !_bot, active: _bot?.active})
+                        botLog(bot, "REMOVING BOT...", {
+                            notBot: !_bot,
+                            active: _bot?.active,
+                        });
                         if (!_bot) {
                             this.rmvBot(bot.id);
                         }
@@ -263,7 +266,7 @@ export class WsTriArbit {
                         cPxA: pxA,
                         cPxB: pxB,
                         cPxC: pxC,
-                    };                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+                    };
                     await deactivateBot(bot);
                     const res = flipped
                         ? await placeArbitOrdersFlipped(params)
@@ -276,7 +279,7 @@ export class WsTriArbit {
 
                     // RE-FRESH BOT
                     const _botFinal = await Bot.findById(bot.id).exec();
-                    if (!_botFinal) return false;                                                              
+                    if (!_botFinal) return false;
                     this._updateBots({ ...abot, bot: _botFinal });
                     await sleep(SLEEP_MS);
                     return bot.id;
@@ -302,7 +305,9 @@ export class WsTriArbit {
                 bot.platform
             );
             if (pricePrecision == null) return;
-
+            if (this.ws?.readyState != this.ws?.OPEN) {
+                await this.initWs();
+            } 
             this.arbitBots = this.arbitBots.filter((el) => el.bot.id != bot.id);
             const pairA = [bot.B, bot.A];
             const pairB = [bot.C, bot.B];
@@ -321,7 +326,7 @@ export class WsTriArbit {
             }
             this._log("BOT ADDED");
         } catch (e) {
-            console.log(e);
+            this._log(e);
         }
     }
 
@@ -334,7 +339,7 @@ export class WsTriArbit {
                 if (!_botC) return this._log("NO BOT C");
 
                 let order = await getLastOrder(_botC);
-                const bal = bot.balance
+                const bal = bot.balance;
                 abot.order = order ?? undefined;
                 abot.startAmt = bal;
             }
@@ -371,7 +376,10 @@ export class WsTriArbit {
                 break;
         }
         if (!this.ws) return;
-        const fn = act == "sub" ? this.ws.sub.bind(this.ws) : this.ws.unsub.bind(this.ws);
+        const fn =
+            act == "sub"
+                ? this.ws.sub.bind(this.ws)
+                : this.ws.unsub.bind(this.ws);
         botLog(bot, `\n${act}ing...`);
 
         if (act == "unsub") {
@@ -442,7 +450,7 @@ export class WsTriArbit {
     }
 
     _log(...args: any) {
-        timedLog(`[WS][${this.name}] `, ...args);
+        timedLog(`[WS][${this.plat}] `, ...args);
     }
 
     async onMessage(resp: RawData) {
@@ -477,7 +485,7 @@ export class WsTriArbit {
                         };
                         break;
                     case symbolC:
-                        //console.log({ asks: ob.asks });
+                        //this._log({ asks: ob.asks });
                         abot.bookC = {
                             ask: ob.asks[0],
                             bid: ob.bids[0],
@@ -490,8 +498,8 @@ export class WsTriArbit {
             }
 
             const { bookA, bookB, bookC } = abot;
-            //console.log("\n", { plat: this.plat, pairC });
-            //console.log({ bookC });
+            //this._log("\n", { plat: this.plat, pairC });
+            //this._log({ bookC });
             //await sleep(SLEEP_MS);
             //return;
 
@@ -529,7 +537,7 @@ export class WsTriArbit {
         let channel: string | undefined;
         let symbol: string | undefined;
         if (!data) {
-            //console.log({ parsedResp });
+            //this._log({ parsedResp });
             return;
         }
 
@@ -606,11 +614,11 @@ export class WsTriArbit {
                 break;
         }
 
-        if (!channel || !symbol) console.log("MISSING:", parsedResp);
+        if (!channel || !symbol) this._log("MISSING:", parsedResp);
         if (channel == "orderbook") {
             //SORT ORDERBOOK
             const ob: IOrderbook = data;
-            //console.log({bids: ob.bids, asks: ob.asks})
+            //this._log({bids: ob.bids, asks: ob.asks})
             //data = { ...ob, asks: ob.asks.sort((a, b) => a.px - b.px), bids: ob.bids.sort((a, b) => b.px - a.px) };
         }
         return { channel: channel, symbol, data };
