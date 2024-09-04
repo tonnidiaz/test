@@ -80,7 +80,7 @@ export class WsTriArbit {
 
     constructor(plat: string) {
         this.name = this.constructor.name;
-        this.plat = plat;
+        this.plat = plat.toLowerCase();
         this.reconnectInterval = 5000; // 5 seconds by default
         this.maxReconnectAttempts = 10; // Max reconnection attempts
         this.currentReconnectAttempts = 0;
@@ -106,7 +106,7 @@ export class WsTriArbit {
         try {
             if (!this.wsURL) return this._log("WS URL UNDEFINED");
 
-            if (this.ws?.readyState == this.ws?.OPEN) this.ws?.close();
+            //if (this.ws?.readyState == this.ws?.OPEN) this.ws?.close();
 
             this.isConnectError = false;
             if (this.plat.toLocaleLowerCase() == "kucoin") {
@@ -115,30 +115,29 @@ export class WsTriArbit {
             this.ws = new TuWs(this.wsURL);
             this.ws.plat = this.plat;
             if (!this.open) this._log("INIT WS");
-            const ws = this.ws;
 
-            ws?.on("open", async () => {
-                if (!this.ws) return;
-                if (!this.open) this._log("ON OPEN");
-                for (let ch of ws.channels) {
+            this.ws?.on("open", async () => {
+                if (!this.ws) return this._log("ON OPEN: BUT NO WS");
+                this._log("ON OPEN");
+                for (let ch of this.ws.channels) {
                     await this.ws.sub(ch.channel, ch.plat, ch.data);
                 }
                 this.ws.channels = [];
-                this.currentReconnectAttempts = 0
+                this.currentReconnectAttempts = 0;
                 this.open = true;
             });
-            ws?.on("error", async (e) => {
+            this.ws?.on("error", async (e) => {
                 this._log("ON ERROR", e);
                 this.isConnectError = e.stack?.split(" ")[2] == "ENOTFOUND";
                 await sleep(SLEEP_MS);
             });
-            ws?.on("close", async (code, rsn) => {
+            this.ws?.on("close", async (code, rsn) => {
                 if (DEV) this._log(`[onClose] CODE: ${code}\nREASON: ${rsn}`);
                 // if (!this.isConnectError) await this.initWs();
                 this.reconnect();
             });
 
-            ws?.on("message", async (r) => await this.onMessage(r));
+            this.ws?.on("message", async (r) => await this.onMessage(r));
         } catch (e) {
             this._log(e);
         }
@@ -193,6 +192,10 @@ export class WsTriArbit {
             botLog(bot, pairA, pairB, pairC);
             botLog(bot, { flipped });
             botLog(bot, { perc: `${perc}%`, pxA, pxB, pxC });
+            if (this.plat == 'kucoin' && bot.demo){
+                await sleep(5000)
+                return true
+            }
 
             if (Math.abs(perc) >= bot.arbit_settings!.min_perc) {
                 // NOW CHECK IF THERE IS ENOUGH SIZES
@@ -307,7 +310,8 @@ export class WsTriArbit {
             if (pricePrecision == null) return;
             if (this.ws?.readyState != this.ws?.OPEN) {
                 await this.initWs();
-            } 
+                //return await this.addBot(bot, first)
+            }
             this.arbitBots = this.arbitBots.filter((el) => el.bot.id != bot.id);
             const pairA = [bot.B, bot.A];
             const pairB = [bot.C, bot.B];
@@ -375,11 +379,15 @@ export class WsTriArbit {
                 channel1 = `/spotMarket/level2Depth5:`;
                 break;
         }
-        if (!this.ws) return;
+        if (!this.ws) {
+            await this.initWs();
+            //return await this.subUnsub(bot, act)
+        }
         const fn =
             act == "sub"
-                ? this.ws.sub.bind(this.ws)
-                : this.ws.unsub.bind(this.ws);
+                ? this.ws?.sub.bind(this.ws)
+                : this.ws?.unsub.bind(this.ws);
+
         botLog(bot, `\n${act}ing...`);
 
         if (act == "unsub") {
@@ -410,22 +418,19 @@ export class WsTriArbit {
         const unsubC =
             activePairs.findIndex((el) => el == pairC.toString()) == -1; // pairA not in any of active bots
 
-        if (channel1) {
+        if (channel1 && fn) {
             // Orderbook channel, also returns ask n bid pxs
             if (platform == "okx") {
                 if (act == "sub" || unsubA)
-                    await fn(channel1, platform, { instId: symbolA });
+                    fn(channel1, platform, { instId: symbolA });
                 if (act == "sub" || unsubB)
-                    await fn(channel1, platform, { instId: symbolB });
+                    fn(channel1, platform, { instId: symbolB });
                 if (act == "sub" || unsubC)
-                    await fn(channel1, platform, { instId: symbolC });
+                    fn(channel1, platform, { instId: symbolC });
             } else if (platform == "bybit" || platform == "kucoin") {
-                if (act == "sub" || unsubA)
-                    await fn(channel1 + symbolA, platform);
-                if (act == "sub" || unsubB)
-                    await fn(channel1 + symbolB, platform);
-                if (act == "sub" || unsubC)
-                    await fn(channel1 + symbolC, platform);
+                if (act == "sub" || unsubA) fn(channel1 + symbolA, platform);
+                if (act == "sub" || unsubB) fn(channel1 + symbolB, platform);
+                if (act == "sub" || unsubC) fn(channel1 + symbolC, platform);
             }
         }
     }
@@ -503,9 +508,17 @@ export class WsTriArbit {
             //await sleep(SLEEP_MS);
             //return;
 
-            if (bookA == undefined || bookB == undefined || bookC == undefined)
-                return this._log("\nNO BOOK\n");
-
+            if (
+                bookA == undefined ||
+                bookB == undefined ||
+                bookC == undefined
+            ) {
+                if (DEV)
+                this._log("\nNO BOOK\n");
+                return 
+            }
+            //this._log({ bookA, bookB, bookC });
+            //await sleep(5000)
             // UNSUB FIRST
             //await this.unsub(abot.bot)
             if (abot.active) {
@@ -594,7 +607,7 @@ export class WsTriArbit {
                 if (topic && topic.includes("level2Depth5")) {
                     channel = "orderbook";
                     symbol = topic.split(":")[1];
-                    const d = data.data;
+                    const d = data;
                     const ob: IOrderbook = {
                         ts: parseDate(Date.now()),
                         asks: d.asks.map((el) => ({

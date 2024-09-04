@@ -18,7 +18,7 @@ export class Kucoin extends Platform {
         const apiKey = process.env.KUCOIN_API_KEY!;
         const apiSecret = process.env.KUCOIN_API_SECRET!;
         const passphrase = process.env.KUCOIN_API_PASS!
-        console.log({apiKey, apiSecret, passphrase})
+        //console.log({apiKey, apiSecret, passphrase})
         this.client = new SpotClient({
             apiKey: apiKey,
             apiSecret: apiSecret,

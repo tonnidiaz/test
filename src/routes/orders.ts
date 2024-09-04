@@ -23,6 +23,12 @@ router.get('/', async (req, res)=>{
           .limit(_limit)
           .exec();
           orders.push(...(await Promise.all(ords.map(parseArbitOrder))).map(el=>el.order ?? {}))
+        }else{
+            const ords = await Order.find({bot: _bot.id, is_arbit: _bot.is_child})
+          .skip(skip)
+          .limit(_limit)
+          .exec();
+          orders.push(...ords)
         }
         //console.log('\n',{len: orders.length, last: [...orders].pop()?.a?._id})
         res.json(orders)

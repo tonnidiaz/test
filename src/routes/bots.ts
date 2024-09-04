@@ -215,7 +215,7 @@ router.post("/:id/edit", authMid, async (req, res) => {
                 "CHILD BOTS CAN NOT BE INDIVIDUALLY MODIFIED"
             );
 
-        const { A: oldA, B: oldB, C: oldC } = bot;
+        const { A: oldA, B: oldB, C: oldC, balance: oldBal } = bot;
 
         const fd = req.body;
         const { key, val } = fd;
@@ -231,7 +231,6 @@ router.post("/:id/edit", authMid, async (req, res) => {
         const ts = parseDate(new Date());
 
         const is_arb = bot.type == "arbitrage";
-
         const commonFields = [
             "platform",
             "interval",
@@ -240,6 +239,7 @@ router.post("/:id/edit", authMid, async (req, res) => {
             "category",
             "start_amt",
             "start_bal",
+            "balance",
             "A",
             "B",
             "C",
@@ -289,6 +289,7 @@ router.post("/:id/edit", authMid, async (req, res) => {
         } else if (key == "multi") {
             for (let k of Object.keys(val)) {
                 const v = val[k];
+               // if (k == 'start_amt' || k == 'start_bal') continue
                 if (k == "pair" || k == "symbol") {
                     bot.set("base", v[0]);
                     bot.set("ccy", v[1]);
@@ -296,6 +297,11 @@ router.post("/:id/edit", authMid, async (req, res) => {
                 }
 
                 bot.set(k, v);
+
+                const updateBal = bot.balance != oldBal
+                if (k == 'balance' && updateBal){
+                    bot.set('balCcy', bot.ccy)
+                }
                 if (commonFields.includes(k)) {
                     const childA = await Bot.findById(bot.children[0]).exec();
                     const childB = await Bot.findById(bot.children[1]).exec();
@@ -313,18 +319,38 @@ router.post("/:id/edit", authMid, async (req, res) => {
                         );
                     }
                     const children = [childA, childB, childC];
+                    childA.name = `${bot.name} [A]`
+                    childB.name = `${bot.name} [B]`
+                    childC.name = `${bot.name} [C]`
+
+                    childA.base = bot.B
+                    childA.ccy = bot.A
+
+                    childB.base = bot.C
+                    childB.ccy = bot.B
+
+                    childC.base = bot.C
+                    childC.ccy = bot.A
+
                     if (k == "name" || k == "A" || k == "B" || k == "C") {
-                    } else {
-                        for (let b of children) {
-                            b!.set(k, v);
-                        }
+                        
                     }
+                    else {
+                        for (let b of children) {
+                            
+                            if (k == 'balance' && updateBal){
+                                b.set(k, v)
+                                b.set('balCcy', bot.ccy)
+                            }else
+                                b!.set(k, v);
+                        }
+                    } 
                     for (let b of children) {
-                        b.set("balance", b.start_amt)
                         await b.save();
                     }
                 }
             }
+
         }
         await bot.save();
         if (bot.active) {

@@ -150,6 +150,7 @@ export const updateSellOrder = async (
     order.order_id = res.id;
     await order.save();
     bot.balance = bal;
+    bot.balCcy = bot.ccy
     await bot.save()
     if (bot.parent){
         await Bot.findByIdAndUpdate(bot.parent, {balance: bal, balCcy: bot.ccy}).exec()

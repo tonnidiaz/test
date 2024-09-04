@@ -286,7 +286,7 @@ type MexcOrder = typeof testMexcOrderRes;
 
 export const parseFilledOrder = (res: IObj, plat: string) => {
     let data: IOrderDetails;
-
+    //fillSz is the base
     if (plat == "okx") {
         res = res as OrderDetails;
         data = {
@@ -337,7 +337,7 @@ export const parseFilledOrder = (res: IObj, plat: string) => {
         data = {
             id: _res.id!,
             fillPx: price,
-            fillSz: _res.side == 'buy' ? sz : funds,
+            fillSz: sz,
             fee: Number(_res.fee),
             fillTime: Date.now(),
             cTime: Number(_res.createdAt),
