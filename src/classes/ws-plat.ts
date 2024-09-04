@@ -504,7 +504,7 @@ export class WsTriArbit {
             //return;
 
             if (bookA == undefined || bookB == undefined || bookC == undefined)
-                return;
+                return this._log("\nNO BOOK\n");
 
             // UNSUB FIRST
             //await this.unsub(abot.bot)
