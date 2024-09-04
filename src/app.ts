@@ -40,6 +40,7 @@ import usersRouter from "./routes/users";
 import authRouter from "./routes/auth";
 import botsRouter from "./routes/bots";
 import rfRouter from "./routes/rf";
+import ordersRouter from "./routes/orders";
 
 const app = express();
 import { default as mongoose } from "mongoose";
@@ -89,6 +90,7 @@ app.use("/users", usersRouter);
 app.use("/auth", authRouter);
 app.use("/bots", botsRouter);
 app.use("/rf", rfRouter);
+app.use("/orders", ordersRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -141,19 +143,19 @@ const main = async () => {
             await wsPlat.addBot(bot, true)
         }
 
-        if (bot.orders.length) {
-            const lastOrder = await Order.findById(
-                bot.orders[bot.orders.length - 1]
-            ).exec();
-            if (
-                lastOrder &&
-                lastOrder.side == "sell" &&
-                !lastOrder.is_closed &&
-                lastOrder.sell_price != 0
-            ) {
-                //await plat.addBot(bot.id, true);
-            }
-        }
+        // if (bot.orders.length) {
+        //     const lastOrder = await Order.findById(
+        //         bot.orders[bot.orders.length - 1]
+        //     ).exec();
+        //     if (
+        //         lastOrder &&
+        //         lastOrder.side == "sell" &&
+        //         !lastOrder.is_closed &&
+        //         lastOrder.sell_price != 0
+        //     ) {
+        //         //await plat.addBot(bot.id, true);
+        //     }
+        // }
     }
 };
 

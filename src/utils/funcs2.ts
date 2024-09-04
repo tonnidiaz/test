@@ -365,13 +365,14 @@ export const findBotOrders = async (bot: IBot) => {
             base: bot.base,
             ccy: bot.ccy,
         }).exec()
-    ).filter((el) => bot.orders.includes(el._id));
+    )
     return orders;
 };
 
 export const getLastOrder = async (bot: IBot) => {
-    return bot.orders.length
-        ? await Order.findById(bot.orders[bot.orders.length - 1]).exec()
+    const orders = await Order.find({bot: bot.id}).exec()
+    return orders.length
+        ? await Order.findById([...orders].pop()?.id).exec()
         : null;
 };
 
@@ -387,12 +388,4 @@ export const orderHasPos = (order?: IOrder | null) => {
 };
 export const getBaseToSell = (order: IOrder) => {
     return order.base_amt - order.buy_fee;
-};
-export const getAmtToBuyWith = (bot: IBot, order?: IOrder | null) => {
-    let amt = bot.start_bal
-    if (order){
-        amt = order.is_closed ? order.new_ccy_amt - Math.abs(order.sell_fee) : order.ccy_amt
-    }
-    
-    return amt;
 };

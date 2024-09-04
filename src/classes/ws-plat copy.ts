@@ -13,7 +13,7 @@
 // import { Bot } from "@/models";
 // import mongoose, { ObjectId } from "mongoose";
 // import { Bybit } from "./bybit";
-// import { getAmtToBuyWith, getLastOrder, parseDate } from "@/utils/funcs2";
+// import { getLastOrder, parseDate } from "@/utils/funcs2";
 // import { placeArbitOrders } from "@/utils/orders/funcs4";
 // import { deactivateBot, reactivateBot } from "@/utils/funcs3";
 // import { IOrder } from "@/models/order";
@@ -268,7 +268,7 @@
 //                 if (!_botC) return this._log("NO BOT C");
 
 //                 let order = await getLastOrder(_botC);
-//                 const bal = getAmtToBuyWith(_botC, order);
+//                 const bal = bot.balance
 //                 abot.order = order ?? undefined;
 //                 abot.startAmt = bal;
 //             }

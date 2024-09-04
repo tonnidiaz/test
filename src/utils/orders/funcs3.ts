@@ -8,7 +8,6 @@ import {
 } from "../functions";
 import { objPlats } from "../consts2";
 import {
-    getAmtToBuyWith,
     getExactDate,
     getLastOrder,
     orderHasPos,

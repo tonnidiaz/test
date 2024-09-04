@@ -5,7 +5,6 @@
 import { IBot } from "@/models/bot";
 import { IOrder } from "@/models/order";
 import {
-    getAmtToBuyWith,
     getBaseToSell,
     getBotPlat,
     getBotStrategy,
@@ -55,7 +54,7 @@ export const ImprProd = async ({
     if (!pos && !hasBuyId && str.buyCond(prevrow)) {
         botLog(bot, "KAYA RA BUY");
 
-        const amt = getAmtToBuyWith(bot, order);
+        const amt = bot.balance
         entry = o;
 
         if (o < trail && prevrow.c <= prevrow.o){

@@ -5,7 +5,6 @@
 import { IBot } from "@/models/bot";
 import { IOrder } from "@/models/order";
 import {
-    getAmtToBuyWith,
     getBaseToSell,
     getBotPlat,
     getBotStrategy,
@@ -45,7 +44,7 @@ export const prodStrategy = async ({
     if (!pos && str.buyCond(prevrow)) {
         botLog(bot, "KAYA RA BUY");
 
-        const amt = getAmtToBuyWith(bot, order);
+        const amt =bot.balance;
         entry = o;
 
         const r = await placeTrade({

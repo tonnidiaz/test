@@ -129,7 +129,7 @@ export const updateOrder = async ({
                 }
             } else {
                 botLog(bot, "FILLED");
-                await updateSellOrder(order, res);
+                await updateSellOrder(order, res, bot);
             }
         }
 
@@ -179,14 +179,14 @@ export const placeTrade = async ({
         ) {
             return;
         }
-        let aside = bot.aside.find(
-            (el) => el.base == pair[0] && el.ccy == pair[1]
-        );
-        if (!aside) {
-            aside = { base: bot.base, ccy: bot.ccy, amt: 0 };
-            bot.aside.push(aside);
-            await bot.save();
-        }
+        // let aside = bot.aside.find(
+        //     (el) => el.base == pair[0] && el.ccy == pair[1]
+        // );
+        // if (!aside) {
+        //     aside = { base: bot.base, ccy: bot.ccy, amt: 0 };
+        //     bot.aside.push(aside);
+        //     await bot.save();
+        // }
         let total_base = bot.total_base.find(
             (el) => el.base == pair[0] && el.ccy == pair[1]
         );
@@ -207,17 +207,17 @@ export const placeTrade = async ({
         botLog(bot, "PLACE_TRADE", { amt, price, side });
 
         const putAside = async (amt: number) => {
-            if (!aside) return;
-            botLog(bot, `PUTTING ${amt} ASIDE...`);
-            order.new_ccy_amt = order.new_ccy_amt - amt; // LEAVE THE FEE
-            aside.amt = aside!.amt + amt;
-            bot.start_bal = order.new_ccy_amt - Math.abs(order.sell_fee);
+            // if (!aside) return;
+            // botLog(bot, `PUTTING ${amt} ASIDE...`);
+            // order.new_ccy_amt = order.new_ccy_amt - amt; // LEAVE THE FEE
+            // aside.amt = aside!.amt + amt;
+            // bot.start_bal = order.new_ccy_amt - Math.abs(order.sell_fee);
 
-            bot.aside?.map((el) => {
-                return el.base == aside?.base && el.ccy == aside?.ccy
-                    ? aside
-                    : el;
-            });
+            // bot.aside?.map((el) => {
+            //     return el.base == aside?.base && el.ccy == aside?.ccy
+            //         ? aside
+            //         : el;
+            // });
 
             await order.save();
             await bot.save();
@@ -317,14 +317,15 @@ export const placeTrade = async ({
                 : orders[orders.length - 1];
 
         if (side == "sell") {
-            
             order._exit = price;
+        }
+        if (bot.is_child){
+            order.is_arbit = true
         }
         
         order.cl_order_id = clOrderId;
 
         await order.save();
-        if (side == "buy" || isBotC) bot.orders.push(order._id);
         const px = ordType == "Market" ? undefined : price;
 
         const orderId = await plat.placeOrder(amt, px, side, sl, clOrderId);
@@ -372,7 +373,7 @@ export const placeTrade = async ({
                 }
                 if (res && res != "live") {
                     _filled = true;
-                    await updateSellOrder(order, res);
+                    await updateSellOrder(order, res, bot);
                     //return { isClosed: true, lastOrder: order };
                 }
             }

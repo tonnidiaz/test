@@ -13,7 +13,7 @@ import { DEV, TP } from "@/utils/constants";
 import { Bot } from "@/models";
 import mongoose, { ObjectId } from "mongoose";
 import { Bybit } from "./bybit";
-import { getAmtToBuyWith, getLastOrder, parseDate } from "@/utils/funcs2";
+import {  getLastOrder, parseDate } from "@/utils/funcs2";
 import {
     placeArbitOrders,
     placeArbitOrdersFlipped,
@@ -21,6 +21,7 @@ import {
 import { deactivateBot, reactivateBot } from "@/utils/funcs3";
 import { IOrder } from "@/models/order";
 import { RawData } from "ws";
+import axios from "axios";
 
 const OKX_WS_URL = "wss://ws.okx.com:8443/ws/v5/public";
 const OKX_WS_URL_DEMO = "wss://wspap.okx.com:8443/ws/v5/public";
@@ -28,9 +29,24 @@ const OKX_WS_URL_DEMO = "wss://wspap.okx.com:8443/ws/v5/public";
 const BYBIT_WS_URL = "wss://stream.bybit.com/v5/public/spot";
 const BYBIT_WS_URL_DEMO = "wss://stream-testnet.bybit.com/v5/public/spot";
 const BINANCE_WS_URL = "wss://stream.binance.com:9443";
-const KUCOIN_TOKEN =
-    "2neAiuYvAU61ZDXANAGAsiL4-iAExhsBXZxftpOeh_55i3Ysy2q2LEsEWU64mdzUOPusi34M_wGoSf7iNyEWJ7Hpi6VkzA_HnrsEt757fLDI01cJ3EoydNiYB9J6i9GjsxUuhPw3Blq6rhZlGykT3Vp1phUafnulOOpts-MEmEGpNUI84S6vrJTgyxX8E4rMJBvJHl5Vs9Y=.LmLBJkS2mQLCJn4B0fVRXw==";
-const KUCOIN_WS_URL = "wss://ws-api-spot.kucoin.com/?token=" + KUCOIN_TOKEN;
+
+const KUCOIN_TOKEN_URL = 'https://api.kucoin.com/api/v1/bullet-public'
+let kucoinTokenTs = Date.now()
+let kucoinToken = ''
+
+const getKucoinToken = async () =>{
+    const diff = Date.now() - kucoinTokenTs
+    if (diff < 60 * 60000 && kucoinToken.length) return kucoinToken
+    try{
+        const r = await axios.post(KUCOIN_TOKEN_URL)
+        kucoinToken = r.data?.data?.token ?? ''
+        return kucoinToken
+    }catch(e){
+        console.log("FAILED TO GET KUCOIN TOKEN")
+        console.log(e)
+    }
+}
+const KUCOIN_WS_URL = (tkn: any) => "wss://ws-api-spot.kucoin.com/?token=" + tkn;
 
 const SLEEP_MS = 10 * 1000;
 const demo = false;
@@ -61,7 +77,7 @@ export class WsTriArbit {
     maxReconnectAttempts: number;
     currentReconnectAttempts: number;
 
-    constructor(plat: string) {
+     constructor(plat: string) {
         this.name = this.constructor.name;
         this.plat = plat;
         this.reconnectInterval = 5000; // 5 seconds by default
@@ -80,7 +96,7 @@ export class WsTriArbit {
                 this.wsURL = BINANCE_WS_URL;
                 break;
             case "kucoin":
-                this.wsURL = KUCOIN_WS_URL;
+                this.wsURL = 'url'
                 break;
         }
     }
@@ -92,6 +108,9 @@ export class WsTriArbit {
             if (this.ws?.readyState == this.ws?.OPEN) this.ws?.close();
 
             this.isConnectError = false;
+            if (this.plat.toLocaleLowerCase() == 'kucoin'){
+                this.wsURL = KUCOIN_WS_URL(await getKucoinToken());
+            }
             this.ws = new TuWs(this.wsURL);
             this.ws.plat = this.plat;
             if (!this.open)
@@ -197,7 +216,7 @@ export class WsTriArbit {
                     const _botA = await Bot.findById(bot.children[0]).exec();
                     if (!_botA) return botLog(bot, "NO BOT A");
                     let order = await getLastOrder(_botA);
-                    amt = getAmtToBuyWith(_botA, order);
+                    amt = bot.balance
 
                     szC = amt / pxC;
                     szB = szC;
@@ -214,7 +233,7 @@ export class WsTriArbit {
                     const _botC = await Bot.findById(bot.children[2]).exec();
                     if (!_botC) return botLog(bot, "NO BOT C");
                     let order = await getLastOrder(_botC);
-                    amt = getAmtToBuyWith(_botC, order);
+                    amt = bot.balance
 
                     szA = amt / pxA;
                     szB = szA / pxB;
@@ -315,7 +334,7 @@ export class WsTriArbit {
                 if (!_botC) return this._log("NO BOT C");
 
                 let order = await getLastOrder(_botC);
-                const bal = getAmtToBuyWith(_botC, order);
+                const bal = bot.balance
                 abot.order = order ?? undefined;
                 abot.startAmt = bal;
             }

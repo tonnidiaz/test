@@ -1,7 +1,5 @@
-import { Bybit } from "@/classes/bybit";
-import { OKX } from "@/classes/okx";
 import { IBot } from "@/models/bot";
-import { parseDate, getLastOrder, getAmtToBuyWith } from "../funcs2";
+import { parseDate, getLastOrder } from "../funcs2";
 import {
     botLog,
     getCoinPrecision,
@@ -12,10 +10,10 @@ import {
     toFixed,
 } from "../functions";
 import { placeTrade } from "./funcs";
-import { Bot } from "@/models";
+import { Bot, TriArbitOrder } from "@/models";
 import { objPlats } from "../consts2";
 
-const SLEEP_MS = 2000
+const SLEEP_MS = 2000;
 export const placeArbitOrders = async ({
     bot,
     pairA,
@@ -90,9 +88,12 @@ export const placeArbitOrders = async ({
         );
     }
     botLog(bot, "PLACING NORMAL ORDERS...\n");
-    let order = await getLastOrder(_botC);
-    let bal = getAmtToBuyWith(_botC, order);
-    bal = toFixed(bal, pxPrA)
+    //let order = await getLastOrder(_botC);
+    if (bot.balCcy != _botA.ccy)
+        return botLog(bot, "BAL_ERROR:", { last: bot.balCcy, bot: _botA.ccy });
+
+    let bal = bot.balance;
+    bal = toFixed(bal, pxPrA);
     const ts = parseDate(new Date());
     let _base = 0,
         _amt = 0;
@@ -126,7 +127,7 @@ export const placeArbitOrders = async ({
         return botLog(bot, "LESS_ERROR: UNABLE TO PLACE SELL ORDER AT C");
     }
 
-
+    const arbitOrder = new TriArbitOrder({ bot: bot.id });
 
     const resA = await placeTrade({
         amt: bal,
@@ -145,10 +146,12 @@ export const placeArbitOrders = async ({
     orderA.side = "buy";
     orderA.is_closed = true;
     await orderA.save();
-    await sleep(SLEEP_MS)
+    arbitOrder.order = { ...arbitOrder.order, a: orderA.id };
+    await arbitOrder.save();
+    await sleep(SLEEP_MS);
     // The base from A becomes the Quote for B
     let amtB = orderA.base_amt - Math.abs(orderA.buy_fee);
-    amtB = toFixed(amtB, pxPrB)
+    amtB = toFixed(amtB, pxPrB);
     const resB = await placeTrade({
         amt: amtB,
         ordType: "Market",
@@ -167,10 +170,12 @@ export const placeArbitOrders = async ({
     orderB.side = "buy";
     orderB.is_closed = true;
     await orderB.save();
-    await sleep(SLEEP_MS)
+    arbitOrder.order = { ...arbitOrder.order, b: orderB.id };
+    await arbitOrder.save();
+    await sleep(SLEEP_MS);
     // Sell base_amt from B At C to get A back
     let amtC = orderB.base_amt - Math.abs(orderB.buy_fee);
-    amtC = toFixed(amtC, basePrC)
+    amtC = toFixed(amtC, basePrC);
     const resC = await placeTrade({
         amt: amtC,
         ordType: "Market",
@@ -197,8 +202,9 @@ export const placeArbitOrders = async ({
     profit = Number(profit.toFixed(2));
     orderC.profit = profit;
     await orderC.save();
-    bot.arbit_orders.push({ a: orderA.id, b: orderB.id, c: orderC.id });
-    await bot.save()
+    arbitOrder.order = { ...arbitOrder.order, c: orderC.id };
+    await arbitOrder.save();
+    await bot.save();
     return bot.id;
 };
 
@@ -279,15 +285,19 @@ export const placeArbitOrdersFlipped = async ({
 
     let order = await getLastOrder(_botA);
 
-    let bal = getAmtToBuyWith(_botA, order);
-    bal = toFixed(bal, pxPrC)
+    let bal = bot.balance;
+    if (bot.balCcy != _botC.ccy)
+        return botLog(bot, "BAL_ERROR:", { last: bot.balCcy, bot: _botC.ccy });
+    
+    bal = toFixed(bal, pxPrC);
     const ts = parseDate(new Date());
 
     let _base = 0,
         _amt = 0;
     _amt = bal;
-    _base = bal / cPxC // FLIPPED: FIRST BUY AT C 
-    const TAKER = .1/100, MAKER = .1/100
+    _base = bal / cPxC; // FLIPPED: FIRST BUY AT C
+    const TAKER = 0.1 / 100,
+        MAKER = 0.1 / 100;
 
     botLog(bot, pairC);
     botLog(bot, { _amt, _base, minAmtC, minSzC });
@@ -295,11 +305,9 @@ export const placeArbitOrdersFlipped = async ({
         return botLog(bot, "LESS_ERROR: UNABLE TO PLACE BUY ORDER AT C");
     }
 
-    
-   
     _base = toFixed((_base *= 1 - TAKER), basePrB);
     _amt = _base * cPxB;
-    botLog(bot, pairB); 
+    botLog(bot, pairB);
     botLog(bot, { _amt, _base, minAmtB, minSzB });
     if (_amt < minAmtB || _base < minSzB) {
         return botLog(bot, "LESS_ERROR: UNABLE TO PLACE SELL ORDER AT B");
@@ -314,6 +322,7 @@ export const placeArbitOrdersFlipped = async ({
         return botLog(bot, "LESS_ERROR: UNABLE TO PLACE SELL ORDER AT A");
     }
 
+    const arbitOrder = new TriArbitOrder({ bot: bot.id });
 
     // BUY C [APEX] at C
     const resC = await placeTrade({
@@ -333,11 +342,14 @@ export const placeArbitOrdersFlipped = async ({
     if (!orderC) return botLog(bot, "Failed to get orderC");
     orderC.side = "buy";
     orderC.is_closed = true;
+
     await orderC.save();
-    await sleep(SLEEP_MS)
+    arbitOrder.order = { ...arbitOrder.order, a: orderC.id };
+    await arbitOrder.save();
+    await sleep(SLEEP_MS);
     // SELL C [APEX] FOR B [USDC] at B
     let amtB = orderC.base_amt - Math.abs(orderC.buy_fee);
-    amtB = toFixed(amtB, basePrB)
+    amtB = toFixed(amtB, basePrB);
     const resB = await placeTrade({
         amt: amtB,
         ordType: "Market",
@@ -356,10 +368,12 @@ export const placeArbitOrdersFlipped = async ({
     orderB.side = "sell";
     orderB.is_closed = true;
     await orderB.save();
-    await sleep(SLEEP_MS)
+    arbitOrder.order = { ...arbitOrder.order, b: orderB.id };
+    await arbitOrder.save();
+    await sleep(SLEEP_MS);
     // Sell B [USDC] at A
     let amtA = orderB.new_ccy_amt - Math.abs(orderB.sell_fee);
-    amtA = toFixed(amtA, basePrA)
+    amtA = toFixed(amtA, basePrA);
     const resA = await placeTrade({
         amt: amtA,
         ordType: "Market",
@@ -385,9 +399,11 @@ export const placeArbitOrdersFlipped = async ({
     let profit = ((currAmt - orderA.ccy_amt) / orderA.ccy_amt) * 100;
     profit = Number(profit.toFixed(2));
     orderA.profit = profit;
+
+    arbitOrder.order = { ...arbitOrder.order, c: orderA.id };
+    await arbitOrder.save();
     await orderA.save();
 
-    bot.arbit_orders.push({ a: orderC.id, b: orderB.id, c: orderA.id });
-    await bot.save()
+    await bot.save();
     return bot.id;
 };

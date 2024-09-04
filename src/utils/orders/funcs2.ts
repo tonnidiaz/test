@@ -13,7 +13,7 @@ import {
     getExactDate,
 } from "../funcs2";
 import { IBot } from "@/models/bot";
-import { Order } from "@/models";
+import { Bot, Order } from "@/models";
 import { placeTrade } from "./funcs";
 import {
     botLog,
@@ -121,7 +121,11 @@ export const updateBuyOrder = async (
     await order.save();
     console.log("BUY ORDER UPDATED");
 };
-export const updateSellOrder = async (order: IOrder, res: IOrderDetails) => {
+export const updateSellOrder = async (
+    order: IOrder,
+    res: IOrderDetails,
+    bot: IBot
+) => {
     const fee = Math.abs(res.fee); // In USDT
 
     /* Buy/Base fee already removed when placing sell order  */
@@ -134,7 +138,9 @@ export const updateSellOrder = async (order: IOrder, res: IOrderDetails) => {
         o: parseDate(new Date(res.fillTime)),
     };
     /* order == currentOrder */
-    const bal = order.new_ccy_amt - Math.abs(res.fee);
+    const pxPr =
+        getPricePrecision([bot.base, bot.ccy], bot.platform) ?? Infinity;
+    const bal = toFixed(order.new_ccy_amt - Math.abs(res.fee), pxPr);
     const profit =
         !order.buy_order_id || order.buy_order_id.length == 0
             ? 0
@@ -143,6 +149,11 @@ export const updateSellOrder = async (order: IOrder, res: IOrderDetails) => {
     order.profit = toFixed(profit, 2);
     order.order_id = res.id;
     await order.save();
+    bot.balance = bal;
+    await bot.save()
+    if (bot.parent){
+        await Bot.findByIdAndUpdate(bot.parent, {balance: bal, balCcy: bot.ccy}).exec()
+    }
     console.log("SELL ORDER UPDATED");
 };
 

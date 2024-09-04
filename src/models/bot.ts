@@ -8,9 +8,9 @@ import mn, {
 } from "mongoose";
 
 const TriArbitOrder = {
-    a: { type: Schema.ObjectId, required: true, ref: "Order" },
-    b: { type: Schema.ObjectId, required: true, ref: "Order" },
-    c: { type: Schema.ObjectId, required: true, ref: "Order" },
+    a: { type: Schema.ObjectId, ref: "Order" },
+    b: { type: Schema.ObjectId, ref: "Order" },
+    c: { type: Schema.ObjectId, ref: "Order" },
     _id: false,
 };
 
@@ -25,7 +25,10 @@ const ArbitSettings = {
     },
     _id: false,
 };
-
+export const TriArbitOrderSchema = new Schema({
+    bot: {type: Schema.ObjectId, required: true, ref: "Bot"},
+    order: {type: TriArbitOrder}
+})
 export const BotSchema = new Schema(
     {
         name: { type: String, required: true },
@@ -34,6 +37,7 @@ export const BotSchema = new Schema(
         demo: { type: Boolean, default: true },
         base: { type: String, default: "ETH" },
         ccy: { type: String, default: "USDT" },
+        balCcy: { type: String, default: "USDT" },
         category: { type: String, default: "spot" },
         interval: { type: Number, default: 15 },
         mult: { type: Number, default: 1.8 },
@@ -41,8 +45,8 @@ export const BotSchema = new Schema(
         strategy: { type: Number, default: 5 },
         user: { type: Schema.ObjectId, ref: "User" },
         parent: { type: Schema.ObjectId, ref: "Bot" },
-        orders: { type: [Schema.ObjectId], ref: "Order" },
-        arbit_orders: { type: [TriArbitOrder] },
+        //orders: { type: [Schema.ObjectId], ref: "Order" },
+        //arbit_orders: { type: [Schema.ObjectId], ref: "TriArbitOrder", default: [] },
         aside: {
             type: [
                 {
@@ -74,6 +78,7 @@ export const BotSchema = new Schema(
             default: [],
         },
         start_amt: { type: Number, default: 10 },
+        balance: { type: Number, default: 0 },
         start_bal: { type: Number, default: 10 },
         curr_amt: { type: Number, default: 0 },
         platform: { type: String, default: "bybit" },

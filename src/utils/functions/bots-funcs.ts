@@ -1,10 +1,11 @@
-import { Bot } from "@/models";
+import { Bot, TriArbitOrder } from "@/models";
 import { IBot } from "@/models/bot";
 import { botLog } from "../functions";
 
 export const createChildBots = async (bot: IBot) => {
     botLog(bot, "CREATING CHILD BOTS...");
-    if (bot.arbit_orders.length)
+    const arbitOrders = await TriArbitOrder.find({bot: bot.id}).exec()
+    if (arbitOrders.length)
         return botLog(
             bot,
             "CANNOT MODIFY CHILD BOTS WHILE ORDER STILL HAS ORDERS"
@@ -25,6 +26,7 @@ export const createChildBots = async (bot: IBot) => {
             base: pairA[0],
             ccy: pairA[1],
             start_amt: bot.start_amt,
+            balance: bot.start_amt,
             start_bal: bot.start_bal,
             strategy: bot.strategy,
             interval: bot.interval,
