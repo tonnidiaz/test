@@ -88,7 +88,7 @@ export class WsTriArbit {
     async initWs() {
         try {
             if (!this.wsURL) return this._log("WS URL UNDEFINED");
-
+            this._log("initWs()")
             //if (this.ws?.readyState == this.ws?.OPEN) this.ws?.close();
 
             this.isConnectError = false;

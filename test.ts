@@ -334,4 +334,28 @@ const testDb = async () => {
       }
 };
 
-testDb();
+const calcTrade = ({amt, pxA, pxB, pxC, flipped}: {amt: number, pxA: number, pxB: number, pxC: number, flipped: boolean}) =>{
+    const MAKER = .1/100, TAKER = .1/100
+    let A2 = 0
+    const A1 = amt
+    if (flipped){
+        const baseC = (amt / pxC) * (1 - TAKER)
+        const amtB = (baseC * pxB) * (1 - MAKER)
+        const amtA = (amtB * pxA) * (1 - MAKER)
+        console.log({flipped, baseC, amtB, amtA})
+        A2 = amtA
+    }else{
+        const baseA = (amt / pxA) * (1 - TAKER)
+        const baseB = (baseA / pxB) * (1 - TAKER)
+        const amtC = (baseA / pxC) * (1 - MAKER)
+        console.log({flipped, baseA, baseB, amtC})
+        A2 = amtC
+    }
+
+    const perc = ((A2 - A1) / A1 * 100).toFixed(2) + '%'
+    console.log({perc, A1, A2})
+}
+
+
+const pxs = { pxA: 57967.4, pxB: 3.063e-7, pxC: 0.01793 } 
+calcTrade({flipped: false, amt: .6, ...pxs})
