@@ -282,9 +282,11 @@ export class WsTriArbit {
 
             if (!this.arbitBots.find((el) => el.bot.id)) return false;
 
-            this.arbitBots = this.arbitBots.map((abot2) => {
-                return abot2.bot.id == abot.bot.id ? abot : abot2;
-            });
+            // this.arbitBots = this.arbitBots.map((abot2) => {
+            //     return abot2.bot.id == abot.bot.id ? abot : abot2;
+            // });
+            abot.active = true
+            this._updateBots(abot)
             return true;
         } catch (e) {
             this._log(e);
@@ -520,8 +522,8 @@ export class WsTriArbit {
                 });
 
                 // refetch abot
-                const _abot = this.arbitBots.find(el=> el.bot.id == abot.bot.id)
-                if (re != false && _abot?.active) {
+                //const _abot = this.arbitBots.find(el=> el.bot.id == abot.bot.id)
+                if (re != false) {
                     abot.active = true;
                 }
                 this._updateBots(abot);
