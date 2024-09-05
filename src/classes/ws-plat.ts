@@ -164,24 +164,34 @@ export class WsTriArbit {
                 return;
 
             const A = 1;
-            // USE [ask, ask, bid]
+            //Normal prices
             let pxA = bookA.ask.px;
             let pxB = bookB.ask.px;
             let pxC = bookC.bid.px;
-            const A2 = (A * pxC) / (pxA * pxB);
 
-            const perc = Number((((A2 - A) / A) * 100).toFixed(2));
-            const flipped = perc < 0;
+            //Flipped prices
+            let fpxC = bookC.ask.px;
+            let fpxB = bookB.bid.px;
+            let fpxA = bookA.bid.px;
+            
+            const A2 = (A * pxC) / (pxA * pxB); // BUY A, BUY B, SELL C
+            const FA2 = (A * fpxA * fpxB ) / fpxC; //BUY C, SELL B, SELL A
 
-            botLog(bot, pairA, pairB, pairC);
-            botLog(bot, { flipped });
-            botLog(bot, { perc: `${perc}%`, pxA, pxB, pxC });
+            const _perc = ceil(((A2 - A) / A) * 100, 2);
+            const _fperc = ceil(((FA2 - A) / A) * 100, 2);
+            const perc = Math.max(_perc, _fperc)
+
+            const flipped = _perc < _fperc;
+
+            botLog(bot, pairA, pairB, pairC, '\n', {pxA, pxB, pxC}, '\n', {fpxA, fpxB, fpxC});
+
+            botLog(bot, { _perc: `${_perc}%`, _fperc: `${_fperc}%`, flipped });
             if (this.plat == 'kucoin' && bot.demo){
                 await sleep(5000)
                 return true
             }
 
-            if (Math.abs(perc) >= bot.arbit_settings!.min_perc) {
+            if (perc >= bot.arbit_settings!.min_perc) {
                 // NOW CHECK IF THERE IS ENOUGH SIZES
                 let szA = 0,
                     szB = 0,
@@ -200,9 +210,6 @@ export class WsTriArbit {
                     availSzB = bookB.bid.amt;
                     availSzA = bookA.bid.amt;
 
-                    const _botA = await Bot.findById(bot.children[0]).exec();
-                    if (!_botA) return botLog(bot, "NO BOT A");
-                    let order = await getLastOrder(_botA);
                     amt = bot.balance;
 
                     szC = amt / pxC;
@@ -217,9 +224,6 @@ export class WsTriArbit {
                     availSzB = bookB.ask.amt;
                     availSzC = bookC.bid.amt;
 
-                    const _botC = await Bot.findById(bot.children[2]).exec();
-                    if (!_botC) return botLog(bot, "NO BOT C");
-                    let order = await getLastOrder(_botC);
                     amt = bot.balance;
 
                     szA = amt / pxA;
@@ -227,9 +231,8 @@ export class WsTriArbit {
                     szC = szB;
                 }
 
-                botLog(bot, { pxA, pxB, pxC });
-                botLog(bot, { availSzA, availSzB, availSzC });
-                botLog(bot, { szA, szB, szC });
+                botLog(bot, { pxA, pxB, pxC }, '\n', { availSzA, availSzB, availSzC }, '\n',  { szA, szB, szC });
+
                 if (availSzA > szA && availSzB > szB && availSzC > szC) {
                     botLog(bot, "WS: ALL GOOD, GOING IN...");
                     // DOUBLE-CHECK IF BOT IS ACTIVE
@@ -254,7 +257,9 @@ export class WsTriArbit {
                         cPxB: pxB,
                         cPxC: pxC,
                     };
-                    await deactivateBot(bot);
+                    //await deactivateBot(bot);
+                    abot.active = false
+                    this._updateBots(abot)
                     const res = flipped
                         ? await placeArbitOrdersFlipped(params)
                         : await placeArbitOrders(params);
@@ -262,13 +267,15 @@ export class WsTriArbit {
                     await bot.save();
                     if (!res) return botLog(bot, "FAILED TO PLACE ORDERS");
                     botLog(bot, "ALL ORDERS PLACED SUCCESSFULLY!!");
-                    await reactivateBot(bot);
+                    //await reactivateBot(bot);
 
                     // RE-FRESH BOT
                     const _botFinal = await Bot.findById(bot.id).exec();
                     if (!_botFinal) return false;
                     this._updateBots({ ...abot, bot: _botFinal });
                     await sleep(SLEEP_MS);
+                    abot.active = true
+                    this._updateBots(abot)
                     return bot.id;
                 }
             }
@@ -511,7 +518,10 @@ export class WsTriArbit {
                     abot,
                     symbol,
                 });
-                if (re != false) {
+
+                // refetch abot
+                const _abot = this.arbitBots.find(el=> el.bot.id == abot.bot.id)
+                if (re != false && _abot?.active) {
                     abot.active = true;
                 }
                 this._updateBots(abot);

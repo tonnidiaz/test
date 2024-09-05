@@ -6,6 +6,7 @@ import { bybitInstrus } from "@/utils/data/instrus/bybit-instrus";
 import { existsSync } from "fs";
 import { parseDate, parseKlines } from "@/utils/funcs2";
 import {
+    ceil,
     getCoinPrecision,
     getPricePrecision,
     getSymbol,
@@ -26,7 +27,7 @@ import { configDotenv } from "dotenv";
 import mongoose from "mongoose";
 import { parseArbitOrder } from "@/utils/funcs3";
 
-clearTerminal();
+//clearTerminal();
 configDotenv();
 async function connectMongo(DEV: boolean) {
     console.log({ DEV });
@@ -294,22 +295,24 @@ const checkIfFlipped = ({
 };
 
 //checkIfFlipped({pxA: .5, pxB: .233, pxC: .244})
-let bal = 50;
-const START = bal;
-let perc = 1;
-const TAKER = 0.1 / 100,
-    MAKER = 0.1 / 100;
+const rumcheck = () => {
+    let bal = 50;
+    const START = bal;
+    let perc = 1;
+    const TAKER = 0.1 / 100,
+        MAKER = 0.1 / 100;
 
-for (let i = 0; i < 1000; i++) {
-    bal *= 1 - MAKER;
-    bal *= 1 - MAKER;
-    bal *= 1 - MAKER;
-    bal *= 1 - MAKER;
-    bal *= 1 + perc / 100;
-}
+    for (let i = 0; i < 1000; i++) {
+        bal *= 1 - MAKER;
+        bal *= 1 - MAKER;
+        bal *= 1 - MAKER;
+        bal *= 1 - MAKER;
+        bal *= 1 + perc / 100;
+    }
 
-const profit = bal - START;
-console.log({ profit });
+    const profit = bal - START;
+    //console.log({ profit });
+};
 
 const goodCoins = kucoinBTC.slice(0, 20).map((el) => el.pair.split("-")[0]);
 //console.log(goodCoins)
@@ -322,40 +325,97 @@ const testDb = async () => {
 
     try {
         const documents = await TriArbitOrder.find({})
-          .skip(skip)
-          .limit(limit)
-          .exec();
-    
-        const totalDocuments = await TriArbitOrder.countDocuments();
-        const ords = await Promise.all(documents.map(parseArbitOrder))
-        console.log(ords)
-      } catch (err: any) {
-       console.log(err.message)
-      }
-};
+            .skip(skip)
+            .limit(limit)
+            .exec();
 
-const calcTrade = ({amt, pxA, pxB, pxC, flipped}: {amt: number, pxA: number, pxB: number, pxC: number, flipped: boolean}) =>{
-    const MAKER = .1/100, TAKER = .1/100
-    let A2 = 0
-    const A1 = amt
-    if (flipped){
-        const baseC = (amt / pxC) * (1 - TAKER)
-        const amtB = (baseC * pxB) * (1 - MAKER)
-        const amtA = (amtB * pxA) * (1 - MAKER)
-        console.log({flipped, baseC, amtB, amtA})
-        A2 = amtA
-    }else{
-        const baseA = (amt / pxA) * (1 - TAKER)
-        const baseB = (baseA / pxB) * (1 - TAKER)
-        const amtC = (baseA / pxC) * (1 - MAKER)
-        console.log({flipped, baseA, baseB, amtC})
-        A2 = amtC
+        const totalDocuments = await TriArbitOrder.countDocuments();
+        const ords = await Promise.all(documents.map(parseArbitOrder));
+        console.log(ords);
+    } catch (err: any) {
+        console.log(err.message);
+    }
+};
+const MAKER = 0.1 / 100,
+    TAKER = 0.1 / 100;
+const calcTrade = ({
+    amt,
+    pxA,
+    pxB,
+    pxC,
+    flipped,
+}: {
+    amt: number;
+    pxA: number;
+    pxB: number;
+    pxC: number;
+    flipped: boolean;
+}) => {
+    let A2 = 0;
+    const A1 = amt;
+
+    let _base = 1 / pxA;
+    _base = _base / pxB;
+    _base *= pxC;
+    console.log({ pxA, pxB, pxC });
+    const _A2 = (1 * pxC) / (pxA * pxB);
+    const estPerc = ((_base - 1) / 1) * 100;
+    const estPerc2 = ((_A2 - 1) / 1) * 100;
+    if (flipped) {
+        const baseC = (amt / pxC) * (1 - TAKER);
+        const amtB = baseC * pxB * (1 - MAKER);
+        const amtA = amtB * pxA * (1 - MAKER);
+        console.log({ flipped, baseC, amtB, amtA });
+        A2 = amtA;
+    } else {
+        const baseA = (amt / pxA) * (1 - TAKER);
+        const baseB = (baseA / pxB) * (1 - TAKER);
+        const amtC = baseB * pxC * (1 - MAKER);
+        console.log({ flipped, baseA, baseB, amtC });
+        A2 = amtC;
     }
 
-    const perc = ((A2 - A1) / A1 * 100).toFixed(2) + '%'
-    console.log({perc, A1, A2})
+    const perc = (((A2 - A1) / A1) * 100).toFixed(2) + "%";
+    console.log({ estPerc, estPerc2, _base });
+    console.log({ perc, A1, A2 });
+};
+
+interface IPx {
+    pxA: number;
+    pxB: number;
+    pxC: number;
 }
+const testTrades = ({
+    amt,
+    fPxs,
+    pxs,
+}: {
+    amt: number;
+    fPxs: IPx;
+    pxs: IPx;
+}) => {
+    const A = 1;
+    // The normal side: use pxs
+    const _baseA = A / pxs.pxA;
+    const _baseB = _baseA / pxs.pxB;
+    const _A2 = _baseB * pxs.pxC;
 
+    const perc = ceil(((_A2 - A) / A) * 100, 2);
 
-const pxs = { pxA: 57967.4, pxB: 3.063e-7, pxC: 0.01793 } 
-calcTrade({flipped: false, amt: .6, ...pxs})
+    // The flipped side: use fpxs
+    const _baseC = A / fPxs.pxC;
+    const _amtB = _baseC * fPxs.pxB;
+    const _A3 = _amtB * fPxs.pxA;
+    const _A33 = A * fPxs.pxB * fPxs.pxA /fPxs.pxC
+
+    const fperc = ceil(((_A3 - A) / A) * 100, 2);
+
+    const flipped = fperc > perc;
+    console.log({_A3, _A33});
+    console.log({ perc: `${perc}%`, fperc: `${fperc}%` });
+};
+
+const pxs = { pxA: 57967.5, pxB: 3.204e-7, pxC: 0.01786 };
+const fPxs = { pxA: 57967.4, pxB: 3.063e-7, pxC: 0.01793 };
+//calcTrade({flipped: true, amt: .6, ...pxs})
+testTrades({ amt: 10, pxs, fPxs });
