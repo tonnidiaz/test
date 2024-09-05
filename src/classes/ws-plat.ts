@@ -18,7 +18,7 @@ import {
     placeArbitOrders,
     placeArbitOrdersFlipped,
 } from "@/utils/orders/funcs4";
-import { deactivateBot, reactivateBot } from "@/utils/funcs3";
+import { KUCOIN_WS_URL, deactivateBot, reactivateBot } from "@/utils/funcs3";
 import { IOrder } from "@/models/order";
 import { RawData } from "ws";
 import axios from "axios";
@@ -30,24 +30,6 @@ const BYBIT_WS_URL = "wss://stream.bybit.com/v5/public/spot";
 const BYBIT_WS_URL_DEMO = "wss://stream-testnet.bybit.com/v5/public/spot";
 const BINANCE_WS_URL = "wss://stream.binance.com:9443";
 
-const KUCOIN_TOKEN_URL = "https://api.kucoin.com/api/v1/bullet-public";
-let kucoinTokenTs = Date.now();
-let kucoinToken = "";
-
-const getKucoinToken = async () => {
-    const diff = Date.now() - kucoinTokenTs;
-    if (diff < 60 * 60000 && kucoinToken.length) return kucoinToken;
-    try {
-        const r = await axios.post(KUCOIN_TOKEN_URL);
-        kucoinToken = r.data?.data?.token ?? "";
-        return kucoinToken;
-    } catch (e) {
-        console.log("FAILED TO GET KUCOIN TOKEN");
-        console.log(e);
-    }
-};
-const KUCOIN_WS_URL = (tkn: any) =>
-    "wss://ws-api-spot.kucoin.com/?token=" + tkn;
 
 const SLEEP_MS = 10 * 1000;
 const demo = false;
@@ -77,6 +59,7 @@ export class WsTriArbit {
     reconnectInterval: number;
     maxReconnectAttempts: number;
     currentReconnectAttempts: number;
+    PING_INTERVAL = 10 * 1000
 
     constructor(plat: string) {
         this.name = this.constructor.name;
@@ -110,7 +93,7 @@ export class WsTriArbit {
 
             this.isConnectError = false;
             if (this.plat.toLocaleLowerCase() == "kucoin") {
-                this.wsURL = KUCOIN_WS_URL(await getKucoinToken());
+                this.wsURL = await KUCOIN_WS_URL();
             }
             this.ws = new TuWs(this.wsURL);
             this.ws.plat = this.plat;
@@ -119,6 +102,7 @@ export class WsTriArbit {
             this.ws?.on("open", async () => {
                 if (!this.ws) return this._log("ON OPEN: BUT NO WS");
                 this._log("ON OPEN");
+                setInterval(()=>this.ws?.keepAlive(), this.PING_INTERVAL)
                 for (let ch of this.ws.channels) {
                     await this.ws.sub(ch.channel, ch.plat, ch.data);
                 }
@@ -132,7 +116,7 @@ export class WsTriArbit {
                 await sleep(SLEEP_MS);
             });
             this.ws?.on("close", async (code, rsn) => {
-                if (DEV) this._log(`[onClose] CODE: ${code}\nREASON: ${rsn}`);
+                this._log(`[onClose] CODE: ${code}\nREASON: ${rsn}`);
                 // if (!this.isConnectError) await this.initWs();
                 this.reconnect();
             });

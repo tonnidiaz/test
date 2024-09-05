@@ -4,12 +4,13 @@ import type { ClientRequestArgs } from "http";
 import { sleep, timedLog } from "@/utils/functions";
 import { IObj, IOrderbook } from "@/utils/interfaces";
 import { parseDate } from "@/utils/funcs2";
+import { DEV } from "@/utils/constants";
 const readyStateMap = {
-    0: 'CONNECTING',
-    1: 'OPEN',
-    2: 'CLOSING',
-    3: 'CLOSED'
-  };
+    0: "CONNECTING",
+    1: "OPEN",
+    2: "CLOSING",
+    3: "CLOSED",
+};
 export class TuWs extends WebSocket {
     channels: { channel: string; data: IObj; plat: string }[] = [];
     plat: string = "okx";
@@ -23,8 +24,21 @@ export class TuWs extends WebSocket {
         this.lastSub = Date.now();
     }
 
+    keepAlive() {
+        if (this.readyState === this.OPEN) {
+            this.ping();
+            if (DEV)
+            console.log("Ping sent to server");
+        }
+    }
+    
+
     async sub(channel: string, plat: string, data: IObj = {}) {
-        console.log("\n", { channel, state: readyStateMap[this.readyState] }, "\n");
+        console.log(
+            "\n",
+            { channel, state: readyStateMap[this.readyState] },
+            "\n"
+        );
         if (this.readyState != this.OPEN && false) {
             this.channels.push({ channel, data, plat });
         } else {

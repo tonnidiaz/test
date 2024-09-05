@@ -1,15 +1,21 @@
 import { parseDate } from "@/utils/funcs2";
+import { KUCOIN_WS_URL } from "@/utils/funcs3";
 import { IOrderbook } from "@/utils/interfaces";
 import Ws from "ws";
 
-const KUCOIN_API_SECRET = "35dc9c1d-51aa-4fad-be79-280be6155b59",
-    KUCOIN_API_KEY = "66d6db260ead2400015e90ea",
-    KUCOIN_TOKEN =
-        "2neAiuYvAU61ZDXANAGAsiL4-iAExhsBXZxftpOeh_55i3Ysy2q2LEsEWU64mdzUOPusi34M_wGoSf7iNyEWJ7Hpi6VkzA_HnrsEt757fLDI01cJ3EoydNiYB9J6i9GjsxUuhPw3Blq6rhZlGykT3Vp1phUafnulOOpts-MEmEGpNUI84S6vrJTgyxX8E4rMJBvJHl5Vs9Y=.LmLBJkS2mQLCJn4B0fVRXw==";
-const connect = () => {
-    const ws = new Ws("wss://ws-api-spot.kucoin.com/?token=" + KUCOIN_TOKEN);
+
+const connect = async() => {
+    const PING_INTERVAL = 10 * 1000
+    const ws = new Ws(await KUCOIN_WS_URL());
+    const keepAlive = () => {
+    if (ws.readyState === ws.OPEN) {
+      ws.ping();
+      console.log('Ping sent to server');
+    }
+  };
     ws.on("open", () => {
         console.log("onOpen");
+        setInterval(keepAlive, PING_INTERVAL)
     });
     ws.on("close", (code, rsn) => {
         console.log("onClose:", `${code}: ${rsn}`);
@@ -21,21 +27,23 @@ const connect = () => {
     ws.on("message", (buff) => {
         const data = JSON.parse(`${buff}`);
         const { topic } = data;
-        let channel = "", symbol = ''; 
+        let channel = "",
+            symbol = "";
         if (data.type == "welcome") {
             console.log("SUBING...");
-            ws.send(
-                JSON.stringify({
-                    type: "subscribe",
-                    topic: "/spotMarket/level2Depth5:SOL-USDT", //Topic needs to be subscribed. Some topics support to divisional subscribe the informations of multiple trading pairs through ",".
-                    privateChannel: false, //Adopted the private channel or not. Set as false by default.
-                    response: true,
-                })
-            );
+            // ws.send(
+            //     JSON.stringify({
+            //         type: "subscribe",
+            //         topic: "/spotMarket/level2Depth5:SOL-USDT", //Topic needs to be subscribed. Some topics support to divisional subscribe the informations of multiple trading pairs through ",".
+            //         privateChannel: false, //Adopted the private channel or not. Set as false by default.
+            //         response: true,
+            //     })
+            // );
         } else {
+            console.log(data)
             if (topic && topic.includes("level2Depth5")) {
                 channel = "orderbook";
-                symbol = topic.split(':')[1]
+                symbol = topic.split(":")[1];
                 const d = data.data;
                 const ob: IOrderbook = {
                     ts: parseDate(Date.now()),
@@ -51,10 +59,10 @@ const connect = () => {
                     })),
                 };
 
-                console.log({bid: ob.bids[0], ask: ob.asks[0]}, '\n')
+                console.log({ bid: ob.bids[0], ask: ob.asks[0] }, "\n");
             }
         }
     });
 };
 
-//connect();
+connect();

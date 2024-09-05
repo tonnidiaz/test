@@ -11,7 +11,7 @@ import { botLog, getSymbol } from "./functions";
 import { kucoinInstrus } from "./data/instrus/kucoin-instrus";
 import { TriArbitOrder, Order } from "@/models";
 import { max } from "indicatorts";
-
+import axios from "axios";
 export const getKlinesPath = ({
     plat,
     demo = false,
@@ -131,3 +131,23 @@ export const parseOrders = async (_bot: IBot, _start: number, max: number) => {
         }
     }
 };
+
+
+const KUCOIN_TOKEN_URL = "https://api.kucoin.com/api/v1/bullet-public";
+let kucoinTokenTs = Date.now();
+let kucoinToken = "";
+
+const getKucoinToken = async () => {
+    const diff = Date.now() - kucoinTokenTs;
+    if (diff < 60 * 60000 && kucoinToken.length) return kucoinToken;
+    try {
+        const r = await axios.post(KUCOIN_TOKEN_URL);
+        kucoinToken = r.data?.data?.token ?? "";
+        return kucoinToken;
+    } catch (e) {
+        console.log("FAILED TO GET KUCOIN TOKEN");
+        console.log(e);
+    }
+};
+export const KUCOIN_WS_URL = async () =>
+    "wss://ws-api-spot.kucoin.com/?token=" + await getKucoinToken();
