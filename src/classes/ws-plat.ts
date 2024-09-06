@@ -30,7 +30,6 @@ const BYBIT_WS_URL = "wss://stream.bybit.com/v5/public/spot";
 const BYBIT_WS_URL_DEMO = "wss://stream-testnet.bybit.com/v5/public/spot";
 const BINANCE_WS_URL = "wss://stream.binance.com:9443";
 
-
 const SLEEP_MS = 10 * 1000;
 const demo = false;
 
@@ -59,7 +58,7 @@ export class WsTriArbit {
     reconnectInterval: number;
     maxReconnectAttempts: number;
     currentReconnectAttempts: number;
-    PING_INTERVAL = 10 * 1000
+    PING_INTERVAL = 10 * 1000;
 
     constructor(plat: string) {
         this.name = this.constructor.name;
@@ -88,7 +87,7 @@ export class WsTriArbit {
     async initWs() {
         try {
             if (!this.wsURL) return this._log("WS URL UNDEFINED");
-            this._log("initWs()")
+            this._log("initWs()");
             //if (this.ws?.readyState == this.ws?.OPEN) this.ws?.close();
 
             this.isConnectError = false;
@@ -102,7 +101,7 @@ export class WsTriArbit {
             this.ws?.on("open", async () => {
                 if (!this.ws) return this._log("ON OPEN: BUT NO WS");
                 this._log("ON OPEN");
-                setInterval(()=>this.ws?.keepAlive(), this.PING_INTERVAL)
+                setInterval(() => this.ws?.keepAlive(), this.PING_INTERVAL);
                 for (let ch of this.ws.channels) {
                     await this.ws.sub(ch.channel, ch.plat, ch.data);
                 }
@@ -173,22 +172,26 @@ export class WsTriArbit {
             let fpxC = bookC.ask.px;
             let fpxB = bookB.bid.px;
             let fpxA = bookA.bid.px;
-            
+
             const A2 = (A * pxC) / (pxA * pxB); // BUY A, BUY B, SELL C
-            const FA2 = (A * fpxA * fpxB ) / fpxC; //BUY C, SELL B, SELL A
+            const FA2 = (A * fpxA * fpxB) / fpxC; //BUY C, SELL B, SELL A
 
             const _perc = ceil(((A2 - A) / A) * 100, 2);
             const _fperc = ceil(((FA2 - A) / A) * 100, 2);
-            const perc = Math.max(_perc, _fperc)
+            const perc = Math.max(_perc, _fperc);
 
             const flipped = _perc < _fperc;
 
-            botLog(bot, pairA, pairB, pairC, '\n', {pxA, pxB, pxC}, '\n', {fpxA, fpxB, fpxC});
+            botLog(bot, pairA, pairB, pairC, "\n", { pxA, pxB, pxC }, "\n", {
+                fpxA,
+                fpxB,
+                fpxC,
+            });
 
             botLog(bot, { _perc: `${_perc}%`, _fperc: `${_fperc}%`, flipped });
-            if (this.plat == 'kucoin' && bot.demo){
-                await sleep(5000)
-                return true
+            if (this.plat == "kucoin" && bot.demo) {
+                await sleep(5000);
+                return true;
             }
 
             if (perc >= bot.arbit_settings!.min_perc) {
@@ -231,7 +234,14 @@ export class WsTriArbit {
                     szC = szB;
                 }
 
-                botLog(bot, { pxA, pxB, pxC }, '\n', { availSzA, availSzB, availSzC }, '\n',  { szA, szB, szC });
+                botLog(
+                    bot,
+                    { pxA, pxB, pxC },
+                    "\n",
+                    { availSzA, availSzB, availSzC },
+                    "\n",
+                    { szA, szB, szC }
+                );
 
                 if (availSzA > szA && availSzB > szB && availSzC > szC) {
                     botLog(bot, "WS: ALL GOOD, GOING IN...");
@@ -258,8 +268,8 @@ export class WsTriArbit {
                         cPxC: pxC,
                     };
                     //await deactivateBot(bot);
-                    abot.active = false
-                    this._updateBots(abot)
+                    abot.active = false;
+                    this._updateBots(abot);
                     const res = flipped
                         ? await placeArbitOrdersFlipped(params)
                         : await placeArbitOrders(params);
@@ -274,8 +284,8 @@ export class WsTriArbit {
                     if (!_botFinal) return false;
                     this._updateBots({ ...abot, bot: _botFinal });
                     await sleep(SLEEP_MS);
-                    abot.active = true
-                    this._updateBots(abot)
+                    abot.active = true;
+                    this._updateBots(abot);
                     return bot.id;
                 }
             }
@@ -285,8 +295,9 @@ export class WsTriArbit {
             // this.arbitBots = this.arbitBots.map((abot2) => {
             //     return abot2.bot.id == abot.bot.id ? abot : abot2;
             // });
-            abot.active = true
-            this._updateBots(abot)
+            await sleep(5000);
+            abot.active = true;
+            this._updateBots(abot);
             return true;
         } catch (e) {
             this._log(e);
@@ -468,7 +479,11 @@ export class WsTriArbit {
                 // Determine whether to use the flipped or not
                 const ob = data as IOrderbook;
                 let enoughAsk: IBook | undefined;
-
+                const {
+                    bookA: oldBookA,
+                    bookB: oldBookB,
+                    bookC: oldBookC,
+                } = abot;
                 switch (symbol) {
                     case symbolA:
                         abot.bookA = {
@@ -493,51 +508,44 @@ export class WsTriArbit {
 
                 // Update bots
                 this._updateBots(abot);
-            }
 
-            const { bookA, bookB, bookC } = abot;
-            //this._log("\n", { plat: this.plat, pairC });
-            //this._log({ bookC });
-            //await sleep(SLEEP_MS);
-            //return;
+                const { bookA, bookB, bookC } = abot;
+                //this._log("\n", { plat: this.plat, pairC });
+                //this._log({ bookC });
+                //await sleep(SLEEP_MS);
+                //return;
 
-            if (
-                bookA == undefined ||
-                bookB == undefined ||
-                bookC == undefined
-            ) {
-                if (DEV)
-                this._log("\nNO BOOK\n");
-                return 
-            }
-            //this._log({ bookA, bookB, bookC });
-            //await sleep(5000)
-            // UNSUB FIRST
-            //await this.unsub(abot.bot)
-            if (abot.active) {
-                abot.active = false;
-                const re = await this.handleTickers({
-                    abot,
-                    symbol,
-                });
-
-                // refetch abot
-                //const _abot = this.arbitBots.find(el=> el.bot.id == abot.bot.id)
-                if (re != false) {
-                    abot.active = true;
+                if (
+                    bookA == undefined ||
+                    bookB == undefined ||
+                    bookC == undefined
+                ) {
+                    if (DEV) this._log("\nNO BOOK\n");
+                    return;
                 }
-                this._updateBots(abot);
+                //this._log({ bookA, bookB, bookC });
+                //await sleep(5000)
+                // UNSUB FIRST
+                //await this.unsub(abot.bot)
+                const bookCond =
+                    oldBookA != bookA || oldBookB != bookB || oldBookC != bookC;
+                if (abot.active && bookCond) {
+                    abot.active = false;
+                    const re = await this.handleTickers({
+                        abot,
+                        symbol,
+                    });
 
-                // if (re != false) {
-                //     // RE-SUB
-                //     this._log("\nRE-SUB\n");
-                //     await this.sub(abot.bot);
-                // }
+                    if (re != false) {
+                        abot.active = true;
+                    }
+                    this._updateBots(abot);
+                } else if (abot.active) {
+                    if (DEV)
+                    console.log({ bookA, bookB, bookC });
+                }
             }
-
-            //await sleep(SLEEP_MS);
         }
-        //await sleep(SLEEP_MS);
     }
 
     parseData(resp: RawData) {
