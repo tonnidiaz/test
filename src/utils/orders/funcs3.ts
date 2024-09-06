@@ -184,22 +184,24 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
         }
         const o_perc = Number((((oA - AMT) / AMT) * 100).toFixed(2));
         const c_perc = Number((((cA - AMT) / AMT) * 100).toFixed(2));
-        const percCond = c_perc >= arbit_settings.min_perc;
+        
 
-        perc = c_perc
+        perc = Math.abs(c_perc)
+        const percCond = perc >= arbit_settings.min_perc;
+        const flipped = c_perc < 0
         botLog(bot, { prev_ts: prev_rowA.ts });
         botLog(bot, { cPxA, cPxB, cPxC });
         botLog(bot, { pxA, pxB, pxC });
 
         botLog(bot, { _isGreenA, _isGreenB, _isGreenC });
-        botLog(bot, { perc: `${perc}%`, mustEnter }, "\n");
+        botLog(bot, { perc: `${perc}%`, flipped }, "\n");
         botLog(bot, { baseA, baseB, _quote });
         const MAKER = 0.1 / 100,
             TAKER = 0.1 / 100;
 
         if (percCond) {
             botLog(bot, "GOING IN...");
-            perc = c_perc;
+          
             const params = {
                 bot,
                 pairA,
@@ -235,7 +237,7 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
 
             let res: any = null;
             /* PLACE ORDERS */
-            if (arbit_settings.flipped) {
+            if (flipped) {
                 res = await placeArbitOrdersFlipped(params);
             } else {
                 res = await placeArbitOrders(params);

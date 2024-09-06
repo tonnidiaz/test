@@ -226,7 +226,7 @@ router.post("/:id/edit", authMid, async (req, res) => {
         const wsTriArbit: WsTriArbit = wsTriArbits[bot.platform];
         //const ws = bot.platform == "bybit" ? wsBybit : wsOkx;
         //await ws.rmvBot(bot.id);
-        await wsTriArbit.rmvBot(bot.id);
+        await wsTriArbit?.rmvBot(bot.id);
 
         const ts = parseDate(new Date());
 
