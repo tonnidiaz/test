@@ -529,7 +529,16 @@ export class WsTriArbit {
                 //await this.unsub(abot.bot)
                 const bookCond =
                     oldBookA != bookA || oldBookB != bookB || oldBookC != bookC;
-                if (abot.active && bookCond) {
+
+                const bookFieldsCond =
+                    bookA.bid &&
+                    bookA.ask &&
+                    bookB.bid &&
+                    bookB.ask &&
+                    bookC.bid &&
+                    bookC.ask;
+
+                if (abot.active && bookCond && bookFieldsCond) {
                     abot.active = false;
                     const re = await this.handleTickers({
                         abot,
@@ -541,8 +550,7 @@ export class WsTriArbit {
                     }
                     this._updateBots(abot);
                 } else if (abot.active) {
-                    if (DEV)
-                    console.log({ bookA, bookB, bookC });
+                    if (DEV && false) console.log({ bookA, bookB, bookC });
                 }
             }
         }
