@@ -371,7 +371,7 @@ router.post("/:id/edit", authMid, async (req, res) => {
                 bot.arbit_settings?._type == "tri" &&
                 bot.arbit_settings.use_ws
             ) {
-                await wsTriArbit.addBot(bot);
+                await wsTriArbit?.addBot(bot);
             }
 
             // if (bot.orders.length) {
@@ -384,7 +384,7 @@ router.post("/:id/edit", authMid, async (req, res) => {
             //         !order.is_closed &&
             //         order.sell_price != 0
             //     ) {
-            //         //await ws.addBot(bot.id, true);
+            //         //await ws.addBot(bot.id, true); 
             //     }
             // }
         } else {

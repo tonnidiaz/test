@@ -140,7 +140,7 @@ const main = async () => {
         await addBotJob(bot);
         botLog(bot, "INITIALIZING WS...");
         if (bot.type == 'arbitrage' && bot.arbit_settings?._type == 'tri'){
-            await wsPlat.addBot(bot, true)
+            await wsPlat?.addBot(bot, true)
         }
 
         // if (bot.orders.length) {
