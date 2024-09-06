@@ -29,7 +29,7 @@ export class Def5Adv extends Backtest {
             this.enterTs = this.row.ts;
             console.log(`HAS BUY SIGNAL...`);
             let m = this.minSz;
-            this.entryLimit = this.row.o * (1 - .02/100);
+            this.entryLimit = this.prevrow.c * (1 - .0/100);
 
 
             // if (o < trail && this.prevrow.c <= this.prevrow.o)

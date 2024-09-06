@@ -290,7 +290,9 @@ export class WsTriArbit {
                 }
             }
 
-            if (!this.arbitBots.find((el) => el.bot.id)) return false;
+            if (!this.arbitBots.find((el) => el.bot.id)) {
+                this._log("ARBIT BOT NO LONGER IN BOTS")
+                return false;}
 
             // this.arbitBots = this.arbitBots.map((abot2) => {
             //     return abot2.bot.id == abot.bot.id ? abot : abot2;
@@ -547,6 +549,8 @@ export class WsTriArbit {
 
                     if (re != false) {
                         abot.active = true;
+                    }else {
+                        this._log("NOT RESUMING")
                     }
                     this._updateBots(abot);
                 } else if (abot.active) {
