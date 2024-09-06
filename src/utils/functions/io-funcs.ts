@@ -111,7 +111,7 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
             }
             if (T) {
                 if (existsSync(tradesPath)) {
-                    trades = await require(tradesPath);
+                    trades = await readJson(tradesPath);
                     console.log({
                         trades: [trades[0], trades[trades.length - 1]],
                     });
@@ -125,7 +125,7 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
             }
             const r =
                 skip_existing && existsSync(klinesPath)
-                    ? await require(klinesPath)
+                    ? await readJson(klinesPath)
                     : await plat.getKlines({
                           start: startTs,
                           end: endTs,
@@ -159,7 +159,7 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
             useFile && file
                 ? JSON.parse(file.toString("utf-8"))
                 : offline
-                ? await require(klinesPath!)
+                ? await readJson(klinesPath!)
                 : klines;
         console.log({ startTs, m: Number(klines[0][0]), endTs });
         console.log({
@@ -262,7 +262,7 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
             quote,
             prefix,
             skip_existing,
-            from_last,
+            from_last,  
             skip_saved,
             fix_invalid,
             clId,
@@ -285,6 +285,7 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
                 new Set(_data.map((el) => JSON.stringify(el)))
             ).map((el) => JSON.parse(el));
         };
+        only = only?.length == 2 ?  only : undefined
 
         let result: IObj = {};
         let msg = "";
@@ -314,12 +315,12 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
         client?.emit(ep, `${platform}: BEGIN COINTEST...`);
 
         if (only){
-            if (!existsSync(savePath)){ client?.emit(ep, {err: "NOTHING TO SHOW"});return}
+            //if (!existsSync(savePath)){ client?.emit(ep, {err: "NOTHING TO SHOW"});return}
             
         }
         else if (show){
             if(existsSync(savePath)){
-                result = {clId, platform, data: await require(savePath)}
+                result = {clId, platform, data: await readJson(savePath)}
                 client?.emit(ep, result)
             }else{
                 client?.emit(ep, {err: "NOTHING TO SHOW"})
@@ -337,7 +338,7 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
             let okxCoins: IObj[] | null = null;
 
             if (existsSync(okxCoinsPath)) {
-                okxCoins = await require(okxCoinsPath);
+                okxCoins = await readJson(okxCoinsPath);
             }
 
             _instruments = getInstrus(_platName)
@@ -354,13 +355,15 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
 
         _instruments = _instruments.sort(); //.sort((a, b)=> a.toString() > b.toString() ? 1 : -1)
         let coins = _instruments;
+        
         if (only){
             coins = coins.filter(el=> el[0] == only[0] && el[1] == only[1])
         }
         else if (quote) coins = coins.filter((el) => el[1] == `${quote}`);
 
         if ((only || from_last) && existsSync(savePath)){
-            _data = (await require(savePath)).sort((a, b) =>
+            console.log("HERE", only)
+            _data = (await readJson(savePath)).sort((a, b) =>
                 a.pair > b.pair ? 1 : -1
             );
 
@@ -434,7 +437,7 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
                 }
                 const r =
                     offline || (existsSync(klinesPath) && skip_saved)
-                        ? await require(klinesPath!)
+                        ? await readJson(klinesPath!)
                         : await plat.getKlines({
                               start: startTs,
                               end: endTs,

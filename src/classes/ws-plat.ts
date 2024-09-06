@@ -520,7 +520,7 @@ export class WsTriArbit {
                     bookB == undefined ||
                     bookC == undefined
                 ) {
-                    if (DEV) this._log("\nNO BOOK\n");
+                    this._log("\nNO BOOK\n");
                     return;
                 }
                 //this._log({ bookA, bookB, bookC });
@@ -550,7 +550,7 @@ export class WsTriArbit {
                     }
                     this._updateBots(abot);
                 } else if (abot.active) {
-                    if (DEV && false) console.log({ bookA, bookB, bookC });
+                    if (DEV) console.log({ bookA, bookB, bookC });
                 }
             }
         }
@@ -562,7 +562,7 @@ export class WsTriArbit {
         let channel: string | undefined;
         let symbol: string | undefined;
         if (!data) {
-            //this._log({ parsedResp });
+            this._log({ parsedResp });
             return;
         }
 
