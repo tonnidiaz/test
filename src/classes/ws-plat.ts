@@ -655,14 +655,14 @@ export class WsTriArbit {
 }
 
 export const wsTriArbits = {
-    okx: new WsTriArbit("okx"),
-    bybit: new WsTriArbit("bybit"),
-    kucoin: new WsTriArbit("kucoin"),
+    //okx: new WsTriArbit("okx"),
+    //bybit: new WsTriArbit("bybit"),
+    //kucoin: new WsTriArbit("kucoin"),
 };
 
 export const initWsTriArbit = async () => {
     try {
-        for (let ws of Object.values(wsTriArbits)) {
+        for (let ws  of Object.values(wsTriArbits) as any[]) {
             await ws.initWs();
         }
     } catch (e) {
