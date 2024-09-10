@@ -1,5 +1,10 @@
-# get klines: after: ts = 5
-limit = 1500
-start = 1
-end = start + limit * interval * 60000
-klines = [5, 4,3,2,1]
+# CROSS_WS BOT
+# - schema:
+#   - platA, platB
+#   - cross_arbit_orders: [{curr_plat: A | B, state: live | withdrawing | withdrawn}]
+
+# - Place buy order on A:
+#   - curr_plat = A, state = live, side: buy
+# - Buy order filled: 
+#   - withdraw from A -> B:
+#   - state

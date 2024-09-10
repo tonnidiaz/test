@@ -663,6 +663,7 @@ export const wsTriArbits = {
 export const initWsTriArbit = async () => {
     try {
         for (let ws  of Object.values(wsTriArbits) as any[]) {
+            if (!DEV)
             await ws.initWs();
         }
     } catch (e) {

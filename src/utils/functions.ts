@@ -308,7 +308,9 @@ export function getCoinPrecision(
             break;
         case "kucoin":
             const _i6 = instru as (typeof kucoinInstrus)[0];
-            pr = precision(Number(is_quote ? _i6.quoteIncrement : _i6.baseIncrement));
+            pr = precision(
+                Number(is_quote ? _i6.quoteIncrement : _i6.baseIncrement)
+            );
             break;
     }
     return pr;
@@ -651,4 +653,8 @@ export const getSymbol = (pair: string[], plat: string) => {
 
 export const clearTerminal = () => {
     process.stdout.write("\x1Bc");
+};
+
+export const calcPerc = (num1: number, num2: number) => {
+    return ceil(((num2 - num1) / num1) * 100, 2);
 };

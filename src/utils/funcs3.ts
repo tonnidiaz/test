@@ -57,8 +57,9 @@ export const getInstrus = (_platName: string) => {
                 .map((el) => [el.baseCoin, el.quoteCoin]);
             break;
         case "mexc":
+            console.log(`\nMEXC BABAYYYYYYY\n`)
             _instruments = mexcInstrus
-                .filter((el) => el.status == "1" && el.isSpotTradingAllowed)
+                .filter((el) => el.status == "1" && el.isSpotTradingAllowed && el.orderTypes.map(el=> el.toLowerCase()).includes('market'))
                 .map((el) => [el.baseAsset, el.quoteAsset]);
             break;
         case "okx":

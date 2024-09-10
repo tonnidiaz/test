@@ -22,7 +22,6 @@ export class Arbit {
     pos = false;
     MIN_PERC: number; //.3 //.1
     entry = 0;
-    exit = 0;
     zvA = 0;
     zvB = 0;
     lastRow: ICandle;
@@ -39,9 +38,6 @@ export class Arbit {
     enterTs = "";
     est_perc = 0;
     pair: string[];
-    SLIP = 0 / 100;
-
-    otype: "market" | "limit" = "market";
 
     trades: {
         ts: string[];
@@ -103,12 +99,7 @@ export class Arbit {
         this.entry = px;
         this.platA.quote -= amt;
         let _base = amt / px;
-
-        const slip = _base * this.SLIP;
-        _base -= slip;
-
         const fee = _base * this.TAKER;
-
         _base -= fee;
         _base = toFixed(_base, this.basePrA);
         console.log({ base: _base, fee }, "\n");
@@ -117,7 +108,7 @@ export class Arbit {
         const { o, h, l, v } = row;
 
         this.trades.push({
-            side: `buy { o: ${o}, h: ${h}, l: ${l}, v: ${v || 'null'} }`,
+            side: `buy { o: ${o}, h: ${h}, l: ${l}, v: ${v} }`,
             ccy: this.pair[0],
             amt: _base,
             px: [this.prefEntryPx, px],
@@ -132,10 +123,6 @@ export class Arbit {
         console.log("\nSELLING:", { amt, px });
         this.platB.base -= amt;
         let _quote = amt * px;
-
-        const slip = _quote * this.SLIP;
-        _quote -= slip;
-
         const fee = _quote * this.MAKER;
         _quote -= fee;
         _quote = toFixed(_quote, this.pxPrB);
@@ -152,7 +139,7 @@ export class Arbit {
         const { o, h, l, v } = row;
 
         this.trades.push({
-            side: `sell { o: ${o}, h: ${h}, l: ${l}, v: ${v || 'null'} }`,
+            side: `sell { o: ${o}, h: ${h}, l: ${l}, v: ${v} }`,
             ccy: this.pair[1],
             amt: _quote,
             px: [this.prefExitPx, px],
@@ -200,10 +187,6 @@ export class Arbit {
     //     }
     // }
 
-    /**
-     *
-     * SELLS AND WITHDRAWS FROM B
-     */
     closePos({ amt, px, row }: { amt: number; px: number; row: ICandle }) {
         const quote = this.sell({ amt, px, row });
         this.withdraw({ amt: quote, side: "sell" });
@@ -225,7 +208,7 @@ export class Arbit {
 
             try {
                 const rowA = dfA[i],
-                    rowB = dfB[i]; 
+                    rowB = dfB[i];
                 const prevrowA = dfA[i - 1],
                     prevrowB = dfB[i - 1];
 
@@ -235,30 +218,29 @@ export class Arbit {
                 const { o: p_oB, h: p_hB, c: p_cB, l: p_lB } = prevrowB;
                 const { o: oB, h: hB, c: cB, l: lB } = rowB;
 
+                console.log("\n", { tsA: rowA.ts, tsB: rowB.ts });
+
                 if (rowA.ts != rowB.ts) break;
 
                 if (rowA.v == 0) this.zvA += 1;
                 if (rowB.v == 0) this.zvB += 1;
 
-                const _slip = 3 / 100;
-                let buyPx = oA * (1 + _slip),
-                    sellPx = oB * (1 - _slip);
-                if (rowA.v) buyPx = Math.min(hA, buyPx);
+                const buyPx = rowA.o,
+                    sellPx = rowB.o;
 
-                if (rowB.v) sellPx = Math.max(lB, sellPx);
-                console.log("\n", { ts: rowA.ts });
+                console.log({ ts: rowA.ts, pxA: buyPx, pxB: sellPx });
 
                 this.lastRow = rowB;
 
-                let diff = ceil(((sellPx - buyPx) / buyPx) * 100, 2); //(sellPx - buyPx) / buyPx * 100
+                let diff = ceil(((p_cB - p_cA) / p_cA) * 100, 2); //(sellPx - buyPx) / buyPx * 100
                 console.log({ diff });
 
-                if (this.pos && this.otype == "limit") {
+                if (this.pos) {
                     console.log("\nHas pos", {
                         side: this.entryLimit ? "buy" : "sell",
                     });
                     if (this.entryLimit) {
-                        if (p_lA < this.entryLimit) {
+                        if (p_lA <= this.entryLimit) {
                             console.log("\nFILL BUY\n");
                             this.buy({
                                 amt: this.platA.quote,
@@ -272,7 +254,8 @@ export class Arbit {
 
                             // PLACE THE SELL ORDER AT CURR ROW
                         }
-                        continue;
+                        continue
+                        
                     }
                     if (!this.entryLimit && !this.withdrawnA) {
                         this.withdrawnA = true;
@@ -287,7 +270,7 @@ export class Arbit {
                         continue;
                     }
                     if (!this.entryLimit && this.exitLimit) {
-                        if (this.exitLimit < p_hB) {
+                        if (this.exitLimit <= p_hB) {
                             console.log("\nFILL SELL\n");
                             this.closePos({
                                 amt: this.platB.base,
@@ -313,17 +296,16 @@ export class Arbit {
                         }
                     }
                 }
-                const CONST = .25
-                if (this.pos && this.otype == "limit") {
+                if (this.pos) {
                     if (this.entryLimit) {
                         this.entryLimit = ceil(
-                            p_cA * (1 - CONST / 100),
+                            p_cA * (1 - 0.5 / 100),
                             this.pxPrA
                         );
                     }
                     if (this.exitLimit) {
                         this.exitLimit = ceil(
-                            p_cB * (1 + CONST / 100),
+                            p_cB * (1 + 0.5 / 100),
                             this.pxPrB
                         );
                     }
@@ -335,66 +317,12 @@ export class Arbit {
                     this.withdrawnA = false;
                     this.withdrawnB = false;
                     this.enterTs = rowA.ts;
-                    this.entryLimit = ceil(p_cA * (1 - CONST / 100), this.pxPrA);
-                    this.exitLimit = ceil(p_cB * (1 + CONST / 100), this.pxPrB);
+                    this.entryLimit = ceil(p_cA * (1 - 0.1 / 100), this.pxPrA);
+                    this.exitLimit = ceil(p_cB * (1 + 0.1 / 100), this.pxPrB);
 
                     this.prefEntryPx = this.entryLimit;
                     this.prefExitPx = this.exitLimit;
                     this.pos = true;
-                }
-
-                if (this.pos && this.otype == "market") {
-                    /**
-                     * BUY [A] - WITHDRAW [A]
-                     * SELL [B] - WITHDRAW [B]
-                     */
-
-                    this.entry = buyPx;
-                    this.exit = sellPx;
-
-                    console.log("\nFILL MARKET BUY\n");
-                    if (this.entryLimit) {
-                        this.buy({
-                            amt: this.platA.quote,
-                            px: this.entry,
-                            row: rowA,
-                        });
-                        this.withdraw({
-                            amt: this.platA.base,
-                            side: "buy",
-                        });
-
-                        this.withdrawnA = true;
-                        console.log(`\n[ ${rowA.ts} ] WITHDRAW TIME [A]`);
-                        this.trades.push({
-                            ts: [rowA.ts],
-                            side: "WITHDRAW A [BUY]",
-                            amt: this.platB.base,
-                            ccy: this.pair[0],
-                            px: [0],
-                        });
-
-                        continue;
-                    }
-
-                    if (this.exitLimit) {
-                        console.log("\nFILL MARKET SELL\n");
-                        this.closePos({
-                            amt: this.platB.base,
-                            px: this.exit,
-                            row: rowB,
-                        });
-                        this.withdrawnB = true;
-                        console.log(`\n[ ${rowB.ts} ] WITHDRAW TIME [B]`);
-                        this.trades.push({
-                            ts: [rowB.ts],
-                            side: "WITHDRAW B [SELL]",
-                            amt: this.platA.quote,
-                            ccy: this.pair[1],
-                            px: [0],
-                        });
-                        continue;
-                    }
                 }
                 // if (this.pos && !IMMEDIATE_SELL) {
                 //     this.sell({ amt: this.platB.base, px: sellPx, row: rowB });

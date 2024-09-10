@@ -5,6 +5,7 @@ import { ARBIT_ZERO_FEES, ARBIT_MIN_PERC } from "../constants";
 import { getInstrus, getKlinesPath, getMakerFee, getTakerFee } from "../funcs3";
 import { ensureDirExists } from "../orders/funcs";
 import {
+    ceil,
     getCoinPrecision,
     getMinAmt,
     getMinSz,
@@ -48,7 +49,7 @@ export const onTriArbitCointest = async (
         skip_saved,
         save_klines,
         perc,
-       flipped,
+       // flipped,
     } = data;
 
     try {
@@ -339,7 +340,7 @@ export const onTriArbitCointest = async (
                 });
 
                 const iLen = Math.min(dfA.length, dfB.length, dfC.length);
-                const SLIP = 1// 0.5;
+                // 1// 0.5;
                 for (let i = 1; i < iLen; i++) {
                     try {
                         const prev_rowA = dfA[i - 1];
@@ -363,7 +364,10 @@ export const onTriArbitCointest = async (
                         const cPxC = prev_rowC.c;
                         const ts = rowA.ts;
 
-                       // let flipped = false//(cPxA * cPxB) > cPxC
+                        const isEven = i % 2 == 0
+                        const SLIP = 1/100//(isEven ? 0:0)/100
+
+                        let flipped = false//(cPxA * cPxB) > cPxC
 
                         if (rowB.ts != ts || rowC.ts != ts) {
                             msg = "TIMESTAMPS DONT MATCH";
@@ -372,12 +376,12 @@ export const onTriArbitCointest = async (
                         }
                         console.log("\n", { ts });
                         console.log({ pairA, pairB, pairC });
-
+                        
                         let _quote = 0,
                             baseA = 0,
                             baseB = 0;
                         let perc = 0;
-                        const _amt = 1;
+                        const _amt = 1, A = 1;
 
                         let oA = 0,
                             cA = 0,
@@ -385,58 +389,37 @@ export const onTriArbitCointest = async (
                             cB = 0,
                             oC = 0,
                             cC = 0;
+                        console.log({SLIP})
 
-                        if (flipped) {
-                            oC = _amt / oPxC;
-                            oB = oC * oPxB;
-                            oA = oB * oPxA;
+                        const SLIP_A = B == 'USDC' ? .5/100 : SLIP
+                        // NORMAL SIDE
+                        const _pxA = pxA * (1 + SLIP_A)
+                        const _pxB = pxB * (1 + SLIP)
+                        const _pxC = pxC * (1 - SLIP)
+                        const _A2 = (A * _pxC) / (_pxA * _pxB)
+                        const _perc = ceil((_A2 - A)/A * 100, 2)
 
-                            cC = _amt / cPxC;
-                            cB = cC * cPxB;
-                            cA = cB * cPxA;
-                        } else {
-                            cB = _amt / cPxA; //  BUY B WITH A
-                            cC = cB / cPxB; // BUY C WITH B
-                            cA = cC * cPxC; // SELL C FOR A
+                        const _fpxA = pxA * (1 - SLIP_A)
+                        const _fpxB = pxB * (1 - SLIP)
+                        const _fpxC = pxC * (1 + SLIP)
+                        const _fA2 = (A * _fpxA * _fpxB) / _fpxC
 
-                            oB = _amt / oPxA; //  BUY B WITH A
-                            oC = oB / oPxB; // BUY C WITH B
-                            oA = oC * oPxC; // SELL C FOR A
-                            // 242.660
+                        const _fperc = ceil((_fA2 - A)/A * 100, 2)
 
-                            //console.log({ _amt, _A, perc });
-                        }
-                        const o_perc = Number(
-                            (((oA - _amt) / _amt) * 100).toFixed(2)
-                        );
-                        const c_perc = Number(
-                            (((cA - _amt) / _amt) * 100).toFixed(2)
-                        );
-
-                        const _isGreenA = prev_rowA.c >= prev_rowA.o;
-                        const _isGreenB = prev_rowB.c >= prev_rowB.o;
-                        const _isGreenC = prev_rowC.c >= prev_rowC.o;
-                        const mustEnter =
-                            (!_isGreenA && _isGreenC) || _isGreenB;
-
-                        console.log({ prev_ts: prev_rowA.ts });
-                        console.log({ cPxA, cPxB, cPxC });
-                        console.log({ pxA, pxB, pxC });
-
-                        console.log({ _isGreenA, _isGreenB, _isGreenC });
-                        console.log({ o_perc, c_perc, mustEnter }, "\n");
-                        //flipped = true//c_perc < 0//(cPxA * cPxB) > cPxC
-                        const percCond = c_perc >= MIN_PERC; // o_perc >= MIN_PERC && c_perc >= MIN_PERC
-
-                        ///const noZeroVol = prev_rowA.v != 0 && prev_rowB.v != 0 && prev_rowC.v != 0
-
+                        flipped = _fperc > _perc
+                        console.log({pxA, pxB, pxC})
                         
-                        const slipA = 0// rowA.v == 0 || false ? SLIP / 100 : 0;
-                        const slipB = 0// rowB.v == 0 || false ? SLIP / 100 : 0;
-                        const slipC = 0// rowC.v == 0 || false ? SLIP / 100 : 0;
-
-                        const day = new Date(rowA.ts).getDay();
-                        const is_weekend = day == 6 || day == 7;
+                        console.log({flipped, _perc, _fperc})
+                        console.log({A, _A2, _fA2})
+                        perc = Math.max(_perc, _fperc)
+                        const est_perc = perc
+                        const __pxA = flipped ? _fpxA : _pxA
+                        const __pxB = flipped ? _fpxB : _pxB
+                        const __pxC = flipped ? _fpxC : _pxC
+                        //console.log({_pxA, _pxB, _pxC})
+                        //console.log({_fpxA, _fpxB, _fpxC})
+                        //console.log({__pxA, __pxB, __pxC})
+                        const percCond = perc >= MIN_PERC; // o_perc >= MIN_PERC && c_perc >= MIN_PERC
 
                         if (percCond) {
                             //console.log({ perc: `${perc}%` });
@@ -445,7 +428,7 @@ export const onTriArbitCointest = async (
                             
                             if (flipped) {
                                 // Buy ALGO at C
-                                baseB = bal / pxC;
+                                baseB = bal / __pxC
                                 if (baseB < minSzC || bal < minAmtC) {
                                     console.log(
                                         "CANNOT BUY C: LESS THAN MIN_AMT",
@@ -458,12 +441,11 @@ export const onTriArbitCointest = async (
                                     );
                                     continue;
                                 }
-                                baseB *= 1 - slipC
                                 baseB *= 1 - TAKER;
                                 baseB = toFixed(baseB, basePrC);
 
                                 // Sell ALGO at B to get BTC
-                                baseA = baseB * pxB;
+                                baseA = baseB * __pxB
                                 if (baseB < minSzB || baseA < minAmtB) {
                                     console.log(
                                         "CANNOT BUY B: LESS THAN MIN_AMT",
@@ -476,13 +458,12 @@ export const onTriArbitCointest = async (
                                     );
                                     continue;
                                 }
-                                baseA *= 1 - slipB
                                 baseA *= 1 - MAKER;
                                 baseA = toFixed(baseA, pxPrB);
 
                                 // Sell BTC at A to get USDT back
                                 // SELL baseA [QUOTE of B] at A to get QUOTE of A
-                                _quote = baseA * pxA;
+                                _quote = baseA * __pxA
                                 if (baseA < minSzA || _quote < minAmtA) {
                                     console.log(
                                         "CANNOT BUY B: LESS THAN MIN_AMT",
@@ -495,11 +476,10 @@ export const onTriArbitCointest = async (
                                     );
                                     continue;
                                 }
-                                _quote *= 1 - slipA
                                 _quote *= 1 - MAKER;
                                 _quote = toFixed(_quote, pxPrA);
                             } else {
-                                baseA = bal / pxA;
+                                baseA = bal / __pxA
                                 if (baseA < minSzA || bal < minAmtA) {
                                     console.log(
                                         "CANNOT BUY A: LESS THAN MIN_AMT",
@@ -512,11 +492,10 @@ export const onTriArbitCointest = async (
                                     );
                                     continue;
                                 }
-                                baseA *= 1 - slipA;
                                 baseA *= 1 - TAKER;
                                 baseA = toFixed(baseA, basePrA);
 
-                                baseB = baseA / pxB;
+                                baseB = baseA / __pxB
                                 if (baseB < minSzB || baseA < minAmtB) {
                                     console.log(
                                         "CANNOT BUY B: LESS THAN MIN_AMT",
@@ -529,11 +508,10 @@ export const onTriArbitCointest = async (
                                     );
                                     continue;
                                 }
-                                baseB *= 1 - slipB;
                                 baseB *= 1 - TAKER;
                                 baseB = toFixed(baseB, basePrB);
 
-                                _quote = baseB * pxC;
+                                _quote = baseB * __pxC
                                 if (baseB < minSzC || _quote < minAmtC) {
                                     console.log(
                                         "CANNOT BUY B: LESS THAN MIN_AMT",
@@ -546,7 +524,6 @@ export const onTriArbitCointest = async (
                                     );
                                     continue;
                                 }
-                                _quote *= 1 - slipC;
                                 _quote *= 1 - MAKER;
                                 _quote = toFixed(_quote, pxPrC);
                             }
@@ -559,8 +536,6 @@ export const onTriArbitCointest = async (
                             bal = _quote;
                             console.log({ bal, START_BAL });
 
-                            const est_perc = c_perc
-                            
                             if (only) {
                                 if (flipped) { 
                                     orders.push({
@@ -573,9 +548,9 @@ export const onTriArbitCointest = async (
                                             `[${pairA}] SELL {H: ${rowA.h}, L: ${rowA.l}, V: ${rowA.v || 'null'}}`,
                                         ],
                                         px: [
-                                            `${pairC[1]} ${cPxC}\n${pairC[1]} ${pxC}`,
-                                            `${pairB[1]} ${cPxB}\n${pairB[1]} ${pxB}`,
-                                            `${pairA[1]} ${cPxA}\n${pairA[1]} ${pxA}`,
+                                            `${pairC[1]} ${pxC}\n${pairC[1]} ${__pxC}`,
+                                            `${pairB[1]} ${pxB}\n${pairB[1]} ${__pxB}`,
+                                            `${pairA[1]} ${pxA}\n${pairA[1]} ${__pxA}`,
                                         ],
                                         amt: [
                                             `${pairC[0]} ${baseB}`,
@@ -594,9 +569,9 @@ export const onTriArbitCointest = async (
                                             `[${pairC}] SELL {H: ${rowC.h}, L: ${rowC.l}, V: ${rowC.v || 'null'}}`,
                                         ],
                                         px: [
-                                            `${pairA[1]} ${cPxA}\n${pairA[1]} ${pxA}`,
-                                            `${pairB[1]} ${cPxB}\n${pairB[1]} ${pxB}`,
-                                            `${pairC[1]} ${cPxC}\n${pairC[1]} ${pxC}`,
+                                            `${pairA[1]} ${pxA}\n${pairA[1]} ${__pxA}`,
+                                            `${pairB[1]} ${pxB}\n${pairB[1]} ${__pxB}`,
+                                            `${pairC[1]} ${pxC}\n${pairC[1]} ${__pxC}`,
                                         ],
                                         amt: [
                                             `${pairA[0]} ${baseA}`,

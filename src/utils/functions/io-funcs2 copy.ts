@@ -302,7 +302,7 @@ export const onTriArbitCointest = async (
 
                 const startMs = Date.parse(start);
                 const endMs = Date.parse(end);
-
+                console.log({a: dfA.length, b: dfB.length, c: dfC.length})
                 dfA = dfA.filter((el) => {
                     const tsMs = Date.parse(el.ts);
                     return tsMs >= startMs && tsMs <= endMs;
@@ -316,6 +316,7 @@ export const onTriArbitCointest = async (
                     const tsMs = Date.parse(el.ts);
                     return tsMs >= startMs && tsMs <= endMs;
                 });
+                console.log({a: dfA.length, b: dfB.length, c: dfC.length})
 
                 const realStartMs = Math.max(
                     Date.parse(dfA[0].ts),
@@ -429,9 +430,9 @@ export const onTriArbitCointest = async (
                         ///const noZeroVol = prev_rowA.v != 0 && prev_rowB.v != 0 && prev_rowC.v != 0
 
                         const SLIP = .5//0.5;
-                        const slipA = rowA.v == 0 ? SLIP / 100 : 0;
-                        const slipB = rowB.v == 0 ? SLIP / 100 : 0;
-                        const slipC = rowC.v == 0 ? SLIP / 100 : 0;
+                        const slipA = rowA.v == 0 || true ? SLIP / 100 : 0;
+                        const slipB = rowB.v == 0 || true ? SLIP / 100 : 0;
+                        const slipC = rowC.v == 0 || true ? SLIP / 100 : 0;
 
                         const day = new Date(rowA.ts).getDay();
                         const is_weekend = day == 6 || day == 7;

@@ -172,7 +172,6 @@ import { bybitInstrus } from "@/utils/data/instrus/bybit-instrus";
 import { ensureDirExists } from "@/utils/orders/funcs";
 import { XRP_WITHDRAW_FEE } from "@/utils/constants";
 import { IObj } from "@/utils/interfaces";
-import { NumberSchemaDefinition } from "mongoose";
 
 // BYBIT, BINANCE 15min PEPE works
 // BYBIT, BINANCE 15min UMA works
@@ -182,24 +181,25 @@ import { NumberSchemaDefinition } from "mongoose";
 const coin = {pair: ["THETA", "USDT"], fee: {base: .24, quote: XRP_WITHDRAW_FEE}}
 async function run() {
     clearTerminal()
-    const one=  true
+    const one=  false
     const data: IObj = {
         
         
-        platA: "okx",
-        platB: "bybit", 
+        platA: "bybit",
+        platB: "binance", 
         interval: 60, 
         start: "2024-01-01 00:00:00+02:00", 
         end: "2024-10-28 23:59:00+02:00",
-        only:  one ? ["BABYDOGE", "USDT"] :  undefined,
+        only:  one ? ["SC", "USDT"] :  undefined,
         save: !one,
         demo: false,
         join: false,
         bal: 50, 
         prefix: 'SELL_NEXT',
+        MED_PAIR: ["SC", "USDT"]
     };
 
-    let { platA, platB, interval, start, end, demo, bal, only, save, join, prefix } = data;
+    let {MED_PAIR, platA, platB, interval, start, end, demo, bal, only, save, join, prefix } = data;
     const startPair = data.from;
     prefix = prefix ? `${prefix}_` : ''
     const QUOTE_FEE = 0,
@@ -230,7 +230,7 @@ async function run() {
             instrusA.findIndex((el2) => el2.toString() == el.toString()) != -1
     );
 
-    let _data: { pair: string[]; profit: number; trades: IObj[], tradeCnt: number }[] = [];
+    let _data: { pair: string[]; profit: number; trades: number }[] = [];
     let last: string[] | undefined;
 
     const savePath = `_data/rf/arbit/coins/${year}/${prefix}${platA}-${platB}_${interval}m.json`;
@@ -288,8 +288,27 @@ async function run() {
             {writeFileSync(savePath, JSON.stringify(_data)); console.log("SAVED\n")}
     }
 
+    
+    const medA_klines_path =  getKlinesPath({plat: platA, interval, year, pair: MED_PAIR, demo})
+
+    if (!existsSync(medA_klines_path)){
+        //return console.log("MED_PAIR", MED_PAIR, `FILE NOT FOUND ON ${platA}`)
+    }
+    
+    const medB_klines_path =  getKlinesPath({plat: platB, interval, year, pair: MED_PAIR, demo})
+
+    if (!existsSync(medB_klines_path)){
+        //return console.log("MED_PAIR", MED_PAIR, `FILE NOT FOUND ON ${platB}`)
+    }
+
+    const medKA: any[] = []//await readJson(medA_klines_path)
+    const medKB: any[] = []//await readJson(medB_klines_path)
+
+    let medDfA = parseKlines(medKA)
+    let medDfB = parseKlines(medKB)
 
     
+
     for (let i = 0; i < iLen; i++) {
         const pair = instrus[i];
         console.log("\nBEGIN PAIR", pair);
@@ -346,7 +365,14 @@ async function run() {
             return tsMs >= startMs && tsMs <= endMs;
         });
 
-      
+        medDfB = medDfB.filter((el) => {
+            const tsMs = Date.parse(el.ts);
+            return tsMs >= startMs && tsMs <= endMs;
+        });
+        medDfA = medDfA.filter((el) => {
+            const tsMs = Date.parse(el.ts);
+            return tsMs >= startMs && tsMs <= endMs;
+        });
 
         // START AT THE LATEST START
         const realStartMs = Math.max(
@@ -364,7 +390,14 @@ async function run() {
             return tsMs >= realStartMs;
         });
 
-      
+        medDfB = medDfB.filter((el) => {
+            const tsMs = Date.parse(el.ts);
+            return tsMs >= realStartMs
+        });
+        medDfA = medDfA.filter((el) => {
+            const tsMs = Date.parse(el.ts);
+            return tsMs >= realStartMs
+        });
 
         const bt = new Arbit({
             platA,
@@ -374,11 +407,13 @@ async function run() {
             bal,
             dfA,
             dfB,
+            medDfA,
+            medDfB,
             basePr,
             pxPr,
         });
         const res = bt.run();
-        _data.push({ pair, profit: res.profit, trades: res.trades, tradeCnt: res.tradeCnt });
+        _data.push({ pair, profit: res.profit, trades: res.trades });
         _data = [..._data].sort((a, b) => (a.profit > b.profit ? -1 : 1));
 
         _save()

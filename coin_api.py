@@ -26,7 +26,7 @@ params = {
     "time_end": DEXE_END,#"2024-04-14T15:00:00+02:00",#"2024-06-20T00:00:00",
     "time_start": DEXE_START#"2024-06-18T00:00:00",
 }
-
+ 
 def get_klines():
     res = requests.get(klinesURL, params=params, headers=headers)
     with open('data/coin-api/bybit-spot/klines.json', 'w') as f:

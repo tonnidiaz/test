@@ -21,8 +21,8 @@ export class Impr5 extends Backtest {
             //this.entry = this.row.o;
 
             if (
-                true//this.prevrow.c < trail
-                 //&& this.prevrow.c <= this.prevrow.o // && v > 0
+                this.prevrow.c < trail
+                 &&this.prevrow.c <= this.prevrow.o // && v > 0
                 //&& (l < o || (v > 0 && o == h && l == o && c == o))
             ) {
                 this.entryLimit = Math.min(this.prevrow.o, this.prevrow.c); //o;

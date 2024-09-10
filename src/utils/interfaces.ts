@@ -54,9 +54,7 @@ export interface IPlat {
     name: string;
     base: number;
     quote: number;
-    med: number;
     df: ICandle[];
-    medDf: ICandle[];
 }
 
 export interface ICcy {

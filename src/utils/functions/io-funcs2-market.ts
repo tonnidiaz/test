@@ -48,7 +48,7 @@ export const onTriArbitCointest = async (
         skip_saved,
         save_klines,
         perc,
-       flipped,
+       // flipped,
     } = data;
 
     try {
@@ -363,7 +363,7 @@ export const onTriArbitCointest = async (
                         const cPxC = prev_rowC.c;
                         const ts = rowA.ts;
 
-                       // let flipped = false//(cPxA * cPxB) > cPxC
+                        let flipped = false//(cPxA * cPxB) > cPxC
 
                         if (rowB.ts != ts || rowC.ts != ts) {
                             msg = "TIMESTAMPS DONT MATCH";
@@ -425,8 +425,8 @@ export const onTriArbitCointest = async (
 
                         console.log({ _isGreenA, _isGreenB, _isGreenC });
                         console.log({ o_perc, c_perc, mustEnter }, "\n");
-                        //flipped = true//c_perc < 0//(cPxA * cPxB) > cPxC
-                        const percCond = c_perc >= MIN_PERC; // o_perc >= MIN_PERC && c_perc >= MIN_PERC
+                        flipped = c_perc < 0//(cPxA * cPxB) > cPxC
+                        const percCond = Math.abs(c_perc) >= MIN_PERC; // o_perc >= MIN_PERC && c_perc >= MIN_PERC
 
                         ///const noZeroVol = prev_rowA.v != 0 && prev_rowB.v != 0 && prev_rowC.v != 0
 
