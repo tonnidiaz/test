@@ -1526,7 +1526,7 @@ export const mexcInstrus = [
     },
     {
         symbol: "DFIUSDT",
-        status: "1",
+        status: "1", 
         baseAsset: "DFI",
         baseAssetPrecision: 2,
         quoteAsset: "USDT",

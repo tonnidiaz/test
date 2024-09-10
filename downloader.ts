@@ -27,6 +27,8 @@ import { platforms } from "@/utils/consts";
 import { okxInstrus } from "@/utils/data/instrus/okx-instrus";
 import { binanceInstrus } from "@/utils/data/instrus/binance-instrus";
 import { bybitInstrus } from "@/utils/data/instrus/bybit-instrus";
+import { bitgetInstrus } from "@/utils/data/instrus/bitget-instrus";
+import { kucoinInstrus } from "@/utils/data/instrus/kucoin-instrus";
 
 const dld = async ({
     parse = false,
@@ -217,8 +219,11 @@ console.log("PID:", process.pid)
 const fn = async () => {
     //const symbos = okxInstrus.filter(el=> el.state == 'live' && el.quoteCcy == 'BTC').map(el=> `${el.baseCcy}/${el.quoteCcy}`)
     //const symbos = bybitInstrus.filter(el=> el.status == 'Trading' && el.quoteCoin == 'BTC').map(el=> `${el.baseCoin}/${el.quoteCoin}`).sort()
-    const symbos = binanceInstrus.filter(el=> el.status == 'TRADING' && el.quoteAsset == 'BTC' && el.isSpotTradingAllowed).map(el=> `${el.baseAsset}/${el.quoteAsset}`).sort()
+    //const symbos = binanceInstrus.filter(el=> el.status == 'TRADING' && el.quoteAsset == 'BTC' && el.isSpotTradingAllowed).map(el=> `${el.baseAsset}/${el.quoteAsset}`).sort()
+    const symbos = bitgetInstrus.filter(el=> el.status == 'online' && el.quoteCoin == 'ETH').map(el=> `${el.baseCoin}/${el.quoteCoin}`).sort()
+   // const symbos = kucoinInstrus.filter(el=> el.enableTrading && el.quoteCurrency == 'ETH').map(el=> `${el.baseCurrency}/${el.quoteCurrency}`).sort()
     console.log("LEN:", symbos.length)
+    return
     for (let plat of plats) {
 
            await dld({

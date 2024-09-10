@@ -16,6 +16,7 @@ import { gateioInstrus } from "@/utils/data/instrus/gateio-instrus";
 import { mexcInstrus } from "./data/instrus/mexc-instrus";
 import { binanceInstrus } from "./data/instrus/binance-instrus";
 import { kucoinInstrus } from "./data/instrus/kucoin-instrus";
+import { ensureDirExists } from "./orders/funcs";
 
 const test = false;
 
@@ -219,6 +220,16 @@ export const readJson = (fp: string) => {
     const data = fs.readFileSync(fp, { encoding: "utf-8" });
     return JSON.parse(data);
 };
+
+export const writeJson = (fp: string, data: any) => {
+    console.log("\nSaving....");
+    ensureDirExists(fp)
+    fs.writeFileSync(fp, JSON.stringify(data));
+    console.log(fp)
+    console.log("SAVED!!\n");
+};
+
+export const existsSync = (fp: string) => fs.existsSync(fp);
 
 export const botLog = (bot: IBot, ...data: any) => {
     console.log(`\n[${parseDate(new Date())}] [ ${bot.name} ]`, ...data, "\n");
@@ -657,4 +668,8 @@ export const clearTerminal = () => {
 
 export const calcPerc = (num1: number, num2: number) => {
     return ceil(((num2 - num1) / num1) * 100, 2);
+};
+
+export const encodeDate = (date: string) => {
+    return date.replaceAll(":", "^").replace(" ", "T");
 };

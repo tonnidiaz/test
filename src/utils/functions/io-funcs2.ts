@@ -363,7 +363,7 @@ export const onTriArbitCointest = async (
                         const cPxC = prev_rowC.c;
                         const ts = rowA.ts;
 
-                       // let flipped = false//(cPxA * cPxB) > cPxC
+                       flipped = (cPxA * cPxB) > cPxC
 
                         if (rowB.ts != ts || rowC.ts != ts) {
                             msg = "TIMESTAMPS DONT MATCH";
