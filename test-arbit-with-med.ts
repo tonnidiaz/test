@@ -159,7 +159,7 @@ arbit({pair: ["SOL", "USDT"], interval, year, demo, plt1, plt2, MIN_PERC});
 import { existsSync, writeFileSync } from "fs";
 import { parseDate, parseKlines } from "@/utils/funcs2";
 
-import { Arbit } from "@/bots/arbitrage/classes";
+import { Arbit } from "@/bots/arbitrage/classes-with-med-pair";
 import { getInstrus, getKlinesPath } from "@/utils/funcs3";
 import {
     getPricePrecision,
@@ -399,11 +399,14 @@ async function run() {
             return tsMs >= realStartMs
         });
 
+        const MAKER = 0.1 / 100,
+        TAKER = 0.1 / 100;
+
         const bt = new Arbit({
             platA,
             platB,
-            BASE_FEE,
-            QUOTE_FEE,
+            MAKER,
+            TAKER,
             bal,
             dfA,
             dfB,
@@ -411,6 +414,7 @@ async function run() {
             medDfB,
             basePr,
             pxPr,
+            BASE_FEE, QUOTE_FEE
         });
         const res = bt.run();
         _data.push({ pair, profit: res.profit, trades: res.trades });

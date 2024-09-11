@@ -55,6 +55,8 @@ export interface IPlat {
     base: number;
     quote: number;
     df: ICandle[];
+    med?: number;
+    medDf?: ICandle[]
 }
 
 export interface ICcy {

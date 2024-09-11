@@ -101,13 +101,15 @@ export class WsTriArbit {
             this.ws?.on("open", async () => {
                 if (!this.ws) return this._log("ON OPEN: BUT NO WS");
                 this._log("ON OPEN");
-                setInterval(() => this.ws?.keepAlive(), this.PING_INTERVAL);
-                for (let ch of this.ws.channels) {
-                    await this.ws.sub(ch.channel, ch.plat, ch.data);
+                for (let abot of this.arbitBots) {
+                    console.log("RESUBING FOR BOT: ", abot.bot.name)
+                    await this.sub(abot.bot)
                 }
                 this.ws.channels = [];
                 this.currentReconnectAttempts = 0;
                 this.open = true;
+                setInterval(() => this.ws?.keepAlive(), this.PING_INTERVAL);
+                
             });
             this.ws?.on("error", async (e) => {
                 this._log("ON ERROR", e);
@@ -340,20 +342,14 @@ export class WsTriArbit {
         }
     }
 
+    /**
+     * 
+     * @param bot An arbitrage bot with A, B, and C
+     */
     async sub(bot: IBot) {
         // SUB FOR A. B. C
         const abot = this.arbitBots.find((el) => el.bot.id == bot.id);
         if (abot) {
-            if (!abot.order) {
-                const _botC = await Bot.findById(bot.children[2]).exec();
-                if (!_botC) return this._log("NO BOT C");
-
-                let order = await getLastOrder(_botC);
-                const bal = bot.balance;
-                abot.order = order ?? undefined;
-                abot.startAmt = bal;
-            }
-
             abot.active = true;
             this._updateBots(abot);
         }

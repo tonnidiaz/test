@@ -15,7 +15,7 @@ const TriArbitOrder = {
 };
 
 const ArbitSettings = {
-    flipped: Boolean,
+    mega: {type: Boolean, default: false},
     use_ws: {type: Boolean, default: false},
     min_perc: { type: Number, default: 1 },
     _type: {
@@ -30,6 +30,11 @@ export const TriArbitOrderSchema = new Schema({
     order: {type: TriArbitOrder}
 },
 { timestamps: true })
+
+const IChildPair = {_id: false, A: { type: String, default: "USDT" },
+B: { type: String, default: "BTC" },
+C: { type: String, default: "DOGE" },}
+
 export const BotSchema = new Schema(
     {
         name: { type: String, required: true },
@@ -98,6 +103,7 @@ export const BotSchema = new Schema(
         A: { type: String, default: "USDT" },
         B: { type: String, default: "BTC" },
         C: { type: String, default: "DOGE" },
+        child_pairs: {type: [IChildPair], default: []},
         is_child: { type: Boolean, default: false },
         children: { type: [Schema.ObjectId], ref: "Bot" },
         arbit_settings: ArbitSettings,

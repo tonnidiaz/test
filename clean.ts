@@ -114,10 +114,11 @@ const cleanOldArbitOrders = async () =>{
 const clean = async () =>{
     await connectMongo()
     await cleanOldArbitOrders()
-    console.log("DONE")
-    return;
     await remChildBots()
     await cleanOrders()
+    console.log("DONE")
+    return;
+    
 }
 
 clean()

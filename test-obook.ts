@@ -360,7 +360,7 @@ const BDX_START = "2024-03-13 13:00:00+02:00",
 //     minPerc: 0.3,
 // });
 
-const C = "WRX";
+const C = "CAS";
 
 runTri({
     minPerc: 0.5,

@@ -1,6 +1,25 @@
-# WS ARBIT BOT
+# MAIN PLANS FOR TRIANGULAR ARBITRAGE BOT
 
-- Check if abs non-flipped **perc** [ask, ask, bid] > min_perc
-- If so:
-    - use flipped if **perc** < 0
-    - check if books have enough sz [bookA, bookB, bookC]
+
+## MEGA-BOT
+### Schema:
+- **mega** = true
+- **children** = [ **TriArbitBot** ]
+    - **ChildSchema:**
+        - **type** = arbitrage
+        - **is_child** = true
+        - **parent** = bot
+        - **arbit_settings.type** = tri
+### Creation
+- Loop through child_pairs
+- Create **new ArbitBots** for with each child pair
+- Add child-bot to bot.children 
+
+### WS
+
+- Each **child-bot** works like a seperate normal **tri-arbit 
+- Add a **Boolean** to pause/resume all **child-bot** subs
+parent bot**
+- Sub to orderbook for each **child-bot** children
+    - The **child-bot.child** with highest percentage pauses the all other **child-bot** subs
+    - 

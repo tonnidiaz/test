@@ -177,41 +177,52 @@ import { NumberSchemaDefinition } from "mongoose";
 // BYBIT, BINANCE 15min PEPE works
 // BYBIT, BINANCE 15min UMA works
 
-
-
-const coin = {pair: ["THETA", "USDT"], fee: {base: .24, quote: XRP_WITHDRAW_FEE}}
+const coin = {
+    pair: ["THETA", "USDT"],
+    fee: { base: 0.24, quote: XRP_WITHDRAW_FEE },
+};
 async function run() {
-    clearTerminal()
-    const one=  true
+    clearTerminal();
+    const one = true;
     const data: IObj = {
-        
-        
         platA: "okx",
-        platB: "bybit", 
-        interval: 60, 
-        start: "2024-01-01 00:00:00+02:00", 
+        platB: "bybit",
+        interval: 60,
+        start: "2024-01-01 00:00:00+02:00",
         end: "2024-10-28 23:59:00+02:00",
-        only:  one ? ["BABYDOGE", "USDT"] :  undefined,
+        only: one ? ["BABYDOGE", "USDT"] : undefined,
         save: !one,
         demo: false,
         join: false,
-        bal: 50, 
-        prefix: 'SELL_NEXT',
+        bal: 50,
+        prefix: "SELL_NEXT",
     };
 
-    let { platA, platB, interval, start, end, demo, bal, only, save, join, prefix } = data;
+    let {
+        platA,
+        platB,
+        interval,
+        start,
+        end,
+        demo,
+        bal,
+        only,
+        save,
+        join,
+        prefix,
+    } = data;
     const startPair = data.from;
-    prefix = prefix ? `${prefix}_` : ''
+    prefix = prefix ? `${prefix}_` : "";
     const QUOTE_FEE = 0,
         BASE_FEE = 0;
-    let msg = ""
-    
+    let msg = "";
+
     const year = Number(start.split("-")[0]);
 
     let instrusA = getInstrus(platA);
     let instrusB = getInstrus(platB);
-    instrusA = instrusA.filter(el=> el[1] == "USDT")
-    instrusB = instrusB.filter(el=> el[1] == "USDT")
+    instrusA = instrusA.filter((el) => el[1] == "USDT");
+    instrusB = instrusB.filter((el) => el[1] == "USDT");
 
     if (only) {
         instrusA = instrusA.filter(
@@ -230,42 +241,46 @@ async function run() {
             instrusA.findIndex((el2) => el2.toString() == el.toString()) != -1
     );
 
-    let _data: { pair: string[]; profit: number; trades: IObj[], tradeCnt: number }[] = [];
+    let _data: {
+        pair: string[];
+        profit: number;
+        trades: IObj[];
+        tradeCnt: number;
+    }[] = [];
     let last: string[] | undefined;
 
     const savePath = `_data/rf/arbit/coins/${year}/${prefix}${platA}-${platB}_${interval}m.json`;
 
-    if ((only || join) && existsSync(savePath)){
+    if ((only || join) && existsSync(savePath)) {
         _data = (await readJson(savePath)).sort((a, b) =>
             a.pair > b.pair ? 1 : -1
         );
 
-        if (join){
+        if (join) {
             console.log("\nCONTINUING WHERE WE LEFT OF...\n");
-        
-        last = _data[_data.length - 1]?.pair;
+
+            last = _data[_data.length - 1]?.pair;
         }
     }
 
-
     if (!only) {
         if (startPair) {
-            instrusA=instrusA.slice(
+            instrusA = instrusA.slice(
                 typeof startPair == "number"
                     ? startPair
-                    :instrusA.findIndex((el) => el[0] == startPair[0])
+                    : instrusA.findIndex((el) => el[0] == startPair[0])
             );
-            instrusB=instrusB.slice(
+            instrusB = instrusB.slice(
                 typeof startPair == "number"
                     ? startPair
-                    :instrusB.findIndex((el) => el[0] == startPair[0])
+                    : instrusB.findIndex((el) => el[0] == startPair[0])
             );
         } else if (last) {
-        instrusA =instrusA.slice(
-            instrusA.findIndex((el) => el.toString() == last!.toString())
+            instrusA = instrusA.slice(
+                instrusA.findIndex((el) => el.toString() == last!.toString())
             );
-        instrusB =instrusB.slice(
-            instrusB.findIndex((el) => el.toString() == last!.toString())
+            instrusB = instrusB.slice(
+                instrusB.findIndex((el) => el.toString() == last!.toString())
             );
 
             msg = `STARTING AT: $instrusA[0]} -> last: ${last}`;
@@ -275,21 +290,17 @@ async function run() {
     }
     const iLen = instrusA.length;
     const instrus = instrusA.sort();
-    
- 
+
     console.log(instrus.length);
     ensureDirExists(savePath);
 
-    
+    const _save = () => {
+        if (save) {
+            writeFileSync(savePath, JSON.stringify(_data));
+            console.log("SAVED\n");
+        }
+    };
 
-
-    const _save = ()=>{
-        if (save)
-            {writeFileSync(savePath, JSON.stringify(_data)); console.log("SAVED\n")}
-    }
-
-
-    
     for (let i = 0; i < iLen; i++) {
         const pair = instrus[i];
         console.log("\nBEGIN PAIR", pair);
@@ -309,11 +320,19 @@ async function run() {
             demo,
         });
 
-        const pxPr = getPricePrecision(pair, platB);
-        const basePr = getCoinPrecision(pair, "limit", platB);
+        const pxPrB = getPricePrecision(pair, platB);
+        const pxPrA = getPricePrecision(pair, platA);
 
-        if (pxPr == null || basePr == null) {
-            console.log("Precision error:", { pxPr, basePr });
+        const basePrB = getCoinPrecision(pair, "limit", platB);
+        const basePrA = getCoinPrecision(pair, "limit", platA);
+
+        if (
+            pxPrB == null ||
+            basePrB == null ||
+            pxPrA == null ||
+            basePrA == null
+        ) {
+            console.log("Precision error:", { pxPr: pxPrB, basePr: basePrB });
             continue;
         }
         if (!existsSync(k1Path)) {
@@ -346,8 +365,6 @@ async function run() {
             return tsMs >= startMs && tsMs <= endMs;
         });
 
-      
-
         // START AT THE LATEST START
         const realStartMs = Math.max(
             Date.parse(dfA[0].ts),
@@ -364,28 +381,33 @@ async function run() {
             return tsMs >= realStartMs;
         });
 
-      
-
         const bt = new Arbit({
+            pair,
             platA,
             platB,
-            BASE_FEE,
-            QUOTE_FEE,
             bal,
             dfA,
             dfB,
-            basePr,
-            pxPr,
+            pxPrA,
+            pxPrB,
+            basePrA,
+            MIN_PERC: 0.3,
+            basePrB,
         });
         const res = bt.run();
-        _data.push({ pair, profit: res.profit, trades: res.trades, tradeCnt: res.tradeCnt });
+        _data.push({
+            pair,
+            profit: res.profit,
+            trades: res.trades,
+            tradeCnt: res.tradeCnt,
+        });
         _data = [..._data].sort((a, b) => (a.profit > b.profit ? -1 : 1));
 
-        _save()
+        _save();
         console.log(`\n${pair} DONE`);
     }
     _data = [..._data].sort((a, b) => (a.profit > b.profit ? -1 : 1));
-    _save()
+    _save();
     console.log("\nALL DONE");
 }
 

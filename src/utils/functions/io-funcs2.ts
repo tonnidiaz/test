@@ -5,6 +5,7 @@ import { ARBIT_ZERO_FEES, ARBIT_MIN_PERC } from "../constants";
 import { getInstrus, getKlinesPath, getMakerFee, getTakerFee } from "../funcs3";
 import { ensureDirExists } from "../orders/funcs";
 import {
+    ceil,
     getCoinPrecision,
     getMinAmt,
     getMinSz,
@@ -48,7 +49,7 @@ export const onTriArbitCointest = async (
         skip_saved,
         save_klines,
         perc,
-       flipped,
+        flipped,
     } = data;
 
     try {
@@ -302,7 +303,7 @@ export const onTriArbitCointest = async (
 
                 const startMs = Date.parse(start);
                 const endMs = Date.parse(end);
-                console.log({a: dfA.length, b: dfB.length, c: dfC.length})
+                console.log({ a: dfA.length, b: dfB.length, c: dfC.length });
                 dfA = dfA.filter((el) => {
                     const tsMs = Date.parse(el.ts);
                     return tsMs >= startMs && tsMs <= endMs;
@@ -316,7 +317,7 @@ export const onTriArbitCointest = async (
                     const tsMs = Date.parse(el.ts);
                     return tsMs >= startMs && tsMs <= endMs;
                 });
-                console.log({a: dfA.length, b: dfB.length, c: dfC.length})
+                console.log({ a: dfA.length, b: dfB.length, c: dfC.length });
 
                 const realStartMs = Math.max(
                     Date.parse(dfA[0].ts),
@@ -339,7 +340,7 @@ export const onTriArbitCointest = async (
                 });
 
                 const iLen = Math.min(dfA.length, dfB.length, dfC.length);
-                const SLIP = 1// 0.5;
+                const SLIP = 1; // 0.5;
                 for (let i = 1; i < iLen; i++) {
                     try {
                         const prev_rowA = dfA[i - 1];
@@ -354,16 +355,9 @@ export const onTriArbitCointest = async (
                         const pxB = rowB.o;
                         const pxC = rowC.o;
 
-                        const oPxA = prev_rowA.o;
-                        const oPxB = prev_rowB.o;
-                        const oPxC = prev_rowC.o;
-
-                        const cPxA = prev_rowA.h;
-                        const cPxB = prev_rowB.c;
-                        const cPxC = prev_rowC.c;
                         const ts = rowA.ts;
 
-                       flipped = (cPxA * cPxB) > cPxC
+                        flipped = pxA * pxB > pxC;
 
                         if (rowB.ts != ts || rowC.ts != ts) {
                             msg = "TIMESTAMPS DONT MATCH";
@@ -379,70 +373,37 @@ export const onTriArbitCointest = async (
                         let perc = 0;
                         const _amt = 1;
 
-                        let oA = 0,
-                            cA = 0,
-                            oB = 0,
-                            cB = 0,
-                            oC = 0,
-                            cC = 0;
+                        let A2 = 0;
 
                         if (flipped) {
-                            oC = _amt / oPxC;
-                            oB = oC * oPxB;
-                            oA = oB * oPxA;
-
-                            cC = _amt / cPxC;
-                            cB = cC * cPxB;
-                            cA = cB * cPxA;
+                            A2 = (pxA * pxB) / pxC;
                         } else {
-                            cB = _amt / cPxA; //  BUY B WITH A
-                            cC = cB / cPxB; // BUY C WITH B
-                            cA = cC * cPxC; // SELL C FOR A
-
-                            oB = _amt / oPxA; //  BUY B WITH A
-                            oC = oB / oPxB; // BUY C WITH B
-                            oA = oC * oPxC; // SELL C FOR A
-                            // 242.660
-
-                            //console.log({ _amt, _A, perc });
+                            A2 = pxC / (pxA * pxB);
                         }
-                        const o_perc = Number(
-                            (((oA - _amt) / _amt) * 100).toFixed(2)
-                        );
-                        const c_perc = Number(
-                            (((cA - _amt) / _amt) * 100).toFixed(2)
-                        );
+                        perc = ceil(((A2 - _amt) / _amt) * 100, 2);
 
-                        const _isGreenA = prev_rowA.c >= prev_rowA.o;
-                        const _isGreenB = prev_rowB.c >= prev_rowB.o;
-                        const _isGreenC = prev_rowC.c >= prev_rowC.o;
-                        const mustEnter =
-                            (!_isGreenA && _isGreenC) || _isGreenB;
-
-                        console.log({ prev_ts: prev_rowA.ts });
-                        console.log({ cPxA, cPxB, cPxC });
                         console.log({ pxA, pxB, pxC });
 
-                        console.log({ _isGreenA, _isGreenB, _isGreenC });
-                        console.log({ o_perc, c_perc, mustEnter }, "\n");
-                        //flipped = true//c_perc < 0//(cPxA * cPxB) > cPxC
-                        const percCond = c_perc >= MIN_PERC; // o_perc >= MIN_PERC && c_perc >= MIN_PERC
+                        console.log({ perc }, "\n");
+                        //flipped = true//c_perc < 0//(pxA * pxB) > pxC
+                        const percCond = perc >= MIN_PERC; // o_perc >= MIN_PERC && c_perc >= MIN_PERC
 
                         ///const noZeroVol = prev_rowA.v != 0 && prev_rowB.v != 0 && prev_rowC.v != 0
 
-                        
-                        const slipA = 0// rowA.v == 0 || false ? SLIP / 100 : 0;
-                        const slipB = 0// rowB.v == 0 || false ? SLIP / 100 : 0;
-                        const slipC = 0// rowC.v == 0 || false ? SLIP / 100 : 0;
+                        const slipA = 0; // rowA.v == 0 || false ? SLIP / 100 : 0;
+                        const slipB = 0; // rowB.v == 0 || false ? SLIP / 100 : 0;
+                        const slipC = 0; // rowC.v == 0 || false ? SLIP / 100 : 0;
 
                         const day = new Date(rowA.ts).getDay();
                         const is_weekend = day == 6 || day == 7;
+
+                        const est_perc = perc;
 
                         if (percCond) {
                             //console.log({ perc: `${perc}%` });
                             console.log({ A, B, C });
                             console.log("GOING IN...\n");
-                            
+
                             if (flipped) {
                                 // Buy ALGO at C
                                 baseB = bal / pxC;
@@ -458,7 +419,7 @@ export const onTriArbitCointest = async (
                                     );
                                     continue;
                                 }
-                                baseB *= 1 - slipC
+                                baseB *= 1 - slipC;
                                 baseB *= 1 - TAKER;
                                 baseB = toFixed(baseB, basePrC);
 
@@ -476,7 +437,7 @@ export const onTriArbitCointest = async (
                                     );
                                     continue;
                                 }
-                                baseA *= 1 - slipB
+                                baseA *= 1 - slipB;
                                 baseA *= 1 - MAKER;
                                 baseA = toFixed(baseA, pxPrB);
 
@@ -495,7 +456,7 @@ export const onTriArbitCointest = async (
                                     );
                                     continue;
                                 }
-                                _quote *= 1 - slipA
+                                _quote *= 1 - slipA;
                                 _quote *= 1 - MAKER;
                                 _quote = toFixed(_quote, pxPrA);
                             } else {
@@ -559,23 +520,31 @@ export const onTriArbitCointest = async (
                             bal = _quote;
                             console.log({ bal, START_BAL });
 
-                            const est_perc = c_perc
-                            
                             if (only) {
-                                if (flipped) { 
+                                if (flipped) {
                                     orders.push({
                                         ts,
                                         perc,
                                         est_perc,
                                         side: [
-                                            `[${pairC}] BUY {H: ${rowC.h}, L: ${rowC.l}, V: ${rowC.v || 'null'}}`,
-                                            `[${pairB}] SELL {H: ${rowB.h}, L: ${rowB.l}, V: ${rowB.v || 'null'}}`,
-                                            `[${pairA}] SELL {H: ${rowA.h}, L: ${rowA.l}, V: ${rowA.v || 'null'}}`,
+                                            `[${pairC}] BUY {H: ${rowC.h}, L: ${
+                                                rowC.l
+                                            }, V: ${rowC.v || "null"}}`,
+                                            `[${pairB}] SELL {H: ${
+                                                rowB.h
+                                            }, L: ${rowB.l}, V: ${
+                                                rowB.v || "null"
+                                            }}`,
+                                            `[${pairA}] SELL {H: ${
+                                                rowA.h
+                                            }, L: ${rowA.l}, V: ${
+                                                rowA.v || "null"
+                                            }}`,
                                         ],
                                         px: [
-                                            `${pairC[1]} ${cPxC}\n${pairC[1]} ${pxC}`,
-                                            `${pairB[1]} ${cPxB}\n${pairB[1]} ${pxB}`,
-                                            `${pairA[1]} ${cPxA}\n${pairA[1]} ${pxA}`,
+                                            `${pairC[1]} ${pxC}\n${pairC[1]} ${pxC}`,
+                                            `${pairB[1]} ${pxB}\n${pairB[1]} ${pxB}`,
+                                            `${pairA[1]} ${pxA}\n${pairA[1]} ${pxA}`,
                                         ],
                                         amt: [
                                             `${pairC[0]} ${baseB}`,
@@ -589,14 +558,22 @@ export const onTriArbitCointest = async (
                                         perc,
                                         est_perc,
                                         side: [
-                                            `[${pairA}] BUY {H: ${rowA.h}, L: ${rowA.l}, V: ${rowA.v || 'null'}}`,
-                                            `[${pairB}] BUY {H: ${rowB.h}, L: ${rowB.l}, V: ${rowB.v || 'null'}}`,
-                                            `[${pairC}] SELL {H: ${rowC.h}, L: ${rowC.l}, V: ${rowC.v || 'null'}}`,
+                                            `[${pairA}] BUY {H: ${rowA.h}, L: ${
+                                                rowA.l
+                                            }, V: ${rowA.v || "null"}}`,
+                                            `[${pairB}] BUY {H: ${rowB.h}, L: ${
+                                                rowB.l
+                                            }, V: ${rowB.v || "null"}}`,
+                                            `[${pairC}] SELL {H: ${
+                                                rowC.h
+                                            }, L: ${rowC.l}, V: ${
+                                                rowC.v || "null"
+                                            }}`,
                                         ],
                                         px: [
-                                            `${pairA[1]} ${cPxA}\n${pairA[1]} ${pxA}`,
-                                            `${pairB[1]} ${cPxB}\n${pairB[1]} ${pxB}`,
-                                            `${pairC[1]} ${cPxC}\n${pairC[1]} ${pxC}`,
+                                            `${pairA[1]} ${pxA}\n${pairA[1]} ${pxA}`,
+                                            `${pairB[1]} ${pxB}\n${pairB[1]} ${pxB}`,
+                                            `${pairC[1]} ${pxC}\n${pairC[1]} ${pxC}`,
                                         ],
                                         amt: [
                                             `${pairA[0]} ${baseA}`,

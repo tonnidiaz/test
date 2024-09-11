@@ -116,6 +116,7 @@ export class Arbit {
             this.pos = true
         }else{
 
+            if (this.platA.med == undefined) return
             if (amt >= MAX_QUOTE) this.stop = true
             
             const fee = 0 // TRANSFER FEE
@@ -123,7 +124,7 @@ export class Arbit {
             this.platB.quote -= amt
             let _quote = amt - fee
 
-            if (false){
+            if (true){
               // CONVERT TO MED [XRP] # BUY MED
             let _med = amt / medPxB
             _med *= (1 - this.TAKER)

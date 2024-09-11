@@ -62,8 +62,7 @@ const COIN_API_BASE_URL = "https://rest.coinapi.io/v1";
 const KEY0 = "5CFA6702-2C91-4F98-A45B-FAB3564E0A90",
     KEY1 = "2851C217-28DF-4101-9B79-37A206346424",
     KEY2 = "DC1A54FA-ECCC-40A8-A2FE-E094386A30F9",
-    KEY3 = "CDE0DA21-63A5-4AFA-B3BE-B93D6447EAFF",
-    KEY4 = "CDE0DA21-63A5-4AFA-B3BE-B93D6447EAFF";
+    KEY3 = "CDE0DA21-63A5-4AFA-B3BE-B93D6447EAFF", KEY4 = "2954911D-0DDC-4539-A914-11DBB2FD41D5";
 
 const getOrderbook = async ({
     start,
@@ -97,7 +96,7 @@ const getOrderbook = async ({
     };
 
     const headers = {
-        "X-CoinAPI-Key": KEY2,
+        "X-CoinAPI-Key": KEY4,
     };
 
     try {
@@ -124,10 +123,10 @@ const getOrderbook = async ({
 
 
 
-const symb = "WRX"
+const symb = "HAI"
 
 getOrderbook({
-    symbolId: "KUCOIN_SPOT_WRX_BTC",
+    symbolId: "KUCOIN_SPOT_HAI_USDT",
     plat: "kucoin",
     limit: 100000,
     start: coinApiDates[symb].start,

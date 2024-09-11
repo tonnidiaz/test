@@ -434,6 +434,12 @@ router.post("/:id/delete", authMid, async (req, res) => {
         await clearOrders(bot)
         for (let oid of children) {
             console.log(`DELETING CHILD BOT ` + oid);
+            const childBot = await Bot.findById(oid).exec()
+            if (childBot){
+                // DELETE IT'S CHILDREN IF ANY
+                await clearOrders(childBot)
+                await Bot.findOneAndDelete({parent: childBot.id}).exec()
+            }
             await Bot.findByIdAndDelete(oid).exec();
             console.log("CHILD BOT deleted");
            
