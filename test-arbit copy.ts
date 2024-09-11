@@ -397,22 +397,22 @@ async function run() {
             return tsMs >= realStartMs
         });
 
-        const bt = new Arbit({
-            platA,
-            platB,
-            BASE_FEE,
-            QUOTE_FEE,
-            bal,
-            dfA,
-            dfB,
-            medDfA,
-            medDfB,
-            basePr,
-            pxPr,
-        });
-        const res = bt.run();
-        _data.push({ pair, profit: res.profit, trades: res.trades });
-        _data = [..._data].sort((a, b) => (a.profit > b.profit ? -1 : 1));
+        // const bt = new Arbit({
+        //     platA,
+        //     platB,
+        //     BASE_FEE,
+        //     QUOTE_FEE,
+        //     bal,
+        //     dfA,
+        //     dfB,
+        //     medDfA,
+        //     medDfB,
+        //     basePr,
+        //     pxPr,
+        // });
+        // const res = bt.run();
+        // _data.push({ pair, profit: res.profit, trades: res.trades });
+        // _data = [..._data].sort((a, b) => (a.profit > b.profit ? -1 : 1));
 
         _save()
         console.log(`\n${pair} DONE`);

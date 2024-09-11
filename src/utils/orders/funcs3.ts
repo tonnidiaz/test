@@ -162,26 +162,26 @@ export const afterOrderUpdateArbit = async ({ bot }: { bot: IBot }) => {
             oC = 0,
             cC = 0;
 
-        if (arbit_settings.flipped) {
-            oC = AMT / oPxC;
-            oB = oC * oPxB;
-            oA = oB * oPxA;
+        // if (arbit_settings.flipped) {
+        //     oC = AMT / oPxC;
+        //     oB = oC * oPxB;
+        //     oA = oB * oPxA;
 
-            cC = AMT / cPxC;
-            cB = cC * cPxB;
-            cA = cB * cPxA;
-        } else {
-            cB = AMT / cPxA; //  BUY B WITH A
-            cC = cB / cPxB; // BUY C WITH B
-            cA = cC * cPxC; // SELL C FOR A
+        //     cC = AMT / cPxC;
+        //     cB = cC * cPxB;
+        //     cA = cB * cPxA;
+        // } else {
+        //     cB = AMT / cPxA; //  BUY B WITH A
+        //     cC = cB / cPxB; // BUY C WITH B
+        //     cA = cC * cPxC; // SELL C FOR A
 
-            oB = AMT / oPxA; //  BUY B WITH A
-            oC = oB / oPxB; // BUY C WITH B
-            oA = oC * oPxC; // SELL C FOR A
-            // 242.660
+        //     oB = AMT / oPxA; //  BUY B WITH A
+        //     oC = oB / oPxB; // BUY C WITH B
+        //     oA = oC * oPxC; // SELL C FOR A
+        //     // 242.660
 
-            //console.log({ AMT, _A, perc });
-        }
+        //     //console.log({ AMT, _A, perc });
+        // }
         const o_perc = Number((((oA - AMT) / AMT) * 100).toFixed(2));
         const c_perc = Number((((cA - AMT) / AMT) * 100).toFixed(2));
         
