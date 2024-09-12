@@ -285,7 +285,7 @@ export class TuArbitWs {
         let { data, topic, type } = parsedResp;
         let channel: string | undefined;
         let symbol: string | undefined;
-        if (!data) {
+        if (!data && parsedResp != 'pong') {
             this._log({ parsedResp });
             return;
         }
@@ -729,15 +729,14 @@ export class TuArbitWs {
 
             const A = 1;
             //Normal prices
-            let pxA = bookA?.ask.px ?? 0;
-            let pxB = bookB?.ask.px ?? 0;
+            const askA = bookA?.ask.px ?? 0
+            const bidA = bookA?.bid.px ?? 0
 
-            //Flipped prices
-            let fpxB = bookB?.bid.px ?? 0;
-            let fpxA = bookA?.bid.px ?? 0;
+            const askB = bookB?.ask.px ?? 0
+            const bidB = bookB?.bid.px ?? 0
 
-            const A2 = (A * pxB) / pxA; // BUY A, BUY B, SELL C
-            const FA2 = (A * fpxA) / fpxB; //BUY C, SELL B, SELL A
+            const A2 = (A * bidB) / askA; // BUY A, SELL B
+            const FA2 = (A * bidA) / askB; // BUT B, SELL A
 
             const _perc = ceil(((A2 - A) / A) * 100, 2);
             const _fperc = ceil(((FA2 - A) / A) * 100, 2);
@@ -745,9 +744,9 @@ export class TuArbitWs {
 
             const flipped = _perc < _fperc;
 
-            console.log({ platA, platB, pair }, "\n", { pxA, pxB }, "\n", {
-                fpxA,
-                fpxB,
+            console.log({ platA, platB, pair }, "\n", { askA, bidA }, "\n", {
+                askB,
+                bidB,
             });
 
             console.log({ _perc: `${_perc}%`, _fperc: `${_fperc}%`, flipped });

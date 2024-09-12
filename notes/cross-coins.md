@@ -9,3 +9,11 @@
 ## BITGET_KUCOIN
 - PEPE2 - **High vol**
 - OORT
+
+## DIFFERENT SAME-NAME COINS
+### KUCOIN_BITGET
+- ACE - ACEend_Flourist
+- VELO
+
+## BAD COINS
+- COTI - HIGH FEES
