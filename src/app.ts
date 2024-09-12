@@ -51,6 +51,7 @@ import { Bot, Order } from "./models";
 import { addBotJob } from "./utils/orders/funcs";
 import { botLog } from "./utils/functions";
 import { WsTriArbit, initWsTriArbit, wsTriArbits } from "./classes/ws-plat";
+import { initClientWsTriArbit } from "./classes/client-ws/tri-arbit";
 
 dotenv.config();
 // view engine setup
@@ -157,6 +158,8 @@ const main = async () => {
         //     }
         // }
     }
+
+    await initClientWsTriArbit()
 };
 
 main();

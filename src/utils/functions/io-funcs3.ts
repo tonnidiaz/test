@@ -102,10 +102,6 @@ export const onCrossArbitCointest = async (
         const savePath = `_data/rf/arbit/coins/${year}/${MIN_PERC}%_${prefix}${platA}-${platB}_${interval}m.json`;
         console.log({ savePath });
 
-        if (only){
-            console.log(`DOING ${only} ONLY...\n`)
-            
-        }
         let ret_data: IObj = {};
 
         const parseData = (orders?: any[]) => {
@@ -119,6 +115,20 @@ export const onCrossArbitCointest = async (
             };
             return ret_data;
         };
+        
+        if (show) {
+            if (!existsSync(savePath)) {
+                return client?.emit(ep, { err: savePath + " DOES TO EXIST" });
+            }
+            _data = await readJson(savePath);
+            client?.emit(ep, parseData());
+            return _data;
+        }
+        if (only){
+            console.log(`DOING ${only} ONLY...\n`)
+            
+        }
+        
 
         if ((join) && existsSync(savePath)) {
             _data = (await readJson(savePath)).sort((a, b) =>
@@ -291,7 +301,7 @@ export const onCrossArbitCointest = async (
                     basePrB,
                     pxPrA,
                     pxPrB,
-                    MIN_PERC,
+                    MIN_PERC, 
                 });
                 const res = bt.run();
                 _data.push({

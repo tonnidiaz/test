@@ -1,25 +1,22 @@
 import { Server } from "socket.io";
 import { CorsOptions } from "cors";
-import { IObj } from "./interfaces";
-import {
-    tuCE,
-    heikinAshi,
-    parseDate,
-    parseKlines,
-    tuPath,
-} from "./funcs2";
-import {
-    klinesDir,
-    klinesRootDir,
-    tradesRootDir,
-} from "./constants";
+import { IClientBot, IObj } from "./interfaces";
+import { tuCE, heikinAshi, parseDate, parseKlines, tuPath } from "./funcs2";
+import { klinesDir, klinesRootDir, tradesRootDir } from "./constants";
 import { existsSync } from "fs";
-import { clearTerminal, getPricePrecision, getSymbol, readJson, toFixed } from "./functions";
+import {
+    clearTerminal,
+    getPricePrecision,
+    getSymbol,
+    readJson,
+    toFixed,
+} from "./functions";
 import { objStrategies, parentStrategies, strategies } from "@/strategies";
 import { TestOKX } from "@/classes/test-platforms";
 import { platforms } from "./consts";
-import {onArbitCointest, onBacktest, onCointest} from './functions/io-funcs'
+import { onArbitCointest, onBacktest, onCointest } from "./functions/io-funcs";
 import { onCrossArbitCointest } from "./functions/io-funcs3";
+import { clientWsTriArbits } from "@/classes/client-ws/tri-arbit";
 
 const corsOptions: CorsOptions = { origin: "*" };
 const io = new Server({ cors: corsOptions }); // yes, no server arg here; it's not required
@@ -27,10 +24,9 @@ let prevData: any = null;
 // attach stuff to io
 io.on("connection", (client) => {
     console.log(`IO: ${client.id} CONNECTED`);
-    
-    console.log({ep: prevData?.ep})
+
+    console.log({ ep: prevData?.ep });
     if (prevData && prevData.ep) {
-        
         io.emit(prevData.ep, prevData.data);
         //prevData = null
     }
@@ -51,10 +47,22 @@ io.on("connection", (client) => {
         }, 1500);
     });
 
-    client.on("backtest", async (d)=>prevData = await onBacktest(d, client));
-    client.on("cointest", async (d)=>prevData = await onCointest(d, client));
-    client.on("arbit-cointest", async (d)=>prevData = await onArbitCointest(d, client));
-    client.on("cross-arbit-cointest", async (d)=>prevData = await onCrossArbitCointest(d, client));
+    client.on(
+        "backtest",
+        async (d) => (prevData = await onBacktest(d, client))
+    );
+    client.on(
+        "cointest",
+        async (d) => (prevData = await onCointest(d, client))
+    );
+    client.on(
+        "arbit-cointest",
+        async (d) => (prevData = await onArbitCointest(d, client))
+    );
+    client.on(
+        "cross-arbit-cointest",
+        async (d) => (prevData = await onCrossArbitCointest(d, client))
+    );
 
     client.on("strategies", (e) => {
         client.emit("strategies", { data: strategies });
@@ -66,8 +74,40 @@ io.on("connection", (client) => {
         client.emit("parents", { data: Object.keys(parentStrategies) });
     });
 
+    client.on("/client-ws/rm-bot", async (fd) => {
+        console.log("KILLING BOT...")
+        for (let ws of Object.values(clientWsTriArbits)){
+            await ws.kill()
+        }
+        console.log("KILLED")
+    })
+    client.on("/client-ws/add-bot", async (fd) => {
+        try {
+            console.log("NEW CLIENT BOT");
+            const { A, B, C, platform,  type, platA, platB, pair } = fd;
+            if (type == 'tri') {
+                const bot: IClientBot = {
+                id: `bot-${Date.now()}`,
+                A,
+                B, 
+                C,
+                platform,
+            };
+
+            await clientWsTriArbits[platform].addBot(bot, client)
+            console.log("CREATED")
+            client.emit("/client-ws/add-bot", bot.id)
+            }else{
+
+            }
+            
+        } catch (e) {
+            console.log(e);
+        }
+    });
+
     client.on("test-candles", async (data: IObj) => {
-        clearTerminal()
+        clearTerminal();
         try {
             const pair = data.symbol;
             let {
@@ -80,7 +120,8 @@ io.on("connection", (client) => {
                 useFile,
                 file,
                 save,
-                isParsed,demo
+                isParsed,
+                demo,
             } = data;
 
             const startTs = Date.parse(start),
@@ -91,9 +132,9 @@ io.on("connection", (client) => {
 
             client.emit("test-candles", "Getting klines...");
 
-            const plat =new platforms[platform]({demo});
+            const plat = new platforms[platform]({ demo });
             const platName = platform.toLowerCase();
-            const symbol = getSymbol(pair, platName)
+            const symbol = getSymbol(pair, platName);
             console.log(symbol);
             const test = false;
             if (useFile && !file) {
@@ -101,16 +142,15 @@ io.on("connection", (client) => {
                 return;
             }
             start = start ?? parseDate(new Date());
-                const year = start.split("-")[0];
-                const sub = demo ? "demo" : "live";
+            const year = start.split("-")[0];
+            const sub = demo ? "demo" : "live";
             klinesPath = tuPath(
-                    `${klinesRootDir}/${platName.toLowerCase()}/${year}/${sub}/${symbol}_${interval}m-${sub}.json`
+                `${klinesRootDir}/${platName.toLowerCase()}/${year}/${sub}/${symbol}_${interval}m-${sub}.json`
             );
 
             if (offline && !useFile) {
                 console.log("IS OFFLINE");
-                
-                
+
                 if (!existsSync(klinesPath!)) {
                     const err = {
                         err: `${klinesPath} does not exist`,
@@ -126,7 +166,7 @@ io.on("connection", (client) => {
                     end: endTs,
                     interval,
                     symbol,
-                    savePath: save ? klinesPath : undefined
+                    savePath: save ? klinesPath : undefined,
                 });
                 if (!r) {
                     client.emit("err", "Failed to get klines");
@@ -170,9 +210,16 @@ io.on("connection", (client) => {
                         l: el.l,
                         c: el.c,
                         sma_20: el.sma_20,
-                        sma_50: el.sma_50, vol: el.v
+                        sma_50: el.sma_50,
+                        vol: el.v,
                     },
-                    ha: { o: el.ha_o, h: el.ha_h, l: el.ha_l, c: el.ha_c, vol: el.v },
+                    ha: {
+                        o: el.ha_o,
+                        h: el.ha_h,
+                        l: el.ha_l,
+                        c: el.ha_c,
+                        vol: el.v,
+                    },
                 };
             });
             client.emit("test-candles", {

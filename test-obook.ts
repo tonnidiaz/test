@@ -7,6 +7,7 @@ import {
     readJson,
     toFixed,
 } from "@/utils/functions";
+import { IObj } from "@/utils/interfaces";
 import { readdirSync } from "fs";
 const DEXE_START = "2024-03-05T14:00:00+02:00",
     DEXE_END = "2024-03-05T17:00:00+02:00",
@@ -48,6 +49,7 @@ const runTri = async ({
     pre?: string;
 }) => {
     pre = pre ? pre + "_" : "";
+    let lastTs = 0; //dataA = dataA.filter((el, i, dt)=> i == 0 || Date.parse(el.time_exchange) >= Date.parse(dt[i - 1].time_exchange) + interval * 1000  )
 
     const symboA = `${B}_${A}`;
     const symboB = `${C}_${B}`;
@@ -65,12 +67,18 @@ const runTri = async ({
     let dataB = await readJson(pathB);
     let dataC = await readJson(pathC);
 
-    const interval = 30; // secs
+    const interval = .001; // secs
     let aTs = dataA[0].time_exchange;
     let bTs = dataB[0].time_exchange;
     let cTs = dataC[0].time_exchange;
     console.log({ cTs, bTs, aTs });
 
+    let cnt = 0
+    const __dataA:  any[]= []
+    while (lastTs <= Date.parse([...dataA].pop().time_exchange)){
+        cnt += 1
+    }
+    lastTs = 0
     let startTs = Math.max(Date.parse(aTs), Date.parse(bTs), Date.parse(cTs));
     // mainloop: for (let rowA of dataA) {
     //     for (let rowB of dataB) {
@@ -91,25 +99,79 @@ const runTri = async ({
     //     }
     // }
 
-    console.log({startTs})
+    console.log({ startTs });
 
-    dataB = dataB.filter(
-        (el) => Date.parse(el.time_exchange) >=startTs
-    );
-    dataA = dataA.filter(
-        (el) => Date.parse(el.time_exchange) >=startTs
-    );
-    dataC = dataC.filter(
-        (el) => Date.parse(el.time_exchange) >=startTs
-    );
+    dataB = dataB.filter((el) => Date.parse(el.time_exchange) >= startTs);
+    dataA = dataA.filter((el) => Date.parse(el.time_exchange) >= startTs);
+    dataC = dataC.filter((el) => Date.parse(el.time_exchange) >= startTs);
 
     aTs = dataA[0].time_exchange;
     bTs = dataB[0].time_exchange;
     cTs = dataC[0].time_exchange;
 
+    // Space the books
+
+    const _dataA: IObj[] = [];
+    console.log({ lenA: dataA.length });
+    for (let i = 0; i < dataA.length; i++) {
+        const row = dataA[i];
+        const ts = row.time_exchange;
+        const tsMs = Date.parse(ts);
+
+        if (tsMs >= lastTs + interval * 1000) {
+            lastTs = tsMs;
+            _dataA.push(row);
+        }
+    }
+    console.log({ lenA: _dataA.length });
+
+    lastTs = 0
+    const _dataB: IObj[] = [];
+    console.log({ lenB: dataB.length });
+    for (let i = 0; i < dataB.length; i++) {
+        const row = dataB[i];
+        const ts = row.time_exchange;
+        const tsMs = Date.parse(ts);
+
+        if (tsMs >= lastTs + interval * 1000) {
+            lastTs = tsMs;
+            _dataB.push(row);
+        }
+    }
+    console.log({ lenB: _dataB.length });
+
+    lastTs = 0
+    const _dataC: IObj[] = [];
+    console.log({ lenC: dataC.length });
+    for (let i = 0; i < dataC.length; i++) {
+        const row = dataC[i];
+        const ts = row.time_exchange;
+        const tsMs = Date.parse(ts);
+
+        if (tsMs >= lastTs + interval * 1000) {
+            lastTs = tsMs;
+            _dataC.push(row);
+        }
+    }
+    console.log({ lenC: _dataC.length });
+
     const trades: { ts: string; perc: number; flipped: boolean }[] = [];
 
     console.log({ cTs, bTs, aTs }, "\n");
+
+    const minLen = Math.min(_dataA.length, _dataB.length, _dataC.length)
+    console.log(_dataB.map(el=> el.time_exchange))
+    for (let i = 0; i < minLen; i++) {
+        const rowA = _dataA[i];
+        const rowB = _dataB[i];
+        const rowC = _dataC[i];
+
+        const tsA = rowA.time_exchange;
+        const tsB = rowB.time_exchange;
+        const tsC = rowC.time_exchange;
+        
+        //console.log("\n", { tsB }, "\n");
+    }
 
     let lastTsA = 0;
     let lastTsB = 0;
@@ -121,11 +183,12 @@ const runTri = async ({
     const MAKER = 0.1 / 100,
         TAKER = 0.1 / 100;
 
-    for (let i = 0; i < dataA.length; i++) {
+    for (let i = 0; i < minLen; i++) {
+        break
         try {
-            const rowA = dataA[i];
-            const rowB = dataB[i];
-            const rowC = dataC[i];
+            const rowA = _dataA[i];
+            const rowB = _dataB[i];
+            const rowC = _dataC[i];
 
             const tsA = rowA.time_exchange;
             const tsB = rowB.time_exchange;
@@ -149,7 +212,7 @@ const runTri = async ({
             const bidC = rowC.bids[0].price;
 
             if (tsCond) {
-                console.log("\n", { ts: tsA }, "\n");
+                console.log("\n", { tsA, tsB, tsC }, "\n");
                 lastTsA = tsMsA;
                 lastTsB = tsMsB;
                 lastTsC = tsMsC;
@@ -360,7 +423,7 @@ const BDX_START = "2024-03-13 13:00:00+02:00",
 //     minPerc: 0.3,
 // });
 
-const C = "CAS";
+const C = "UNO";
 
 runTri({
     minPerc: 0.5,

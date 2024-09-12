@@ -87,3 +87,12 @@ export class TuWs extends WebSocket {
         this.send(JSON.stringify(json));
     }
 }
+
+
+export class CrossArbitData {
+    platA: string | undefined
+    platB: string | undefined
+    pair: string[] = []
+    bookA: IOrderbook | undefined
+    bookB: IOrderbook | undefined
+}

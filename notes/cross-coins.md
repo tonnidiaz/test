@@ -5,3 +5,6 @@
 
 ## MEXC_BYBIT
 - CLOUD-USDT
+
+## BITGET_KUCOIN
+- PEPE2 - **High vol**
