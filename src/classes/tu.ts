@@ -44,7 +44,7 @@ const readyStateMap = {
 };
 
 const SLEEP_MS = 10 * 1000;
-const PAUSE_MS = 3 * 1000
+const PAUSE_MS = 3 * 1000;
 
 export class TuWs extends WebSocket {
     channels: { channel: string; data: IObj; plat: string }[] = [];
@@ -62,8 +62,8 @@ export class TuWs extends WebSocket {
     keepAlive(id?: string) {
         if (this.readyState === this.OPEN) {
             this.ping();
-            if (DEV)
-            console.log(`[ ${id ?? 'WS'} ] Ping sent to server\n`);
+            // if (DEV)
+            // console.log(`[ ${id ?? 'WS'} ] Ping sent to server\n`);
         }
     }
 
@@ -147,7 +147,7 @@ export class TuArbitWs {
 
     constructor(plat: string, type: "tri" | "cross") {
         this.name = this.constructor.name;
-        this.arbitType = type
+        this.arbitType = type;
         this.plat = plat.toLowerCase();
         this.reconnectInterval = 5000; // 5 seconds by default
         this.maxReconnectAttempts = 10; // Max reconnection attempts
@@ -197,7 +197,10 @@ export class TuArbitWs {
                 this.ws.channels = [];
                 this.currentReconnectAttempts = 0;
                 this.open = true;
-                setInterval(() => this.ws?.keepAlive(`${this.arbitType}__${this.plat}`), this.PING_INTERVAL);
+                setInterval(
+                    () => this.ws?.keepAlive(`${this.arbitType}__${this.plat}`),
+                    this.PING_INTERVAL
+                );
             });
             this.ws?.on("error", async (e) => {
                 this._log("ON ERROR", e);
@@ -264,10 +267,10 @@ export class TuArbitWs {
     }
 
     async kill() {
-        for (let abot of this.abots.filter(el=> el.demo)) {
+        for (let abot of this.abots.filter((el) => el.demo)) {
             await this.subUnsub(abot.bot, "unsub");
         }
-        this.abots = [];
+        this.abots = this.abots.filter(el=> !el.demo);
     }
 
     parseData(resp: any) {
@@ -523,8 +526,8 @@ export class TuArbitWs {
         const { channel, data, symbol } = r;
         //return;
         if (!symbol) return this._log("NO SYMBOL");
-        if (this.arbitType == 'tri') await this._onMessageTri(r)
-        if (this.arbitType == 'cross') await this._onMessageCross(r)
+        if (this.arbitType == "tri") await this._onMessageTri(r);
+        if (this.arbitType == "cross") await this._onMessageCross(r);
     }
 
     async _onMessageTri(r: ReturnType<typeof this.parseData>) {
@@ -636,6 +639,7 @@ export class TuArbitWs {
 
             if (
                 channel == "orderbook" &&
+                (symbolA == symbol || symbolB == symbol) &&
                 (this.plat == platA || this.plat == platB)
             ) {
                 // Determine whether to use the flipped or not
@@ -687,7 +691,7 @@ export class TuArbitWs {
                     });
 
                     if (re != false) {
-                        await sleep(PAUSE_MS)
+                        await sleep(PAUSE_MS);
                         abot.active = true;
                     } else {
                         this._log("NOT RESUMING");
@@ -926,8 +930,13 @@ export class TuArbitWs {
             return false;
         }
     }
-    async addBot(bot: IBot, client?: Socket, demo?: boolean, data?: CrossArbitData) {
-        this._log("ADDING BOT", bot.name);
+    async addBot(
+        bot: IBot,
+        client?: Socket,
+        demo?: boolean,
+        data?: CrossArbitData
+    ) {
+        this._log("ADDING BOT", bot.name, {demo, data});
         try {
             const pricePrecision = getPricePrecision(
                 [bot.base, bot.ccy],
@@ -961,7 +970,7 @@ export class TuArbitWs {
                     client,
                     demo,
                     active: true,
-                    data: data!
+                    data: data!,
                 });
             }
 
@@ -982,4 +991,3 @@ export class TuArbitWs {
         this._log("BOT REMOVED\n");
     }
 }
-
