@@ -1,4 +1,5 @@
 import { CrossArbitData } from "@/classes/tu";
+import { IBot } from "@/models/bot";
 import { ObjectId } from "mongoose";
 import { Socket } from "socket.io";
 
@@ -87,37 +88,26 @@ export interface IOrderpage {
     bid: IBook;
 }
 
-export interface IClientBot {
-    A: string;
-    B: string;
-    C: string;
-    platform: string;
-    id: string;
-}
+
 
 export interface IABot {
-    bot: IClientBot;
+    bot: IBot;
     active: boolean;
+    demo?: boolean;
     pairA: string[];
     pairB: string[];
     pairC: string[];
     bookA?: IOrderpage;
     bookB?: IOrderpage;
     bookC?: IOrderpage;
-    client: Socket;
+    client?: Socket;
 }
 
-export interface ICrossClientBot {
-    platA: string;
-    platB: string;
-    id: string;
-    pair: string[];
-
-}
 export interface ICrossArbitBot {
-    bot: ICrossClientBot;
+    bot: IBot;
     active: boolean;
     pair: string[];
     data: CrossArbitData;
-    client: Socket
+    client?: Socket;
+    demo?: boolean;
 }

@@ -88,6 +88,8 @@ export const BotSchema = new Schema(
         start_bal: { type: Number, default: 10 },
         curr_amt: { type: Number, default: 0 },
         platform: { type: String, default: "bybit" },
+        platB: { type: String, default: "okx" },
+        platA: { type: String, default: "kucoin" },
         order_type: {
             type: String,
             enum: ["Market", "Limit"],

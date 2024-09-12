@@ -50,8 +50,8 @@ import dotenv from "dotenv";
 import { Bot, Order } from "./models";
 import { addBotJob } from "./utils/orders/funcs";
 import { botLog } from "./utils/functions";
-import { WsTriArbit, initWsTriArbit, wsTriArbits } from "./classes/ws-plat";
-import { initClientWsTriArbit } from "./classes/client-ws/tri-arbit";
+import {  crossArbitWsList, initArbitWs, triArbitWsList } from "./classes/tu-ws";
+import { TuArbitWs } from "./classes/tu";
 
 dotenv.config();
 // view engine setup
@@ -133,15 +133,17 @@ jobs.push({job, id: "1"}) */
 const main = async () => {
     const activeBots = await Bot.find({ active: true }).exec();
     setJobs([]);
-    await initWsTriArbit()
+    await initArbitWs()
 
     for (let bot of activeBots) {
-        const wsPlat: WsTriArbit = wsTriArbits[bot.platform]
+        const triWs : TuArbitWs = triArbitWsList[bot.platform]
+        const crossWs : TuArbitWs = crossArbitWsList[bot.platform]
 
         await addBotJob(bot);
         botLog(bot, "INITIALIZING WS...");
-        if (bot.type == 'arbitrage' && bot.arbit_settings?._type == 'tri'){
-            await wsPlat?.addBot(bot, true)
+        if (bot.type == 'arbitrage' ){
+            if (bot.arbit_settings?._type == 'tri') await triWs.addBot(bot, undefined, false, undefined)
+            else await crossWs.addBot(bot, undefined, false, undefined)
         }
 
         // if (bot.orders.length) {
@@ -159,7 +161,6 @@ const main = async () => {
         // }
     }
 
-    await initClientWsTriArbit()
 };
 
 main();

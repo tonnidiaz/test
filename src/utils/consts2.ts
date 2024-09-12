@@ -23,3 +23,11 @@ export const objPlats =
         CAS: {start: "2024-06-14 00:00:00+02:00", end: "2024-06-15 00:00:00+02:00"},
         HAI: {start: "2024-06-14 00:00:00+02:00", end: "2024-06-15 00:00:00+02:00"},
     };
+
+    export const OKX_WS_URL = "wss://ws.okx.com:8443/ws/v5/public";
+    export const OKX_WS_URL_DEMO = "wss://wspap.okx.com:8443/ws/v5/public";
+    export const BYBIT_WS_URL = "wss://stream.bybit.com/v5/public/spot";
+    export const BYBIT_WS_URL_DEMO = "wss://stream-testnet.bybit.com/v5/public/spot";
+    export const BINANCE_WS_URL = "wss://stream.binance.com:9443";
+    export const BITGET_WS_URL = "wss://ws.bitget.com/v2/ws/public"
+    export const KUCOIN_TOKEN_URL = "https://api.kucoin.com/api/v1/bullet-public";
