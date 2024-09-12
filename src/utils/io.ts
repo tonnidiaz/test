@@ -76,7 +76,7 @@ io.on("connection", (client) => {
         client.emit("parents", { data: Object.keys(parentStrategies) });
     });
 
-    client.on("/client-ws/rm-bot", async (fd) => {
+    client.on("/client-ws/kill", async (fd) => {
         console.log("KILLING BOT...");
         const list = [...Object.values(triArbitWsList), ...Object.values(crossArbitWsList)]
         for (let ws of list) {
@@ -84,6 +84,7 @@ io.on("connection", (client) => {
         }
       
         console.log("KILLED");
+        client?.emit("/client-ws/kill", 'killed')
     });
     client.on("/client-ws/add-bot", async (fd) => {
         try {
