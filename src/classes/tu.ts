@@ -285,8 +285,9 @@ export class TuArbitWs {
         let { data, topic, type } = parsedResp;
         let channel: string | undefined;
         let symbol: string | undefined;
-        if (!data && parsedResp != 'pong') {
-            this._log({ parsedResp });
+        if (!data) {
+            if (parsedResp != 'pong')
+                this._log({ parsedResp });
             return;
         }
 
