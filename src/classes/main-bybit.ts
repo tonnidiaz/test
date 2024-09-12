@@ -55,7 +55,7 @@ export class WsBybit {
             if (this.ws?.readyState == this.ws?.OPEN) this.ws?.close();
 
             this.isConnectError = false;
-            this.ws = new TuWs(WS_URL_SPOT_PUBLIC);
+            this.ws = new TuWs(WS_URL_SPOT_PUBLIC, 'bybit');
             this.wsList = [this.ws];
             console.log("MAIN_BYBIT INIT");
             for (let ws of this.wsList) {

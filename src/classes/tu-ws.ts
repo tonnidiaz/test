@@ -1,5 +1,6 @@
 import { timedLog } from "@/utils/functions";
 import { TuArbitWs } from "./tu";
+import { DEV } from "@/utils/constants";
 
 export const triArbitWsList : {[key: string]: TuArbitWs}= {
     okx: new TuArbitWs("okx", 'tri'),
@@ -18,6 +19,7 @@ export const initArbitWs = async () => {
     try {
         const wsList = [...Object.values(triArbitWsList), ...Object.values(crossArbitWsList)]
         for (let ws  of wsList) {
+            if (!DEV)
             await ws.initWs();
         }
     } catch (e) {
