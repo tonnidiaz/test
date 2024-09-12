@@ -938,9 +938,10 @@ export class TuArbitWs {
     ) {
         this._log("ADDING BOT", bot.name, {demo, data});
         try {
+            
             const pricePrecision = getPricePrecision(
                 [bot.base, bot.ccy],
-                bot.platform
+                this.plat
             );
             if (pricePrecision == null) return;
             if (this.ws?.readyState != this.ws?.OPEN) {

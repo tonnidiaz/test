@@ -103,11 +103,12 @@ io.on("connection", (client) => {
                 id = `${bot.id}`;
                 await triArbitWsList[platform].addBot(bot, client, demo);
             } else {
-                console.log({platA, platB})
+                console.log({platA, platB, pair})
                 const bot = new Bot({
                     name: `CROSS-${id}`,
                     platA,
                     platB,
+                    
                     base: pair[0], ccy: pair[1],
                     arbit_settings: { _type: "cross" },
                 });
