@@ -145,7 +145,7 @@ export class TuArbitWs {
     currentReconnectAttempts: number;
     PING_INTERVAL = 10 * 1000;
 
-    constructor(plat: string, type: typeof this.arbitType) {
+    constructor(plat: string, type: "tri" | "cross") {
         this.name = this.constructor.name;
         this.arbitType = type
         this.plat = plat.toLowerCase();
