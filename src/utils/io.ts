@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import { CorsOptions } from "cors";
-import { IClientBot, IObj } from "./interfaces";
+import { IClientBot, ICrossClientBot, IObj } from "./interfaces";
 import { tuCE, heikinAshi, parseDate, parseKlines, tuPath } from "./funcs2";
 import { klinesDir, klinesRootDir, tradesRootDir } from "./constants";
 import { existsSync } from "fs";
@@ -17,6 +17,8 @@ import { platforms } from "./consts";
 import { onArbitCointest, onBacktest, onCointest } from "./functions/io-funcs";
 import { onCrossArbitCointest } from "./functions/io-funcs3";
 import { clientWsTriArbits } from "@/classes/client-ws/tri-arbit";
+import { clientWsCrossArbits } from "@/classes/client-ws/cross-arbit";
+import { CrossArbitData } from "@/classes/tu";
 
 const corsOptions: CorsOptions = { origin: "*" };
 const io = new Server({ cors: corsOptions }); // yes, no server arg here; it's not required
@@ -75,32 +77,43 @@ io.on("connection", (client) => {
     });
 
     client.on("/client-ws/rm-bot", async (fd) => {
-        console.log("KILLING BOT...")
-        for (let ws of Object.values(clientWsTriArbits)){
-            await ws.kill()
+        console.log("KILLING BOT...");
+        for (let ws of Object.values(clientWsTriArbits)) {
+            await ws.kill();
         }
-        console.log("KILLED")
-    })
+        for (let ws of Object.values(clientWsCrossArbits)) {
+            await ws.kill();
+        }
+        console.log("KILLED");
+    });
     client.on("/client-ws/add-bot", async (fd) => {
         try {
             console.log("NEW CLIENT BOT");
-            const { A, B, C, platform,  type, platA, platB, pair } = fd;
-            if (type == 'tri') {
+            const { A, B, C, platform, type, platA, platB, pair } = fd;
+            const id = `bot-${Date.now()}`;
+            if (type == "tri") {
                 const bot: IClientBot = {
-                id: `bot-${Date.now()}`,
-                A,
-                B, 
-                C,
-                platform,
-            };
+                    id,
+                    A,
+                    B,
+                    C,
+                    platform,
+                };
 
-            await clientWsTriArbits[platform].addBot(bot, client)
-            console.log("CREATED")
-            client.emit("/client-ws/add-bot", bot.id)
-            }else{
+                await clientWsTriArbits[platform].addBot(bot, client);
+                
+            } else {
+                const bot: ICrossClientBot = {
+                    id,
+                    platA,platB, pair
+                };
 
+                const data = new CrossArbitData()
+                await clientWsCrossArbits[platA].addBot(bot, data, client);
+                await clientWsCrossArbits[platB].addBot(bot, data, client);
             }
-            
+            console.log("CREATED");
+            client.emit("/client-ws/add-bot", id);
         } catch (e) {
             console.log(e);
         }

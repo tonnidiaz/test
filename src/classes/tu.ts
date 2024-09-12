@@ -2,7 +2,7 @@ import { WebSocket } from "ws";
 import type { ClientOptions, RawData } from "ws";
 import type { ClientRequest, ClientRequestArgs, IncomingMessage } from "http";
 import { sleep, timedLog } from "@/utils/functions";
-import { IObj, IOrderbook } from "@/utils/interfaces";
+import { IObj, IOrderbook, IOrderpage } from "@/utils/interfaces";
 import { parseDate } from "@/utils/funcs2";
 import { DEV } from "@/utils/constants";
 const readyStateMap = {
@@ -27,8 +27,8 @@ export class TuWs extends WebSocket {
     keepAlive() {
         if (this.readyState === this.OPEN) {
             this.ping();
-            if (DEV)
-            console.log("Ping sent to server");
+            //if (DEV)
+            //console.log("Ping sent to server");
         }
     }
     
@@ -93,6 +93,6 @@ export class CrossArbitData {
     platA: string | undefined
     platB: string | undefined
     pair: string[] = []
-    bookA: IOrderbook | undefined
-    bookB: IOrderbook | undefined
+    bookA: IOrderpage | undefined
+    bookB: IOrderpage | undefined
 }

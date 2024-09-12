@@ -118,8 +118,6 @@ export interface ICrossArbitBot {
     bot: ICrossClientBot;
     active: boolean;
     pair: string[];
-    bookA?: IOrderpage;
-    bookB?: IOrderpage;
     data: CrossArbitData;
     client: Socket
 }

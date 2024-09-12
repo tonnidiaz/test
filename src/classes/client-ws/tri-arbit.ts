@@ -167,7 +167,7 @@ export class TriWs {
     async handleTickers({ client, abot }: { abot: IABot; client?: Socket}) {
         //DONT RESUME IF RETURN TRUE
         try {
-            console.log("\nTickerHandler");
+            //console.log("\nTickerHandler");
             const MAX_SLIP = 0.5;
 
             const { bot, pairA, pairB, pairC, bookA, bookB, bookC } = abot;
@@ -198,14 +198,14 @@ export class TriWs {
             const perc = Math.max(_perc, _fperc);
 
             const flipped = _perc < _fperc;
+            
+            // console.log(pairA, pairB, pairC, "\n", { pxA, pxB, pxC }, "\n", {
+            //     fpxA,
+            //     fpxB,
+            //     fpxC,
+            // });
 
-            console.log(pairA, pairB, pairC, "\n", { pxA, pxB, pxC }, "\n", {
-                fpxA,
-                fpxB,
-                fpxC,
-            });
-
-            console.log({ _perc: `${_perc}%`, _fperc: `${_fperc}%`, flipped });
+            // console.log({ _perc: `${_perc}%`, _fperc: `${_fperc}%`, flipped });
             client?.emit('/client-ws/book', {type: 'tri', bookA, bookB, bookC, pairA, pairB, pairC, perc: _perc, fperc: _fperc})
 
             return true;
@@ -496,9 +496,11 @@ export class TriWs {
         timedLog(`[WS][${this.plat}] `, ...args);
     }
 
-    kill(){
+   async kill(){
+        for (let abot of this.abots){
+            await this.subUnsub(abot.bot, 'unsub')
+        }
         this.abots = []
-        this.ws?.removeAllListeners("subscribe")
     }
 }
 export const clientWsTriArbits = {
