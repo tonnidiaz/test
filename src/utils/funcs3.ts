@@ -152,3 +152,14 @@ const getKucoinToken = async () => {
 };
 export const KUCOIN_WS_URL = async () =>
     "wss://ws-api-spot.kucoin.com/?token=" + await getKucoinToken();
+
+
+export const safeJsonParse = <T>(str: any) => {
+    try {
+      const jsonValue: T = JSON.parse(str);
+  
+      return jsonValue;
+    } catch {
+      return str;
+    }
+  };

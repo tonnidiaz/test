@@ -240,12 +240,12 @@ export class Arbit {
                 if (rowA.v == 0) this.zvA += 1;
                 if (rowB.v == 0) this.zvB += 1;
 
-                const _slip = 3 / 100;
+                const _slip = 0 / 100;
                 let buyPx = oA * (1 + _slip),
                     sellPx = oB * (1 - _slip);
-                if (rowA.v) buyPx = Math.min(hA, buyPx);
+                //if (rowA.v) buyPx = Math.min(hA, buyPx);
 
-                if (rowB.v) sellPx = Math.max(lB, sellPx);
+                //if (rowB.v) sellPx = Math.max(lB, sellPx);
                 console.log("\n", { ts: rowA.ts });
 
                 this.lastRow = rowB;

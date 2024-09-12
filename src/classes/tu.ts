@@ -15,7 +15,7 @@ import {
     ICrossArbitBot,
     IObj,
     IOrderbook,
-    IOrderpage,
+    IOrderpage, 
 } from "@/utils/interfaces";
 import { parseDate } from "@/utils/funcs2";
 import { DEV } from "@/utils/constants";
@@ -28,7 +28,7 @@ import {
     BITGET_WS_URL,
 } from "@/utils/consts2";
 import { IBot } from "@/models/bot";
-import { KUCOIN_WS_URL } from "@/utils/funcs3";
+import { KUCOIN_WS_URL, safeJsonParse } from "@/utils/funcs3";
 import { Bot } from "@/models";
 import {
     placeArbitOrdersFlipped,
@@ -48,20 +48,27 @@ const PAUSE_MS = 3 * 1000;
 
 export class TuWs extends WebSocket {
     channels: { channel: string; data: IObj; plat: string }[] = [];
-    plat: string = "okx";
+    plat: string;
     lastSub: number;
 
     constructor(
-        address: string | URL,
+        address: string | URL, plat: string,
         options?: ClientOptions | ClientRequestArgs | undefined
     ) {
+        
         super(address, options);
+        this.plat = plat
         this.lastSub = Date.now();
     }
 
     keepAlive(id?: string) {
         if (this.readyState === this.OPEN) {
-            this.ping();
+            {
+                this.ping();
+                if (this.plat == 'bitget')
+                this.send("ping")
+            }
+
             // if (DEV)
             // console.log(`[ ${id ?? 'WS'} ] Ping sent to server\n`);
         }
@@ -183,7 +190,7 @@ export class TuArbitWs {
             if (this.plat.toLocaleLowerCase() == "kucoin") {
                 this.wsURL = await KUCOIN_WS_URL();
             }
-            this.ws = new TuWs(this.wsURL);
+            this.ws = new TuWs(this.wsURL, this.plat);
             this.ws.plat = this.plat;
             if (!this.open) this._log("INIT WS");
 
@@ -274,7 +281,7 @@ export class TuArbitWs {
     }
 
     parseData(resp: any) {
-        const parsedResp = JSON.parse(resp.toString());
+        const parsedResp = safeJsonParse(resp.toString());
         let { data, topic, type } = parsedResp;
         let channel: string | undefined;
         let symbol: string | undefined;

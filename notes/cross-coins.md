@@ -8,3 +8,4 @@
 
 ## BITGET_KUCOIN
 - PEPE2 - **High vol**
+- OORT
