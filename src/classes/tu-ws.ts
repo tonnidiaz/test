@@ -1,26 +1,27 @@
 import { timedLog } from "@/utils/functions";
 import { TuArbitWs } from "./tu";
 import { DEV } from "@/utils/constants";
+import { IObj } from "@/utils/interfaces";
 
-export const triArbitWsList : {[key: string]: TuArbitWs}= {
-    okx: new TuArbitWs("okx", 'tri'),
-    bybit: new TuArbitWs("bybit", 'tri'),
-    kucoin: new TuArbitWs("kucoin", 'tri'),
-    bitget: new TuArbitWs("bitget", 'tri'),
-};
-export const crossArbitWsList : {[key: string]: TuArbitWs}= {
-    okx: new TuArbitWs("okx", 'cross'),
-    bybit: new TuArbitWs("bybit", 'cross'),
-    kucoin: new TuArbitWs("kucoin", 'cross'),
-    bitget: new TuArbitWs("bitget", 'cross'),
-};
+const plats = ["binance", "bitget", "bybit", "kucoin", "okx", "mexc"];
+const crossList: IObj = {};
+const triList: IObj = {};
+
+for (let plat of plats) {
+    triList[plat] = new TuArbitWs(plat, "tri");
+    crossList[plat] = new TuArbitWs(plat, "cross");
+}
+export const triArbitWsList: { [key: string]: TuArbitWs } = triList;
+export const crossArbitWsList: { [key: string]: TuArbitWs } = crossList;
 
 export const initArbitWs = async () => {
     try {
-        const wsList = [...Object.values(triArbitWsList), ...Object.values(crossArbitWsList)]
-        for (let ws  of wsList) {
-            if (!DEV || false)
-            await ws.initWs();
+        const wsList = [
+            ...Object.values(triArbitWsList),
+            ...Object.values(crossArbitWsList),
+        ];
+        for (let ws of wsList) {
+            if (!DEV || false) await ws.initWs();
         }
     } catch (e) {
         timedLog("FAILED TO INIT WS");

@@ -4,15 +4,16 @@ import { parseDate } from "@/utils/funcs2";
 import axios from "axios";
 import { unlinkSync, writeFileSync } from "fs";
 import { Platform } from "./test-platforms";
-import { binance } from "ccxt";
-import { ITrade } from "@/utils/interfaces";
-
+import { IOrderbook, ITrade } from "@/utils/interfaces";
+import { MainClient, WebsocketClient } from "binance";
+import { getSymbol } from "@/utils/functions";
+import type { SymbolPrice } from "binance";
 export class TestBinance extends Platform {
-    client: binance;
+    client: MainClient;
 
-    constructor({demo = false}: {demo?: boolean}) {
-        super({demo});
-        this.client = new binance();
+    constructor({ demo = false }: { demo?: boolean }) {
+        super({ demo });
+        this.client = new MainClient({});
     }
     async getKlines({
         symbol,
@@ -116,9 +117,8 @@ export class TestBinance extends Platform {
                 while (firstTs <= end) {
                     console.log(`[Binance] GETTING ${cnt + 1} TRADES...`);
                     console.log(parseDate(new Date(firstTs)));
-                    res = await this.client.publicGetAggTrades({
+                    res = await this.client.getRecentTrades({
                         symbol,
-                        startTime: firstTs,
                     });
                     const _res = res.map((el) => ({
                         symbol,
@@ -138,9 +138,9 @@ export class TestBinance extends Platform {
                     cnt += 1;
                 }
             } else {
-                res = await this.client.publicGetAggTrades({
+                res = await this.client.getRecentTrades({
                     symbol,
-                    endTime: end,
+                    //endTime: end,
                 });
                 trades = res.map((el) => ({
                     symbol,
@@ -154,6 +154,26 @@ export class TestBinance extends Platform {
         } catch (error) {
             console.log(error);
             return [];
+        }
+    }
+    async getTicker(pair: string[]): Promise<number> {
+        try {
+            const ticker = await this.client.getSymbolPriceTicker({
+                symbol: getSymbol(pair, "binance"),
+            });
+            return Number((ticker as SymbolPrice).price);
+        } catch (e) {
+            this._log("FAILED TO GET TICKER FOR", pair, e);
+            return 0;
+        }
+    }
+    async getBook(
+        pair: string[]
+    ): Promise<IOrderbook | void | null | undefined> {
+        super.getBook(pair);
+        try {
+        } catch (e) {
+            this._log("FAILED TO GET ORDERBOOK FOR", pair, "\n", e);
         }
     }
 }

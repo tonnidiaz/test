@@ -37,6 +37,7 @@ import {
 import { Socket } from "socket.io";
 import mongoose from "mongoose";
 import { platforms } from "@/utils/consts";
+import { WebsocketClient as BinanceWs } from "binance";
 const readyStateMap = {
     0: "CONNECTING",
     1: "OPEN",
@@ -47,84 +48,106 @@ const readyStateMap = {
 const SLEEP_MS = 10 * 1000;
 const PAUSE_MS = 3 * 1000;
 
-export class TuWs extends WebSocket {
+export class TuWs {
     channels: { channel: string; data: IObj; plat: string }[] = [];
     plat: string;
     lastSub: number;
+    ws: BinanceWs | WebSocket;
 
     constructor(
         address: string | URL,
         plat: string,
         options?: ClientOptions | ClientRequestArgs | undefined
     ) {
-        super(address, options);
         this.plat = plat;
+        if (plat == "binance") {
+            this.ws = new BinanceWs({});
+        } else {
+            console.log({ plat: this.plat, address });
+            this.ws = new WebSocket(address);
+        }
         this.lastSub = Date.now();
     }
 
-    keepAlive(id?: string) {
-        if (this.readyState === this.OPEN) {
-            {
-                this.ping();
-                if (this.plat == "bitget") this.send("ping");
-            }
+    on(event: string, cb: (...data: any[]) => any) {
+        return this.ws.on(event as any, cb);
+    }
 
-            // if (DEV)
-            // console.log(`[ ${id ?? 'WS'} ] Ping sent to server\n`);
+    keepAlive(id?: string) {
+        if (this.ws instanceof WebSocket) {
+            if (this.ws.readyState === this.ws.OPEN) {
+                {
+                    this.ws.ping();
+                    if (this.plat == "bitget") this.ws.send("ping");
+                }
+
+                // if (DEV)
+                // console.log(`[ ${id ?? 'WS'} ] Ping sent to server\n`);
+            }
+        } else {
+            for (let ch of this.channels) this.ws.tryWsPing(ch.channel);
         }
     }
 
     async sub(channel: string, plat: string, data: IObj = {}) {
-        console.log(
-            "\n",
-            { channel, state: readyStateMap[this.readyState] },
-            "\n"
-        );
-        if (this.readyState != this.OPEN && false) {
-            this.channels.push({ channel, data, plat });
-        } else {
-            if (Date.now() - this.lastSub < 3000) {
-                await sleep(3000);
-            }
+        if (this.ws instanceof BinanceWs) {
+            this.ws.connectToWsUrl(channel.toLocaleLowerCase(), undefined, true);
+        } else if (this.ws instanceof WebSocket) {
+            console.log(
+                "\n",
+                { channel, state: readyStateMap[this.ws.readyState] },
+                "\n"
+            );
+            if (this.ws.readyState != this.ws.OPEN && false) {
+                this.channels.push({ channel, data, plat });
+            } else {
+                if (Date.now() - this.lastSub < 3000) {
+                    await sleep(3000);
+                }
 
+                let json: IObj = {
+                    op: "subscribe",
+                    args: plat == "bybit" ? [channel] : [{ channel, ...data }],
+                };
+
+                switch (plat) {
+                    case "kucoin":
+                        json = {
+                            type: "subscribe",
+                            topic: channel, //Topic needs to be subscribed. Some topics support to divisional subscribe the informations of multiple trading pairs through ",".
+                            privateChannel: false, //Adopted the private channel or not. Set as false by default.
+                            response: true,
+                        };
+                        break;
+                }
+                this.ws.send(JSON.stringify(json));
+                this.lastSub = Date.now();
+            }
+        }
+    }
+
+    unsub(channel: string, plat: string, data: IObj = {}) {
+        console.log(`\nUNSUSCRIBING FROM ${channel}`, data, "\n");
+        if (this.ws instanceof BinanceWs) {
+            this.ws.close(channel.toLocaleLowerCase(),);
+        } else {
             let json: IObj = {
-                op: "subscribe",
+                op: "unsubscribe",
                 args: plat == "bybit" ? [channel] : [{ channel, ...data }],
             };
 
             switch (plat) {
                 case "kucoin":
                     json = {
-                        type: "subscribe",
+                        type: "unsubscribe",
                         topic: channel, //Topic needs to be subscribed. Some topics support to divisional subscribe the informations of multiple trading pairs through ",".
                         privateChannel: false, //Adopted the private channel or not. Set as false by default.
                         response: true,
                     };
                     break;
             }
-            this.send(JSON.stringify(json));
-            this.lastSub = Date.now();
+            this.ws.send(JSON.stringify(json));
         }
-    }
-
-    unsub(channel: string, plat: string, data: IObj = {}) {
-        console.log(`\nUNSUSCRIBING FROM ${channel}`, data, "\n");
-        let json: IObj = {
-            op: "unsubscribe",
-            args: plat == "bybit" ? [channel] : [{ channel, ...data }],
-        };
-
-        switch (plat) {
-            case "kucoin":
-                json = {
-                    type: "unsubscribe",
-                    topic: channel, //Topic needs to be subscribed. Some topics support to divisional subscribe the informations of multiple trading pairs through ",".
-                    privateChannel: false, //Adopted the private channel or not. Set as false by default.
-                    response: true,
-                };
-                break;
-        }
-        this.send(JSON.stringify(json));
     }
 }
 
@@ -155,6 +178,7 @@ export class TuArbitWs {
     PING_INTERVAL = 10 * 1000;
     lastTickerFetchAt = 0;
     tickerFetchInterval = 30; //secs
+    bookFetchInterval = 5 * 1000; //ms
 
     constructor(plat: string, type: "tri" | "cross") {
         this.name = this.constructor.name;
@@ -200,8 +224,10 @@ export class TuArbitWs {
 
             this.ws?.on("open", async () => {
                 if (!this.ws) return this._log("ON OPEN: BUT NO WS");
+                
                 this._log("ON OPEN");
-                for (let abot of this.abots) {
+                if (this.plat != 'binance'){
+                    for (let abot of this.abots) {
                     console.log("RESUBING FOR BOT: ", abot.bot.id);
                     await this.sub(abot.bot);
                 }
@@ -211,19 +237,21 @@ export class TuArbitWs {
                 setInterval(
                     () => this.ws?.keepAlive(`${this.arbitType}__${this.plat}`),
                     this.PING_INTERVAL
-                );
+                ); 
+                }
+               
             });
-            this.ws?.on("error", async (e) => {
+            this.ws?.on("error" as any, async (e) => {
                 this._log("ON ERROR", e);
                 this.isConnectError = e.stack?.split(" ")[2] == "ENOTFOUND";
             });
-            this.ws?.on("close", async (code, rsn) => {
+            this.ws?.on("close" as any, async (code, rsn) => {
                 this._log(`[onClose] CODE: ${code}\nREASON: ${rsn}`);
                 // if (!this.isConnectError) await this.initWs();
                 this.reconnect();
             });
 
-            this.ws?.on("message", async (r) => await this.onMessage(r));
+            this.ws?.on("message" as any, async (r) => await this.onMessage(r));
         } catch (e) {
             this._log(e);
         }
@@ -268,7 +296,7 @@ export class TuArbitWs {
                 channel = `orderbook.200.`;
                 break;
             case "binance":
-                channel = `orderbook.200.`;
+                channel = `wss://stream.binance.com:9443/ws/`;
                 break;
             case "kucoin":
                 channel = `/spotMarket/level2Depth5:`;
@@ -285,11 +313,11 @@ export class TuArbitWs {
     }
 
     parseData(resp: any) {
-        const parsedResp = safeJsonParse(resp.toString());
+        const parsedResp = this.plat == 'binance' ? resp : safeJsonParse(resp.toString());
         let { data, topic, type } = parsedResp;
         let channel: string | undefined;
         let symbol: string | undefined;
-        if (!data) {
+        if ((this.plat != 'binance' && !data) || (this.plat == "binance" && !parsedResp.e)) {
             if (parsedResp != "pong") this._log({ parsedResp });
             return;
         }
@@ -366,7 +394,31 @@ export class TuArbitWs {
                     data = ob;
                 }
                 break;
+            case "binance":
+                if (resp?.e) {
+                    const e = resp;
+                    symbol = e.s;
+                    channel = "orderbook"
+                    if (resp.e == "depthUpdate") {
+                        const ob: IOrderbook = {
+                            ts: parseDate(e.E),
+                            asks: e.a.map((el) => ({
+                                px: Number(el[0]),
+                                amt: Number(el[1]),
+                            })),
+                            bids: e.b.map((el) => ({
+                                px: Number(el[0]),
+                                amt: Number(el[1]),
+                            })),
+                        };
+
+                        data = ob;
+                    }
+
+                    break;
+                }
         }
+
         //console.log(data)
 
         if (!channel || !symbol) this._log("MISSING:", parsedResp);
@@ -387,9 +439,7 @@ export class TuArbitWs {
     async sub(bot: IBot) {
         // SUB FOR A. B. C
         const abot = this.abots.find((el) => el.bot.id == bot.id);
-        if (abot) {
-            abot.active = true;
-            this._updateBots(abot);
+        if (!abot || !abot.active) { return this._log("BOT NOT ACTIVE")
         }
         await this.subUnsub(bot, "sub");
     }
@@ -417,6 +467,10 @@ export class TuArbitWs {
         if (this.arbitType == "cross")
             await this._subUnsubCross(bot, act, channel1, fn);
         else await this._subUnsubTri(bot, act, channel1, fn);
+    }
+
+    _getAbot(botId: any) {
+        return this.abots.find((el) => el.bot.id == botId);
     }
 
     async _subUnsubTri(
@@ -453,10 +507,11 @@ export class TuArbitWs {
             activePairs.findIndex((el) => el == pairB.toString()) == -1; // pairA not in any of active bots
         const unsubC =
             activePairs.findIndex((el) => el == pairC.toString()) == -1; // pairA not in any of active bots
-        if (this.ws?.readyState != this.ws?.OPEN) {
-            this._log("NOT READY");
-            return;
-        }
+        // if (this.ws?.readyState != this.ws?.OPEN) {
+        //     this._log("NOT READY");
+        //    return;
+        // }
+
         if (channel1 && fn) {
             // Orderbook channel, also returns ask n bid pxs
             if (platform == "okx" || platform == "bitget") {
@@ -475,10 +530,32 @@ export class TuArbitWs {
                         instId: symbolC,
                         instType: "SPOT",
                     });
-            } else if (platform == "bybit" || platform == "kucoin") {
-                if (act == "sub" || unsubA) fn(channel1 + symbolA, platform);
-                if (act == "sub" || unsubB) fn(channel1 + symbolB, platform);
-                if (act == "sub" || unsubC) fn(channel1 + symbolC, platform);
+            } else if (
+                platform == "bybit" ||
+                platform == "kucoin" ||
+                platform == "binance"
+            ) {
+                if (act == "sub" || unsubA)
+                    fn(
+                        channel1 +
+                            symbolA +
+                            (this.plat == "binance" ? "@depth" : ""),
+                        platform
+                    );
+                if (act == "sub" || unsubB)
+                    fn(
+                        channel1 +
+                            symbolB +
+                            (this.plat == "binance" ? "@depth" : ""),
+                        platform
+                    );
+                if (act == "sub" || unsubC)
+                    fn(
+                        channel1 +
+                            symbolC +
+                            (this.plat == "binance" ? "@depth" : ""),
+                        platform
+                    );
             }
         }
     }
@@ -505,9 +582,6 @@ export class TuArbitWs {
         const unsubPair =
             activePairs.findIndex((el) => el == pair.toString()) == -1; // pairA not in any of active bots
 
-        if (this.ws?.readyState != this.ws?.OPEN) {
-            return this._log("NOT READY");
-        }
         if (channel1 && fn) {
             // Orderbook channel, also returns ask n bid pxs
 
@@ -523,8 +597,14 @@ export class TuArbitWs {
                     break;
                 case "bybit":
                 case "kucoin":
+                case "binance":
                     if (act == "sub" || unsubPair)
-                        fn(channel1 + symbol, this.plat);
+                        fn(
+                            channel1 +
+                                symbol +
+                                (this.plat == "binance" ? "@depth" : ""),
+                            this.plat
+                        );
                     break;
             }
         }
@@ -533,6 +613,7 @@ export class TuArbitWs {
         await this.subUnsub(bot, "unsub");
     }
     async onMessage(resp: RawData) {
+        console.log("\nON MESSAGE\n")
         const r = this.parseData(resp);
         if (!r) return;
         const { channel, data, symbol } = r;
@@ -556,6 +637,13 @@ export class TuArbitWs {
                 // Determine whether to use the flipped or not
                 const ob = data as IOrderbook;
                 let enoughAsk: IBook | undefined;
+                const askA = ob.asks[0] ?? abot.bookA?.ask
+                const askB = ob.asks[0] ?? abot.bookB?.ask
+                const askC = ob.asks[0] ?? abot.bookC?.ask
+
+                const bidA = ob.bids[0] ?? abot.bookA?.bid
+                const bidB = ob.bids[0] ?? abot.bookB?.bid
+                const bidC = ob.bids[0] ?? abot.bookC?.bid
                 const {
                     bookA: oldBookA,
                     bookB: oldBookB,
@@ -564,21 +652,21 @@ export class TuArbitWs {
                 switch (symbol) {
                     case symbolA:
                         abot.bookA = {
-                            ask: ob.asks[0],
-                            bid: ob.bids[0],
+                            ask: askA,
+                            bid: bidA,
                         };
                         break;
                     case symbolB:
                         abot.bookB = {
-                            ask: ob.asks[0],
-                            bid: ob.bids[0],
+                            ask: askB,
+                            bid: bidB,
                         };
                         break;
                     case symbolC:
                         //this._log({ asks: ob.asks });
                         abot.bookC = {
-                            ask: ob.asks[0],
-                            bid: ob.bids[0],
+                            ask: askC,
+                            bid: bidC,
                         };
                         break;
                 }
@@ -615,8 +703,9 @@ export class TuArbitWs {
                     bookC.bid &&
                     bookC.ask;
 
-                if (abot.active && bookCond) {
+                if (abot.active && bookCond && bookFieldsCond) {
                     abot.active = false;
+                    this._updateBots(abot)
                     const re = await this.handleTickersTri({
                         abot,
                     });
@@ -657,18 +746,24 @@ export class TuArbitWs {
                 // Determine whether to use the flipped or not
                 const ob = data as IOrderbook;
                 let enoughAsk: IBook | undefined;
+                const askA = ob.asks[0] ?? abot.data.bookA?.ask
+                const askB = ob.asks[0] ?? abot.data.bookB?.ask
+
+                const bidA = ob.bids[0] ?? abot.data.bookA?.bid
+                const bidB = ob.bids[0] ?? abot.data.bookB?.bid
+
                 const { bookA: oldBookA, bookB: oldBookB } = abot.data;
                 switch (this.plat) {
                     case platA:
                         abot.data.bookA = {
-                            ask: ob.asks[0],
-                            bid: ob.bids[0],
+                            ask: askA,
+                            bid: bidA,
                         };
                         break;
                     case platB:
                         abot.data.bookB = {
-                            ask: ob.asks[0],
-                            bid: ob.bids[0],
+                            ask: askB,
+                            bid: bidB,
                         };
                         break;
                 }
@@ -802,6 +897,7 @@ export class TuArbitWs {
             let tickerA = abot.tickerA ?? 0;
             let tickerB = abot.tickerB ?? 0;
             let tickerC = abot.tickerC ?? 0;
+            console.log({bookB})
             //Normal prices
             let pxA = bookA.ask.px;
             let pxB = bookB.ask.px;
@@ -983,7 +1079,11 @@ export class TuArbitWs {
                 this.plat
             );
             if (pricePrecision == null) return;
-            if (this.ws?.readyState != this.ws?.OPEN) {
+
+            if (
+                this.ws?.ws instanceof WebSocket &&
+                this.ws?.ws.readyState != this.ws?.ws.OPEN
+            ) {
                 await this.initWs();
                 //return await this.addBot(bot, first)
             }
@@ -1021,21 +1121,18 @@ export class TuArbitWs {
             this._log("BOT ADDED");
 
             // Fetch ticker on first run
-            await this._tickerFetcher(abot)
-            this.tickerTimer = setInterval(async () => {
+            await this._tickerFetcher(abot);
+            const tickerTimer = setInterval(async () => {
                 this._log("\nTicker timer\n");
                 const _abot = this.abots.find((el) => el.bot.id == abot.bot.id);
-                if (!_abot || !_abot.active)
-                    return clearInterval(this.tickerTimer);
-                await this._tickerFetcher(_abot)
+                if (!_abot || !_abot.active) return clearInterval(tickerTimer);
+                await this._tickerFetcher(_abot);
             }, this.tickerFetchInterval * 1000);
-
         } catch (e) {
             this._log(e);
         }
     }
 
-    tickerTimer: NodeJS.Timeout | undefined;
     async _tickerFetcher(_abot: (typeof this.abots)[0]) {
         if (DEV) this._log("FETCHING TICKERS...");
 
@@ -1060,6 +1157,29 @@ export class TuArbitWs {
             _abot.tickerC = tickerC;
         }
         this._updateBots(_abot);
+    }
+    async _bookFetcher(_abot: (typeof this.abots)[0]) {
+        // if (DEV) this._log("FETCHING OBook...");
+        // const plat = new platforms[this.plat]({ demo: false });
+        // if (this.arbitType == "cross") {
+        //     if (!("pair" in _abot)) return;
+        //     const ticker = await plat.getBook(_abot.pair);
+        //     if (this.plat == _abot.data.platA) {
+        //         _abot.data.tickerA = ticker;
+        //     }
+        //     if (this.plat == _abot.data.platB) {
+        //         _abot.data.tickerB = ticker;
+        //     }
+        // } else {
+        //     if (!("pairA" in _abot)) return;
+        //     const tickerA = await plat.getBook(_abot.pairA);
+        //     const tickerB = await plat.getBook(_abot.pairB);
+        //     const tickerC = await plat.getBook(_abot.pairC);
+        //     _abot.tickerA = tickerA;
+        //     _abot.tickerB = tickerB;
+        //     _abot.tickerC = tickerC;
+        // }
+        // this._updateBots(_abot);
     }
     async rmvBot(botId: mongoose.Types.ObjectId) {
         this._log("REMOVING BOT", botId, "...");

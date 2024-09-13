@@ -25,8 +25,7 @@ export class Arbit {
     exit = 0;
     zvA = 0;
     zvB = 0;
-    lastRowA: ICandle;
-    lastRowB: ICandle;
+    lastRow: ICandle;
     lastMedPxA = 0;
     lastMedPxB = 0;
     prefEntryPx = 0;
@@ -41,10 +40,6 @@ export class Arbit {
     est_perc = 0;
     pair: string[];
     SLIP = 0 / 100;
-    _base = 0;
-    _quote = 0;
-
-    _flipped = false;
 
     otype: "market" | "limit" = "market";
 
@@ -93,35 +88,21 @@ export class Arbit {
         this.pair = pair;
 
         this.bal = bal;
-        const balA = bal;
+        const balA = bal / 2
         this.platA = { name: platA, base: 0, quote: balA, df: dfA };
         this.platB = { name: platB, base: 0, quote: bal - balA, df: dfB };
-        this.lastRowA = dfA[0];
-        this.lastRowB = dfB[0];
+        this.lastRow = dfA[0];
         this.pxPrA = pxPrA;
         this.pxPrB = pxPrB;
         this.basePrA = basePrA;
         this.basePrB = basePrB;
     }
 
-    buy({
-        amt,
-        px,
-        row,
-        _plat,
-    }: {
-        amt: number;
-        px: number;
-        row: ICandle;
-        _plat: "A" | "B";
-    }) {
+    buy({ amt, px, row }: { amt: number; px: number; row: ICandle }) {
         // BUY BASE ON A: SUBRACT QUOTE A
         console.log("BUYING:", { amt, px });
         this.entry = px;
-        const isA = _plat == "A";
-        if (isA) this.platA.quote -= amt;
-        else this.platB.quote -= amt;
-
+        this.platA.quote -= amt;
         let _base = amt / px;
 
         const slip = _base * this.SLIP;
@@ -130,20 +111,14 @@ export class Arbit {
         const fee = _base * this.TAKER;
 
         _base -= fee;
-        _base = toFixed(_base, isA ? this.basePrA : this.basePrB);
+        _base = toFixed(_base, this.basePrA);
         console.log({ base: _base, fee }, "\n");
-        if (isA) this.platA.base += _base;
-        else this.platB.base += _base;
-
-        // The base to then withdraw
-        this._base = _base;
+        this.platA.base += _base;
 
         const { o, h, l, v } = row;
 
         this.trades.push({
-            side: `[${_plat}] buy { o: ${o}, h: ${h}, l: ${l}, v: ${
-                v || "null"
-            } }`,
+            side: `buy { o: ${o}, h: ${h}, l: ${l}, v: ${v || 'null'} }`,
             ccy: this.pair[0],
             amt: _base,
             px: [this.prefEntryPx, px],
@@ -153,23 +128,10 @@ export class Arbit {
         this.entryLimit = undefined;
     }
 
-    sell({
-        amt,
-        px,
-        row,
-        _plat,
-    }: {
-        amt: number;
-        px: number;
-        row: ICandle;
-        _plat: "A" | "B";
-    }) {
+    sell({ amt, px, row }: { amt: number; px: number; row: ICandle }) {
         // SELL QUOTE ON B: SUBRACT BASE B
-        const isA = _plat == "A";
         console.log("\nSELLING:", { amt, px });
-        if (isA) this.platA.base -= amt;
-        else this.platB.base -= amt;
-
+        this.platB.base -= amt;
         let _quote = amt * px;
 
         const slip = _quote * this.SLIP;
@@ -177,14 +139,9 @@ export class Arbit {
 
         const fee = _quote * this.MAKER;
         _quote -= fee;
-        _quote = toFixed(_quote, isA ? this.pxPrA : this.pxPrB);
-
-        console.log({ quote: _quote, fee }, "\n");
-        if (isA) this.platA.quote += _quote;
-        else this.platB.quote += _quote;
-
-        // The quote to then withdraw
-        this._quote = _quote;
+        _quote = toFixed(_quote, this.pxPrB);
+        console.log({ pr: this.pxPrB, quote: _quote, fee }, "\n");
+        this.platB.quote += _quote;
 
         const _trades = this.trades;
         const profit = ((px - this.entry) / this.entry) * 100;
@@ -196,9 +153,7 @@ export class Arbit {
         const { o, h, l, v } = row;
 
         this.trades.push({
-            side: `[${_plat}] sell { o: ${o}, h: ${h}, l: ${l}, v: ${
-                v || "null"
-            } }`,
+            side: `sell { o: ${o}, h: ${h}, l: ${l}, v: ${v || 'null'} }`,
             ccy: this.pair[1],
             amt: _quote,
             px: [this.prefExitPx, px],
@@ -210,36 +165,22 @@ export class Arbit {
         return _quote;
     }
 
-    withdraw({
-        side,
-        amt,
-        isA,
-    }: {
-        side: "buy" | "sell";
-        amt: number;
-        isA: boolean;
-    }) {
+    withdraw({ side, amt }: { side: "buy" | "sell"; amt: number }) {
         // WITHDRAW BASE FROM A IF SIDE IS BUY ELSE QUOTE FROM B
         if (side == "buy") {
             // BASE FROM A TO B
-            if (isA) this.platA.base -= amt;
-            else this.platB.base -= amt;
+            this.platA.base -= amt;
             const fee = 0;
-
-            if (isA) this.platB.base += amt - fee;
-            else this.platA.base += amt - fee;
+            this.platB.base += amt - fee;
             //this.pos = true;
         } else {
             if (amt >= MAX_QUOTE) this.stop = true;
 
             const fee = 0; // TRANSFER FEE
             // QUOTE FROM B TO A
-            if (isA) this.platA.quote -= amt;
-            else this.platB.quote -= amt;
-
+            this.platB.quote -= amt;
             let _quote = amt - fee;
-            if (isA) this.platB.quote += _quote;
-            else this.platA.quote += _quote;
+            this.platA.quote += _quote;
             this.pos = false;
         }
     }
@@ -264,9 +205,9 @@ export class Arbit {
      *
      * SELLS AND WITHDRAWS FROM B
      */
-    closePos({ amt, px, row, isA }: { amt: number; px: number; row: ICandle; isA: boolean }) {
-        const quote = this.sell({ amt, px, row, _plat: isA ? 'A' : 'B' });
-        this.withdraw({ amt: quote, side: "sell", isA });
+    closePos({ amt, px, row }: { amt: number; px: number; row: ICandle }) {
+        const quote = this.sell({ amt, px, row });
+        this.withdraw({ amt: quote, side: "sell" });
         this.pos = false;
         this.entryLimit = undefined;
         this.exitLimit = undefined;
@@ -285,7 +226,7 @@ export class Arbit {
 
             try {
                 const rowA = dfA[i],
-                    rowB = dfB[i];
+                    rowB = dfB[i]; 
                 const prevrowA = dfA[i - 1],
                     prevrowB = dfB[i - 1];
 
@@ -301,111 +242,101 @@ export class Arbit {
                 if (rowB.v == 0) this.zvB += 1;
 
                 const _slip = 0 / 100;
-                let buyPxA = oA * (1 + _slip),
-                    sellPxB = oB * (1 - _slip);
-                let buyPxB = oB * (1 + _slip),
-                    sellPxA = oA * (1 - _slip);
+                let buyPx = oA * (1 + _slip),
+                    sellPx = oB * (1 - _slip);
                 //if (rowA.v) buyPx = Math.min(hA, buyPx);
 
                 //if (rowB.v) sellPx = Math.max(lB, sellPx);
                 console.log("\n", { ts: rowA.ts });
 
-                this.lastRowB = rowB;
-                this.lastRowA = rowA;
+                this.lastRow = rowB;
 
-                let diff = ceil(((sellPxB - buyPxA) / buyPxA) * 100, 2); //(sellPx - buyPx) / buyPx * 100
-                let fdiff = ceil(((sellPxA - buyPxB) / buyPxB) * 100, 2); //(sellPx - buyPx) / buyPx * 100
-                console.log({ diff, fdiff });
-                const perc = diff//Math.max(diff, fdiff)
+                let diff = ceil(((sellPx - buyPx) / buyPx) * 100, 2); //(sellPx - buyPx) / buyPx * 100
+                console.log({ diff });
 
-                // if (this.pos && this.otype == "limit") {
-                //     console.log("\nHas pos", {
-                //         side: this.entryLimit ? "buy" : "sell",
-                //     });
-                //     if (this.entryLimit) {
-                //         if (p_lA < this.entryLimit) {
-                //             console.log("\nFILL BUY\n");
-                //             this.buy({
-                //                 amt: this.platA.quote,
-                //                 px: this.entryLimit,
-                //                 row: prevrowA,
-                //             });
-                //             this.withdraw({
-                //                 amt: this.platA.base,
-                //                 side: "buy",
-                //             });
+                if (this.pos && this.otype == "limit") {
+                    console.log("\nHas pos", {
+                        side: this.entryLimit ? "buy" : "sell",
+                    });
+                    if (this.entryLimit) {
+                        if (p_lA < this.entryLimit) {
+                            console.log("\nFILL BUY\n");
+                            this.buy({
+                                amt: this.platA.quote,
+                                px: this.entryLimit,
+                                row: prevrowA,
+                            });
+                            this.withdraw({
+                                amt: this.platA.base,
+                                side: "buy",
+                            });
 
-                //             // PLACE THE SELL ORDER AT CURR ROW
-                //         }
-                //         continue;
-                //     }
-                //     if (!this.entryLimit && !this.withdrawnA) {
-                //         this.withdrawnA = true;
-                //         console.log(`\n[ ${prevrowA.ts} ] WITHDRAW TIME [A]`);
-                //         this.trades.push({
-                //             ts: [prevrowA.ts],
-                //             side: "WITHDRAW A [BUY]",
-                //             amt: this.platB.base,
-                //             ccy: this.pair[0],
-                //             px: [0],
-                //         });
-                //         continue;
-                //     }
-                //     if (!this.entryLimit && this.exitLimit) {
-                //         if (this.exitLimit < p_hB) {
-                //             console.log("\nFILL SELL\n");
-                //             this.closePos({
-                //                 amt: this.platB.base,
-                //                 px: this.exitLimit,
-                //                 row: prevrowB,
-                //             });
-                //             //this.sell({ amt: this.platB.base, px: sellPx, row: rowB });
-                //             //this.withdraw({ amt: this.platB.quote, side: "sell" })
-                //             if (!this.withdrawnB) {
-                //                 this.withdrawnB = true;
-                //                 console.log(
-                //                     `\n[ ${rowB.ts} ] WITHDRAW TIME [B]`
-                //                 );
-                //                 this.trades.push({
-                //                     ts: [rowB.ts],
-                //                     side: "WITHDRAW B [SELL]",
-                //                     amt: this.platA.quote,
-                //                     ccy: this.pair[1],
-                //                     px: [0],
-                //                 });
-                //                 continue;
-                //             }
-                //         }
-                //     }
-                // }
-                const CONST = 0.25;
-                // if (this.pos && this.otype == "limit") {
-                //     if (this.entryLimit) {
-                //         this.entryLimit = ceil(
-                //             p_cA * (1 - CONST / 100),
-                //             this.pxPrA
-                //         );
-                //     }
-                //     if (this.exitLimit) {
-                //         this.exitLimit = ceil(
-                //             p_cB * (1 + CONST / 100),
-                //             this.pxPrB
-                //         );
-                //     }
-                //     continue;
-                // }
+                            // PLACE THE SELL ORDER AT CURR ROW
+                        }
+                        continue;
+                    }
+                    if (!this.entryLimit && !this.withdrawnA) {
+                        this.withdrawnA = true;
+                        console.log(`\n[ ${prevrowA.ts} ] WITHDRAW TIME [A]`);
+                        this.trades.push({
+                            ts: [prevrowA.ts],
+                            side: "WITHDRAW A [BUY]",
+                            amt: this.platB.base,
+                            ccy: this.pair[0],
+                            px: [0],
+                        });
+                        continue;
+                    }
+                    if (!this.entryLimit && this.exitLimit) {
+                        if (this.exitLimit < p_hB) {
+                            console.log("\nFILL SELL\n");
+                            this.closePos({
+                                amt: this.platB.base,
+                                px: this.exitLimit,
+                                row: prevrowB,
+                            });
+                            //this.sell({ amt: this.platB.base, px: sellPx, row: rowB });
+                            //this.withdraw({ amt: this.platB.quote, side: "sell" })
+                            if (!this.withdrawnB) {
+                                this.withdrawnB = true;
+                                console.log(
+                                    `\n[ ${rowB.ts} ] WITHDRAW TIME [B]`
+                                );
+                                this.trades.push({
+                                    ts: [rowB.ts],
+                                    side: "WITHDRAW B [SELL]",
+                                    amt: this.platA.quote,
+                                    ccy: this.pair[1],
+                                    px: [0],
+                                });
+                                continue;
+                            }
+                        }
+                    }
+                }
+                const CONST = .25
+                if (this.pos && this.otype == "limit") {
+                    if (this.entryLimit) {
+                        this.entryLimit = ceil(
+                            p_cA * (1 - CONST / 100),
+                            this.pxPrA
+                        );
+                    }
+                    if (this.exitLimit) {
+                        this.exitLimit = ceil(
+                            p_cB * (1 + CONST / 100),
+                            this.pxPrB
+                        );
+                    }
+                    continue;
+                }
 
-                if (!this.pos && perc >= this.MIN_PERC) {
+                if (!this.pos && diff >= this.MIN_PERC) {
                     console.log("\nGOING IN...\n");
-
-                    //this._flipped = fdiff > diff;
                     this.withdrawnA = false;
                     this.withdrawnB = false;
                     this.enterTs = rowA.ts;
-                    this.entryLimit = ceil(
-                        p_cA * (1 - CONST / 100),
-                        this.pxPrA
-                    );
+                    this.entryLimit = ceil(p_cA * (1 - CONST / 100), this.pxPrA);
                     this.exitLimit = ceil(p_cB * (1 + CONST / 100), this.pxPrB);
 
                     this.prefEntryPx = this.entryLimit;
@@ -418,41 +349,28 @@ export class Arbit {
                      * BUY [A] - WITHDRAW [A]
                      * SELL [B] - WITHDRAW [B]
                      */
-                    const buyPx = this._flipped ? buyPxB : buyPxA;
-                    const sellPx = this._flipped ? sellPxA : sellPxB;
 
                     this.entry = buyPx;
                     this.exit = sellPx;
-                    const buyRow = this._flipped ? rowB : rowA;
-                    const sellRow = this._flipped ? rowA : rowB;
-                    const _plat = this._flipped ? "B" : "A";
+
                     console.log("\nFILL MARKET BUY\n");
                     if (this.entryLimit) {
                         this.buy({
-                            amt: this._flipped
-                                ? this.platB.quote
-                                : this.platA.quote,
+                            amt: this.platA.quote,
                             px: this.entry,
-                            row: buyRow,
-                            _plat,
+                            row: rowA,
                         });
                         this.withdraw({
-                            amt: this._base,
+                            amt: this.platA.base,
                             side: "buy",
-                            isA: !this._flipped,
                         });
 
-                        if (this._flipped) this.withdrawnB = true;
-                        else this.withdrawnA = true;
-
-                        console.log(
-                            `\n[ ${buyRow.ts} ] WITHDRAW TIME [${_plat}]`
-                        );
-
+                        this.withdrawnA = true;
+                        console.log(`\n[ ${rowA.ts} ] WITHDRAW TIME [A]`);
                         this.trades.push({
-                            ts: [buyRow.ts],
-                            side: `WITHDRAW ${_plat} [BUY]`,
-                            amt: this._base,
+                            ts: [rowA.ts],
+                            side: "WITHDRAW A [BUY]",
+                            amt: this.platB.base,
                             ccy: this.pair[0],
                             px: [0],
                         });
@@ -461,25 +379,18 @@ export class Arbit {
                     }
 
                     if (this.exitLimit) {
-                        const _plat = this._flipped ? "A" : "B";
                         console.log("\nFILL MARKET SELL\n");
                         this.closePos({
-                            amt: this._flipped
-                                ? this.platA.base
-                                : this.platB.base,
+                            amt: this.platB.base,
                             px: this.exit,
-                            row: sellRow,
-                            isA: this._flipped,
+                            row: rowB,
                         });
-                        if (this._flipped) this.withdrawnA = true;
-                        else this.withdrawnB = true;
-                        console.log(
-                            `\n[ ${sellRow.ts} ] WITHDRAW TIME [${_plat}]`
-                        );
+                        this.withdrawnB = true;
+                        console.log(`\n[ ${rowB.ts} ] WITHDRAW TIME [B]`);
                         this.trades.push({
-                            ts: [sellRow.ts],
-                            side: `WITHDRAW ${_plat} [SELL]`,
-                            amt: this._quote,
+                            ts: [rowB.ts],
+                            side: "WITHDRAW B [SELL]",
+                            amt: this.platA.quote,
                             ccy: this.pair[1],
                             px: [0],
                         });
@@ -529,20 +440,19 @@ export class Arbit {
 
         if (this.pos) {
             console.log("ENDED WITH BUY");
-            // this.sell({
-            //     amt: this.platB.base,
-            //     px: this.entry,
-            //     row: this.lastRow,
-            // });
-            // this.withdraw({ amt: this.platB.quote, side: "sell" });
-            this.closePos({amt: this._flipped ? this.platA.base : this.platB.base, px: this.entry, row: this._flipped ? this.lastRowA : this.lastRowB,  isA: this._flipped})
+            this.sell({
+                amt: this.platB.base,
+                px: this.entry,
+                row: this.lastRow,
+            });
+            this.withdraw({ amt: this.platB.quote, side: "sell" });
         }
-        const totalQuote = this.platA.quote + this.platB.quote
-
-        const profit = toFixed(totalQuote - this.bal, 2);
+        const profit = toFixed(this.platA.quote - this.bal, 2);
         console.log("\n", {
             trades: this.tradeCnt,
             profit,
+            zvA: this.zvA,
+            zvB: this.zvB,
             _platA,
             _platB,
         });

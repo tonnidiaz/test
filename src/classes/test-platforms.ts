@@ -15,7 +15,7 @@ import {
 } from "bybit-api";
 import { Candle, RestClient, Trade } from "okx-api";
 import dotenv from "dotenv";
-import { ITrade } from "@/utils/interfaces";
+import { IOrderbook, ITrade } from "@/utils/interfaces";
 import {existsSync} from 'fs'
 
 dotenv.config();
@@ -33,6 +33,9 @@ export class Platform {
     async getTicker(pair: string[]): Promise<number>{
         this._log("GETTING TICKER FOR", pair)
         return 0}
+    async getBook(pair: string[]): Promise<IOrderbook | void | null | undefined>{
+        this._log("GETTING BOOK FOR", pair)
+    }
     async getKlines({
         start,
         end,
