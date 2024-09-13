@@ -156,7 +156,11 @@ export class TestMexc extends Platform {
         try{
             const symbol = getSymbol(pair, 'mexc')
             const r = await this.client.tickerPrice(symbol)
-            return Number(r.data.price)
+            if (!r.price){
+                this._log("FAILED TO GET TICKER", r)
+                return 0
+            }
+            return Number(r.price)
         }
         catch(e){
             this._log("FAILED TO GET TICKER", e)

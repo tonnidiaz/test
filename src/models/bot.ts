@@ -1,4 +1,5 @@
 import { platforms } from "@/utils/constants";
+import { platList } from "@/utils/consts2";
 import mn, {
     HydratedDocument,
     HydratedDocumentFromSchema,
@@ -87,9 +88,9 @@ export const BotSchema = new Schema(
         balance: { type: Number, default: 0 },
         start_bal: { type: Number, default: 10 },
         curr_amt: { type: Number, default: 0 },
-        platform: { type: String, default: "bybit" },
-        platB: { type: String, default: "okx" },
-        platA: { type: String, default: "kucoin" },
+        platform: { type: String, default: "bybit", enum: platList },
+        platB: { type: String, default: "okx", enum: platList },
+        platA: { type: String, default: "kucoin", enum: platList },
         order_type: {
             type: String,
             enum: ["Market", "Limit"],

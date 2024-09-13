@@ -2,12 +2,12 @@ import { timedLog } from "@/utils/functions";
 import { TuArbitWs } from "./tu";
 import { DEV } from "@/utils/constants";
 import { IObj } from "@/utils/interfaces";
+import { platList } from "@/utils/consts2";
 
-const plats = ["binance", "bitget", "bybit", "kucoin", "okx", "mexc"];
 const crossList: IObj = {};
 const triList: IObj = {};
 
-for (let plat of plats) {
+for (let plat of platList) {
     triList[plat] = new TuArbitWs(plat, "tri");
     crossList[plat] = new TuArbitWs(plat, "cross");
 }

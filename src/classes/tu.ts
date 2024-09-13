@@ -16,6 +16,7 @@ import {
     IObj,
     IOrderbook,
     IOrderpage,
+    TPlatName,
 } from "@/utils/interfaces";
 import { parseDate } from "@/utils/funcs2";
 import { DEV } from "@/utils/constants";
@@ -26,6 +27,7 @@ import {
     BYBIT_WS_URL,
     BINANCE_WS_URL,
     BITGET_WS_URL,
+    MEXC_WS_URL
 } from "@/utils/consts2";
 import { IBot } from "@/models/bot";
 import { KUCOIN_WS_URL, safeJsonParse } from "@/utils/funcs3";
@@ -50,13 +52,13 @@ const PAUSE_MS = 3 * 1000;
 
 export class TuWs {
     channels: { channel: string; data: IObj; plat: string }[] = [];
-    plat: string;
+    plat: TPlatName;
     lastSub: number;
     ws: BinanceWs | WebSocket;
 
     constructor(
         address: string | URL,
-        plat: string,
+        plat: TPlatName,
         options?: ClientOptions | ClientRequestArgs | undefined
     ) {
         this.plat = plat;
@@ -89,9 +91,14 @@ export class TuWs {
         }
     }
 
-    async sub(channel: string, plat: string, data: IObj = {}) {
+    async sub(channel: string, plat: TPlatName, data: IObj = {}) {
+        if (plat == 'mexc') channel += '@5'
         if (this.ws instanceof BinanceWs) {
-            this.ws.connectToWsUrl(channel.toLocaleLowerCase(), undefined, true);
+            this.ws.connectToWsUrl(
+                channel.toLocaleLowerCase(),
+                undefined,
+                true
+            );
         } else if (this.ws instanceof WebSocket) {
             console.log(
                 "\n",
@@ -119,6 +126,12 @@ export class TuWs {
                             response: true,
                         };
                         break;
+                    case "mexc":
+                        json = {
+                            method: "SUBSCRIPTION",
+                            params: [channel],
+                        };
+                        break;
                 }
                 this.ws.send(JSON.stringify(json));
                 this.lastSub = Date.now();
@@ -126,10 +139,12 @@ export class TuWs {
         }
     }
 
-    unsub(channel: string, plat: string, data: IObj = {}) {
+    unsub(channel: string, plat: TPlatName, data: IObj = {}) {
+        if (plat == 'mexc') channel += '@5'
         console.log(`\nUNSUSCRIBING FROM ${channel}`, data, "\n");
+        
         if (this.ws instanceof BinanceWs) {
-            this.ws.close(channel.toLocaleLowerCase(),);
+            this.ws.close(channel.toLocaleLowerCase());
         } else {
             let json: IObj = {
                 op: "unsubscribe",
@@ -143,6 +158,12 @@ export class TuWs {
                         topic: channel, //Topic needs to be subscribed. Some topics support to divisional subscribe the informations of multiple trading pairs through ",".
                         privateChannel: false, //Adopted the private channel or not. Set as false by default.
                         response: true,
+                    };
+                    break;
+                case "mexc":
+                    json = {
+                        method: "UNSUBSCRIPTION",
+                        params: [channel],
                     };
                     break;
             }
@@ -171,7 +192,7 @@ export class TuArbitWs {
     wsURL: string | undefined;
     open = false;
     name: string;
-    plat: string;
+    plat: TPlatName;
     reconnectInterval: number;
     maxReconnectAttempts: number;
     currentReconnectAttempts: number;
@@ -180,10 +201,10 @@ export class TuArbitWs {
     tickerFetchInterval = 30; //secs
     bookFetchInterval = 5 * 1000; //ms
 
-    constructor(plat: string, type: "tri" | "cross") {
+    constructor(plat: TPlatName, type: "tri" | "cross") {
         this.name = this.constructor.name;
         this.arbitType = type;
-        this.plat = plat.toLowerCase();
+        this.plat = plat;
         this.reconnectInterval = 5000; // 5 seconds by default
         this.maxReconnectAttempts = 10; // Max reconnection attempts
         this.currentReconnectAttempts = 0;
@@ -201,6 +222,9 @@ export class TuArbitWs {
                 break;
             case "bitget":
                 this.wsURL = BITGET_WS_URL;
+                break;
+            case "mexc":
+                this.wsURL = MEXC_WS_URL;
                 break;
             case "kucoin":
                 this.wsURL = "url";
@@ -224,22 +248,24 @@ export class TuArbitWs {
 
             this.ws?.on("open", async () => {
                 if (!this.ws) return this._log("ON OPEN: BUT NO WS");
-                
+
                 this._log("ON OPEN");
-                if (this.plat != 'binance'){
+                if (this.plat != "binance") {
                     for (let abot of this.abots) {
-                    console.log("RESUBING FOR BOT: ", abot.bot.id);
-                    await this.sub(abot.bot);
+                        console.log("RESUBING FOR BOT: ", abot.bot.id);
+                        await this.sub(abot.bot);
+                    }
+                    this.ws.channels = [];
+                    this.currentReconnectAttempts = 0;
+                    this.open = true;
+                    setInterval(
+                        () =>
+                            this.ws?.keepAlive(
+                                `${this.arbitType}__${this.plat}`
+                            ),
+                        this.PING_INTERVAL
+                    );
                 }
-                this.ws.channels = [];
-                this.currentReconnectAttempts = 0;
-                this.open = true;
-                setInterval(
-                    () => this.ws?.keepAlive(`${this.arbitType}__${this.plat}`),
-                    this.PING_INTERVAL
-                ); 
-                }
-               
             });
             this.ws?.on("error" as any, async (e) => {
                 this._log("ON ERROR", e);
@@ -301,6 +327,9 @@ export class TuArbitWs {
             case "kucoin":
                 channel = `/spotMarket/level2Depth5:`;
                 break;
+            case "mexc":
+                channel = "spot@public.limit.depth.v3.api@";
+                break;
         }
         return channel;
     }
@@ -313,12 +342,18 @@ export class TuArbitWs {
     }
 
     parseData(resp: any) {
-        const parsedResp = this.plat == 'binance' ? resp : safeJsonParse(resp.toString());
-        let { data, topic, type } = parsedResp;
+        const parsedResp =
+            this.plat == "binance"
+                ? resp
+                : safeJsonParse(resp.toString());
+        let { data, topic, d } = parsedResp;
         let channel: string | undefined;
         let symbol: string | undefined;
-        if ((this.plat != 'binance' && !data) || (this.plat == "binance" && !parsedResp.e)) {
-            if (parsedResp != "pong") this._log({ parsedResp });
+        if (
+            (this.plat != "binance" && (!data && !d)) ||
+            (this.plat == "binance" && !parsedResp.e)
+        ) {
+            if (parsedResp != "pong") this._log({parsedResp });
             return;
         }
 
@@ -397,9 +432,10 @@ export class TuArbitWs {
             case "binance":
                 if (resp?.e) {
                     const e = resp;
-                    symbol = e.s;
-                    channel = "orderbook"
+                    
                     if (resp.e == "depthUpdate") {
+                        symbol = e.s;
+                    channel = "orderbook";
                         const ob: IOrderbook = {
                             ts: parseDate(e.E),
                             asks: e.a.map((el) => ({
@@ -414,9 +450,32 @@ export class TuArbitWs {
 
                         data = ob;
                     }
-
-                    break;
                 }
+                break;
+            case "mexc":
+                if (parsedResp?.c) {
+                    const e = parsedResp;
+                    
+                    if (e.c.includes('depth')) {
+                        symbol = e.s;
+                        //console.log({asks: e.d.asks, bids: e.d.bids})
+                    channel = "orderbook";
+                        const ob: IOrderbook = {
+                            ts: parseDate(e.t),
+                            asks: e.d.asks.map((el) => ({
+                                px: Number(el.p),
+                                amt: Number(el.v),
+                            })),
+                            bids: e.d.bids.map((el) => ({
+                                px: Number(el.p),
+                                amt: Number(el.v),
+                            })),
+                        };
+
+                        data = ob;
+                    }
+                }
+                break;
         }
 
         //console.log(data)
@@ -439,7 +498,8 @@ export class TuArbitWs {
     async sub(bot: IBot) {
         // SUB FOR A. B. C
         const abot = this.abots.find((el) => el.bot.id == bot.id);
-        if (!abot || !abot.active) { return this._log("BOT NOT ACTIVE")
+        if (!abot || !abot.active) {
+            return this._log("BOT NOT ACTIVE");
         }
         await this.subUnsub(bot, "sub");
     }
@@ -477,7 +537,7 @@ export class TuArbitWs {
         bot: IBot,
         act: "sub" | "unsub",
         channel1: string,
-        fn: ((channel: string, plat: string, data?: IObj) => void) | undefined
+        fn: ((channel: string, plat: TPlatName, data?: IObj) => void) | undefined
     ) {
         const { platform } = bot;
         const pairA = [bot.B, bot.A];
@@ -533,7 +593,8 @@ export class TuArbitWs {
             } else if (
                 platform == "bybit" ||
                 platform == "kucoin" ||
-                platform == "binance"
+                platform == "binance" ||
+                platform == "mexc"
             ) {
                 if (act == "sub" || unsubA)
                     fn(
@@ -564,7 +625,7 @@ export class TuArbitWs {
         bot: IBot,
         act: "sub" | "unsub",
         channel1: string,
-        fn: ((channel: string, plat: string, data?: IObj) => void) | undefined
+        fn: ((channel: string, plat: TPlatName, data?: IObj) => void) | undefined
     ) {
         const pair = [bot.base, bot.ccy];
         const symbol = getSymbol(pair, this.plat);
@@ -598,6 +659,7 @@ export class TuArbitWs {
                 case "bybit":
                 case "kucoin":
                 case "binance":
+                case "mexc":
                     if (act == "sub" || unsubPair)
                         fn(
                             channel1 +
@@ -613,7 +675,8 @@ export class TuArbitWs {
         await this.subUnsub(bot, "unsub");
     }
     async onMessage(resp: RawData) {
-        console.log("\nON MESSAGE\n")
+        if (DEV)
+        this._log("ON MESSAGE");
         const r = this.parseData(resp);
         if (!r) return;
         const { channel, data, symbol } = r;
@@ -637,13 +700,13 @@ export class TuArbitWs {
                 // Determine whether to use the flipped or not
                 const ob = data as IOrderbook;
                 let enoughAsk: IBook | undefined;
-                const askA = ob.asks[0] ?? abot.bookA?.ask
-                const askB = ob.asks[0] ?? abot.bookB?.ask
-                const askC = ob.asks[0] ?? abot.bookC?.ask
+                const askA = ob.asks[0] ?? abot.bookA?.ask;
+                const askB = ob.asks[0] ?? abot.bookB?.ask;
+                const askC = ob.asks[0] ?? abot.bookC?.ask;
 
-                const bidA = ob.bids[0] ?? abot.bookA?.bid
-                const bidB = ob.bids[0] ?? abot.bookB?.bid
-                const bidC = ob.bids[0] ?? abot.bookC?.bid
+                const bidA = ob.bids[0] ?? abot.bookA?.bid;
+                const bidB = ob.bids[0] ?? abot.bookB?.bid;
+                const bidC = ob.bids[0] ?? abot.bookC?.bid;
                 const {
                     bookA: oldBookA,
                     bookB: oldBookB,
@@ -705,7 +768,7 @@ export class TuArbitWs {
 
                 if (abot.active && bookCond && bookFieldsCond) {
                     abot.active = false;
-                    this._updateBots(abot)
+                    this._updateBots(abot);
                     const re = await this.handleTickersTri({
                         abot,
                     });
@@ -746,11 +809,11 @@ export class TuArbitWs {
                 // Determine whether to use the flipped or not
                 const ob = data as IOrderbook;
                 let enoughAsk: IBook | undefined;
-                const askA = ob.asks[0] ?? abot.data.bookA?.ask
-                const askB = ob.asks[0] ?? abot.data.bookB?.ask
+                const askA = ob.asks[0] ?? abot.data.bookA?.ask;
+                const askB = ob.asks[0] ?? abot.data.bookB?.ask;
 
-                const bidA = ob.bids[0] ?? abot.data.bookA?.bid
-                const bidB = ob.bids[0] ?? abot.data.bookB?.bid
+                const bidA = ob.bids[0] ?? abot.data.bookA?.bid;
+                const bidB = ob.bids[0] ?? abot.data.bookB?.bid;
 
                 const { bookA: oldBookA, bookB: oldBookB } = abot.data;
                 switch (this.plat) {
@@ -820,7 +883,8 @@ export class TuArbitWs {
     async handleTickersCross({ abot }: { abot: ICrossArbitBot }) {
         //DONT RESUME IF RETURN TRUE
         try {
-            botLog(abot.bot, "\nTickerHandler");
+            if (DEV)
+            botLog(abot.bot, "\nTickerHandlerCross", {plat: this.plat});
 
             const { bot, pair, data } = abot;
             const { platA, platB } = bot;
@@ -882,7 +946,8 @@ export class TuArbitWs {
     async handleTickersTri({ abot }: { abot: ITriArbitBot }) {
         //DONT RESUME IF RETURN TRUE
         try {
-            botLog(abot.bot, "\nTickerHandler");
+            if (DEV)
+            botLog(abot.bot, "\nTickerHandler Tri", {plat: this.plat});
             const MAX_SLIP = 0.5;
             const { bot, pairA, pairB, pairC, bookA, bookB, bookC } = abot;
             let symbolA = getSymbol(abot.pairA, bot.platform);
@@ -897,7 +962,7 @@ export class TuArbitWs {
             let tickerA = abot.tickerA ?? 0;
             let tickerB = abot.tickerB ?? 0;
             let tickerC = abot.tickerC ?? 0;
-            console.log({bookB})
+            console.log({ bookB });
             //Normal prices
             let pxA = bookA.ask.px;
             let pxB = bookB.ask.px;

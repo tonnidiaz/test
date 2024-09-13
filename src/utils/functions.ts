@@ -5,7 +5,7 @@ import fs from "fs";
 const { env } = process;
 import { Response } from "express";
 import axios from "axios";
-import { ICandle, IObj } from "./interfaces";
+import { ICandle, IObj, TPlatName } from "./interfaces";
 import { IBot } from "@/models/bot";
 import { okxInstrus } from "@/utils/data/instrus/okx-instrus";
 import { binanceInfo } from "./binance-info";
@@ -646,8 +646,7 @@ export const findAve = (numbers: number[]) => {
     return avg;
 };
 
-export const getSymbol = (pair: string[], plat: string) => {
-    plat = plat.toLowerCase();
+export const getSymbol = (pair: string[], plat: TPlatName) => {
     let sep = "";
     switch (plat) {
         case "okx":

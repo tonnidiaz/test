@@ -2,6 +2,7 @@ import { CrossArbitData } from "@/classes/tu";
 import { IBot } from "@/models/bot";
 import { ObjectId } from "mongoose";
 import { Socket } from "socket.io";
+import { platList } from "./consts2";
 
 export interface IObj {
     [key: string]: any;
@@ -112,3 +113,5 @@ export interface ICrossArbitBot extends IArbitBot {
     client?: Socket;
 
 }
+
+export type TPlatName = typeof platList[number]

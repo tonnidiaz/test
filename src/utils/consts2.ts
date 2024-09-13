@@ -31,3 +31,6 @@ export const objPlats =
     export const BINANCE_WS_URL = "wss://stream.binance.com:9443";
     export const BITGET_WS_URL = "wss://ws.bitget.com/v2/ws/public"
     export const KUCOIN_TOKEN_URL = "https://api.kucoin.com/api/v1/bullet-public";
+    export const MEXC_WS_URL = "wss://wbs.mexc.com/ws"
+
+    export const platList = ["binance", "bitget", "bybit", "kucoin", "okx", "mexc", "gateio"] as const;
