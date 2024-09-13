@@ -150,7 +150,7 @@ const getTrades = async ({
     const startDate = parseDate(new Date(start));
     const endDate = parseDate(new Date(end));
     const year = startDate.split("-")[0];
-    const plat = new platforms[platNm].obj({});
+    const plat = new platforms[platNm]({});
     const savePath =
         tradesRootDir + `/${platNm}/${year}/${symbol}_${start}-${end}.json`;
     console.log({ savePath });
@@ -160,7 +160,7 @@ const getTrades = async ({
         end,
         savePath,
     });
-    console.log(r[0], r[r.length - 1]);
+    //console.log(r[0], r[r.length - 1]);
 };
 
 async function test() {
