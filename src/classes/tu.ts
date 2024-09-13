@@ -1143,7 +1143,7 @@ export class TuArbitWs {
                 [bot.base, bot.ccy],
                 this.plat
             );
-            if (pricePrecision == null) return;
+           // if (pricePrecision == null) return;
 
             if (
                 this.ws?.ws instanceof WebSocket &&

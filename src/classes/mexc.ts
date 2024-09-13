@@ -25,6 +25,7 @@ export class Mexc {
         this.client = new Spot(this.apiKey, this.apiSecret);
     }
 
+  
     async getBal(ccy?: string) {
         botLog(this.bot, "GETTING BAL...");
         try {
