@@ -115,6 +115,8 @@ io.on("connection", (client) => {
                 });
                 id = `${bot.id}`;
                 const data = new CrossArbitData();
+                data.pair = pair
+                data.platA = platA; data.platB = platB
                 await crossArbitWsList[platA].addBot(bot, client, demo ,data);
                 await crossArbitWsList[platB].addBot(bot, client, demo, data);
             }

@@ -4,9 +4,9 @@ import { TestBitget } from "@/classes/test-bitget";
 import { TestGateio } from "@/classes/test-gateio";
 import { TestKucoin } from "@/classes/test-kucoin";
 import { TestMexc } from "@/classes/test-mexc";
-import { TestBybit, TestOKX } from "@/classes/test-platforms";
+import { Platform, TestBybit, TestOKX } from "@/classes/test-platforms";
 
-export const platforms = {
+export const platforms : {[key: string] : typeof Platform} = {
     binance: TestBinance ,
     bybit: TestBybit ,
     okx: TestOKX ,

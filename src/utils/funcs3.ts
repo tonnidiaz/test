@@ -163,3 +163,5 @@ export const safeJsonParse = <T>(str: any) => {
       return str;
     }
   };
+
+  export const getLastItem = (arr: any[])=> [...arr].pop()

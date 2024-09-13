@@ -10,6 +10,9 @@
 - PEPE2 - **High vol**
 - OORT
 
+## KUCOIN_BITGET
+- PIP
+
 ## DIFFERENT SAME-NAME COINS
 ### KUCOIN_BITGET
 - ACE - ACEend_Flourist

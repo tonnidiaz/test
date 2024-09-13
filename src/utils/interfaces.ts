@@ -88,26 +88,27 @@ export interface IOrderpage {
     bid: IBook;
 }
 
-
-
-export interface IABot {
+interface IArbitBot {
     bot: IBot;
     active: boolean;
+    client?: Socket;
     demo?: boolean;
+}
+export interface ITriArbitBot extends IArbitBot {
     pairA: string[];
     pairB: string[];
     pairC: string[];
     bookA?: IOrderpage;
     bookB?: IOrderpage;
     bookC?: IOrderpage;
-    client?: Socket;
+    tickerA?: number;
+    tickerB?: number;
+    tickerC?: number;
 }
 
-export interface ICrossArbitBot {
-    bot: IBot;
-    active: boolean;
+export interface ICrossArbitBot extends IArbitBot {
     pair: string[];
     data: CrossArbitData;
     client?: Socket;
-    demo?: boolean;
+
 }

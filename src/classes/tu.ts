@@ -10,12 +10,12 @@ import {
     timedLog,
 } from "@/utils/functions";
 import {
-    IABot,
+    ITriArbitBot,
     IBook,
     ICrossArbitBot,
     IObj,
     IOrderbook,
-    IOrderpage, 
+    IOrderpage,
 } from "@/utils/interfaces";
 import { parseDate } from "@/utils/funcs2";
 import { DEV } from "@/utils/constants";
@@ -36,6 +36,7 @@ import {
 } from "@/utils/orders/funcs4";
 import { Socket } from "socket.io";
 import mongoose from "mongoose";
+import { platforms } from "@/utils/consts";
 const readyStateMap = {
     0: "CONNECTING",
     1: "OPEN",
@@ -52,12 +53,12 @@ export class TuWs extends WebSocket {
     lastSub: number;
 
     constructor(
-        address: string | URL, plat: string,
+        address: string | URL,
+        plat: string,
         options?: ClientOptions | ClientRequestArgs | undefined
     ) {
-        
         super(address, options);
-        this.plat = plat
+        this.plat = plat;
         this.lastSub = Date.now();
     }
 
@@ -65,8 +66,7 @@ export class TuWs extends WebSocket {
         if (this.readyState === this.OPEN) {
             {
                 this.ping();
-                if (this.plat == 'bitget')
-                this.send("ping")
+                if (this.plat == "bitget") this.send("ping");
             }
 
             // if (DEV)
@@ -134,6 +134,8 @@ export class CrossArbitData {
     pair: string[] = [];
     bookA: IOrderpage | undefined;
     bookB: IOrderpage | undefined;
+    tickerA?: number;
+    tickerB?: number;
 }
 
 const demo = false;
@@ -141,7 +143,7 @@ const demo = false;
 export class TuArbitWs {
     arbitType: "tri" | "cross";
     ws: TuWs | undefined;
-    abots: (ICrossArbitBot | IABot)[] = [];
+    abots: (ICrossArbitBot | ITriArbitBot)[] = [];
     isConnectError = false;
     wsURL: string | undefined;
     open = false;
@@ -151,6 +153,8 @@ export class TuArbitWs {
     maxReconnectAttempts: number;
     currentReconnectAttempts: number;
     PING_INTERVAL = 10 * 1000;
+    lastTickerFetchAt = 0;
+    tickerFetchInterval = 30; //secs
 
     constructor(plat: string, type: "tri" | "cross") {
         this.name = this.constructor.name;
@@ -277,7 +281,7 @@ export class TuArbitWs {
         for (let abot of this.abots.filter((el) => el.demo)) {
             await this.subUnsub(abot.bot, "unsub");
         }
-        this.abots = this.abots.filter(el=> !el.demo);
+        this.abots = this.abots.filter((el) => !el.demo);
     }
 
     parseData(resp: any) {
@@ -286,8 +290,7 @@ export class TuArbitWs {
         let channel: string | undefined;
         let symbol: string | undefined;
         if (!data) {
-            if (parsedResp != 'pong')
-                this._log({ parsedResp });
+            if (parsedResp != "pong") this._log({ parsedResp });
             return;
         }
 
@@ -431,7 +434,7 @@ export class TuArbitWs {
         let symbolB = getSymbol(pairB, bot.platform);
         let symbolC = getSymbol(pairC, bot.platform);
         const activePairs: string[] = [];
-        const activeBots: IABot[] = this.abots.filter(
+        const activeBots: ITriArbitBot[] = this.abots.filter(
             (el) => el.active && el.bot.id != bot.id
         ) as any;
         for (let abot of activeBots) {
@@ -451,7 +454,8 @@ export class TuArbitWs {
         const unsubC =
             activePairs.findIndex((el) => el == pairC.toString()) == -1; // pairA not in any of active bots
         if (this.ws?.readyState != this.ws?.OPEN) {
-            return this._log("NOT READY");
+            this._log("NOT READY");
+            return;
         }
         if (channel1 && fn) {
             // Orderbook channel, also returns ask n bid pxs
@@ -540,7 +544,7 @@ export class TuArbitWs {
 
     async _onMessageTri(r: ReturnType<typeof this.parseData>) {
         if (!r) return;
-        for (let abot of this.abots as IABot[]) {
+        for (let abot of this.abots as ITriArbitBot[]) {
             const { bot, pairA, pairB, pairC } = abot;
             let symbolA = getSymbol(pairA, bot.platform);
             let symbolB = getSymbol(pairB, bot.platform);
@@ -712,7 +716,7 @@ export class TuArbitWs {
         }
     }
 
-    _updateBots(abot: ICrossArbitBot | IABot) {
+    _updateBots(abot: ICrossArbitBot | ITriArbitBot) {
         this.abots = this.abots.map((el) =>
             el.bot.id == abot.bot.id ? abot : el
         );
@@ -722,6 +726,7 @@ export class TuArbitWs {
         //DONT RESUME IF RETURN TRUE
         try {
             botLog(abot.bot, "\nTickerHandler");
+
             const { bot, pair, data } = abot;
             const { platA, platB } = bot;
             const { bookA, bookB } = data;
@@ -730,11 +735,11 @@ export class TuArbitWs {
 
             const A = 1;
             //Normal prices
-            const askA = bookA?.ask.px ?? 0
-            const bidA = bookA?.bid.px ?? 0
+            const askA = bookA?.ask.px ?? 0;
+            const bidA = bookA?.bid.px ?? 0;
 
-            const askB = bookB?.ask.px ?? 0
-            const bidB = bookB?.bid.px ?? 0
+            const askB = bookB?.ask.px ?? 0;
+            const bidB = bookB?.bid.px ?? 0;
 
             const A2 = (A * bidB) / askA; // BUY A, SELL B
             const FA2 = (A * bidA) / askB; // BUT B, SELL A
@@ -744,6 +749,15 @@ export class TuArbitWs {
             const perc = Math.max(_perc, _fperc);
 
             const flipped = _perc < _fperc;
+
+            const tickerA = data.tickerA ?? 0;
+            const tickerB = data.tickerB ?? 0;
+
+            const tickerA2 = (A * tickerB) / tickerA;
+            const ftickerA2 = (A * tickerA) / tickerB;
+
+            const tickerPerc = ceil(((tickerA2 - A) / A) * 100, 2);
+            const ftickerPerc = ceil(((ftickerA2 - A) / A) * 100, 2);
 
             console.log({ platA, platB, pair }, "\n", { askA, bidA }, "\n", {
                 askB,
@@ -755,6 +769,10 @@ export class TuArbitWs {
                 type: "cross",
                 bookA,
                 bookB,
+                tickerA,
+                tickerB,
+                tickerPerc,
+                ftickerPerc,
                 pair,
                 platA,
                 platB,
@@ -766,7 +784,7 @@ export class TuArbitWs {
             return false;
         }
     }
-    async handleTickersTri({ abot }: { abot: IABot }) {
+    async handleTickersTri({ abot }: { abot: ITriArbitBot }) {
         //DONT RESUME IF RETURN TRUE
         try {
             botLog(abot.bot, "\nTickerHandler");
@@ -781,6 +799,9 @@ export class TuArbitWs {
                 return;
 
             const A = 1;
+            let tickerA = abot.tickerA ?? 0;
+            let tickerB = abot.tickerB ?? 0;
+            let tickerC = abot.tickerC ?? 0;
             //Normal prices
             let pxA = bookA.ask.px;
             let pxB = bookB.ask.px;
@@ -796,6 +817,13 @@ export class TuArbitWs {
 
             const _perc = ceil(((A2 - A) / A) * 100, 2);
             const _fperc = ceil(((FA2 - A) / A) * 100, 2);
+
+            const tickerA2 = (A * tickerC) / (tickerA * tickerB);
+            const ftickerA2 = (A * tickerA * tickerB) / tickerC;
+
+            const tickerPerc = ceil(((tickerA2 - A) / A) * 100, 2);
+            const ftickerPerc = ceil(((ftickerA2 - A) / A) * 100, 2);
+
             const perc = Math.max(_perc, _fperc);
 
             const flipped = _perc < _fperc;
@@ -925,6 +953,11 @@ export class TuArbitWs {
                     pairA,
                     pairB,
                     pairC,
+                    tickerA,
+                    tickerB,
+                    tickerC,
+                    tickerPerc,
+                    ftickerPerc,
                     perc: _perc,
                     fperc: _fperc,
                 });
@@ -943,9 +976,8 @@ export class TuArbitWs {
         demo?: boolean,
         data?: CrossArbitData
     ) {
-        this._log("ADDING BOT", bot.name, {demo, data});
+        this._log("ADDING BOT", bot.name, { demo, data });
         try {
-            
             const pricePrecision = getPricePrecision(
                 [bot.base, bot.ccy],
                 this.plat
@@ -956,12 +988,12 @@ export class TuArbitWs {
                 //return await this.addBot(bot, first)
             }
             this.abots = this.abots.filter((el) => el.bot.id != bot.id);
+            let abot: ITriArbitBot | ICrossArbitBot;
             if (this.arbitType == "tri") {
                 const pairA = [bot.B, bot.A];
                 const pairB = [bot.C, bot.B];
                 const pairC = [bot.C, bot.A];
-
-                this.abots.push({
+                abot = {
                     bot: bot,
                     pairA,
                     pairB,
@@ -969,24 +1001,65 @@ export class TuArbitWs {
                     client,
                     demo,
                     active: true,
-                });
+                };
             } else {
                 const pair = [bot.base, bot.ccy];
-                this.abots.push({
+                abot = {
                     bot: bot,
                     pair,
                     client,
                     demo,
                     active: true,
                     data: data!,
-                });
+                };
             }
+            this.abots.push(abot);
+
+            const isCross = data != undefined;
 
             await this.sub(bot);
             this._log("BOT ADDED");
+
+            // Fetch ticker on first run
+            await this._tickerFetcher(abot)
+            this.tickerTimer = setInterval(async () => {
+                this._log("\nTicker timer\n");
+                const _abot = this.abots.find((el) => el.bot.id == abot.bot.id);
+                if (!_abot || !_abot.active)
+                    return clearInterval(this.tickerTimer);
+                await this._tickerFetcher(_abot)
+            }, this.tickerFetchInterval * 1000);
+
         } catch (e) {
             this._log(e);
         }
+    }
+
+    tickerTimer: NodeJS.Timeout | undefined;
+    async _tickerFetcher(_abot: (typeof this.abots)[0]) {
+        if (DEV) this._log("FETCHING TICKERS...");
+
+        const plat = new platforms[this.plat]({ demo: false });
+        if (this.arbitType == "cross") {
+            if (!("pair" in _abot)) return;
+            const ticker = await plat.getTicker(_abot.pair);
+            if (this.plat == _abot.data.platA) {
+                _abot.data.tickerA = ticker;
+            }
+            if (this.plat == _abot.data.platB) {
+                _abot.data.tickerB = ticker;
+            }
+        } else {
+            if (!("pairA" in _abot)) return;
+            const tickerA = await plat.getTicker(_abot.pairA);
+            const tickerB = await plat.getTicker(_abot.pairB);
+            const tickerC = await plat.getTicker(_abot.pairC);
+
+            _abot.tickerA = tickerA;
+            _abot.tickerB = tickerB;
+            _abot.tickerC = tickerC;
+        }
+        this._updateBots(_abot);
     }
     async rmvBot(botId: mongoose.Types.ObjectId) {
         this._log("REMOVING BOT", botId, "...");

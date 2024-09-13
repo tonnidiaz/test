@@ -1,7 +1,7 @@
 import { MAKER_FEE_RATE, TAKER_FEE_RATE } from "@/utils/constants";
 import { ensureDirExists } from "@/utils/orders/funcs";
 import { getInterval, parseDate } from "@/utils/funcs2";
-import { botLog, readJson } from "@/utils/functions";
+import { botLog, getSymbol, readJson } from "@/utils/functions";
 import axios, { AxiosResponse } from "axios";
 import crypto from "crypto";
 
@@ -30,6 +30,9 @@ export class Platform {
     constructor({ demo = false }: { demo?: boolean }) {
         this.demo = demo;
     }
+    async getTicker(pair: string[]): Promise<number>{
+        this._log("GETTING TICKER FOR", pair)
+        return 0}
     async getKlines({
         start,
         end,
@@ -45,6 +48,9 @@ export class Platform {
     }): Promise<any[] | undefined | void> {
         console.log(`[${this.constructor.name}] GETTING KLINES FOR`, {symbol, interval}, '\n')
         return;
+    }
+    _log(...args){
+        console.log(`\n[${this.constructor.name}]`, ...args, '\n')
     }
     async getTrades({
         start,
@@ -312,6 +318,18 @@ export class TestOKX extends Platform {
             return d.sort((a, b) => Number(a.ts) - Number(b.ts));
         } catch (e) {
             console.log(e);
+        }
+    }
+   async getTicker(pair: string[]): Promise<number> {
+        super.getTicker(pair)
+        try{
+            const symbo = getSymbol(pair, 'okx')
+            const r = await this.client.getTicker(symbo)
+            return Number(r[0].last)
+        }
+        catch(e){
+            this._log("FAILED TO GET TICKER", e)
+            return 0
         }
     }
 }

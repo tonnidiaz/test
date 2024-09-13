@@ -4,6 +4,7 @@ import { Platform } from "./test-platforms";
 import { RestClientV2 } from "bitget-api";
 import { writeFileSync } from "fs";
 import { CompanyResultSortBy } from "indicatorts";
+import { getSymbol } from "@/utils/functions";
 
 export class TestBitget extends Platform {
     name = "BITGET";
@@ -154,5 +155,18 @@ export class TestBitget extends Platform {
         let d = [...klines];
         console.log(d[d.length - 1]);
         return d;
+    }
+
+    async getTicker(pair: string[]): Promise<number> {
+        super.getTicker(pair)
+        try{
+            const symbol = getSymbol(pair, 'bitget')
+            const r = await this.client.getSpotTicker({symbol})
+            return Number(r.data[0].lastPr)
+        }
+        catch(e){
+            this._log("FAILED TO GET TICKER", e)
+            return 0
+        }
     }
 }

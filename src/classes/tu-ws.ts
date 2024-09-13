@@ -19,7 +19,7 @@ export const initArbitWs = async () => {
     try {
         const wsList = [...Object.values(triArbitWsList), ...Object.values(crossArbitWsList)]
         for (let ws  of wsList) {
-            if (!DEV)
+            if (!DEV || false)
             await ws.initWs();
         }
     } catch (e) {

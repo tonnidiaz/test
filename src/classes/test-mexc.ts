@@ -4,6 +4,7 @@ import { Platform } from "./test-platforms";
 import { writeFileSync } from "fs";
 import { CompanyResultSortBy } from "indicatorts";
 import * as Mexc from "mexc-api-sdk";
+import { getSymbol } from "@/utils/functions";
 
 export class TestMexc extends Platform {
     name = "MEXC";
@@ -149,5 +150,17 @@ export class TestMexc extends Platform {
         let d = [...klines];
         console.log(d[d.length - 1]);
         return d;
+    }
+    async getTicker(pair: string[]): Promise<number> {
+        super.getTicker(pair)
+        try{
+            const symbol = getSymbol(pair, 'mexc')
+            const r = await this.client.tickerPrice(symbol)
+            return Number(r.data.price)
+        }
+        catch(e){
+            this._log("FAILED TO GET TICKER", e)
+            return 0
+        }
     }
 }

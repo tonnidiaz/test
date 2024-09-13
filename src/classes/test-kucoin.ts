@@ -4,7 +4,7 @@ import type { Kline } from "kucoin-api";
 import { MAKER_FEE_RATE, TAKER_FEE_RATE } from "@/utils/constants";
 import { ensureDirExists } from "@/utils/orders/funcs";
 import { getInterval, parseDate } from "@/utils/funcs2";
-import { botLog, readJson } from "@/utils/functions";
+import { botLog, getSymbol, readJson } from "@/utils/functions";
 import axios, { AxiosResponse } from "axios";
 import { existsSync, writeFileSync } from "fs";
 
@@ -90,6 +90,19 @@ export class TestKucoin extends Platform {
             return klines;
         } catch (e) {
             console.log(e);
+        }
+    }
+
+    async getTicker(pair: string[]): Promise<number> {
+        super.getTicker(pair)
+        try{
+            const symbol = getSymbol(pair, 'kucoin')
+            const r = await this.client.getTicker({symbol})
+            return Number(r.data.price)
+        }
+        catch(e){
+            this._log("FAILED TO GET TICKER", e)
+            return 0
         }
     }
 }
