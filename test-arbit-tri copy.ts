@@ -15,7 +15,7 @@ import { okxInstrus } from "@/utils/data/instrus/okx-instrus";
 import { bybitInstrus } from "@/utils/data/instrus/bybit-instrus";
 import { ensureDirExists } from "@/utils/orders/funcs";
 import { ARBIT_ZERO_FEES, XRP_WITHDRAW_FEE } from "@/utils/constants";
-import { IObj } from "@/utils/interfaces";
+import { IObj, TPlatName } from "@/utils/interfaces";
 import { binanceInstrus } from "@/utils/data/instrus/binance-instrus";
 import { binanceBTCBases } from "@/utils/data/binance-bases";
 // BYBIT, BINANCE 15min PEPE works
@@ -140,9 +140,9 @@ async function run({A = "USDT", B = "ETH", C, _plat }:{A?: string, B?: string, C
     }
 
     
-    const klinesPathA =  getKlinesPath({plat, interval, year, pair: pairA, demo})
-    const klinesPathB =  getKlinesPath({plat, interval, year, pair: pairB!, demo})
-    const klinesPathC =  getKlinesPath({plat, interval, year, pair: pairC!, demo})
+    const klinesPathA =  getKlinesPath({plat: plat as TPlatName, interval, year, pair: pairA, demo})
+    const klinesPathB =  getKlinesPath({plat: plat as TPlatName, interval, year, pair: pairB!, demo})
+    const klinesPathC =  getKlinesPath({plat: plat as TPlatName, interval, year, pair: pairC!, demo})
 
    if (!existsSync(klinesPathA)){
     return console.log(`${klinesPathA} DOES NOT EXIST`)

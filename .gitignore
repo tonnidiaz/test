@@ -15,6 +15,7 @@ _data
 # Benchmarking
 benchmarks/graphs
 src/data/**/*.json
+src/utils/data/currencies
 .github
 #!src/data/instrus/*
 # ignore additional files using core.excludesFile

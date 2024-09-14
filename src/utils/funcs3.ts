@@ -19,7 +19,7 @@ export const getKlinesPath = ({
     pair,
     year,
 }: {
-    plat: string;
+    plat: TPlatName;
     pair: string[];
     interval: number;
     demo?: boolean;
@@ -32,7 +32,7 @@ export const getKlinesPath = ({
     )}_${interval}m-${t}.json`;
 };
 
-export const getInstrus = (_platName: string) => {
+export const getInstrus = (_platName: TPlatName) => {
     let _instruments: string[][] = [];
 
     switch (_platName) {
@@ -57,9 +57,16 @@ export const getInstrus = (_platName: string) => {
                 .map((el) => [el.baseCoin, el.quoteCoin]);
             break;
         case "mexc":
-            console.log(`\nMEXC BABAYYYYYYY\n`)
+            console.log(`\nMEXC BABAYYYYYYY\n`);
             _instruments = mexcInstrus
-                .filter((el) => el.status == "1" && el.isSpotTradingAllowed && el.orderTypes.map(el=> el.toLowerCase()).includes('market'))
+                .filter(
+                    (el) =>
+                        el.status == "1" &&
+                        el.isSpotTradingAllowed &&
+                        el.orderTypes
+                            .map((el) => el.toLowerCase())
+                            .includes("market")
+                )
                 .map((el) => [el.baseAsset, el.quoteAsset]);
             break;
         case "okx":
@@ -119,7 +126,7 @@ export const parseOrders = async (_bot: IBot, _start: number, max: number) => {
     if (_bot.type == "arbitrage") {
         const ords = await TriArbitOrder.find({ bot: _bot.id }).exec();
         for (let ord of ords.slice(_start, end)) {
-            ord = await parseArbitOrder(ord)
+            ord = await parseArbitOrder(ord);
             orders.push(ord.order);
         }
     } else {
@@ -132,7 +139,6 @@ export const parseOrders = async (_bot: IBot, _start: number, max: number) => {
         }
     }
 };
-
 
 const KUCOIN_TOKEN_URL = "https://api.kucoin.com/api/v1/bullet-public";
 let kucoinTokenTs = Date.now();
@@ -151,17 +157,39 @@ const getKucoinToken = async () => {
     }
 };
 export const KUCOIN_WS_URL = async () =>
-    "wss://ws-api-spot.kucoin.com/?token=" + await getKucoinToken();
-
+    "wss://ws-api-spot.kucoin.com/?token=" + (await getKucoinToken());
 
 export const safeJsonParse = <T>(str: any) => {
     try {
-      const jsonValue: T = JSON.parse(str);
-  
-      return jsonValue;
-    } catch {
-      return str;
-    }
-  };
+        const jsonValue: T = JSON.parse(str);
 
-  export const getLastItem = (arr: any[])=> [...arr].pop()
+        return jsonValue;
+    } catch {
+        return str;
+    }
+};
+
+import crypto from "crypto";
+import { IObj, TPlatName } from "./interfaces";
+export const getLastItem = (arr: any[]) => [...arr].pop();
+export const genSignature = (
+    apiKey: string,
+    apiSecret: string,
+    params: IObj,
+    plat: TPlatName
+) => {
+    const paramString = Object.keys(params)
+        .sort()
+        .map((key) => `${key}=${params[key]}`)
+        .join("&");
+console.log(paramString)
+    const timestamp = Date.now().toString();
+    const prehashString =plat == 'mexc' ? `${paramString}`: `${timestamp}${apiKey}${paramString}`;
+    console.log({prehashString})
+    const signature = crypto
+        .createHmac("sha256", apiSecret)
+        .update(prehashString)
+        .digest("hex");
+
+    return signature.toLocaleLowerCase();
+};

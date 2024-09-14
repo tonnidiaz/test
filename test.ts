@@ -12,6 +12,7 @@ import {
     getSymbol,
     randomNum,
     readJson,
+    sleep,
     toFixed,
 } from "@/utils/functions";
 import { scheduleJob } from "node-schedule";
@@ -26,9 +27,12 @@ import { clearTerminal } from "@/utils/functions";
 import { configDotenv } from "dotenv";
 import mongoose from "mongoose";
 import { parseArbitOrder } from "@/utils/funcs3";
+import { TestMexc } from "@/classes/test-mexc";
+import { TestKucoin } from "@/classes/test-kucoin";
 
 //clearTerminal();
 configDotenv();
+clearTerminal();
 async function connectMongo(DEV: boolean) {
     console.log({ DEV });
     let mongoURL = (DEV ? process.env.MONGO_URL_LOCAL : process.env.MONGO_URL)!;
@@ -406,16 +410,30 @@ const testTrades = ({
     const _baseC = A / fPxs.pxC;
     const _amtB = _baseC * fPxs.pxB;
     const _A3 = _amtB * fPxs.pxA;
-    const _A33 = A * fPxs.pxB * fPxs.pxA /fPxs.pxC
+    const _A33 = (A * fPxs.pxB * fPxs.pxA) / fPxs.pxC;
 
     const fperc = ceil(((_A3 - A) / A) * 100, 2);
 
     const flipped = fperc > perc;
-    console.log({_A3, _A33});
+    console.log({ _A3, _A33 });
     console.log({ perc: `${perc}%`, fperc: `${fperc}%` });
 };
 
 const pxs = { pxA: 57967.5, pxB: 3.204e-7, pxC: 0.01786 };
 const fPxs = { pxA: 57967.4, pxB: 3.063e-7, pxC: 0.01793 };
 //calcTrade({flipped: true, amt: .6, ...pxs})
-testTrades({ amt: 10, pxs, fPxs });
+//testTrades({ amt: 10, pxs, fPxs });
+const run = async () => {
+    const plat = new TestKucoin({});
+    const coins = ["SOL", "DOGE", "ETH", "BTC"];
+   
+    const tickers : number[]= []
+    for (let coin of coins){
+        const r = await plat.getTicker([coin, 'USDT'])
+        await sleep(2000)
+        tickers.push(r)
+    }
+    console.log({tickers})
+};
+
+run();

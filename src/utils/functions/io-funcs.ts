@@ -1,5 +1,5 @@
 import { Server, Socket } from "socket.io";
-import { IObj, ICandle } from "../interfaces";
+import { IObj, ICandle, TPlatName } from "../interfaces";
 import { tuCE, heikinAshi, parseDate, parseKlines, tuPath } from "../funcs2";
 import {
     ETH_RATE,
@@ -297,7 +297,7 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
         let klinesPath: string | undefined;
         console.log({ platform });
 
-        const platName: string = platform.toLowerCase();
+        const platName: TPlatName = platform.toLowerCase();
         const plat = new platforms[platName]({ demo });
 
         const _platName = platform.toLowerCase();

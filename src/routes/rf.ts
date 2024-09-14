@@ -1,4 +1,6 @@
 import { Test } from "@/models";
+import { platforms } from "@/utils/consts";
+import { tunedErr } from "@/utils/functions";
 import axios from "axios";
 import { Router } from "express";
 
@@ -38,6 +40,18 @@ router.get('/kline', async (req, res)=>{
     catch(e){
         console.log(e)
         res.status(500).json({msg: "SOMETHING WRONG"})
+    }
+})
+
+router.get('/nets', async(req, res)=>{
+    try {
+        const {plat: platname, offline} = req.query
+        const Plat = new platforms[platname as any]({demo: false, name: platname as any})
+        const r = await Plat.getNets(undefined, offline == 'true')
+        res.json(r)
+    } catch (e) {
+        console.log(e);
+        return tunedErr(res, 500, 'Something went wrong')
     }
 })
 export default router

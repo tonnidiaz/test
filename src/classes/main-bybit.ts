@@ -50,64 +50,64 @@ export class WsBybit {
         console.log(env.BYBIT_API_KEY_DEMO, env.BYBIT_API_SECRET_DEMO);
     }
 
-    async initWs() {
-        try {
-            if (this.ws?.readyState == this.ws?.OPEN) this.ws?.close();
+    // async initWs() {
+    //     try {
+    //         if (this.ws?.ws.readyState == this.ws?.OPEN) this.ws?.close();
 
-            this.isConnectError = false;
-            this.ws = new TuWs(WS_URL_SPOT_PUBLIC, 'bybit');
-            this.wsList = [this.ws];
-            console.log("MAIN_BYBIT INIT");
-            for (let ws of this.wsList) {
-                ws?.on("open", () => {
-                    timedLog(this.TAG, "OPEN");
-                });
-                ws?.on("error", (e) => {
-                    console.log(this.TAG, "ERROR", e);
-                    this.isConnectError = e.stack?.split(" ")[2] == "ENOTFOUND";
-                });
-                ws?.on("close", async (e) => {
-                    console.log(this.TAG, "CLOSED", e);
-                    if (!this.isConnectError) await this.initWs();
-                });
+    //         this.isConnectError = false;
+    //         this.ws = new TuWs(WS_URL_SPOT_PUBLIC, 'bybit');
+    //         this.wsList = [this.ws];
+    //         console.log("MAIN_BYBIT INIT");
+    //         for (let ws of this.wsList) {
+    //             ws?.on("open", () => {
+    //                 timedLog(this.TAG, "OPEN");
+    //             });
+    //             ws?.on("error", (e) => {
+    //                 console.log(this.TAG, "ERROR", e);
+    //                 this.isConnectError = e.stack?.split(" ")[2] == "ENOTFOUND";
+    //             });
+    //             ws?.on("close", async (e) => {
+    //                 console.log(this.TAG, "CLOSED", e);
+    //                 if (!this.isConnectError) await this.initWs();
+    //             });
 
-                // ws?.on("message", async (resp) => {
-                //     const { channel, data } = ws?.parseData(resp);
-                //     if (DEV) {
-                //         timedLog("WS UPDATE");
-                //         //timedLog(candle);
-                //     }
-                //     for (let openBot of this.botsWithPos) {
-                //         const bot = await Bot.findById(openBot.id).exec();
-                //         if (!bot?.active) return;
-                //         if (channel == this.getCandleChannelName(bot!) && data) {
-                //             const candle = data.map((el) =>
-                //                 [
-                //                     el.start,
-                //                     el.open,
-                //                     el.high,
-                //                     el.low,
-                //                     el.close,
-                //                     el.volume,
-                //                     el.confirm,
-                //                 ].map((el) => Number(el))
-                //             )[0];
-                //             /* HANDLE TICKERS */
-                //             const df = tuCE(
-                //                 heikinAshi(
-                //                     parseKlines([...openBot.klines, candle])
-                //                 )
-                //             );
+    //             // ws?.on("message", async (resp) => {
+    //             //     const { channel, data } = ws?.parseData(resp);
+    //             //     if (DEV) {
+    //             //         timedLog("WS UPDATE");
+    //             //         //timedLog(candle);
+    //             //     }
+    //             //     for (let openBot of this.botsWithPos) {
+    //             //         const bot = await Bot.findById(openBot.id).exec();
+    //             //         if (!bot?.active) return;
+    //             //         if (channel == this.getCandleChannelName(bot!) && data) {
+    //             //             const candle = data.map((el) =>
+    //             //                 [
+    //             //                     el.start,
+    //             //                     el.open,
+    //             //                     el.high,
+    //             //                     el.low,
+    //             //                     el.close,
+    //             //                     el.volume,
+    //             //                     el.confirm,
+    //             //                 ].map((el) => Number(el))
+    //             //             )[0];
+    //             //             /* HANDLE TICKERS */
+    //             //             const df = tuCE(
+    //             //                 heikinAshi(
+    //             //                     parseKlines([...openBot.klines, candle])
+    //             //                 )
+    //             //             );
 
-                //             updateOpenBot(bot, openBot, df);
-                //         }
-                //     }
-                // });
-            }
-        } catch (e) {
-            console.log(e);
-        }
-    }
+    //             //             updateOpenBot(bot, openBot, df);
+    //             //         }
+    //             //     }
+    //             // });
+    //         }
+    //     } catch (e) {
+    //         console.log(e);
+    //     }
+    // }
 
     getCandleChannelName(bot: IBot) {
         const interval = getInterval(bot.interval, "bybit");

@@ -6,6 +6,7 @@ import { clearTerminal, getSymbol } from "./src/utils/functions";
 import { binanceInfo } from "./src/utils/binance-info";
 import { binanceInstrus } from "./src/utils/data/instrus/binance-instrus";
 import { Platform } from "@/classes/platforms";
+import { TPlatName } from "@/utils/interfaces";
 
 async function getCurrencies() {
     clearTerminal();
@@ -31,7 +32,7 @@ async function getCurrencies() {
 
 //getCurrencies()
 
-const getMinAmt = (pair: string[], plat: string) => {
+const getMinAmt = (pair: string[], plat: TPlatName) => {
     let amt = 0;
     const ccy = getSymbol(pair, plat);
     switch (plat) {

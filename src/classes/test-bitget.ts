@@ -4,20 +4,28 @@ import { Platform } from "./test-platforms";
 import { RestClientV2 } from "bitget-api";
 import { writeFileSync } from "fs";
 import { CompanyResultSortBy } from "indicatorts";
-import { getSymbol } from "@/utils/functions";
+import {
+    existsSync,
+    getSymbol,
+    readJson,
+    sleep,
+    writeJson,
+} from "@/utils/functions";
+import { ICoinNets, TPlatName } from "@/utils/interfaces";
+import { safeJsonParse } from "@/utils/funcs3";
+import { Axios } from "axios";
 
 export class TestBitget extends Platform {
-    name = "BITGET";
-    maker: number = 0.1 / 100; 
+    maker: number = 0.1 / 100;
     taker: number = 0.1 / 100;
     client: RestClientV2;
     flag: "1" | "0";
     apiKey: string;
     apiSecret: string;
     passphrase: string;
-
+    axiosClient: () => Axios;
     constructor({ demo = false }: { demo?: boolean }) {
-        super({ demo });
+        super({ demo, name: "bitget" });
         this.flag = demo ? "1" : "0";
         this.apiKey = demo
             ? process.env.BITGET_API_KEY_DEMO!
@@ -28,9 +36,9 @@ export class TestBitget extends Platform {
         this.passphrase = process.env.BITGET_PASSPHRASE!;
 
         this.client = new RestClientV2({});
+        this.axiosClient = () =>
+            new Axios({ baseURL: "https://api.kucoin.com/api" });
     }
-
-
 
     async getKlines({
         start,
@@ -99,32 +107,33 @@ export class TestBitget extends Platform {
                     limit: limit,
                 });
                 let { data } = res;
-                if (!data || !data.length) return console.log(data)
+                if (!data || !data.length) return console.log(data);
                 data = data.map((el) => el.map((el) => Number(el)));
 
-                const last = klines.length == 0 ? null : Number(klines[klines.length - 1][0])
-                const _new = Number(data[0][0])
+                const last =
+                    klines.length == 0
+                        ? null
+                        : Number(klines[klines.length - 1][0]);
+                const _new = Number(data[0][0]);
                 console.log(
                     "\n",
                     {
-                        last: last && parseDate(
-                            new Date(klines[klines.length - 1][0])
-                        ),
+                        last:
+                            last &&
+                            parseDate(new Date(klines[klines.length - 1][0])),
                         new: parseDate(new Date(data[0][0])),
                     },
                     "\n"
                 );
-                
-                if (last){
-                    if (last >= _new)
-                    {console.log("LAST > NEW", data.length)}
-                    data = data.filter(el => el[0] > last)
-                    console.log(data.length);
-                    
-                }
-                if (!data?.length) break; 
 
-               
+                if (last) {
+                    if (last >= _new) {
+                        console.log("LAST > NEW", data.length);
+                    }
+                    data = data.filter((el) => el[0] > last);
+                    console.log(data.length);
+                }
+                if (!data?.length) break;
 
                 klines.push(...[...data]);
 
@@ -138,7 +147,9 @@ export class TestBitget extends Platform {
                     console.log("Saved");
                 }
 
-                if (done){break}
+                if (done) {
+                    break;
+                }
                 cnt += 1;
             }
         } else {
@@ -158,15 +169,205 @@ export class TestBitget extends Platform {
     }
 
     async getTicker(pair: string[]): Promise<number> {
-        super.getTicker(pair)
-        try{
-            const symbol = getSymbol(pair, 'bitget')
-            const r = await this.client.getSpotTicker({symbol})
-            return Number(r.data[0].lastPr)
+        super.getTicker(pair);
+        try {
+            const symbol = getSymbol(pair, "bitget");
+            const r = await this.client.getSpotTicker({ symbol });
+            return Number(r.data[0].lastPr);
+        } catch (e) {
+            this._log("FAILED TO GET TICKER", e);
+            return 0;
         }
-        catch(e){
-            this._log("FAILED TO GET TICKER", e)
-            return 0
+    }
+
+    async getNets(ccy?: string, offline?: boolean) {
+        try {
+            console.log({ offline });
+            let res = safeJsonParse(
+                offline && existsSync(this.netsPath)
+                    ? await readJson(this.netsPath)
+                    : (await this.axiosClient().get("/v3/currencies")).data
+            );
+            if (res.data) res = res.data;
+            writeJson(
+                this.netsPath,
+                res.sort((a, b) => a.currency.localeCompare(b.currency))
+            );
+
+            const dummyData = [
+                {
+                    currency: "BTC",
+                    name: "BTC",
+                    fullName: "Bitcoin",
+                    precision: 8,
+                    confirms: null,
+                    contractAddress: null,
+                    isMarginEnabled: true,
+                    isDebitEnabled: true,
+                    chains: [
+                        {
+                            chainName: "BTC",
+                            withdrawalMinFee: "0.001",
+                            withdrawalMinSize: "0.0012",
+                            withdrawFeeRate: "0",
+                            depositMinSize: "0.0002",
+                            isWithdrawEnabled: true,
+                            isDepositEnabled: true,
+                            preConfirms: 1,
+                            contractAddress: "",
+                            chainId: "btc",
+                            confirms: 3,
+                        },
+                        {
+                            chainName: "KCC",
+                            withdrawalMinFee: "0.00002",
+                            withdrawalMinSize: "0.0008",
+                            withdrawFeeRate: "0",
+                            depositMinSize: null,
+                            isWithdrawEnabled: true,
+                            isDepositEnabled: true,
+                            preConfirms: 20,
+                            contractAddress:
+                                "0xfa93c12cd345c658bc4644d1d4e1b9615952258c",
+                            chainId: "kcc",
+                            confirms: 20,
+                        },
+                        {
+                            chainName: "BTC-Segwit",
+                            withdrawalMinFee: "0.0005",
+                            withdrawalMinSize: "0.0008",
+                            withdrawFeeRate: "0",
+                            depositMinSize: "0.0002",
+                            isWithdrawEnabled: false,
+                            isDepositEnabled: true,
+                            preConfirms: 2,
+                            contractAddress: "",
+                            chainId: "bech32",
+                            confirms: 2,
+                        },
+                    ],
+                },
+            ];
+            const data: typeof dummyData = res;
+
+            let coins: string[] = Array.from(
+                new Set(data.map((el) => el.currency))
+            );
+
+            coins = coins
+                .filter((el) => data.find((el2) => el2.currency == el)?.chains)
+                .sort((a, b) => a.localeCompare(b));
+
+            const tickers: { coin: string; ticker: number }[] = [];
+
+            if (offline && existsSync(this.tickersPath))
+                tickers.push(...(await readJson(this.tickersPath)));
+            else {
+                for (let el of coins) {
+                    let ticker = 0;
+                    if (el == "USDT" || el == "USDC" || true) {
+                        ticker = 1;
+                    } else {
+                        try {
+                            ticker = await this.getTicker([el, "USDT"]);
+
+                            await sleep(100);
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    }
+                    tickers.push({coin: el, ticker})
+                    writeJson(this.tickersPath, tickers)
+                }
+            }
+
+            writeJson(this.tickersPath, tickers);
+            const nets: ICoinNets[] = coins.map((el) => {
+                const net = data.find((el2) => el2.currency == el);
+                const ticker = tickers.find((el2) => el2.coin == el)!.ticker;
+                return {
+                    coin: net!.currency,
+                    name: net!.fullName,
+                    ticker,
+                    nets: net!.chains.map((el) => ({
+                        name: el.chainName,
+                        coin: net!.currency,
+                        chain: el.chainName,
+                        contactAddr: el.contractAddress,
+                        minComfirm: Number(el.confirms),
+                        minWd: Number(el.withdrawalMinSize),
+                        maxWd: Infinity,
+                        minDp: Number(el.depositMinSize),
+                        maxDp: Infinity,
+                        wdFee: Number(el.withdrawalMinFee),
+                        wdFeeUSDT: Number(el.withdrawalMinFee) * ticker,
+                        canDep: el.isDepositEnabled && el.isWithdrawEnabled,
+                    })),
+                };
+            });
+
+            return nets.filter((el) => !ccy || el.coin == ccy);
+        } catch (e) {
+            this._log("FAILED TO GET NETS", e);
         }
     }
 }
+
+/* 
+{
+  "code": "200000",
+  "data": [
+    {
+      "currency": "BTC",
+      "name": "BTC",
+      "fullName": "Bitcoin",
+      "precision": 8,
+      "confirms": null,
+      "contractAddress": null,
+      "isMarginEnabled": true,
+      "isDebitEnabled": true,
+      "chains": [
+        {
+          "chainName" : "BTC",
+          "withdrawalMinFee" : "0.001",
+          "withdrawalMinSize" : "0.0012",
+          "withdrawFeeRate" : "0",
+          "depositMinSize" : "0.0002",
+          "isWithdrawEnabled" : true,
+          "isDepositEnabled" : true,
+          "preConfirms" : 1,
+          "contractAddress" : "",
+          "chainId" : "btc",
+          "confirms" : 3
+        },
+        {
+          "chainName" : "KCC",
+          "withdrawalMinFee" : "0.00002",
+          "withdrawalMinSize" : "0.0008",
+          "withdrawFeeRate" : "0",
+          "depositMinSize" : null,
+          "isWithdrawEnabled" : true,
+          "isDepositEnabled" : true,
+          "preConfirms" : 20,
+          "contractAddress" : "0xfa93c12cd345c658bc4644d1d4e1b9615952258c",
+          "chainId" : "kcc",
+          "confirms" : 20
+        },
+        {
+          "chainName" : "BTC-Segwit",
+          "withdrawalMinFee" : "0.0005",
+          "withdrawalMinSize" : "0.0008",
+          "withdrawFeeRate" : "0",
+          "depositMinSize" : "0.0002",
+          "isWithdrawEnabled" : false,
+          "isDepositEnabled" : true,
+          "preConfirms" : 2,
+          "contractAddress" : "",
+          "chainId" : "bech32",
+          "confirms" : 2
+        }
+      ]
+    }
+  ]
+}
+*/

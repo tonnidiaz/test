@@ -12,7 +12,7 @@ export class TestBinance extends Platform {
     client: MainClient;
 
     constructor({ demo = false }: { demo?: boolean }) {
-        super({ demo });
+        super({ demo, name: 'binance' });
         this.client = new MainClient({});
     }
     async getKlines({

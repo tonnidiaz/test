@@ -1,7 +1,8 @@
 import { ICcy } from "@/utils/interfaces";
 
 
-export const okxCurrencies: ICcy[] = [
+export const okxCurrencies: ICcy[] = 
+[
     {
         canDep: true,
         canInternal: true,

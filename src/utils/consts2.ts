@@ -34,3 +34,4 @@ export const objPlats =
     export const MEXC_WS_URL = "wss://wbs.mexc.com/ws"
 
     export const platList = ["binance", "bitget", "bybit", "kucoin", "okx", "mexc", "gateio"] as const;
+    export const netsRootDir = "src/utils/data/currencies"

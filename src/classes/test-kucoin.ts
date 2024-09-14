@@ -4,17 +4,17 @@ import type { Kline } from "kucoin-api";
 import { MAKER_FEE_RATE, TAKER_FEE_RATE } from "@/utils/constants";
 import { ensureDirExists } from "@/utils/orders/funcs";
 import { getInterval, parseDate } from "@/utils/funcs2";
-import { botLog, getSymbol, readJson } from "@/utils/functions";
+import { botLog, getSymbol, readJson, sleep } from "@/utils/functions";
 import axios, { AxiosResponse } from "axios";
 import { existsSync, writeFileSync } from "fs";
+import { TPlatName } from "@/utils/interfaces";
 
 export class TestKucoin extends Platform {
-    name = "Kucoin";
     maker: number = 0.1 / 100;
     taker: number = 0.1 / 100;
     client: SpotClient;
-    constructor({ demo = false }: { demo?: boolean }) {
-        super({ demo });
+    constructor({ demo = false }: { demo?: boolean; }) {
+        super({ demo, name: 'kucoin' });
         this.client = new SpotClient();
     }
     _parseData(data: Kline[]) {

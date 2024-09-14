@@ -57,7 +57,7 @@ dotenv.config();
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "pug");
-
+console.log(`\nPID: ${process.pid}\n`)
 app.use(cors());
 app.use(
     cors({

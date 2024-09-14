@@ -22,7 +22,7 @@ import { clearTerminal, getSymbol, readJson } from "@/utils/functions";
 import { existsSync, readdirSync, writeFileSync } from "fs";
 import { TestBinance } from "@/classes/test-binance";
 import { TestBybit, TestOKX } from "@/classes/test-platforms";
-import { ITrade } from "@/utils/interfaces";
+import { ITrade, TPlatName } from "@/utils/interfaces";
 import { platforms } from "@/utils/consts";
 import { okxInstrus } from "@/utils/data/instrus/okx-instrus";
 import { binanceInstrus } from "@/utils/data/instrus/binance-instrus";
@@ -43,7 +43,7 @@ const dld = async ({
     years: number[];
     intervals: number[];
     parse?: boolean;
-    platNm?: string;
+    platNm?: TPlatName;
     skip?: boolean;
     demo?: boolean;
 }) => {
@@ -226,14 +226,7 @@ const fn = async () => {
     return
     for (let plat of plats) {
 
-           await dld({
-            platNm: plat,
-            symbols: symbos,
-            years,
-            intervals,
-            skip: true,
-            demo: false,
-        }); 
+           
         
     }
 };

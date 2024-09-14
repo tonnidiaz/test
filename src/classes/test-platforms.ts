@@ -1,7 +1,7 @@
 import { MAKER_FEE_RATE, TAKER_FEE_RATE } from "@/utils/constants";
 import { ensureDirExists } from "@/utils/orders/funcs";
 import { getInterval, parseDate } from "@/utils/funcs2";
-import { botLog, getSymbol, readJson } from "@/utils/functions";
+import { botLog, getSymbol, readJson, writeJson } from "@/utils/functions";
 import axios, { AxiosResponse } from "axios";
 import crypto from "crypto";
 
@@ -15,26 +15,38 @@ import {
 } from "bybit-api";
 import { Candle, RestClient, Trade } from "okx-api";
 import dotenv from "dotenv";
-import { IOrderbook, ITrade } from "@/utils/interfaces";
-import {existsSync} from 'fs'
+import { ICoinNets, IOrderbook, ITrade, TPlatName } from "@/utils/interfaces";
+import { existsSync } from "fs";
+import { netsRootDir } from "@/utils/consts2";
 
 dotenv.config();
 
 export class Platform {
-    name: string = "";
+    name: TPlatName;
     maker: number = MAKER_FEE_RATE;
     taker: number = TAKER_FEE_RATE;
+    tickersPath: string;
+    netsPath: string
 
     demo: boolean;
 
-    constructor({ demo = false }: { demo?: boolean }) {
+    constructor({ demo = false, name }: { demo?: boolean; name?: TPlatName }) {
         this.demo = demo;
+        this.name = name ?? 'binance'
+        this.netsPath = `${netsRootDir}/${this.name}/nets.json`;
+        this.tickersPath = `${netsRootDir}/${this.name}/tickers.json`;
     }
-    async getTicker(pair: string[]): Promise<number>{
-        this._log("GETTING TICKER FOR", pair)
-        return 0}
-    async getBook(pair: string[]): Promise<IOrderbook | void | null | undefined>{
-        this._log("GETTING BOOK FOR", pair)
+    async getTicker(pair: string[]): Promise<number> {
+        this._log("GETTING TICKER FOR", pair);
+        return 0;
+    }
+    async getBook(
+        pair: string[]
+    ): Promise<IOrderbook | void | null | undefined> {
+        this._log("GETTING BOOK FOR", pair);
+    }
+    async getNets(coin?: string, offline?: boolean): Promise<ICoinNets[] | void | null | undefined> {
+        this._log("GETTING NETS FOR", coin ?? 'ALL');
     }
     async getKlines({
         start,
@@ -49,11 +61,15 @@ export class Platform {
         symbol: string;
         savePath?: string;
     }): Promise<any[] | undefined | void> {
-        console.log(`[${this.constructor.name}] GETTING KLINES FOR`, {symbol, interval}, '\n')
+        console.log(
+            `[${this.constructor.name}] GETTING KLINES FOR`,
+            { symbol, interval },
+            "\n"
+        );
         return;
     }
-    _log(...args){
-        console.log(`\n[${this.constructor.name}]`, ...args, '\n')
+    _log(...args) {
+        console.log(`\n[${this.constructor.name}]`, ...args, "\n");
     }
     async getTrades({
         start,
@@ -75,7 +91,7 @@ export class Platform {
 }
 
 export class TestOKX extends Platform {
-    name = "OKX";
+    
     maker: number = 0.08 / 100;
     taker: number = 0.1 / 100;
     client: RestClient;
@@ -85,7 +101,7 @@ export class TestOKX extends Platform {
     passphrase: string;
 
     constructor({ demo = false }: { demo?: boolean }) {
-        super({ demo });
+        super({ demo, name: 'okx' });
         this.flag = demo ? "1" : "0";
         this.apiKey = demo
             ? process.env.OKX_API_KEY_DEMO!
@@ -94,7 +110,6 @@ export class TestOKX extends Platform {
             ? process.env.OKX_API_SECRET_DEMO!
             : process.env.OKX_API_SECRET!;
         this.passphrase = process.env.OKX_PASSPHRASE!;
-
         this.client = new RestClient(
             {
                 apiKey: this.apiKey,
@@ -120,19 +135,19 @@ export class TestOKX extends Platform {
         savePath?: string | undefined;
         isBybit?: boolean;
     }) {
-
-        try{
+        try {
             const bybit_apiKey = this.demo
-            ? process.env.BYBIT_API_KEY_DEMO!
-            : process.env.BYBIT_API_KEY!;
-        const bybit_apiSecret = this.demo
-            ? process.env.BYBIT_API_SECRET_DEMO!
-            : process.env.BYBIT_API_SECRET!;
-        const bybit_passphrase = process.env.BYBIT_PASSPHRASE!;
+                ? process.env.BYBIT_API_KEY_DEMO!
+                : process.env.BYBIT_API_KEY!;
+            const bybit_apiSecret = this.demo
+                ? process.env.BYBIT_API_SECRET_DEMO!
+                : process.env.BYBIT_API_SECRET!;
+            const bybit_passphrase = process.env.BYBIT_PASSPHRASE!;
             const client = new RestClientV5({
                 demoTrading: this.demo,
                 testnet: this.demo,
-                key: bybit_apiKey, secret: bybit_apiSecret
+                key: bybit_apiKey,
+                secret: bybit_apiSecret,
             });
             console.log({ client: "client", demo: this.demo }, "\n");
             end = end ?? Date.now();
@@ -153,22 +168,18 @@ export class TestOKX extends Platform {
             if (start) {
                 //2024-04-23 05:50:00+02:00
                 let firstTs = start;
-                if (savePath && existsSync(savePath)){
+                if (savePath && existsSync(savePath)) {
                     // const savedKlines = await readJson(savePath)
-
                     // if (savedKlines?.length){
                     //     const lastSaved = savedKlines[savedKlines.length - 1]
                     //     const lastTsMs = Number(lastSaved[0])
                     //     const lastTs = parseDate(lastTsMs)
                     //     console.log({lastTs})
                     //     firstTs = lastTsMs//Math.max(start, lastTsMs)
-
                     // }
-                    
                 }
-                
+
                 while (firstTs <= end) {
-                    
                     const limit = isBybit ? 1000 : 100;
                     console.log(`GETTING ${cnt + 1} KLINES LIMIT: ${limit}`);
                     const after = firstTs + (limit - 1) * interval * 60 * 1000;
@@ -184,7 +195,7 @@ export class TestOKX extends Platform {
                               symbol,
                               interval: interval as any,
                               start: firstTs + interval * 60 * 1000,
-                              limit
+                              limit,
                           })
                         : await this.client.getHistoricCandles(
                               symbol,
@@ -206,7 +217,7 @@ export class TestOKX extends Platform {
                         last_kline: parseDate(
                             new Date(Number(klines[klines.length - 1][0]))
                         ),
-                        first_ts: parseDate(new Date(firstTs))
+                        first_ts: parseDate(new Date(firstTs)),
                     });
                     if (savePath) {
                         ensureDirExists(savePath);
@@ -242,11 +253,9 @@ export class TestOKX extends Platform {
             let d = [...klines];
             console.log(d[d.length - 1]);
             return d;
-        }catch(e){
-            console.log(e)
+        } catch (e) {
+            console.log(e);
         }
-        
-        
     }
     async getTrades({
         start,
@@ -323,16 +332,97 @@ export class TestOKX extends Platform {
             console.log(e);
         }
     }
-   async getTicker(pair: string[]): Promise<number> {
-        super.getTicker(pair)
-        try{
-            const symbo = getSymbol(pair, 'okx')
-            const r = await this.client.getTicker(symbo)
-            return Number(r[0].last)
+    async getTicker(pair: string[]): Promise<number> {
+        super.getTicker(pair);
+        try {
+            const symbo = getSymbol(pair, "okx");
+            const r = await this.client.getTicker(symbo);
+            return Number(r[0].last);
+        } catch (e) {
+            this._log("FAILED TO GET TICKER", e);
+            return 0;
         }
-        catch(e){
-            this._log("FAILED TO GET TICKER", e)
-            return 0
+    }
+
+    async getNets(ccy?: string, offline?: boolean): Promise<ICoinNets[] | void | null | undefined> {
+        try {
+            const res = offline && existsSync(this.netsPath) ? await readJson(this.netsPath) : [{
+                canDep: true,
+                canInternal: true,
+                canWd: true,
+                ccy: "USDT",
+                chain: "USDT-TRC20",
+                depQuotaFixed: "",
+                depQuoteDailyLayer2: "",
+                logoLink:
+                    "https://static.coinall.ltd/cdn/oksupport/asset/currency/icon/usdt20240813135750.png",
+                mainNet: false,
+                maxFee: "4",
+                maxFeeForCtAddr: "4",
+                maxWd: "31729800",
+                minDep: "0.00000001",
+                minDepArrivalConfirm: "19",
+                minFee: "2",
+                minFeeForCtAddr: "2",
+                minWd: "2",
+                minWdUnlockConfirm: "38",
+                name: "Tether",
+                needTag: false,
+                usedDepQuotaFixed: "",
+                usedWdQuota: "0",
+                wdQuota: "10000000",
+                wdTickSz: "6",
+            },
+            {
+                canDep: true,
+                canInternal: true,
+                canWd: true,
+                ccy: "USDT",
+                chain: "USDT-ERC20",
+                depQuotaFixed: "",
+                depQuoteDailyLayer2: "",
+                logoLink:
+                    "https://static.coinall.ltd/cdn/oksupport/asset/currency/icon/usdt20240813135750.png",
+                mainNet: false,
+                maxFee: "7.64",
+                maxFeeForCtAddr: "7.64",
+                maxWd: "31729800",
+                minDep: "0.00000001",
+                minDepArrivalConfirm: "32",
+                minFee: "3.82",
+                minFeeForCtAddr: "3.82",
+                minWd: "2",
+                minWdUnlockConfirm: "96",
+                name: "Tether",
+                needTag: false,
+                usedDepQuotaFixed: "",
+                usedWdQuota: "0",
+                wdQuota: "10000000",
+                wdTickSz: "6",
+            },]
+            await writeJson(this.netsPath, res)
+            const data = res
+
+            const coins: string[] = Array.from(new Set(data.map(el=> el.ccy)))
+            const nets: ICoinNets[] = coins.map(el=> ({
+                coin: el,
+                name:el,
+                nets: data.filter(el2=> el2.ccy == el).map((el) => ({
+                    name: el.name,
+                    coin: el.ccy,
+                    chain: el.chain,
+                    contactAddr: '',
+                    minComfirm: Number(el.minDepArrivalConfirm),
+                    minWd: Number(el.minWd),
+                    maxWd: Number(el.maxWd),
+                    minDp: 0, maxDp: Infinity,
+                    wdFee: Number(el.maxFee),
+                    canDep: el.canDep
+                })),
+            }));
+            return nets.filter(el=> !ccy || el.coin == ccy)
+        } catch (e) {
+            
         }
     }
 }
@@ -340,7 +430,7 @@ export class TestOKX extends Platform {
 export class TestBybit extends Platform {
     client: RestClientV5;
     constructor({ demo = false }: { demo?: boolean }) {
-        super({ demo });
+        super({ demo, name: 'bybit' });
         const apiKey = demo
             ? process.env.BYBIT_API_KEY_DEMO!
             : process.env.BYBIT_API_KEY!;
@@ -355,7 +445,6 @@ export class TestBybit extends Platform {
             //testnet: demo,
         });
     }
-    name: string = "ByBit";
     async getKlines({
         start,
         end,

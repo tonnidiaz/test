@@ -111,7 +111,29 @@ export interface ICrossArbitBot extends IArbitBot {
     pair: string[];
     data: CrossArbitData;
     client?: Socket;
-
 }
 
-export type TPlatName = typeof platList[number]
+export type TPlatName = (typeof platList)[number];
+
+export interface ICoinNets {
+    name: string;
+    coin: string;
+    ticker?: number;
+
+    nets: {
+        coin: string;
+        name: string;
+        contactAddr: string;
+        chain: string;
+        wdTip?: string | null;
+        dpTip?: string | null;
+        minWd: number;
+        wdFee: number;
+        wdFeeUSDT: number;
+        maxWd: number;
+        minDp: number; maxDp: number;
+        minComfirm: number;
+        canDep: boolean;
+
+    }[];
+}

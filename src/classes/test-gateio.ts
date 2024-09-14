@@ -5,7 +5,6 @@ import { ApiClient, SpotApi } from "gate-api";
 import { writeFileSync } from "fs";
 
 export class TestGateio extends Platform {
-    name = "GATEIO";
     maker: number = 0.2 / 100;
     taker: number = 0.2 / 100;
     client: SpotApi;
@@ -13,7 +12,7 @@ export class TestGateio extends Platform {
     apiSecret: string;
 
     constructor({ demo = false }: { demo?: boolean }) {
-        super({ demo });
+        super({ demo, name: 'gateio' });
         this.apiKey = process.env.GATEIO_API_KEY!;
         this.apiSecret =  process.env.GATEIO_API_SECRET!;
 

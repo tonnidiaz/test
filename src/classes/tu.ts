@@ -769,6 +769,7 @@ export class TuArbitWs {
                 if (abot.active && bookCond && bookFieldsCond) {
                     abot.active = false;
                     this._updateBots(abot);
+                    await this.unsub(abot.bot)
                     const re = await this.handleTickersTri({
                         abot,
                     });
@@ -782,6 +783,9 @@ export class TuArbitWs {
                         this._log("NOT RESUMING");
                     }
                     this._updateBots(abot);
+                    if (abot.active){
+                        await this.sub(abot.bot)
+                    }
                 } else if (abot.active) {
                     if (DEV) console.log({ bookA, bookB, bookC });
                 }
@@ -856,6 +860,8 @@ export class TuArbitWs {
 
                 if (abot.active && bookCond && bookFieldsCond) {
                     abot.active = false;
+                    this._updateBots(abot)
+                        await this.unsub(abot.bot)
                     const re = await this.handleTickersCross({
                         abot,
                     });
@@ -867,6 +873,9 @@ export class TuArbitWs {
                         this._log("NOT RESUMING");
                     }
                     this._updateBots(abot);
+                    if (abot.active){
+                        await this.sub(abot.bot)
+                    }
                 } else if (abot.active) {
                     //if (DEV) console.log({ bookA, bookB });
                 }

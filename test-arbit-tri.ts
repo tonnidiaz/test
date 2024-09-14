@@ -16,7 +16,7 @@ import { okxInstrus } from "@/utils/data/instrus/okx-instrus";
 import { bybitInstrus } from "@/utils/data/instrus/bybit-instrus";
 import { ensureDirExists } from "@/utils/orders/funcs";
 import { ARBIT_ZERO_FEES, XRP_WITHDRAW_FEE } from "@/utils/constants";
-import { IObj } from "@/utils/interfaces";
+import { IObj, TPlatName } from "@/utils/interfaces";
 import { binanceInstrus } from "@/utils/data/instrus/binance-instrus";
 import { binanceBTCBases } from "@/utils/data/binance-bases";
 // BYBIT, BINANCE 15min PEPE works
@@ -183,21 +183,21 @@ async function run({
     };
 
     const klinesPathA = getKlinesPath({
-        plat,
+        plat: plat as TPlatName,
         interval,
         year,
         pair: pairA,
         demo,
     });
     const klinesPathB = getKlinesPath({
-        plat,
+        plat: plat as TPlatName,
         interval,
         year,
         pair: pairB!,
         demo,
     });
     const klinesPathC = getKlinesPath({
-        plat,
+        plat: plat as TPlatName,
         interval,
         year,
         pair: pairC!,
