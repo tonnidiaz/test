@@ -2,10 +2,13 @@ import { CrossArbitData } from "@/classes/tu";
 import { IBot } from "@/models/bot";
 import { ObjectId } from "mongoose";
 import { Socket } from "socket.io";
-import { platList } from "./consts2";
+import { platList } from "./consts3";
 
 export interface IObj {
     [key: string]: any;
+}
+export interface IRetData {
+    ep: string; clId: string; data: IObj; [key: string] : any
 }
 export interface ICandle {
     ts: string;

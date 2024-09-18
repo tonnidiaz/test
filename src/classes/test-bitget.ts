@@ -1,6 +1,6 @@
 import { getInterval, parseDate } from "@/utils/funcs2";
 import { ensureDirExists } from "@/utils/orders/funcs";
-import { Platform } from "./test-platforms";
+import { TestPlatform } from "./test-platforms";
 import { RestClientV2 } from "bitget-api";
 import { writeFileSync } from "fs";
 import { CompanyResultSortBy } from "indicatorts";
@@ -15,7 +15,7 @@ import { ICoinNets, TPlatName } from "@/utils/interfaces";
 import { safeJsonParse } from "@/utils/funcs3";
 import { Axios } from "axios";
 
-export class TestBitget extends Platform {
+export class TestBitget extends TestPlatform {
     maker: number = 0.1 / 100;
     taker: number = 0.1 / 100;
     client: RestClientV2;

@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import { CorsOptions } from "cors";
-import { IObj } from "./interfaces";
+import { IObj, IRetData } from "./interfaces";
 import { tuCE, heikinAshi, parseDate, parseKlines, tuPath } from "./funcs2";
 import { klinesDir, klinesRootDir, tradesRootDir } from "./constants";
 import { existsSync } from "fs";
@@ -13,7 +13,7 @@ import {
 } from "./functions";
 import { objStrategies, parentStrategies, strategies } from "@/strategies";
 import { TestOKX } from "@/classes/test-platforms";
-import { platforms } from "./consts";
+import { test_platforms } from "./consts";
 import { onArbitCointest, onBacktest, onCointest } from "./functions/io-funcs";
 import { onCrossArbitCointest } from "./functions/io-funcs3";
 import { CrossArbitData } from "@/classes/tu";
@@ -22,14 +22,14 @@ import { crossArbitWsList, triArbitWsList } from "@/classes/tu-ws";
 
 const corsOptions: CorsOptions = { origin: "*" };
 const io = new Server({ cors: corsOptions }); // yes, no server arg here; it's not required
-let prevData: any = null;
+let prevData: IRetData | undefined | null | void;
 // attach stuff to io
 io.on("connection", (client) => {
     console.log(`IO: ${client.id} CONNECTED`);
 
     console.log({ ep: prevData?.ep });
     if (prevData && prevData.ep) {
-        io.emit(prevData.ep, prevData.data);
+        io.emit(prevData.ep, prevData);
         //prevData = null
     }
     io.emit("event", "This is event");
@@ -57,10 +57,10 @@ io.on("connection", (client) => {
         "cointest",
         async (d) => (prevData = await onCointest(d, client))
     );
-    client.on(
-        "arbit-cointest",
-        async (d) => (prevData = await onArbitCointest(d, client))
-    );
+    // client.on(
+    //     "arbit-cointest",
+    //     async (d) => (prevData = await onArbitCointest(d, client))
+    // );
     client.on(
         "cross-arbit-cointest",
         async (d) => (prevData = await onCrossArbitCointest(d, client))
@@ -70,7 +70,7 @@ io.on("connection", (client) => {
         client.emit("strategies", { data: strategies });
     });
     client.on("platforms", (e) => {
-        client.emit("platforms", { data: Object.keys(platforms) });
+        client.emit("platforms", { data: Object.keys(test_platforms) });
     });
     client.on("parents", (e) => {
         client.emit("parents", { data: Object.keys(parentStrategies) });
@@ -153,7 +153,7 @@ io.on("connection", (client) => {
 
             client.emit("test-candles", "Getting klines...");
 
-            const plat = new platforms[platform]({ demo });
+            const plat = new test_platforms[platform]({ demo });
             const platName = platform.toLowerCase();
             const symbol = getSymbol(pair, platName);
             console.log(symbol);

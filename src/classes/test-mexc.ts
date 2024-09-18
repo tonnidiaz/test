@@ -1,50 +1,57 @@
 import { getInterval, parseDate } from "@/utils/funcs2";
 import { ensureDirExists } from "@/utils/orders/funcs";
-import { Platform } from "./test-platforms";
+import { TestPlatform } from "./test-platforms";
 import { writeFileSync } from "fs";
 import { CompanyResultSortBy } from "indicatorts";
 import * as Mexc from "mexc-api-sdk";
-import { existsSync, getSymbol, readJson, sleep, writeJson } from "@/utils/functions";
-import { ICoinNets, TPlatName } from "@/utils/interfaces";
+import {
+    botLog,
+    existsSync,
+    getSymbol,
+    readJson,
+    sleep,
+    writeJson,
+} from "@/utils/functions";
+import { ICoinNets, IOrderbook, TPlatName } from "@/utils/interfaces";
 import { netsRootDir } from "@/utils/consts2";
 import { Axios } from "axios";
 import { genSignature, safeJsonParse } from "@/utils/funcs3";
 
-export class TestMexc extends Platform {
+export class TestMexc extends TestPlatform {
     maker: number = 0.1 / 100;
     taker: number = 0.1 / 100;
     client: Mexc.Spot;
     apiKey: string;
     apiSecret: string;
     passphrase: string;
-    axiosClient: ()=>Axios;
-    
+    axiosClient: () => Axios;
+
     constructor({ demo = false }: { demo?: boolean }) {
-        super({ demo, name: 'mexc' });
+        super({ demo, name: "mexc" });
         this.apiKey = process.env.MEXC_API_KEY!;
         this.apiSecret = process.env.MEXC_API_SECRET!;
         this.passphrase = process.env.MEXC_PASSPHRASE!;
         this.client = new Mexc.Spot();
-        
-        this.axiosClient = ()=>{ 
+
+        this.axiosClient = () => {
             const ts = Date.now().toString();
             return new Axios({
-            baseURL: "https://api.mexc.com/api/v3",
-            headers: {
-                "X-MEXC-APIKEY": this.apiKey,
-                "Content-Type": 'application/json'
-
-            },
-            params: {
-                signature: genSignature(
-                    this.apiKey,
-                    this.apiSecret,
-                    { timestamp: ts },
-                    this.name!
-                ),
-                timestamp: ts,
-            },
-        });}
+                baseURL: "https://api.mexc.com/api/v3",
+                headers: {
+                    "X-MEXC-APIKEY": this.apiKey,
+                    "Content-Type": "application/json",
+                },
+                params: {
+                    signature: genSignature(
+                        this.apiKey,
+                        this.apiSecret,
+                        { timestamp: ts },
+                        this.name!
+                    ),
+                    timestamp: ts,
+                },
+            });
+        };
     }
 
     async getKlines({
@@ -193,19 +200,25 @@ export class TestMexc extends Platform {
 
     async getNets(ccy?: string, offline?: boolean) {
         try {
-            console.log({offline})
-            const res = safeJsonParse(offline && existsSync(this.netsPath)
+            console.log({ offline });
+            const res = safeJsonParse(
+                offline && existsSync(this.netsPath)
                     ? await readJson(this.netsPath)
-                    : (await this.axiosClient().get("/capital/config/getall")).data)
-                
-            writeJson(this.netsPath, res.sort((a, b)=> a.coin.localeCompare(b.coin)));
+                    : (await this.axiosClient().get("/capital/config/getall"))
+                          .data
+            );
+
+            writeJson(
+                this.netsPath,
+                res.sort((a, b) => a.coin.localeCompare(b.coin))
+            );
             const data = res;
 
             let coins: string[] = Array.from(
                 new Set(data.map((el) => el.coin))
-            )
+            );
 
-            coins = coins.sort((a, b)=> a.localeCompare(b))
+            coins = coins.sort((a, b) => a.localeCompare(b));
 
             const tickers =
                 offline && existsSync(this.tickersPath)
@@ -221,7 +234,7 @@ export class TestMexc extends Platform {
                                           el,
                                           "USDT",
                                       ]);
-                                      await sleep(100)
+                                      await sleep(100);
                                   } catch (e) {
                                       console.log(e);
                                   }
@@ -229,32 +242,36 @@ export class TestMexc extends Platform {
                               return { coin: el, ticker };
                           })
                       );
-                writeJson(this.tickersPath, tickers)
+            writeJson(this.tickersPath, tickers);
             const nets: ICoinNets[] = coins.map((el) => {
-                const net = data.find(el2=> el2.coin == el)
-                const ticker = tickers.find((el2) => el2.coin == el)!.ticker
-                return ({
-                coin: net.coin,
-                name: net.name,
-                ticker,
-                nets: res.find(el2 => {
-                    return el2.coin == el})!.networkList.map((el) => ({
-                        name: el.name,
-                        coin: el.coin,
-                        chain: el.network,
-                        contactAddr: el.contract,
-                        minComfirm: Number(el.minConfirm),
-                        minWd: Number(el.withdrawMin),
-                        maxWd: Number(el.withdrawMax),
-                        minDp: 0,
-                        maxDp: Infinity,
-                        dpTip: el.depositTips,
-                        wdTip: el.withdrawTips,
-                        wdFee: Number(el.withdrawFee),
-                        wdFeeUSDT: Number(el.withdrawFee) * ticker ,
-                        canDep: el.depositEnable,
-                    })),
-            })});
+                const net = data.find((el2) => el2.coin == el);
+                const ticker = tickers.find((el2) => el2.coin == el)!.ticker;
+                return {
+                    coin: net.coin,
+                    name: net.name,
+                    ticker,
+                    nets: res
+                        .find((el2) => {
+                            return el2.coin == el;
+                        })!
+                        .networkList.map((el) => ({
+                            name: el.name,
+                            coin: el.coin,
+                            chain: el.network,
+                            contactAddr: el.contract,
+                            minComfirm: Number(el.minConfirm),
+                            minWd: Number(el.withdrawMin),
+                            maxWd: Number(el.withdrawMax),
+                            minDp: 0,
+                            maxDp: Infinity,
+                            dpTip: el.depositTips,
+                            wdTip: el.withdrawTips,
+                            wdFee: Number(el.withdrawFee),
+                            wdFeeUSDT: Number(el.withdrawFee) * ticker,
+                            canDep: el.depositEnable,
+                        })),
+                };
+            });
 
             return nets.filter((el) => !ccy || el.coin == ccy);
         } catch (e) {
@@ -263,11 +280,36 @@ export class TestMexc extends Platform {
     }
     async testAxios() {
         try {
-           return console.log(this.name);
-            const r = await this.axiosClient().get("/capital/config/getall",);
+            return console.log(this.name);
+            const r = await this.axiosClient().get("/capital/config/getall");
             console.log(r.data);
         } catch (err) {
             console.log(err);
+        }
+    }
+
+    async getBook(
+        pair: string[]
+    ): Promise<IOrderbook | void | null | undefined> {
+        try {
+            super.getBook(pair);
+            const r = await this.client.depth(this._getSymbo(pair), {
+                limit: 5,
+            });
+            const ob: IOrderbook = {
+                ts: parseDate(r.timestamp),
+                asks: r.asks.map((el) => ({
+                    px: Number(el[0]),
+                    amt: Number(el[1]),
+                })),
+                bids: r.bids.map((el) => ({
+                    px: Number(el[0]),
+                    amt: Number(el[1]),
+                })),
+            };
+            return ob
+        } catch (err) {
+            this._log("FAILED TO GET BOOK FOR", pair, err);
         }
     }
 }

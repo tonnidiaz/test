@@ -1,4 +1,4 @@
-import { Platform } from "./test-platforms";
+import { TestPlatform } from "./test-platforms";
 import { SpotClient } from "kucoin-api";
 import type { Kline } from "kucoin-api";
 import { MAKER_FEE_RATE, TAKER_FEE_RATE } from "@/utils/constants";
@@ -9,7 +9,7 @@ import axios, { AxiosResponse } from "axios";
 import { existsSync, writeFileSync } from "fs";
 import { TPlatName } from "@/utils/interfaces";
 
-export class TestKucoin extends Platform {
+export class TestKucoin extends TestPlatform {
     maker: number = 0.1 / 100;
     taker: number = 0.1 / 100;
     client: SpotClient;

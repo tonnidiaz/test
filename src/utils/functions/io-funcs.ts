@@ -1,5 +1,5 @@
 import { Server, Socket } from "socket.io";
-import { IObj, ICandle, TPlatName } from "../interfaces";
+import { IObj, ICandle, TPlatName, IRetData } from "../interfaces";
 import { tuCE, heikinAshi, parseDate, parseKlines, tuPath } from "../funcs2";
 import {
     ETH_RATE,
@@ -15,10 +15,11 @@ import {
     toFixed,
     getSymbol,
     clearTerminal,
+    sleep,
 } from "../functions";
 import { objStrategies, strategies } from "@/strategies";
 import { TestOKX } from "@/classes/test-platforms";
-import { platforms } from "../consts";
+import { test_platforms } from "../consts";
 import { ensureDirExists } from "../orders/funcs";
 import { okxInstrus } from "@/utils/data/instrus/okx-instrus";
 import { binanceInfo } from "../binance-info";
@@ -29,7 +30,6 @@ import { bitgetInstrus } from "@/utils/data/instrus/bitget-instrus";
 import { mexcInstrus } from "../data/instrus/mexc-instrus";
 import { getInstrus } from "../funcs3";
 import { onTriArbitCointest } from "./io-funcs2";
-let prevData: IObj | null = null;
 
 export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
     const ep = "backtest";
@@ -50,14 +50,15 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
             T,
             save,
             demo,
-            parent, useInvalid
+            parent,
+            useInvalid,
         } = data;
 
         demo = demo ?? false;
         console.log("ON BACKTEST");
         // CLEAR CONSOLE
         clearTerminal();
-        prevData = null;
+        let prevData: IRetData = { clId, ep, data: {} };
 
         const startTs = Date.parse(start),
             endTs = Date.parse(end);
@@ -70,7 +71,7 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
 
         const platName = platform.toLowerCase();
 
-        const plat = new platforms[platName]({ demo });
+        const plat = new test_platforms[platName]({ demo });
         let symbol: string = getSymbol(pair, platName);
         const pxPr = getPricePrecision(pair, platName as any);
 
@@ -206,7 +207,7 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
         const strNum = Number(data.strategy);
 
         const pGain = data.pGain ? Number(data.pGain) : undefined;
-        let retData = objStrategies[strNum - 1].run({
+        let retData = await objStrategies[strNum - 1].run({
             df,
             trades,
             balance: bal,
@@ -216,7 +217,7 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
             maker: plat.maker,
             taker: plat.taker,
             platNm: platName.toLowerCase() as any,
-            parent: parent.toLowerCase()
+            parent: parent.toLowerCase(),
         });
 
         let profit = toFixed(retData.balance - bal, pxPr);
@@ -237,9 +238,8 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
         const str_name = objStrategies[strNum - 1].name;
         console.log({ str_name });
 
-        retData = { data: { ...retData, str_name }, clId };
-        prevData = { ep, data: retData };
-        client?.emit(ep, retData);
+        prevData = { ...prevData, data: { ...retData, str_name } };
+        client?.emit(ep, prevData);
         return prevData;
     } catch (e: any) {
         console.log(e.response?.data ?? e);
@@ -262,14 +262,14 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
             quote,
             prefix,
             skip_existing,
-            from_last,  
+            from_last,
             skip_saved,
             fix_invalid,
             clId,
-            show, 
+            show,
             parent,
             only,
-            useInvalid
+            useInvalid,
         } = data;
         const startPair = data.from;
         let _data: {
@@ -285,12 +285,12 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
                 new Set(_data.map((el) => JSON.stringify(el)))
             ).map((el) => JSON.parse(el));
         };
-        only = only?.length == 2 ?  only : undefined
+        only = only?.length == 2 ? only : undefined;
 
         let result: IObj = {};
         let msg = "";
 
-        prevData = null;
+        let prevData: IRetData = { clId, ep, data: {} };
         const startTs = Date.parse(start),
             endTs = Date.parse(end);
 
@@ -298,7 +298,7 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
         console.log({ platform });
 
         const platName: TPlatName = platform.toLowerCase();
-        const plat = new platforms[platName]({ demo });
+        const plat = new test_platforms[platName]({ demo });
 
         const _platName = platform.toLowerCase();
         let _instruments: string[][];
@@ -307,26 +307,25 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
         const year = start.split("-")[0];
 
         const strNum = Number(data.strategy);
+        const str = objStrategies[strNum - 1]
 
-        prefix = prefix ?? "";
+        prefix = prefix ? `${prefix}_` : "";
         const sub = demo ? "demo" : "live";
-        const savePath = `_data/rf/coins/${year}/${sub}/${prefix}_${_platName}_${interval}m-${sub}.json`;
-        
+
+        const savePath = `_data/rf/coins/${year}/${sub}/${prefix}${_platName}_${str.name}_${interval}m-${sub}.json`;
+
         client?.emit(ep, `${platform}: BEGIN COINTEST...`);
 
-        if (only){
-            //if (!existsSync(savePath)){ client?.emit(ep, {err: "NOTHING TO SHOW"});return}
-            
-        }
-        else if (show){
-            if(existsSync(savePath)){
-                result = {clId, platform, data: await readJson(savePath)}
-                client?.emit(ep, result)
-            }else{
-                client?.emit(ep, {err: "NOTHING TO SHOW"})
+        if (only) {
+        } else if (show) {
+            if (existsSync(savePath)) {
+                prevData = { ...prevData, platform, data: await readJson(savePath) };
+                client?.emit(ep, prevData);
+            } else {
+                client?.emit(ep, { err: "NOTHING TO SHOW" });
             }
 
-            return result
+            return prevData;
         }
 
         if (_platName == "okx") {
@@ -341,7 +340,7 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
                 okxCoins = await readJson(okxCoinsPath);
             }
 
-            _instruments = getInstrus(_platName)
+            _instruments = getInstrus(_platName);
 
             // if (okxCoins != null) {
             //     _instruments = _instruments.filter(
@@ -355,25 +354,23 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
 
         _instruments = _instruments.sort(); //.sort((a, b)=> a.toString() > b.toString() ? 1 : -1)
         let coins = _instruments;
-        
-        if (only){
-            coins = coins.filter(el=> el[0] == only[0] && el[1] == only[1])
-        }
-        else if (quote) coins = coins.filter((el) => el[1] == `${quote}`);
 
-        if ((only || from_last) && existsSync(savePath)){
-            console.log("HERE", only)
+        if (only) {
+            coins = coins.filter((el) => el[0] == only[0] && el[1] == only[1]);
+        } else if (quote) coins = coins.filter((el) => el[1] == `${quote}`);
+
+        if ((from_last) && existsSync(savePath)) {
+            console.log("HERE", only);
             _data = (await readJson(savePath)).sort((a, b) =>
                 a.pair > b.pair ? 1 : -1
             );
 
-            if (from_last){
+            if (from_last) {
                 console.log("\nCONTINUING WHERE WE LEFT OF...\n");
-            
-            last = _data[_data.length - 1]?.pair;
+
+                last = _data[_data.length - 1]?.pair;
             }
         }
-
 
         if (!only) {
             if (startPair) {
@@ -399,6 +396,7 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
 
         for (let pair of coins) {
             try {
+                await sleep(0.0000001)
                 msg = `BEGIN PAIR ${pair}`;
                 console.log(`${msg}`);
                 //client?.emit(ep, msg)
@@ -408,10 +406,11 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
                 const symbol = getSymbol(pair, platName);
 
                 console.log(symbol);
-                if (_data.length && only){
-
+                if (_data.length && only) {
                     // FILTER OUT THE CURRENT PAIR
-                    _data = _data.filter(el=> el.pair.toString() != only.toString())
+                    _data = _data.filter(
+                        (el) => el.pair.toString() != only.toString()
+                    );
                 }
                 const pxPr = getPricePrecision(pair, platName as any);
                 if (pxPr == null) {
@@ -494,7 +493,7 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
                 console.log({ bal });
                 bal /= QUOTE_RATE;
                 console.log({ bal });
-                let retData = objStrategies[strNum - 1].run({
+                let retData = await str.run({
                     df,
                     trades: [],
                     balance: bal,
@@ -503,10 +502,10 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
                     maker: plat.maker,
                     taker: plat.taker,
                     platNm: platName.toLowerCase() as any,
-                    parent: parent.toLowerCase()
+                    parent: parent.toLowerCase(),
                 });
 
-                let profit = toFixed(retData.balance - bal, pxPr);
+                let profit = toFixed(retData.balance - bal, 2);
 
                 console.log({
                     balance: retData.balance,
@@ -529,8 +528,8 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
                 console.log(pair, `PROFIT: ${retData.profit}\n`);
                 _data.push({
                     pair,
-                    aside: retData.aside,
                     profit: retData.profit,
+                    aside: retData.aside,
                     total: retData.profit + retData.aside,
                     trades: retData.trades,
                 });
@@ -539,6 +538,7 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
                 );
 
                 _parseData();
+                if (!only)
                 writeFileSync(savePath, JSON.stringify(_data), {});
 
                 msg = `${pair} DONE`;
@@ -556,10 +556,9 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
         _parseData();
 
         console.log("COINTEST DONE");
-        result = { ...result, data: _data, clId, platform };
-        prevData = { ep, data: result };
+        prevData = { ...prevData, ...result, data: _data, platform };
 
-        client?.emit(ep, result);
+        client?.emit(ep, prevData);
 
         return prevData;
     } catch (e: any) {
@@ -568,20 +567,22 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
     }
 };
 
+export const onArbitCointest = async (
+    data: IObj,
+    client?: Socket,
+    io?: Server
+) => {
+    const ep = "arbit-cointest";
+    try {
+        clearTerminal();
+        console.log("PID:", process.pid);
+        if (data.type == "tri") {
+            console.log("TRIANGULAR ARBITRAGE\n");
 
-export const onArbitCointest  = async (data: IObj, client?: Socket, io?: Server) => {
-    const ep = "arbit-cointest"
-    try{
-        clearTerminal()
-        console.log("PID:", process.pid)
-        if (data.type == "tri"){
-            console.log("TRIANGULAR ARBITRAGE\n")
-            prevData = {ep, data: await onTriArbitCointest({...data, ep}, client)}
-            return prevData
+            return await onTriArbitCointest({ ...data, ep }, client);
         }
-    }
-    catch (e: any) {
+    } catch (e: any) {
         console.log(e.response?.data ?? e);
         client?.emit(ep, { err: "Something went wrong" });
     }
-}
+};

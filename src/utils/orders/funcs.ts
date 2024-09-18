@@ -344,7 +344,7 @@ export const placeTrade = async ({
                 /* KEEP CHECKING BUY ORDER TILL FILLED */
                 let _filled = false;
                 while (!_filled) {
-                    await sleep(1000);
+                    await sleep(500);
                     botLog(bot, "CHECKING MARKET BUY ORDER...");
                     const res = await plat.getOrderbyId(orderId);
 

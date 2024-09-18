@@ -50,7 +50,7 @@ export function fillBuyOrder({
     const part = isA == undefined ? '' : isA ? "[A]" : "[B]"
 
     data.data.push({
-        side: `buy \t {h:${row.h}, l: ${row.l}, v: ${row.v || 'null'}}`,
+        side: `buy \t {o: ${row.o}, h:${row.h}, l: ${row.l}, v: ${row.v || 'null'}}`,
         fill: entryLimit,
         base,
         enterTs,
@@ -126,7 +126,7 @@ export const fillSellOrder = ({
     const perc = ((exit - _entry)/_entry * 100).toFixed(2)
     const part = isA == undefined ? '' : isA ? "[A]" : "[B]"
     mData["data"].push({
-        side: `sell \t {h:${row.h}, l: ${row.l}, v: ${row.v || 'null'}}`,
+        side: `sell \t {o: ${row.o}, h:${row.h}, l: ${row.l}, v: ${row.v || 'null'}}`,
         fill: exitLimit,
         enterTs,
         ts,

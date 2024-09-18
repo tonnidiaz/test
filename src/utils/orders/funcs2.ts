@@ -108,7 +108,7 @@ export const updateBuyOrder = async (
         i: order.buy_timestamp?.i,
         o: parseDate(new Date(res.fillTime)),
     };
-    console.log("TS", ts);
+    console.log("TS", ts); 
     const fee = res.fee;
     let base_amt = res.fillSz;
     order.buy_order_id = res.id;

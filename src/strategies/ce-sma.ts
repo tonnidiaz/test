@@ -2,7 +2,6 @@ import { Strategy } from "@/classes/strategy";
 import { ICandle } from "@/utils/interfaces";
 const fastRSI = 30
 export class RSI_ONLY extends Strategy {
-    name: string = "RSI ONLY";
     desc: string = `Enter: macd > 0 && sma20 >  sma50, Exit: oposite`;
 
     buyCond(row: ICandle): boolean {
@@ -14,7 +13,6 @@ export class RSI_ONLY extends Strategy {
     }
 }
 export class ANY extends Strategy {
-    name: string = "ANY";
     desc: string = `Enter: macd > 0 && sma20 >  sma50, Exit: oposite`;
 
     buyCond(row: ICandle): boolean {
@@ -26,7 +24,6 @@ export class ANY extends Strategy {
     }
 }
 class BB_SMA extends Strategy {
-    name: string = "BB_SMA";
     desc: string = `Enter: macd > 0 && sma20 >  sma50, Exit: oposite`;
 
     buyCond(row: ICandle): boolean {
@@ -40,7 +37,6 @@ class BB_SMA extends Strategy {
     }
 }
 class ThreeSum extends Strategy {
-    name: string = "ThreeSum";
     desc: string = `Enter: macd > 0 && sma20 >  sma50, Exit: oposite`;
 
     buyCond(row: ICandle, df?: ICandle[], i?: number): boolean {
@@ -56,4 +52,4 @@ class ThreeSum extends Strategy {
     }
 }
 
-export const strategies = [new ANY()]// [ new BB_SMA(), new ThreeSum()];
+export const strategies = [new ANY(), new ThreeSum(), new RSI_ONLY()]// [ new BB_SMA(), new ThreeSum()];

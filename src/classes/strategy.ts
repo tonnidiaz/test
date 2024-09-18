@@ -6,9 +6,12 @@ import { MAKER_FEE_RATE, TAKER_FEE_RATE } from "@/utils/constants";
 import { IObj, ICandle } from "@/utils/interfaces";
 
 export class Strategy {
-    name: string = "";
+    name: string;
     desc: string = "";
 
+    constructor() {
+        this.name = this.constructor.name
+    }
     buyCond(...args: any): boolean {
         return false;
     }

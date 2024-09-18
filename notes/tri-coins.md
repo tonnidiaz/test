@@ -1,6 +1,53 @@
 # TRIANGULAR-ARBITRAGE RECOMMENDED COINS AND EXs
 
-## KUCOIN
-- UNO
-- DEXE
-- WRX
+
+## OKX
+
+### USDC-USDT
+- ICP - 226K
+
+## BINANCE
+### BTC-USDT 57700
+- PEOPLE - 11
+- NULS - 2.46
+- DATA - 2.24 BTC VOL
+- FIDA - 2.19
+- ONE - 2.14
+- CELR
+- IDEX - .74
+- ARPA - .58
+- MDT - .35
+- MLN - .49
+- IOTX - .3
+
+### USDC-USDT
+- JUP - 8M
+- FET - 5M
+- CKB - 2M USDC VOL
+- WIF - 1M
+- SAGA - 600K
+- AR - 170K
+- PEOPLE - 120K
+- YGG - 67K
+- ETHFI - 51K
+- ALT - 48000
+- MANTA - 28K
+- BLUR - 22K
+- JTO - 19K
+
+### BNB-USDT 560
+
+- CTK - 523
+- INJ - 160
+- WIN - 69.74
+- STX - 66
+- ARKM - 34.41
+- EGLD - 22
+- CYBER - 14
+
+### EUR-USDT 1.1132
+- FTM - 262K
+- SUI - 200K
+- NEAR - 61K
+- GALA - 42K
+- GRT - 30K

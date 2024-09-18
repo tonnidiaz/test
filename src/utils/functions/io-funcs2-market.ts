@@ -5,6 +5,7 @@ import { ARBIT_ZERO_FEES, ARBIT_MIN_PERC } from "../constants";
 import { getInstrus, getKlinesPath, getMakerFee, getTakerFee } from "../funcs3";
 import { ensureDirExists } from "../orders/funcs";
 import {
+    calcPerc,
     getCoinPrecision,
     getMinAmt,
     getMinSz,
@@ -15,7 +16,7 @@ import {
 } from "../functions";
 import { existsSync, writeFileSync } from "fs";
 import { parseKlines } from "../funcs2";
-import { platforms } from "../consts";
+import { test_platforms } from "../consts";
 
 enum startAt {
     A,
@@ -48,7 +49,7 @@ export const onTriArbitCointest = async (
         skip_saved,
         save_klines,
         perc,
-       // flipped,
+        // flipped,
     } = data;
 
     try {
@@ -80,7 +81,7 @@ export const onTriArbitCointest = async (
 
         const A = _A ?? "USDT";
 
-        const savename = `${perc}%_${prefix}${B}-${A}_${interval}m`;
+        const savename = `${MIN_PERC}%_${prefix}${B}-${A}_${interval}m`;
         const savePath = `_data/rf/arbit-tri/coins/${plat}/${year}/${savename}.json`;
 
         const parseData = (orders?: any[]) => {
@@ -126,7 +127,7 @@ export const onTriArbitCointest = async (
             return;
         }
 
-        const Plat = new platforms[plat]({ demo });
+        const Plat = new test_platforms[plat]({ demo });
 
         for (let instru of instrusWithBQuote) {
             try {
@@ -302,7 +303,7 @@ export const onTriArbitCointest = async (
 
                 const startMs = Date.parse(start);
                 const endMs = Date.parse(end);
-                console.log({a: dfA.length, b: dfB.length, c: dfC.length})
+                console.log({ a: dfA.length, b: dfB.length, c: dfC.length });
                 dfA = dfA.filter((el) => {
                     const tsMs = Date.parse(el.ts);
                     return tsMs >= startMs && tsMs <= endMs;
@@ -316,7 +317,7 @@ export const onTriArbitCointest = async (
                     const tsMs = Date.parse(el.ts);
                     return tsMs >= startMs && tsMs <= endMs;
                 });
-                console.log({a: dfA.length, b: dfB.length, c: dfC.length})
+                console.log({ a: dfA.length, b: dfB.length, c: dfC.length });
 
                 const realStartMs = Math.max(
                     Date.parse(dfA[0].ts),
@@ -339,7 +340,7 @@ export const onTriArbitCointest = async (
                 });
 
                 const iLen = Math.min(dfA.length, dfB.length, dfC.length);
-                const SLIP = 1// 0.5;
+                const SLIP = 1; // 0.5;
                 for (let i = 1; i < iLen; i++) {
                     try {
                         const prev_rowA = dfA[i - 1];
@@ -363,7 +364,7 @@ export const onTriArbitCointest = async (
                         const cPxC = prev_rowC.c;
                         const ts = rowA.ts;
 
-                        let flipped = false//(cPxA * cPxB) > cPxC
+                        let flipped = false; //(cPxA * cPxB) > cPxC
 
                         if (rowB.ts != ts || rowC.ts != ts) {
                             msg = "TIMESTAMPS DONT MATCH";
@@ -386,32 +387,10 @@ export const onTriArbitCointest = async (
                             oC = 0,
                             cC = 0;
 
-                        if (flipped) {
-                            oC = _amt / oPxC;
-                            oB = oC * oPxB;
-                            oA = oB * oPxA;
-
-                            cC = _amt / cPxC;
-                            cB = cC * cPxB;
-                            cA = cB * cPxA;
-                        } else {
-                            cB = _amt / cPxA; //  BUY B WITH A
-                            cC = cB / cPxB; // BUY C WITH B
-                            cA = cC * cPxC; // SELL C FOR A
-
-                            oB = _amt / oPxA; //  BUY B WITH A
-                            oC = oB / oPxB; // BUY C WITH B
-                            oA = oC * oPxC; // SELL C FOR A
-                            // 242.660
-
-                            //console.log({ _amt, _A, perc });
-                        }
-                        const o_perc = Number(
-                            (((oA - _amt) / _amt) * 100).toFixed(2)
-                        );
-                        const c_perc = Number(
-                            (((cA - _amt) / _amt) * 100).toFixed(2)
-                        );
+                        const _A2 = pxC / (pxA * pxB);
+                        const _fA2 = (pxA * pxB) / pxC;
+                        const _perc = calcPerc(_amt, _A2);
+                        const _fperc = calcPerc(_amt, _fA2);
 
                         const _isGreenA = prev_rowA.c >= prev_rowA.o;
                         const _isGreenB = prev_rowB.c >= prev_rowB.o;
@@ -420,29 +399,28 @@ export const onTriArbitCointest = async (
                             (!_isGreenA && _isGreenC) || _isGreenB;
 
                         console.log({ prev_ts: prev_rowA.ts });
-                        console.log({ cPxA, cPxB, cPxC });
                         console.log({ pxA, pxB, pxC });
+                        console.log({ _A2, _fA2 });
 
-                        console.log({ _isGreenA, _isGreenB, _isGreenC });
-                        console.log({ o_perc, c_perc, mustEnter }, "\n");
-                        flipped = c_perc < 0//(cPxA * cPxB) > cPxC
-                        const percCond = Math.abs(c_perc) >= MIN_PERC; // o_perc >= MIN_PERC && c_perc >= MIN_PERC
-
+                        console.log({ _perc, _fperc, MIN_PERC }, "\n");
+                        flipped = _fperc > _perc;
+                        perc = Math.max(_fperc, _perc);
+                        const percCond = perc >= MIN_PERC; // o_perc >= MIN_PERC && c_perc >= MIN_PERC
+                        const est_perc = perc;
                         ///const noZeroVol = prev_rowA.v != 0 && prev_rowB.v != 0 && prev_rowC.v != 0
 
-                        
-                        const slipA = 0// rowA.v == 0 || false ? SLIP / 100 : 0;
-                        const slipB = 0// rowB.v == 0 || false ? SLIP / 100 : 0;
-                        const slipC = 0// rowC.v == 0 || false ? SLIP / 100 : 0;
+                        const slipA = 0; // rowA.v == 0 || false ? SLIP / 100 : 0;
+                        const slipB = 0; // rowB.v == 0 || false ? SLIP / 100 : 0;
+                        const slipC = 0; // rowC.v == 0 || false ? SLIP / 100 : 0;
 
                         const day = new Date(rowA.ts).getDay();
                         const is_weekend = day == 6 || day == 7;
 
                         if (percCond) {
                             //console.log({ perc: `${perc}%` });
-                            console.log({ A, B, C });
+                            console.log({ A, B, C, flipped });
                             console.log("GOING IN...\n");
-                            
+
                             if (flipped) {
                                 // Buy ALGO at C
                                 baseB = bal / pxC;
@@ -458,7 +436,7 @@ export const onTriArbitCointest = async (
                                     );
                                     continue;
                                 }
-                                baseB *= 1 - slipC
+                                baseB *= 1 - slipC;
                                 baseB *= 1 - TAKER;
                                 baseB = toFixed(baseB, basePrC);
 
@@ -476,7 +454,7 @@ export const onTriArbitCointest = async (
                                     );
                                     continue;
                                 }
-                                baseA *= 1 - slipB
+                                baseA *= 1 - slipB;
                                 baseA *= 1 - MAKER;
                                 baseA = toFixed(baseA, pxPrB);
 
@@ -495,7 +473,7 @@ export const onTriArbitCointest = async (
                                     );
                                     continue;
                                 }
-                                _quote *= 1 - slipA
+                                _quote *= 1 - slipA;
                                 _quote *= 1 - MAKER;
                                 _quote = toFixed(_quote, pxPrA);
                             } else {
@@ -559,18 +537,28 @@ export const onTriArbitCointest = async (
                             bal = _quote;
                             console.log({ bal, START_BAL });
 
-                            const est_perc = c_perc
                             
+
                             if (only) {
-                                if (flipped) { 
+                                if (flipped) {
                                     orders.push({
                                         ts,
                                         perc,
                                         est_perc,
                                         side: [
-                                            `[${pairC}] BUY {H: ${rowC.h}, L: ${rowC.l}, V: ${rowC.v || 'null'}}`,
-                                            `[${pairB}] SELL {H: ${rowB.h}, L: ${rowB.l}, V: ${rowB.v || 'null'}}`,
-                                            `[${pairA}] SELL {H: ${rowA.h}, L: ${rowA.l}, V: ${rowA.v || 'null'}}`,
+                                            `[${pairC}] BUY {H: ${rowC.h}, L: ${
+                                                rowC.l
+                                            }, V: ${rowC.v || "null"}}`,
+                                            `[${pairB}] SELL {H: ${
+                                                rowB.h
+                                            }, L: ${rowB.l}, V: ${
+                                                rowB.v || "null"
+                                            }}`,
+                                            `[${pairA}] SELL {H: ${
+                                                rowA.h
+                                            }, L: ${rowA.l}, V: ${
+                                                rowA.v || "null"
+                                            }}`,
                                         ],
                                         px: [
                                             `${pairC[1]} ${cPxC}\n${pairC[1]} ${pxC}`,
@@ -589,9 +577,17 @@ export const onTriArbitCointest = async (
                                         perc,
                                         est_perc,
                                         side: [
-                                            `[${pairA}] BUY {H: ${rowA.h}, L: ${rowA.l}, V: ${rowA.v || 'null'}}`,
-                                            `[${pairB}] BUY {H: ${rowB.h}, L: ${rowB.l}, V: ${rowB.v || 'null'}}`,
-                                            `[${pairC}] SELL {H: ${rowC.h}, L: ${rowC.l}, V: ${rowC.v || 'null'}}`,
+                                            `[${pairA}] BUY {H: ${rowA.h}, L: ${
+                                                rowA.l
+                                            }, V: ${rowA.v || "null"}}`,
+                                            `[${pairB}] BUY {H: ${rowB.h}, L: ${
+                                                rowB.l
+                                            }, V: ${rowB.v || "null"}}`,
+                                            `[${pairC}] SELL {H: ${
+                                                rowC.h
+                                            }, L: ${rowC.l}, V: ${
+                                                rowC.v || "null"
+                                            }}`,
                                         ],
                                         px: [
                                             `${pairA[1]} ${cPxA}\n${pairA[1]} ${pxA}`,

@@ -1,10 +1,10 @@
 import { getInterval, parseDate } from "@/utils/funcs2";
 import { ensureDirExists } from "@/utils/orders/funcs";
-import { Platform } from "./test-platforms";
+import { TestPlatform } from "./test-platforms";
 import { ApiClient, SpotApi } from "gate-api";
 import { writeFileSync } from "fs";
 
-export class TestGateio extends Platform {
+export class TestGateio extends TestPlatform {
     maker: number = 0.2 / 100;
     taker: number = 0.2 / 100;
     client: SpotApi;

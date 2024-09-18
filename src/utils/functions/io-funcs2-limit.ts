@@ -17,7 +17,7 @@ import {
 } from "../functions";
 import { existsSync, writeFileSync } from "fs";
 import { parseKlines } from "../funcs2";
-import { platforms } from "../consts";
+import { test_platforms } from "../consts";
 
 enum startAt {
     A,
@@ -128,7 +128,7 @@ export const onTriArbitCointest = async (
             return;
         }
 
-        const Plat = new platforms[plat]({ demo });
+        const Plat = new test_platforms[plat]({ demo });
 
         for (let instru of instrusWithBQuote) {
             try {

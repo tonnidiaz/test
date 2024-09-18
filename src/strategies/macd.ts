@@ -3,7 +3,6 @@ import { ICandle } from "@/utils/interfaces";
 import { RSI_ONLY } from "./ce-sma";
 
 export class MACD_ONLY extends Strategy {
-    name: string = "MACD ONLY";
     desc: string = `Enters: macd > 0  \n  Exit:  macd < 0`;
 
     buyCond(row: ICandle): boolean {
@@ -15,7 +14,6 @@ export class MACD_ONLY extends Strategy {
     }
 }
 export class MACD_EXT extends Strategy {
-    name: string = "MACD EXT";
     desc: string = `Enters: macd > 0  \n  Exit:  macd < 0`;
 
     buyCond(row: ICandle): boolean {
@@ -29,7 +27,6 @@ export class MACD_EXT extends Strategy {
 
 
 export class MA_ONLY extends Strategy {
-    name: string = "MA_ONLY";
     desc: string = `Enter: sma20 >  sma50, Exit: oposite `;
 
     buyCond(row: ICandle): boolean {
@@ -43,7 +40,6 @@ export class MA_ONLY extends Strategy {
 }
 
 export class MACD_MA extends Strategy {
-    name: string = "MACD_MA";
     desc: string = `Enter: macd > 0 && sma20 >  sma50, Exit: oposite`;
 
     buyCond(row: ICandle): boolean {
@@ -55,7 +51,6 @@ export class MACD_MA extends Strategy {
     }
 }
 export class MACD_MA_RSI extends Strategy {
-    name: string = "MACD_MA_RSI";
     desc: string = `Enter: macd > 0 && sma20 >  sma50, Exit: oposite`;
 
     buyCond(row: ICandle): boolean {
@@ -67,7 +62,6 @@ export class MACD_MA_RSI extends Strategy {
     }
 }
 export class MACD_HL_HA extends Strategy {
-    name: string = "MACD_HL_HA";
     desc: string = `Enter: macd > 0 && sma20 >  sma50, Exit: oposite`;
 
     buyCond(row: ICandle): boolean {
@@ -79,7 +73,6 @@ export class MACD_HL_HA extends Strategy {
     }
 }
 export class MA_EXT extends Strategy {
-    name: string = "MA_EXT";
     desc: string = `Enter: sma20 >  sma50 && low is < 5% from o, Exit: oposite `;
 
     buyCond(row: ICandle): boolean {
@@ -98,7 +91,6 @@ export class MA_EXT extends Strategy {
 }
 
 export class CE_ONLY extends Strategy {
-    name: string = "CE_ONLY";
     desc: string = "JUST A CE";
     buyCond(row: ICandle): boolean {
         return row.buy_signal == 1;

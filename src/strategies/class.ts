@@ -14,6 +14,7 @@ import {
     getMaxSz,
     getMinSz,
     getPricePrecision,
+    sleep,
     toFixed,
 } from "@/utils/functions";
 
@@ -300,10 +301,11 @@ export class Backtest {
         }
     }
 
-    run() {
+    async run() {
         console.log(this.name, ": BEGIN BACKTESTING...\n");
         console.log({ pxPr: this.pricePrecision, basePr: this.basePrecision });
         for (let i = 1; i < this.df.length; i++) {
+            //await sleep(0.0000001)
             this.prevrow = this.df[i - 1];
             this.row = this.df[i];
             this.lastPx = this.row.o;

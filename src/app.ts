@@ -40,6 +40,7 @@ import usersRouter from "./routes/users";
 import authRouter from "./routes/auth";
 import botsRouter from "./routes/bots";
 import rfRouter from "./routes/rf";
+import appRouter from "./routes/app";
 import ordersRouter from "./routes/orders";
 
 const app = express();
@@ -47,11 +48,12 @@ import { default as mongoose } from "mongoose";
 import cors from "cors";
 import { DEV, setJobs } from "./utils/constants";
 import dotenv from "dotenv";
-import { Bot, Order } from "./models";
+import { Bot, Order, TuConfig } from "./models";
 import { addBotJob } from "./utils/orders/funcs";
 import { botLog } from "./utils/functions";
 import {  crossArbitWsList, initArbitWs, triArbitWsList } from "./classes/tu-ws";
 import { TuArbitWs } from "./classes/tu";
+import { fetchAndStoreBooks } from "./utils/funcs4";
 
 dotenv.config();
 // view engine setup
@@ -91,6 +93,7 @@ app.use("/users", usersRouter);
 app.use("/auth", authRouter);
 app.use("/bots", botsRouter);
 app.use("/rf", rfRouter);
+app.use("/app", appRouter);
 app.use("/orders", ordersRouter);
 
 // catch 404 and forward to error handler
@@ -131,6 +134,13 @@ const job = schedule.scheduleJob("* * * * * *", function(){
 jobs.push({job, id: "1"}) */
 
 const main = async () => {
+
+    // CREATE CONFIG IF NONE
+    const config = await TuConfig.findOne({}).exec() ?? new TuConfig()
+    await config.save()
+
+    fetchAndStoreBooks()
+
     const activeBots = await Bot.find({ active: true }).exec();
     setJobs([]);
     await initArbitWs()

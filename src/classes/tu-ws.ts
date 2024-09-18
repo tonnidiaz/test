@@ -2,8 +2,7 @@ import { timedLog } from "@/utils/functions";
 import { TuArbitWs } from "./tu";
 import { DEV } from "@/utils/constants";
 import { IObj } from "@/utils/interfaces";
-import { platList } from "@/utils/consts2";
-
+import { platList } from "@/utils/consts3";
 const crossList: IObj = {};
 const triList: IObj = {};
 

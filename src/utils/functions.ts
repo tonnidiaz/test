@@ -251,6 +251,13 @@ export function ceil(num: number, dec: number) {
     return isLarge || dec == 0 ? num : Number(num.toFixed(dec));
 }
 
+/**
+ * 
+ * @param num1 must be less than num2
+ * @returns the percentage difference between the two numbers
+ */
+export const calcPerc = (num1: number, num2: number) => ceil((num2 - num1)/ num1 * 100, 2)
+
 export function precision(a: number) {
     if (!isFinite(a)) return 0;
     var e = 1,
@@ -665,9 +672,7 @@ export const clearTerminal = () => {
     process.stdout.write("\x1Bc");
 };
 
-export const calcPerc = (num1: number, num2: number) => {
-    return ceil(((num2 - num1) / num1) * 100, 2);
-};
+
 
 export const encodeDate = (date: string) => {
     return date.replaceAll(":", "^").replace(" ", "T");

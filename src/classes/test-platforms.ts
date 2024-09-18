@@ -21,7 +21,7 @@ import { netsRootDir } from "@/utils/consts2";
 
 dotenv.config();
 
-export class Platform {
+export class TestPlatform {
     name: TPlatName;
     maker: number = MAKER_FEE_RATE;
     taker: number = TAKER_FEE_RATE;
@@ -88,9 +88,11 @@ export class Platform {
         }
         return;
     }
+
+    _getSymbo(pair: string[]){return getSymbol(pair, this.name)}
 }
 
-export class TestOKX extends Platform {
+export class TestOKX extends TestPlatform {
     
     maker: number = 0.08 / 100;
     taker: number = 0.1 / 100;
@@ -346,60 +348,7 @@ export class TestOKX extends Platform {
 
     async getNets(ccy?: string, offline?: boolean): Promise<ICoinNets[] | void | null | undefined> {
         try {
-            const res = offline && existsSync(this.netsPath) ? await readJson(this.netsPath) : [{
-                canDep: true,
-                canInternal: true,
-                canWd: true,
-                ccy: "USDT",
-                chain: "USDT-TRC20",
-                depQuotaFixed: "",
-                depQuoteDailyLayer2: "",
-                logoLink:
-                    "https://static.coinall.ltd/cdn/oksupport/asset/currency/icon/usdt20240813135750.png",
-                mainNet: false,
-                maxFee: "4",
-                maxFeeForCtAddr: "4",
-                maxWd: "31729800",
-                minDep: "0.00000001",
-                minDepArrivalConfirm: "19",
-                minFee: "2",
-                minFeeForCtAddr: "2",
-                minWd: "2",
-                minWdUnlockConfirm: "38",
-                name: "Tether",
-                needTag: false,
-                usedDepQuotaFixed: "",
-                usedWdQuota: "0",
-                wdQuota: "10000000",
-                wdTickSz: "6",
-            },
-            {
-                canDep: true,
-                canInternal: true,
-                canWd: true,
-                ccy: "USDT",
-                chain: "USDT-ERC20",
-                depQuotaFixed: "",
-                depQuoteDailyLayer2: "",
-                logoLink:
-                    "https://static.coinall.ltd/cdn/oksupport/asset/currency/icon/usdt20240813135750.png",
-                mainNet: false,
-                maxFee: "7.64",
-                maxFeeForCtAddr: "7.64",
-                maxWd: "31729800",
-                minDep: "0.00000001",
-                minDepArrivalConfirm: "32",
-                minFee: "3.82",
-                minFeeForCtAddr: "3.82",
-                minWd: "2",
-                minWdUnlockConfirm: "96",
-                name: "Tether",
-                needTag: false,
-                usedDepQuotaFixed: "",
-                usedWdQuota: "0",
-                wdQuota: "10000000",
-                wdTickSz: "6",
-            },]
+            const res = offline && existsSync(this.netsPath) ? await readJson(this.netsPath) : await readJson("_data/currencies/okx.json")
             await writeJson(this.netsPath, res)
             const data = res
 
@@ -427,7 +376,7 @@ export class TestOKX extends Platform {
     }
 }
 
-export class TestBybit extends Platform {
+export class TestBybit extends TestPlatform {
     client: RestClientV5;
     constructor({ demo = false }: { demo?: boolean }) {
         super({ demo, name: 'bybit' });

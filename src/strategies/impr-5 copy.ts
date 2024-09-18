@@ -21,8 +21,8 @@ export class Impr5 extends Backtest {
             //this.entry = this.row.o;
 
             if (
-                this.prevrow.c < trail
-                 &&this.prevrow.c <= this.prevrow.o // && v > 0
+                true//this.prevrow.c < trail
+                 //&& this.prevrow.c <= this.prevrow.o // && v > 0
                 //&& (l < o || (v > 0 && o == h && l == o && c == o))
             ) {
                 this.entryLimit = Math.min(this.prevrow.o, this.prevrow.c); //o;
@@ -57,7 +57,7 @@ export class Impr5 extends Backtest {
             this.exit = 0;
 
             let isSl = false;
-            let SL = 0.5; //_sell ? 1 : .5; //.5//1.2;
+            let SL = 5.5; //_sell ? 1 : .5; //.5//1.2;
 
             const _sl = ceil(this.entry * (1 - SL / 100), this.pricePrecision);
             const isO =
@@ -88,7 +88,7 @@ export class Impr5 extends Backtest {
                 //isSl = false
             } else {
                 this.exit = this.exitLimit;
-                isSl = true;
+                isSl = false;
             }
 
             const exit = this.exit;

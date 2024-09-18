@@ -59,7 +59,7 @@ export const getExactDate = (interval: number) => {
     return roundedDate;
 };
 const tuMacd = (df: ICandle[]) => {
-    const def = false;
+    const def = true;
     const faster = true;
     const fast = def ? 12 : faster ? 1 : 26 /* 5 */,
         slow = def ? 26 : faster ? 2 : 90 /* 12 */,

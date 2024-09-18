@@ -25,7 +25,6 @@ export class Mexc {
         this.client = new Spot(this.apiKey, this.apiSecret);
     }
 
-  
     async getBal(ccy?: string) {
         botLog(this.bot, "GETTING BAL...");
         try {
@@ -54,14 +53,14 @@ export class Mexc {
         try {
             const { order_type } = this.bot;
 
-            const is_market = price == undefined
+            const is_market = price == undefined;
             const res = await this.client.newOrder(
                 this.getSymbol(),
                 side.toUpperCase(),
-                ( is_market ? "Market" : "Limit").toUpperCase(),
+                (is_market ? "Market" : "Limit").toUpperCase(),
                 {
-                    quantity: !is_market ?  amt.toString() : undefined,
-                    quoteOrderQty: is_market ?  amt.toString() : undefined,
+                    quantity: !is_market ? amt.toString() : undefined,
+                    quoteOrderQty: is_market ? amt.toString() : undefined,
                     price: price?.toString(),
                     newClientOrderId: clOrderId,
                 }
@@ -75,13 +74,13 @@ export class Mexc {
             return res.orderId;
         } catch (error: any) {
             //[ 'statusCode', 'headers', 'body', 'url' ]
-            this._parseErr(error)
+            this._parseErr(error);
         }
     }
 
-    _parseErr(error: any){
-        error = error?.body ? JSON.parse(error.body) : error
-            console.log(error.msg);
+    _parseErr(error: any) {
+        error = error?.body ? JSON.parse(error.body) : error;
+        console.log(error.msg);
     }
     async getOrderbyId(orderId: string, isAlgo = false) {
         try {
@@ -108,20 +107,19 @@ export class Mexc {
             data = parseFilledOrder(d, this.bot.platform);
             return data;
         } catch (error) {
-            this._parseErr(error)
+            this._parseErr(error);
         }
     }
     async getTicker() {
-        try{
-botLog(this.bot, "GETTING TICKER...");
-        const res = await this.client.tickerPrice(this.getSymbol())
-        const ticker = Number(res.price)
-        console.log({ticker});
-        return ticker;
-        }catch(e){
-            this._parseErr(e)
+        try {
+            botLog(this.bot, "GETTING TICKER...");
+            const res = await this.client.tickerPrice(this.getSymbol());
+            const ticker = Number(res.price);
+            console.log({ ticker });
+            return ticker;
+        } catch (e) {
+            this._parseErr(e);
         }
-        
     }
     async getKlines({
         start,
@@ -138,36 +136,34 @@ botLog(this.bot, "GETTING TICKER...");
         savePath?: string;
         limit?: number;
     }) {
-        try{
-
-            if (end){
-                console.log("HAS END", parseDate(new Date(end)))
+        try {
+            if (end) {
+                console.log("HAS END", parseDate(new Date(end)));
             }
             interval = interval ?? this.bot.interval;
             end = end ?? Date.now() - 2 * interval * 60000;
-        let klines: any[] = [];
-        let cnt = 0;
-        
-        symbol = symbol ?? this.getSymbol();
+            let klines: any[] = [];
+            let cnt = 0;
 
-        end += (interval * 60000)
-        const res = await this.client.klines(
-            this.getSymbol(),
-            getInterval(interval, "mexc"),
-            { 
-                //endTime: end, startTime: (end)  - (limit) * interval * 60000 
-            }
-        );
+            symbol = symbol ?? this.getSymbol();
 
-        const data = res;
-        klines = [...data];
+            end += interval * 60000;
+            const res = await this.client.klines(
+                this.getSymbol(),
+                getInterval(interval, "mexc"),
+                {
+                    //endTime: end, startTime: (end)  - (limit) * interval * 60000
+                }
+            );
 
-        const d = [...klines]; //.reverse()
-        return limit == 1 ? d[d.length - 1] : d;
-        }catch(e: any){
-            return this._parseErr(e)
+            const data = res;
+            klines = [...data];
+
+            const d = [...klines]; //.reverse()
+            return limit == 1 ? d[d.length - 1] : d;
+        } catch (e: any) {
+            return this._parseErr(e);
         }
-        
     }
 
     async getKline() {
@@ -190,7 +186,9 @@ botLog(this.bot, "GETTING TICKER...");
             }
             return res.orderId;
         } catch (error) {
-            this._parseErr(error)
+            this._parseErr(error);
         }
     }
+
+   
 }

@@ -1,6 +1,6 @@
 import { getInterval, parseDate, parseFilledOrder } from "@/utils/funcs2";
 import { ensureDirExists } from "@/utils/orders/funcs";
-import { Platform } from "./test-platforms";
+import { TestPlatform } from "./test-platforms";
 import { RestClientV2 } from "bitget-api";
 import { writeFileSync } from "fs";
 import { CompanyResultSortBy } from "indicatorts";

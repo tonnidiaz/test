@@ -19,7 +19,7 @@ import { scheduleJob } from "node-schedule";
 import { mexcInstrus } from "@/utils/data/instrus/mexc-instrus";
 import { objPlats } from "@/utils/consts2";
 import { ARBIT_ZERO_FEES, klinesRootDir, noFees } from "@/utils/constants";
-import { ICandle } from "@/utils/interfaces";
+import { ICandle, TPlatName } from "@/utils/interfaces";
 import { kucoinBTC } from "./data/kucoin-btc";
 
 import { Bot, Order, TriArbitOrder } from "@/models";
@@ -29,22 +29,13 @@ import mongoose from "mongoose";
 import { parseArbitOrder } from "@/utils/funcs3";
 import { TestMexc } from "@/classes/test-mexc";
 import { TestKucoin } from "@/classes/test-kucoin";
+import { test_platforms } from "@/utils/consts";
+import { connectMongo, fetchAndStoreBooks } from "@/utils/funcs4";
 
 //clearTerminal();
 configDotenv();
 clearTerminal();
-async function connectMongo(DEV: boolean) {
-    console.log({ DEV });
-    let mongoURL = (DEV ? process.env.MONGO_URL_LOCAL : process.env.MONGO_URL)!;
-    try {
-        console.log(mongoURL);
-        await mongoose.connect(mongoURL, { dbName: "tb" });
-        console.log("\nConnection established\n");
-    } catch (e) {
-        console.log("Could not establish connection");
-        console.log(e);
-    }
-}
+
 
 const _gateioInstrus = gateioInstrus.filter(
     (el) => el.trade_status == "tradable"
@@ -436,4 +427,16 @@ const run = async () => {
     console.log({tickers})
 };
 
-run();
+
+const getOBook = async (pair: string[], plat: TPlatName)=>{
+    const Plat = new test_platforms[plat]({demo: false})
+    const r = await Plat.getBook(pair)
+    console.log(r)
+}
+
+//getOBook(['SOL', 'USDT'], 'binance')
+const fn = async ()=>{
+    await connectMongo(true)
+    fetchAndStoreBooks()
+}
+fn()

@@ -3,16 +3,16 @@ import { ensureDirExists } from "@/utils/orders/funcs";
 import { parseDate } from "@/utils/funcs2";
 import axios from "axios";
 import { unlinkSync, writeFileSync } from "fs";
-import { Platform } from "./test-platforms";
+import { TestPlatform } from "./test-platforms";
 import { IOrderbook, ITrade } from "@/utils/interfaces";
 import { MainClient, WebsocketClient } from "binance";
 import { getSymbol } from "@/utils/functions";
 import type { SymbolPrice } from "binance";
-export class TestBinance extends Platform {
+export class TestBinance extends TestPlatform {
     client: MainClient;
 
     constructor({ demo = false }: { demo?: boolean }) {
-        super({ demo, name: 'binance' });
+        super({ demo, name: "binance" });
         this.client = new MainClient({});
     }
     async getKlines({
@@ -172,6 +172,24 @@ export class TestBinance extends Platform {
     ): Promise<IOrderbook | void | null | undefined> {
         super.getBook(pair);
         try {
+            const ts = parseDate(new Date());
+            const r = await this.client.getOrderBook({
+                symbol: this._getSymbo(pair),
+                limit: 5,
+            });
+            const ob: IOrderbook = {
+                ts,
+                asks: r.asks.map((el) => ({
+                    px: Number(el[0]),
+                    amt: Number(el[1]),
+                })) as any,
+                bids: r.bids.map((el) => ({
+                    px: Number(el[0]),
+                    amt: Number(el[1]),
+                })) as any,
+            };
+
+            return ob
         } catch (e) {
             this._log("FAILED TO GET ORDERBOOK FOR", pair, "\n", e);
         }

@@ -38,7 +38,7 @@ import {
 } from "@/utils/orders/funcs4";
 import { Socket } from "socket.io";
 import mongoose from "mongoose";
-import { platforms } from "@/utils/consts";
+import { test_platforms } from "@/utils/consts";
 const readyStateMap = {
     0: "CONNECTING",
     1: "OPEN",
@@ -755,7 +755,7 @@ export class TuArbitWs {
                 if (abot.active && bookCond && bookFieldsCond) {
                     abot.active = false;
                     this._updateBots(abot);
-                    await this.unsub(abot.bot);
+                    // await this.unsub(abot.bot);
                     const re = await this.handleTickersTri({
                         abot,
                     });
@@ -770,7 +770,7 @@ export class TuArbitWs {
                     }
                     this._updateBots(abot);
                     if (abot.active) {
-                        await this.sub(abot.bot);
+                        // await this.sub(abot.bot);
                     }
                 } else if (abot.active) {
                     if (DEV) console.log({ bookA, bookB, bookC });
@@ -847,7 +847,7 @@ export class TuArbitWs {
                 if (abot.active && bookCond && bookFieldsCond) {
                     abot.active = false;
                     this._updateBots(abot);
-                    await this.unsub(abot.bot);
+                    // await this.unsub(abot.bot);
                     const re = await this.handleTickersCross({
                         abot,
                     });
@@ -860,7 +860,7 @@ export class TuArbitWs {
                     }
                     this._updateBots(abot);
                     if (abot.active) {
-                        await this.sub(abot.bot);
+                        // await this.sub(abot.bot);
                     }
                 } else if (abot.active) {
                     //if (DEV) console.log({ bookA, bookB });
@@ -1197,7 +1197,7 @@ export class TuArbitWs {
     async _tickerFetcher(_abot: (typeof this.abots)[0]) {
         if (DEV) this._log("FETCHING TICKERS...");
 
-        const plat = new platforms[this.plat]({ demo: false });
+        const plat = new test_platforms[this.plat]({ demo: false });
         if (this.arbitType == "cross") {
             if (!("pair" in _abot)) return;
             const ticker = await plat.getTicker(_abot.pair);

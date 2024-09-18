@@ -394,7 +394,7 @@ async function run() {
             MIN_PERC: 0.3,
             basePrB,
         });
-        const res = bt.run();
+        const res = await bt.run();
         _data.push({
             pair,
             profit: res.profit,

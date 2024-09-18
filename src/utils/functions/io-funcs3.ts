@@ -2,7 +2,7 @@ import { Socket } from "socket.io";
 import { Server } from "ws";
 import { ARBIT_ZERO_FEES, ARBIT_MIN_PERC } from "../constants";
 import { getInstrus, getKlinesPath, getMakerFee, getTakerFee } from "../funcs3";
-import { IObj } from "../interfaces";
+import { IObj, IRetData } from "../interfaces";
 import { Arbit } from "@/bots/arbitrage/classes";
 import { parseKlines } from "../funcs2";
 import {
@@ -14,14 +14,14 @@ import {
 } from "../functions";
 import { ensureDirExists } from "../orders/funcs";
 import { writeFileSync, existsSync } from "fs";
-import { platforms } from "../consts";
-import { Platform } from "@/classes/test-platforms";
+import { test_platforms } from "../consts";
+import { TestPlatform } from "@/classes/test-platforms";
 
 export const onCrossArbitCointest = async (
     data: IObj,
     client?: Socket,
     io?: Server
-) => {
+) : Promise<IRetData | undefined | void> => {
     let {
         platA,
         platB,
@@ -68,8 +68,8 @@ export const onCrossArbitCointest = async (
 
         let instrusA = getInstrus(platA);
         let instrusB = getInstrus(platB);
-        instrusA = instrusA.filter((el) => el[1] == "USDT");
-        instrusB = instrusB.filter((el) => el[1] == "USDT");
+        //instrusA = instrusA.filter((el) => el[1] == "USDT");
+        //instrusB = instrusB.filter((el) => el[1] == "USDT");
 
         if (only) {
             const _base = only[0], _quote = only[1]
@@ -102,7 +102,7 @@ export const onCrossArbitCointest = async (
         const savePath = `_data/rf/arbit/coins/${year}/${MIN_PERC}%_${prefix}${platA}-${platB}_${interval}m.json`;
         console.log({ savePath });
 
-        let ret_data: IObj = {};
+        let ret_data: IRetData = {clId, ep, data:{}};
 
         const parseData = (orders?: any[]) => {
             _data = _data.sort((a, b) => (a.profit > b.profit ? -1 : 1));
@@ -118,11 +118,12 @@ export const onCrossArbitCointest = async (
         
         if (show) {
             if (!existsSync(savePath)) {
-                return client?.emit(ep, { err: savePath + " DOES TO EXIST" });
+                client?.emit(ep, { err: savePath + " DOES TO EXIST" });
+                return
             }
             _data = await readJson(savePath);
             client?.emit(ep, parseData());
-            return _data;
+            return ret_data;
         }
         if (only){
             console.log(`DOING ${only} ONLY...\n`)
@@ -178,7 +179,7 @@ export const onCrossArbitCointest = async (
         if (!instrus.length){
             console.log("NO INSTRUS")
             client?.emit(ep, {err: "NO INSTRUS"})
-            return ret_data
+            return undefined
         }
         ensureDirExists(savePath);
 
@@ -233,8 +234,8 @@ export const onCrossArbitCointest = async (
                 }
                 const startMs = Date.parse(start);
                 const endMs = Date.parse(end);
-                const PlatA: Platform = new platforms[platA]({demo})
-                const PlatB: Platform = new platforms[platB]({demo})
+                const PlatA: TestPlatform = new test_platforms[platA]({demo})
+                const PlatB: TestPlatform = new test_platforms[platB]({demo})
     
                 const kA = offline || (skip_saved && existsSync(k1Path))
                 ? await readJson(k1Path)
@@ -303,7 +304,7 @@ export const onCrossArbitCointest = async (
                     pxPrB,
                     MIN_PERC, 
                 });
-                const res = bt.run();
+                const res = await bt.run();
                 _data.push({
                     pair,
                     profit: res.profit,
@@ -326,7 +327,7 @@ export const onCrossArbitCointest = async (
         _save();
         client?.emit(ep, "ALL DONE");
         client?.emit(ep, ret_data);
-        console.log("\nALL DONE");
+        console.log("\nALL DONE"); 
         return ret_data;
     } catch (e: any) {
         console.log(e.response?.data ?? e);

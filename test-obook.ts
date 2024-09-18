@@ -6,11 +6,12 @@ import {
     clearTerminal,
     encodeDate,
     existsSync,
+    getSymbol,
     readJson,
     sleep,
     toFixed,
 } from "@/utils/functions";
-import { IObj } from "@/utils/interfaces";
+import { IObj, TPlatName } from "@/utils/interfaces";
 import { readdirSync } from "fs";
 const DEXE_START = "2024-03-05T14:00:00+02:00",
     DEXE_END = "2024-03-05T17:00:00+02:00",
@@ -84,24 +85,33 @@ const runTri = async ({
     const lastTsMsB = Date.parse(getLastItem(bookB).time_exchange);
     const lastTsMsC = Date.parse(getLastItem(bookC).time_exchange);
     const startTsA = bookA[0].time_exchange,
-    startTsB = bookB[0].time_exchange,
-    startTsC = bookC[0].time_exchange;
+        startTsB = bookB[0].time_exchange,
+        startTsC = bookC[0].time_exchange;
 
     console.log({
         startTsA,
         startTsB,
         startTsC,
     });
-    console.log({
-        lastTsA: getLastItem(bookA).time_exchange,
-        lastTsB: getLastItem(bookB).time_exchange,
-        lastTsC: getLastItem(bookC).time_exchange,
-    }, '\n');
+    console.log(
+        {
+            lastTsA: getLastItem(bookA).time_exchange,
+            lastTsB: getLastItem(bookB).time_exchange,
+            lastTsC: getLastItem(bookC).time_exchange,
+        },
+        "\n"
+    );
 
-    const biggestStartTs = Math.max(Date.parse(startTsA),Date.parse(startTsB), Date.parse(startTsC) )
+    const biggestStartTs = Math.max(
+        Date.parse(startTsA),
+        Date.parse(startTsB),
+        Date.parse(startTsC)
+    );
 
     const endAt = Math.min(lastTsMsA, lastTsMsB, lastTsMsC);
-    const startAt = false ? Date.parse("2024-06-14 10:20:29+02:00") : biggestStartTs//getTsMs(bookA[0]);
+    const startAt = false
+        ? Date.parse("2024-06-14 10:20:29+02:00")
+        : biggestStartTs; //getTsMs(bookA[0]);
     let lastTs = startAt;
 
     let pos = false,
@@ -114,20 +124,20 @@ const runTri = async ({
     let base = 0;
 
     const _closePos = () => {
-        tradesCnt += 1
+        tradesCnt += 1;
         exitLimit = undefined;
         exitLimit2 = undefined;
         entryLimit = undefined;
         entryLimit2 = undefined;
         pos = false;
-        console.log("\nPOS CLOSED!!\n")
+        console.log("\nPOS CLOSED!!\n");
     };
-    let tradesCnt = 0
+    let tradesCnt = 0;
     while (lastTs <= endAt) {
-        await sleep(1/2)
+        await sleep(.0001);
         console.log({ ts: parseDate(lastTs) }, "\n");
         const ts = lastTs;
-        lastTs += gap * 1000;
+        
 
         const estRowA = getLastItem(bookA.filter((el) => getTsMs(el) <= ts));
         const estRowB = getLastItem(bookB.filter((el) => getTsMs(el) <= ts));
@@ -145,7 +155,7 @@ const runTri = async ({
         const perc = ceil(((A2 - AMT) / AMT) * 100, 3);
         const fA2 = (estBidB * estBidA) / estAskC;
         const fperc = ceil(((fA2 - AMT) / AMT) * 100, 3);
-        if (!pos && perc < 0 && fperc < 0) continue;
+        //if (!pos && perc < 0 && fperc < 0) continue;
         console.log("\n", { perc: `${perc}%`, A2 });
         console.log({ fperc: `${fperc}%`, fA2 });
 
@@ -153,7 +163,7 @@ const runTri = async ({
         const _flipped = fperc > perc;
 
         if (_perc >= minPerc && !pos) {
-            console.log("GOING IN...\n")
+            console.log("GOING IN...\n");
             flipped = _flipped;
             if (flipped) {
                 exitLimit = estBidB;
@@ -166,8 +176,13 @@ const runTri = async ({
             const buyPx = flipped ? estAskC : estAskA;
             base = toFixed((bal / buyPx) * (1 - TAKER), 10);
             pos = true;
+            lastTs += gap * 1000;
         } else if (pos) {
-            console.log("HAS POS", {flipped, entryLimit, entryLimit2, exitLimit, exitLimit2}, '\n')
+            console.log(
+                "HAS POS",
+                { flipped, entryLimit, entryLimit2, exitLimit, exitLimit2 },
+                "\n"
+            );
             if (flipped) {
                 if (exitLimit) {
                     //SELL AT B
@@ -197,6 +212,9 @@ const runTri = async ({
                     _closePos();
                 }
             }
+            lastTs += gap * 1000;
+        }else{
+            lastTs += 30 * 1000
         }
     }
     const profit = bal - START_BAL;
@@ -307,11 +325,12 @@ const runCross = async ({
     let base = 0;
     let entryLimit = 0,
         exitLimit = 0;
+    let buyPx = 0, sellPx = 0;
     while (lastTs <= endAt) {
-        await sleep(1/2)
+        await sleep(.0001);
         console.log({ ts: parseDate(lastTs) }, "\n");
         const ts = lastTs;
-        lastTs += gap * 60000;
+
         const estBuyRow = getLastItem(bookA.filter((el) => getTsMs(el) <= ts));
         const estSellRow = getLastItem(bookB.filter((el) => getTsMs(el) <= ts));
         const estBuyPx = estBuyRow.asks[0].price;
@@ -323,13 +342,22 @@ const runCross = async ({
         const A2 = (AMT * estSellPx) / estBuyPx;
         const estPerc = ceil(((A2 - AMT) / AMT) * 100, 2);
 
-        console.log({ estBuyTs, estSellTs, estPerc: `${estPerc}%` }, "\n");
+        console.log(
+            {
+                estBuyTs,
+                estSellTs,
+                estPerc: `${estPerc}%`,
+                estBuyPx,
+                estSellPx,
+            },
+            "\n"
+        );
 
         if (!pos && estPerc >= minPerc) {
             console.log("BUY");
             entryLimit = estBuyPx;
             exitLimit = estSellPx;
-            const buyPx = estBuyRow.asks[0].price;
+            buyPx = estBuyRow.asks[0].price;
             base = toFixed((bal / buyPx) * (1 - TAKER), 10);
 
             console.log({ entryLimit, buyPx });
@@ -342,9 +370,10 @@ const runCross = async ({
             });
 
             pos = true;
-        } else if (pos) {
+            lastTs += gap * 60000;
+        } else if (pos && estSellPx >= buyPx) {
             console.log("SELL");
-            const sellPx = estSellPx;
+            sellPx = estSellPx;
             console.log({ exitLimit, sellPx });
             bal = toFixed(base * sellPx * (1 - MAKER), 2);
             console.log("WITHDRAW\n");
@@ -355,6 +384,9 @@ const runCross = async ({
                 side: "sell",
             });
             pos = false;
+            lastTs += gap * 60000;
+        } else {
+            lastTs += 60 * 1000;
         }
     }
 
@@ -363,28 +395,166 @@ const runCross = async ({
     //console.log(trades);
 };
 
+const runKlines = async ({
+    minPerc,
+    start,
+    end,
+    platA,
+    platB,
+    pair,
+    pre,
+}: {
+    minPerc: number;
+    platA: TPlatName;
+    platB?: TPlatName;
+    pair: string[],
+    start: string;
+    end: string;
+    pre?: string;
+}) => {
+    pre = pre ? pre + "_" : "";
+    const symbolA =  pair[0] + `_${pair[1]}`//getSymbol(pair, plat)
+    console.log("\nBEGIN", { symbol: symbolA }, "\n");
+    const symbolIdA = platA.toUpperCase() + "_SPOT_" + symbolA;
+    const symbolIdB = !platB ? undefined : platB.toUpperCase() + "_SPOT_" + symbolA;
+
+    const pathA = genFname({ symbolId: symbolIdA, start, end, pre, plat: platA });
+    const pathB = !symbolIdB ? undefined : genFname({ symbolId: symbolIdB, start, end, pre, plat: platB as any });
+
+    let bookA = await readJson(pathA);
+    let bookB =!pathB ? undefined : await readJson(pathB);
+
+    let bal = 50;
+    const START_BAL = bal;
+
+    const trades: { ts: string; perc: number; flipped: boolean }[] = [];
+
+    const MAKER = 0.1 / 100,
+        TAKER = 0.1 / 100;
+
+    const interval = .5; // minutes
+    const lastTsMs = Date.parse(getLastItem(bookA).time_exchange);
+        const startTs = bookA[0].time_exchange;
+    console.log({
+        startTs
+    });
+    console.log(
+        {
+            lastTs: getLastItem(bookA).time_exchange,
+        },
+        "\n"
+    );
+
+    const biggestStartTs = Date.parse(startTs) + interval * 60000
+    console.log(startTs + 60);
+    const endAt = Math.min(lastTsMs);
+    const startAt = false
+        ? Date.parse("2024-06-14 10:20:29+02:00")
+        : biggestStartTs; //getTsMs(bookA[0]);
+    let lastTs = startAt;
+
+    let pos = false,
+        flipped = false;
+
+    let entryLimit: number | undefined;
+    let exitLimit: number | undefined;
+    let base = 0;
+
+    const _closePos = () => {
+        tradesCnt += 1;
+        exitLimit = undefined;
+        entryLimit = undefined;
+        pos = false;
+        console.log("\nPOS CLOSED!!\n");
+    };
+    let tradesCnt = 0;
+    let buyPx = 0, sellPx = 0;
+
+    while (lastTs <= endAt) {
+        await sleep(.0001);
+        console.log({ ts: parseDate(lastTs) }, "\n");
+        const ts = lastTs;
+        lastTs += interval * 60000
+
+        const estRowA = getLastItem(bookA.filter((el) => getTsMs(el) <= ts));
+        const estRowB = !bookB ? undefined :getLastItem(bookB.filter((el) => getTsMs(el) <= ts));
+        const estPrevRow = getLastItem(bookA.filter((el) => getTsMs(el) <= ts - interval * 60000));
+        const estAskA = estRowA.asks[0].price;
+        const estBidA = estRowA.bids[0].price;
+
+        const estAskB : number | undefined = estRowB?.asks[0].price;
+        const estBidB : number | undefined = estRowB?.bids[0].price;
+
+        const estPrevAsk = estPrevRow.asks[0].price;
+        const estPrevBid = estPrevRow.bids[0].price;
+
+        if (!pos) {
+            console.log("GOING IN...\n");
+
+            buyPx = estAskA;
+            base = toFixed((bal / buyPx) * (1 - TAKER), 10);
+            pos = true;
+            exitLimit = Math.max(estPrevBid, estPrevAsk) * ( 1 +1.5/100)
+        } else if (pos && exitLimit) {
+            console.log(
+                "HAS POS",
+                { exitLimit, estBid: estBidA, buyPx},
+                "\n"
+            );
+            sellPx = 0
+            const minTP = buyPx * (1 + .5/100)
+            const sl = buyPx * (1 - .1/100)
+            const estBid = Math.max(estBidA, estBidB ?? 0)
+            if (estBid >= minTP){
+                sellPx = estBid
+            }
+            else if (estBid >= exitLimit){
+                sellPx = exitLimit
+            }
+            else if(estBid >= sl){
+                sellPx = estBid
+            }
+
+            if (sellPx != 0){
+                console.log("SELLING")
+                bal = toFixed(base * sellPx * (1 - MAKER), 10)
+                _closePos()
+            }
+        }
+
+    }
+    const profit = bal - START_BAL;
+
+    console.log("\n", { trades: tradesCnt, profit });
+};
+
 const BDX_START = "2024-03-13 13:00:00+02:00",
     BDX_END = "2024-03-14 00:00:00+02:00";
 
-const side: string = "cross";
+let side = 'tri' as  'tri' | 'cross' | 'klines';
 
-const C = "WRX";
+const C = "SAGA";
 
-if (side == "cross")
+if (side == 'cross')
     runCross({
-        symbol: "BDX_USDT",
+        symbol: C + "_USDT",
         platA: "mexc",
         platB: "kucoin",
-        start: BDX_START,
-        end: BDX_END,
-        minPerc: 0.3,
+        start: coinApiDates[C].start,
+        end: coinApiDates[C].end,
+        minPerc: -0.5,
     });
-else
+else if (side == 'tri')
     runTri({
-        minPerc: 0.5,
-        plat: "kucoin",
+        minPerc: 0.1,
+        plat: "binance",
         A: "USDT",
-        B: "BTC",
+        B: "USDC",
         C,
         ...coinApiDates[C],
     });
+else if (side == 'klines'){
+    runKlines({
+        minPerc: .4, platA: 'mexc', platB: "bitget", ...coinApiDates[C], pair: [C, 'USDT']
+    })
+}

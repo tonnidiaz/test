@@ -1,5 +1,5 @@
 import { platforms } from "@/utils/constants";
-import { platList } from "@/utils/consts2";
+import { platList } from "@/utils/consts3";
 import mn, {
     HydratedDocument,
     HydratedDocumentFromSchema,

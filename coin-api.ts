@@ -6,9 +6,7 @@ import {
     writeJson,
     encodeDate,
 } from "@/utils/functions";
-import { ensureDirExists } from "@/utils/orders/funcs";
 import axios from "axios";
-import fs from "fs";
 
 const symbol_id = "BYBITSPOT_SPOT_SOL_USDT";
 const klinesURL = `https://rest.coinapi.io/v1/ohlcv/${symbol_id}/history`;
@@ -71,6 +69,7 @@ const getOrderbook = async ({
     limit,
     plat,
     save = true,
+    log = false,
     skipSaved = true,
     pre,
 }: {
@@ -79,6 +78,7 @@ const getOrderbook = async ({
     plat: string;
     end: string;
     save?: boolean;
+    log?: boolean;
     skipSaved?: boolean;
     limit?: number;
     pre?: string;
@@ -90,13 +90,13 @@ const getOrderbook = async ({
     // max_limit = 100000
     const params = {
         limit,
-        limit_levels: 1,
+        limit_levels: 2,
         time_start: new Date(start).toISOString(),
         time_end: new Date(end).toISOString(),
     };
 
     const headers = {
-        "X-CoinAPI-Key": KEY4,
+        "X-CoinAPI-Key": KEY1,
     };
 
     try {
@@ -114,6 +114,7 @@ const getOrderbook = async ({
         if (save) {
             writeJson(savePath, ob);
         }
+        if (log){console.log(ob)}
 
         console.log("DONE");
     } catch (e) {
@@ -123,14 +124,24 @@ const getOrderbook = async ({
 
 
 
-const symb = "HAI"
-
+const symb = "SAGA"
+const plat = 'binance'
+// getOrderbook({
+//     symbolId: plat.toUpperCase() + "_SPOT_USDC_USDT",
+//     plat,
+//     limit: 100000,
+//     start: coinApiDates[symb].start,
+//     end: coinApiDates[symb].end,
+//     skipSaved: true,
+//     save: true,
+// });
 getOrderbook({
-    symbolId: "KUCOIN_SPOT_HAI_USDT",
-    plat: "kucoin",
-    limit: 100000,
-    start: coinApiDates[symb].start,
-    end: coinApiDates[symb].end,
+    symbolId: plat.toUpperCase() + "_SPOT_SOL_USDT",
+    plat,
+    limit: 1,
+    start: "2024-08-01 00:05:00+02:00",
+    end: "2024-08-01 00:05:01+02:00",
     skipSaved: true,
-    save: true,
+    save: false,
+    log: true
 });

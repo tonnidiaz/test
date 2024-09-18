@@ -23,7 +23,7 @@ import { existsSync, readdirSync, writeFileSync } from "fs";
 import { TestBinance } from "@/classes/test-binance";
 import { TestBybit, TestOKX } from "@/classes/test-platforms";
 import { ITrade, TPlatName } from "@/utils/interfaces";
-import { platforms } from "@/utils/consts";
+import { test_platforms } from "@/utils/consts";
 import { okxInstrus } from "@/utils/data/instrus/okx-instrus";
 import { binanceInstrus } from "@/utils/data/instrus/binance-instrus";
 import { bybitInstrus } from "@/utils/data/instrus/bybit-instrus";
@@ -74,7 +74,7 @@ const dld = async ({
                     ccy: pair[1],
                     interval,
                 });
-                const plat = new platforms[platNm]({ demo });
+                const plat = new test_platforms[platNm]({ demo });
                 const month =
                     platNm == "okx" ? (year < 2022 ? "07" : "01") : "01";
                 let klines = await plat.getKlines({
@@ -150,7 +150,7 @@ const getTrades = async ({
     const startDate = parseDate(new Date(start));
     const endDate = parseDate(new Date(end));
     const year = startDate.split("-")[0];
-    const plat = new platforms[platNm]({});
+    const plat = new test_platforms[platNm]({});
     const savePath =
         tradesRootDir + `/${platNm}/${year}/${symbol}_${start}-${end}.json`;
     console.log({ savePath });
@@ -220,9 +220,10 @@ const fn = async () => {
     //const symbos = okxInstrus.filter(el=> el.state == 'live' && el.quoteCcy == 'BTC').map(el=> `${el.baseCcy}/${el.quoteCcy}`)
     //const symbos = bybitInstrus.filter(el=> el.status == 'Trading' && el.quoteCoin == 'BTC').map(el=> `${el.baseCoin}/${el.quoteCoin}`).sort()
     //const symbos = binanceInstrus.filter(el=> el.status == 'TRADING' && el.quoteAsset == 'BTC' && el.isSpotTradingAllowed).map(el=> `${el.baseAsset}/${el.quoteAsset}`).sort()
-    const symbos = bitgetInstrus.filter(el=> el.status == 'online' && el.quoteCoin == 'ETH').map(el=> `${el.baseCoin}/${el.quoteCoin}`).sort()
+    const symbos = bitgetInstrus.filter(el=> el.status == 'online' && el.quoteCoin != 'USDT').map(el=> el.quoteCoin)//.map(el=> `${el.baseCoin}/${el.quoteCoin}`).sort()
    // const symbos = kucoinInstrus.filter(el=> el.enableTrading && el.quoteCurrency == 'ETH').map(el=> `${el.baseCurrency}/${el.quoteCurrency}`).sort()
     console.log("LEN:", symbos.length)
+    console.log(symbos)
     return
     for (let plat of plats) {
 

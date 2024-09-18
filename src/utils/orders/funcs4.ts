@@ -10,8 +10,9 @@ import {
     toFixed,
 } from "../functions";
 import { placeTrade } from "./funcs";
-import { Bot, TriArbitOrder } from "@/models";
+import { Bot, Order, TriArbitOrder } from "@/models";
 import { objPlats } from "../consts2";
+import { updateBuyOrder } from "./funcs2";
 
 const SLEEP_MS = 500;
 export const placeArbitOrders = async ({
@@ -325,24 +326,50 @@ export const placeArbitOrdersFlipped = async ({
         return botLog(bot, "LESS_ERROR: UNABLE TO PLACE SELL ORDER AT A");
     }
 
+    let now = Date.now();
     const arbitOrder = new TriArbitOrder({ bot: bot.id });
     let aord: typeof arbitOrder.order;
     // BUY C [APEX] at C
-    const resC = await placeTrade({
-        amt: bal,
-        ordType: "Market",
-        price: cPxC,
-        pair: pairC,
-        bot: _botC,
-        plat: platC,
+    // const resC = await placeTrade({
+    //     amt: bal,
+    //     ordType: "Market",
+    //     price: cPxC,
+    //     pair: pairC,
+    //     bot: _botC,
+    //     plat: platC,
+    //     side: "buy",
+    //     ts,
+    // });
+
+    // if (!resC) return botLog(bot, "Failed to place BUY order for: [C]", pairC);
+
+    // const orderC = await getLastOrder(_botC);
+    // if (!orderC) return botLog(bot, "Failed to get orderC");
+
+    // CREATE FAKE ORDER
+    
+    const orderC = new Order({
+        _entry: cPxC,
+        buy_timestamp: { i: ts, o: parseDate(Date.now()) },
         side: "buy",
-        ts,
+        bot: _botC.id,
+        base: _botC.base,
+        ccy: _botC.ccy,
+        ccy_amt: bal,
+        base_amt: 0,
+        is_arbit: true,
     });
-
-    if (!resC) return botLog(bot, "Failed to place BUY order for: [C]", pairC);
-
-    const orderC = await getLastOrder(_botC);
-    if (!orderC) return botLog(bot, "Failed to get orderC");
+    const _b = bal / cPxC;
+    const _fee = (_b * 0.1) / 100;
+    now = Date.now();
+    await updateBuyOrder(orderC, {
+        fillPx: cPxC,
+        fillSz: toFixed(_b, basePrC),
+        fee: _fee,
+        id: `order__${now}`,
+        cTime: Date.parse(ts),
+        fillTime: now,
+    });
     orderC.side = "buy";
     orderC.is_closed = true;
 

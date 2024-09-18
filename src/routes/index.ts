@@ -11,7 +11,7 @@ var router = express.Router();
 import os from "os";
 import { strategies } from "@/strategies";
 import { Bot } from "@/models";
-import { platforms } from "@/utils/consts";
+import { test_platforms } from "@/utils/consts";
 import { onBacktest, onCointest } from "@/utils/functions/io-funcs";
 import { objPlats } from "@/utils/consts2";
 import { parseKlines } from "@/utils/funcs2";
@@ -32,7 +32,7 @@ router.get("/strategies", (req, res) => {
     res.json(strategies);
 });
 router.get("/platforms", (req, res) => {
-    res.json(Object.keys(platforms));
+    res.json(Object.keys(test_platforms));
 });
 router.post("/coins", async (req, res) => {
     const ret = await onCointest(req.body)
