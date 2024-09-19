@@ -291,16 +291,17 @@ export class TestMexc extends TestPlatform {
     async getBook(
         pair: string[]
     ): Promise<IOrderbook | void | null | undefined> {
+        const ts  = parseDate(new Date())
         try {
             super.getBook(pair);
             const r = await this.client.depth(this._getSymbo(pair), {
                 limit: 5,
             });
             const ob: IOrderbook = {
-                ts: parseDate(r.timestamp),
+                ts,
                 asks: r.asks.map((el) => ({
                     px: Number(el[0]),
-                    amt: Number(el[1]),
+                    amt: Number(el[1]), 
                 })),
                 bids: r.bids.map((el) => ({
                     px: Number(el[0]),

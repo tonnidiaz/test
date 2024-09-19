@@ -7,7 +7,7 @@ import { getInterval, parseDate } from "@/utils/funcs2";
 import { botLog, getSymbol, readJson, sleep } from "@/utils/functions";
 import axios, { AxiosResponse } from "axios";
 import { existsSync, writeFileSync } from "fs";
-import { TPlatName } from "@/utils/interfaces";
+import { IOrderbook, TPlatName } from "@/utils/interfaces";
 
 export class TestKucoin extends TestPlatform {
     maker: number = 0.1 / 100;
@@ -103,6 +103,34 @@ export class TestKucoin extends TestPlatform {
         catch(e){
             this._log("FAILED TO GET TICKER", e)
             return 0
+        }
+    }
+    async getBook(
+        pair: string[]
+    ): Promise<IOrderbook | void | null | undefined> {
+        const ts  = parseDate(new Date())
+        try {
+            super.getBook(pair);
+            const r = await this.client.getOrderBookLevel20({symbol: this._getSymbo(pair),
+            });
+            const data = r.data
+
+            if (r.code != "200000") return this._log(`FAILED TO GET BOOK FOR ${pair}`, data)
+
+            const ob: IOrderbook = {
+                ts,
+                asks: data.asks.slice(0, 5).map((el) => ({
+                    px: Number(el[0]),
+                    amt: Number(el[1]),
+                })),
+                bids: data.bids.slice(0, 5).map((el) => ({
+                    px: Number(el[0]),
+                    amt: Number(el[1]),
+                })),
+            };
+            return ob
+        } catch (err) {
+            this._log("FAILED TO GET BOOK FOR", pair, err);
         }
     }
 }

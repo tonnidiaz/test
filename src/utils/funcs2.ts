@@ -58,12 +58,17 @@ export const getExactDate = (interval: number) => {
     // Return the ISO string of the rounded date
     return roundedDate;
 };
-const tuMacd = (df: ICandle[]) => {
+
+/**
+ * 
+ * slow and signal begin at 2
+ */
+export const tuMacd = (df: ICandle[], _slow?: number, _fast?: number, _signal?:number) => {
     const def = true;
     const faster = true;
-    const fast = def ? 12 : faster ? 1 : 26 /* 5 */,
-        slow = def ? 26 : faster ? 2 : 90 /* 12 */,
-        signal = def ? 9 : faster ? 2 : 26; /* 5 */
+    const fast = _fast ?? (def ? 12 : faster ? 1 : 26) /* 5 */,
+        slow = _slow ??  ( def ? 26 : faster ? 2 : 90) /* 12 */,
+        signal = _signal ?? (def ? 9 : faster ? 2 : 26) ; /* 5 */
 
     const prices = df.map((el) => el[useHaClose ? "ha_c" : "c"]);
 
@@ -166,7 +171,7 @@ export const heikinAshi = (df: ICandle[]) => {
     }));
 };
 
-export const tuCE = (df: ICandle[]) => {
+export const tuCE = (df: ICandle[], _fast?: number, _slow?: number) => {
     const mult = 1.8,
         atrLen = 1;
     const highs = df.map((e) => e[useHaClose ? "ha_h" : "c"]);
@@ -178,8 +183,8 @@ export const tuCE = (df: ICandle[]) => {
     const ATR = atr(highs, lows, closings, { period: atrLen });
     const _atr = ATR.atrLine;
     const rsiLen = 2,
-        fastLen = 1, //89 /* 15 */,
-        slowLen = 2; //90; /* 50 */
+        fastLen = _fast ?? 15, //89 /* 15 */,
+        slowLen =_slow ?? 33; //90; /* 50 */
 
     const sma20 = ema(closings, { period: fastLen });
     const sma50 = ema(closings, { period: slowLen });

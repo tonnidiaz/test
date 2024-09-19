@@ -11,7 +11,7 @@ import {
     sleep,
     writeJson,
 } from "@/utils/functions";
-import { ICoinNets, TPlatName } from "@/utils/interfaces";
+import { ICoinNets, IOrderbook, TPlatName } from "@/utils/interfaces";
 import { safeJsonParse } from "@/utils/funcs3";
 import { Axios } from "axios";
 
@@ -311,6 +311,35 @@ export class TestBitget extends TestPlatform {
             this._log("FAILED TO GET NETS", e);
         }
     }
+    async getBook(
+        pair: string[]
+    ): Promise<IOrderbook | void | null | undefined> {
+        const ts  = parseDate(new Date())
+        try {
+            super.getBook(pair);
+            const r = await this.client.getSpotOrderBookDepth({symbol: this._getSymbo(pair),
+                limit: 5,
+            });
+            const data = r.data
+
+            if (r.code != "00000") return this._log(`FAILED TO GET BOOK FOR ${pair}`, data)
+
+            const ob: IOrderbook = {
+                ts,
+                asks: data.asks.map((el) => ({
+                    px: Number(el[0]),
+                    amt: Number(el[1]),
+                })),
+                bids: data.bids.map((el) => ({
+                    px: Number(el[0]),
+                    amt: Number(el[1]),
+                })),
+            };
+            return ob
+        } catch (err) {
+            this._log("FAILED TO GET BOOK FOR", pair, err);
+        }
+    }
 }
 
 /* 
@@ -371,3 +400,4 @@ export class TestBitget extends TestPlatform {
   ]
 }
 */
+ 

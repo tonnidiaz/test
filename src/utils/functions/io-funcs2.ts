@@ -1,19 +1,17 @@
 import { Socket } from "socket.io";
 import { Server } from "ws";
-import { IObj } from "../interfaces";
+import { IObj, IRetData } from "../interfaces";
 import { ARBIT_ZERO_FEES, ARBIT_MIN_PERC } from "../constants";
 import { getInstrus, getKlinesPath, getMakerFee, getTakerFee } from "../funcs3";
 import { ensureDirExists } from "../orders/funcs";
 import {
     calcPerc,
-    ceil,
     getCoinPrecision,
     getMinAmt,
     getMinSz,
     getPricePrecision,
     getSymbol,
     readJson,
-    sleep,
     toFixed,
 } from "../functions";
 import { existsSync, writeFileSync } from "fs";
@@ -78,7 +76,7 @@ export const onTriArbitCointest = async (
             w: number;
             l: number;
         }[] = [];
-        let ret_data: IObj = {};
+        let ret_data: IRetData = {ep, clId, data: {}};
         const year = Number(start.split("-")[0]);
 
         const A = _A ?? "USDT";
@@ -107,11 +105,12 @@ export const onTriArbitCointest = async (
         };
         if (show) {
             if (!existsSync(savePath)) {
-                return client?.emit(ep, { err: savePath + " DOES TO EXIST" });
+                client?.emit(ep, { err: savePath + " DOES TO EXIST" });
+                return 
             }
             _data = await readJson(savePath);
             client?.emit(ep, parseData());
-            return _data;
+            return ret_data;
         }
         if (save) ensureDirExists(savePath);
 
@@ -139,12 +138,12 @@ export const onTriArbitCointest = async (
                     l = 0;
 
                 let orders: {
-                    ts?: string[];
-                    side?: string[];
-                    px?: string[];
-                    amt?: string[];
-                    perc?: number;
-                    est_perc?: number;
+                    ts: string;
+                    side: string[];
+                    px: string[];
+                    amt: string[];
+                    perc: number;
+                    est_perc: number;
                 }[] = [];
                 let trades = 0,
                     gains: number[] = [];
@@ -305,7 +304,7 @@ export const onTriArbitCointest = async (
 
                 const startMs = Date.parse(start);
                 const endMs = Date.parse(end);
-
+                console.log({ a: dfA.length, b: dfB.length, c: dfC.length });
                 dfA = dfA.filter((el) => {
                     const tsMs = Date.parse(el.ts);
                     return tsMs >= startMs && tsMs <= endMs;
@@ -319,6 +318,7 @@ export const onTriArbitCointest = async (
                     const tsMs = Date.parse(el.ts);
                     return tsMs >= startMs && tsMs <= endMs;
                 });
+                console.log({ a: dfA.length, b: dfB.length, c: dfC.length });
 
                 const realStartMs = Math.max(
                     Date.parse(dfA[0].ts),
@@ -341,51 +341,8 @@ export const onTriArbitCointest = async (
                 });
 
                 const iLen = Math.min(dfA.length, dfB.length, dfC.length);
-                let entryLimit: number | undefined;
-                let entryLimit2: number | undefined;
-                let exitLimit: number | undefined;
-                let exitLimit2: number | undefined;
-                let pos = false;
-                let _base = 0;
-                let _quote = 0,
-                    baseA = 0,
-                    baseB = 0;
-                let perc = 0,
-                    est_perc = 0;
-
-                let _basePair = ["", ""];
-                let flipped = false; //(cPxA * cPxB) > cPxC
-                let opxA = 0,
-                    opxB = 0,
-                    opxC = 0;
-                let trade: {
-                    ts?: string[];
-                    perc?: number;
-                    est_perc?: number;
-                    side?: string[];
-                    px?: string[];
-                    amt?: string[];
-                } = {};
-
-                const closePos = () => {
-                    trades += 1;
-                    if (perc >= 0) {
-                        w += 1;
-                    } else {
-                        l += 1;
-                    }
-                    entryLimit = undefined;
-                    entryLimit2 = undefined;
-                    exitLimit = undefined;
-                    exitLimit2 = undefined;
-                    pos = false;
-                    _base = 0;
-                    _quote = 0;
-                    orders.push(trade);
-                    trade = {};
-                };
+                const SLIP = 1; // 0.5;
                 for (let i = 1; i < iLen; i++) {
-                    await sleep(0.0001)
                     try {
                         const prev_rowA = dfA[i - 1];
                         const prev_rowB = dfB[i - 1];
@@ -408,9 +365,8 @@ export const onTriArbitCointest = async (
                         const cPxC = prev_rowC.c;
                         const ts = rowA.ts;
 
-                        opxA = rowA.o;
-                        opxB = rowB.o;
-                        opxC = rowC.o;
+                        let flipped = false; //(cPxA * cPxB) > cPxC
+
                         if (rowB.ts != ts || rowC.ts != ts) {
                             msg = "TIMESTAMPS DONT MATCH";
                             client?.emit(ep, { err: msg });
@@ -419,338 +375,235 @@ export const onTriArbitCointest = async (
                         console.log("\n", { ts });
                         console.log({ pairA, pairB, pairC });
 
-                        const A = 1;
+                        let _quote = 0,
+                            baseA = 0,
+                            baseB = 0;
+                        let perc = 0;
+                        const _amt = 1;
 
-                        if (pos) {
-                            console.log("\nHAS POS\n");
-                            console.log({
-                                flipped,
-                                entryLimit,
-                                entryLimit2,
-                                exitLimit,
-                                exitLimit2,
-                            });
-                            if (flipped) {
-                                console.log("FLIPPED");
-                                if (entryLimit) {
-                                    //BUY AT C
-                                    console.log("BUYING AT C");
-                                    if (prev_rowC.l < entryLimit) {
-                                        console.log("BOUGHT AT C");
-                                        _base = bal / entryLimit;
-                                        _base = toFixed(
-                                            _base * (1 - TAKER),
-                                            basePrC
-                                        );
-                                        _basePair = pairB;
+                        let oA = 0,
+                            cA = 0,
+                            oB = 0,
+                            cB = 0,
+                            oC = 0,
+                            cC = 0;
 
-                                        trade = {
-                                            ts: [prev_rowC.ts],
-                                            est_perc,
-                                            side: [
-                                                `[${pairC}] BUY {H: ${
-                                                    prev_rowC.h
-                                                }, L: ${prev_rowC.l}, V: ${
-                                                    prev_rowC.v || "null"
-                                                }}`,
-                                            ],
-                                            px: [`${pairC[1]} ${entryLimit}`],
-                                            amt: [`${pairC[0]} ${_base}`],
-                                        };
-                                        entryLimit = undefined;
-                                    } else {
-                                        console.log(
-                                            "COULD NOT BUY",
-                                            { prev_rowC, entryLimit },
-                                            "\n"
-                                        );
-                                    }
-                                } else if (exitLimit) {
-                                    //SELL AT B
-                                    console.log("SELLING AT B");
-                                    if (prev_rowB.h > exitLimit) {
-                                        _base = _base * exitLimit;
-                                        _base = toFixed(
-                                            _base * (1 - MAKER),
-                                            pxPrB
-                                        );
-                                        _basePair = pairA;
+                        const _A2 = pxC / (pxA * pxB);
+                        const _fA2 = (pxA * pxB) / pxC;
+                        const _perc = calcPerc(_amt, _A2);
+                        const _fperc = calcPerc(_amt, _fA2);
 
-                                        trade.ts?.push(prev_rowB.ts);
-                                        trade.side?.push(
-                                            `[${pairB}] SELL {H: ${
-                                                prev_rowB.h
-                                            }, L: ${prev_rowB.l}, V: ${
-                                                prev_rowB.v || "null"
-                                            }}`
-                                        );
-                                        trade.px?.push(
-                                            `${pairB[1]} ${exitLimit}`
-                                        );
-                                        trade.amt?.push(`${pairB[1]} ${_base}`);
-                                        exitLimit = undefined;
-                                        console.log("SOLD AT B");
-                                    }
-                                } else if (exitLimit2) {
-                                    //SELL AT A
-                                    console.log("SELLING AT A");
-                                    if (prev_rowA.h > exitLimit2) {
-                                        console.log("SOLD AT A");
-                                        _quote = _base * exitLimit2;
-                                        _quote = toFixed(
-                                            _quote * (1 - MAKER),
-                                            pxPrA
-                                        );
-                                        perc = ceil(
-                                            ((_quote - bal) / bal) * 100,
-                                            2
-                                        );
-
-                                        trade.ts?.push(prev_rowA.ts);
-                                        trade.side?.push(
-                                            `[${pairA}] SELL {H: ${
-                                                prev_rowA.h
-                                            }, L: ${prev_rowA.l}, V: ${
-                                                prev_rowA.v || "null"
-                                            }}`
-                                        );
-                                        trade.px?.push(
-                                            `${pairA[1]} ${exitLimit2}`
-                                        );
-                                        trade.amt?.push(
-                                            `${pairA[1]} ${_quote}`
-                                        );
-                                        trade.perc = perc;
-
-                                        exitLimit2 = undefined;
-                                        bal = _quote;
-                                        console.log({ bal });
-                                        closePos();
-                                    }
-                                }
-                            } else {
-                                console.log("NORMAL");
-                                if (entryLimit) {
-                                    //BUY AT A
-                                    console.log("BUYING AT A");
-                                    if (prev_rowA.l < entryLimit) {
-                                        console.log("BOUGHT AT A");
-                                        _base = bal / entryLimit;
-                                        _base = toFixed(
-                                            _base * (1 - TAKER),
-                                            basePrA
-                                        );
-
-                                        _basePair = pairB;
-                                        trade = {
-                                            ts: [prev_rowA.ts],
-                                            est_perc,
-                                            side: [
-                                                `[${pairA}] BUY {H: ${
-                                                    prev_rowA.h
-                                                }, L: ${prev_rowA.l}, V: ${
-                                                    prev_rowA.v || "null"
-                                                }}`,
-                                            ],
-                                            px: [`${pairA[1]} ${entryLimit}`],
-                                            amt: [`${pairA[0]} ${_base}`],
-                                        };
-                                        entryLimit = undefined;
-                                    } else {
-                                        console.log(
-                                            "COULD NOT BUY",
-                                            { prev_rowA, entryLimit },
-                                            "\n"
-                                        );
-                                    }
-                                } else if (entryLimit2) {
-                                    //BUY AT B
-                                    console.log("BUYING AT B");
-                                    if (prev_rowB.l < entryLimit2) {
-                                        console.log("BOUGHT AT B");
-                                        _base = _base / entryLimit2;
-                                        _base = toFixed(
-                                            _base * (1 - TAKER),
-                                            basePrB
-                                        );
-
-                                        _basePair = pairC;
-
-                                        trade.ts?.push(prev_rowB.ts);
-                                        trade.side?.push(
-                                            `[${pairB}] BUY {H: ${
-                                                prev_rowB.h
-                                            }, L: ${prev_rowB.l}, V: ${
-                                                prev_rowB.v || "null"
-                                            }}`
-                                        );
-                                        trade.px?.push(
-                                            `${pairB[1]} ${entryLimit2}`
-                                        );
-                                        trade.amt?.push(`${pairB[1]} ${_base}`);
-
-                                        entryLimit2 = undefined;
-                                    }
-                                } else if (exitLimit) {
-                                    //SELL AT C
-                                    console.log("SELLING AT C", { _base, bal });
-                                    if (prev_rowC.h > exitLimit) {
-                                        console.log("SOLD AT C");
-                                        _quote = _base * exitLimit;
-                                        _quote = toFixed(
-                                            _quote * (1 - MAKER),
-                                            basePrC
-                                        );
-
-                                        perc = ceil(
-                                            ((_quote - bal) / bal) * 100,
-                                            2
-                                        );
-                                        trade.ts?.push(prev_rowC.ts);
-                                        trade.side?.push(
-                                            `[${pairC}] SELL {H: ${
-                                                prev_rowC.h
-                                            }, L: ${prev_rowC.l}, V: ${
-                                                prev_rowC.v || "null"
-                                            }}`
-                                        );
-                                        trade.px?.push(
-                                            `${pairC[1]} ${exitLimit}`
-                                        );
-                                        trade.amt?.push(
-                                            `${pairC[1]} ${_quote}`
-                                        );
-                                        trade.perc = perc;
-
-                                        exitLimit = undefined;
-                                        bal = _quote;
-                                        console.log({ bal });
-                                        closePos();
-                                    }
-                                }
-                            }
-                        }
+                        const _isGreenA = prev_rowA.c >= prev_rowA.o;
+                        const _isGreenB = prev_rowB.c >= prev_rowB.o;
+                        const _isGreenC = prev_rowC.c >= prev_rowC.o;
+                        const mustEnter =
+                            (!_isGreenA && _isGreenC) || _isGreenB;
 
                         console.log({ prev_ts: prev_rowA.ts });
+                        console.log({ pxA, pxB, pxC });
+                        console.log({ _A2, _fA2 });
 
-                        const B_CONST = /* B == 'USDC' ? 0 : */ 0//1.5;
-                        const A_CONST = B == "USDC" ? 0 : 0//1.5;
-                        const C_CONST = 0//.5;
-                        const ocMaxA = Math.max(prev_rowA.o, prev_rowA.c)
-                        const ocMaxC = Math.max(prev_rowC.o, prev_rowC.c)
+                        console.log({ _perc, _fperc, MIN_PERC }, "\n");
+                        flipped = _fperc > _perc;
+                        perc = Math.max(_fperc, _perc);
+                        const percCond = perc >= MIN_PERC; // o_perc >= MIN_PERC && c_perc >= MIN_PERC
+                        const est_perc = perc;
+                        ///const noZeroVol = prev_rowA.v != 0 && prev_rowB.v != 0 && prev_rowC.v != 0
 
-                        const MAX_PERC = 1.5
-                        if (pos) {
-                            
-                            // if (flipped) {
-                            //     if (entryLimit) {
-                            //         const _entryLimit = toFixed(
-                            //             prev_rowC.c * (1 - C_CONST / 100),
-                            //             pxPrC
-                            //         );
-                            //         if (calcPerc(entryLimit, _entryLimit) <= MAX_PERC){
-                            //             entryLimit = _entryLimit
-                            //         }
-                            //     } else if (exitLimit) {
-                            //         const _exitLimit = toFixed(
-                            //             prev_rowB.c * (1 + B_CONST / 100),
-                            //             pxPrB
-                            //         );
-                            //         if (calcPerc(_exitLimit, exitLimit) <= MAX_PERC){
-                            //             exitLimit = _exitLimit
-                            //         }
-                            //     } else if (exitLimit2) {
-                            //         const _exitLimit2 = toFixed(
-                            //             ocMaxA * (1 + A_CONST / 100),
-                            //             pxPrA
-                            //         );
-                            //         if (calcPerc(_exitLimit2, exitLimit2) <= MAX_PERC){
-                            //             exitLimit2 = _exitLimit2
-                            //         }
-                            //     }
-                            // } else {
-                            //     if (entryLimit) {
-                            //         const _entryLimit = toFixed(
-                            //             prev_rowA.c * (1 - A_CONST / 100),
-                            //             pxPrA
-                            //         );
-                            //         if (calcPerc(entryLimit, _entryLimit) <= MAX_PERC){
-                            //             entryLimit = _entryLimit
-                            //         }
-                            //     } else if (entryLimit2) {
-                            //         const _entryLimit2 = toFixed(
-                            //             prev_rowB.c * (1 - B_CONST / 100),
-                            //             pxPrB
-                            //         );
-                            //         if (calcPerc(entryLimit2, _entryLimit2) <= MAX_PERC){
-                            //             entryLimit2 = _entryLimit2
-                            //         }
-                            //     } else if (exitLimit) {
-                            //         const _exitLimit = toFixed(
-                            //             ocMaxC * (1 + C_CONST / 100),
-                            //             pxPrC
-                            //         );
-                            //         if (calcPerc(_exitLimit, exitLimit) <= MAX_PERC){
-                            //             exitLimit = _exitLimit
-                            //         }
-                            //     }
-                            // }
-                            continue;
-                        }
-
-                        const _pxA = pxA
-                        const _pxB = pxB
-                        const _pxC = pxC
-                        const _A2 = (A * _pxC) / (_pxA * _pxB)
-                        const _perc = ceil((_A2 - A)/A * 100, 2)
-
-                        const _fpxA = pxA
-                        const _fpxB = pxB
-                        const _fpxC = pxC
-                        const _fA2 = (A * _fpxA * _fpxB) / _fpxC
-
-                        const _fperc = ceil((_fA2 - A)/A * 100, 2)
-
-                        flipped = _fperc > _perc
-                        console.log({pxA, pxB, pxC})
-                        
-                        console.log({flipped, _perc, _fperc})
-                        console.log({A, _A2, _fA2})
-                        perc = Math.max(_perc, _fperc)
-                        est_perc = perc
-                        const __pxA = flipped ? _fpxA : _pxA
-                        const __pxB = flipped ? _fpxB : _pxB
-                        const __pxC = flipped ? _fpxC : _pxC
-
-                   const SLIP = 0.5; //0.5;
-                        const slipA = rowA.v == 0 ? SLIP / 100 : 0;
-                        const slipB = rowB.v == 0 ? SLIP / 100 : 0;
-                        const slipC = rowC.v == 0 ? SLIP / 100 : 0;
+                        const slipA = 0; // rowA.v == 0 || false ? SLIP / 100 : 0;
+                        const slipB = 0; // rowB.v == 0 || false ? SLIP / 100 : 0;
+                        const slipC = 0; // rowC.v == 0 || false ? SLIP / 100 : 0;
 
                         const day = new Date(rowA.ts).getDay();
                         const is_weekend = day == 6 || day == 7;
-                        const volCond =
-                            prev_rowA.v > 0 &&
-                            prev_rowB.v > 0 &&
-                            prev_rowC.v > 0;
 
-                        const percCond = est_perc >= MIN_PERC
-                        if (percCond && !pos) {
+                        if (percCond) {
                             //console.log({ perc: `${perc}%` });
-                            console.log({ A, B, C });
-                            console.log("GOING IN BITCH...\n");
-                            pos = true;
-                            //  bal = 0
+                            console.log({ A, B, C, flipped });
+                            console.log("GOING IN...\n");
+
                             if (flipped) {
                                 // Buy ALGO at C
-                                entryLimit = _pxC * (1 - C_CONST / 100);
-                                exitLimit = _pxB * (1 + B_CONST / 100);
-                                exitLimit2 = _pxA * (1 + A_CONST / 100);
+                                baseB = bal / pxC;
+                                if (baseB < minSzC || bal < minAmtC) {
+                                    console.log(
+                                        "CANNOT BUY C: LESS THAN MIN_AMT",
+                                        {
+                                            baseC: baseB,
+                                            minSzC,
+                                            amtC: bal,
+                                            minAmtC,
+                                        }
+                                    );
+                                    continue;
+                                }
+                                baseB *= 1 - slipC;
+                                baseB *= 1 - TAKER;
+                                baseB = toFixed(baseB, basePrC);
+
+                                // Sell ALGO at B to get BTC
+                                baseA = baseB * pxB;
+                                if (baseB < minSzB || baseA < minAmtB) {
+                                    console.log(
+                                        "CANNOT BUY B: LESS THAN MIN_AMT",
+                                        {
+                                            baseB,
+                                            minSzB,
+                                            amtB: baseA,
+                                            minAmtB,
+                                        }
+                                    );
+                                    continue;
+                                }
+                                baseA *= 1 - slipB;
+                                baseA *= 1 - MAKER;
+                                baseA = toFixed(baseA, pxPrB);
+
+                                // Sell BTC at A to get USDT back
+                                // SELL baseA [QUOTE of B] at A to get QUOTE of A
+                                _quote = baseA * pxA;
+                                if (baseA < minSzA || _quote < minAmtA) {
+                                    console.log(
+                                        "CANNOT BUY B: LESS THAN MIN_AMT",
+                                        {
+                                            baseA,
+                                            minSzA,
+                                            amtA: _quote,
+                                            minAmtA,
+                                        }
+                                    );
+                                    continue;
+                                }
+                                _quote *= 1 - slipA;
+                                _quote *= 1 - MAKER;
+                                _quote = toFixed(_quote, pxPrA);
                             } else {
-                                entryLimit = _pxA * (1 - A_CONST / 100);
-                                entryLimit2 = _pxB * (1 - B_CONST / 100);
-                                exitLimit = _pxC * (1 + C_CONST / 100);
+                                baseA = bal / pxA;
+                                if (baseA < minSzA || bal < minAmtA) {
+                                    console.log(
+                                        "CANNOT BUY A: LESS THAN MIN_AMT",
+                                        {
+                                            baseA,
+                                            minSzA,
+                                            amtA: bal,
+                                            minAmtA,
+                                        }
+                                    );
+                                    continue;
+                                }
+                                baseA *= 1 - slipA;
+                                baseA *= 1 - TAKER;
+                                baseA = toFixed(baseA, basePrA);
+
+                                baseB = baseA / pxB;
+                                if (baseB < minSzB || baseA < minAmtB) {
+                                    console.log(
+                                        "CANNOT BUY B: LESS THAN MIN_AMT",
+                                        {
+                                            baseB,
+                                            minSzB,
+                                            amtB: baseA,
+                                            minAmtB,
+                                        }
+                                    );
+                                    continue;
+                                }
+                                baseB *= 1 - slipB;
+                                baseB *= 1 - TAKER;
+                                baseB = toFixed(baseB, basePrB);
+
+                                _quote = baseB * pxC;
+                                if (baseB < minSzC || _quote < minAmtC) {
+                                    console.log(
+                                        "CANNOT BUY B: LESS THAN MIN_AMT",
+                                        {
+                                            baseC: baseB,
+                                            minSzC,
+                                            amtC: _quote,
+                                            minAmtC,
+                                        }
+                                    );
+                                    continue;
+                                }
+                                _quote *= 1 - slipC;
+                                _quote *= 1 - MAKER;
+                                _quote = toFixed(_quote, pxPrC);
                             }
+
+                            if (_quote >= bal) w += 1;
+                            else l += 1;
+                            perc = Number(
+                                (((_quote - bal) / bal) * 100).toFixed(2)
+                            );
+                            bal = _quote;
+                            console.log({ bal, START_BAL });
+
+                            
+
+                            if (only) {
+                                if (flipped) {
+                                    orders.push({
+                                        ts,
+                                        perc,
+                                        est_perc,
+                                        side: [
+                                            `[${pairC}] BUY {H: ${rowC.h}, L: ${
+                                                rowC.l
+                                            }, V: ${rowC.v || "null"}}`,
+                                            `[${pairB}] SELL {H: ${
+                                                rowB.h
+                                            }, L: ${rowB.l}, V: ${
+                                                rowB.v || "null"
+                                            }}`,
+                                            `[${pairA}] SELL {H: ${
+                                                rowA.h
+                                            }, L: ${rowA.l}, V: ${
+                                                rowA.v || "null"
+                                            }}`,
+                                        ],
+                                        px: [
+                                            `${pairC[1]} ${cPxC}\n${pairC[1]} ${pxC}`,
+                                            `${pairB[1]} ${cPxB}\n${pairB[1]} ${pxB}`,
+                                            `${pairA[1]} ${cPxA}\n${pairA[1]} ${pxA}`,
+                                        ],
+                                        amt: [
+                                            `${pairC[0]} ${baseB}`,
+                                            `${pairB[1]} ${baseA}`,
+                                            `${pairA[1]} ${_quote}`,
+                                        ],
+                                    });
+                                } else {
+                                    orders.push({
+                                        ts,
+                                        perc,
+                                        est_perc,
+                                        side: [
+                                            `[${pairA}] BUY {H: ${rowA.h}, L: ${
+                                                rowA.l
+                                            }, V: ${rowA.v || "null"}}`,
+                                            `[${pairB}] BUY {H: ${rowB.h}, L: ${
+                                                rowB.l
+                                            }, V: ${rowB.v || "null"}}`,
+                                            `[${pairC}] SELL {H: ${
+                                                rowC.h
+                                            }, L: ${rowC.l}, V: ${
+                                                rowC.v || "null"
+                                            }}`,
+                                        ],
+                                        px: [
+                                            `${pairA[1]} ${cPxA}\n${pairA[1]} ${pxA}`,
+                                            `${pairB[1]} ${cPxB}\n${pairB[1]} ${pxB}`,
+                                            `${pairC[1]} ${cPxC}\n${pairC[1]} ${pxC}`,
+                                        ],
+                                        amt: [
+                                            `${pairA[0]} ${baseA}`,
+                                            `${pairB[0]} ${baseB}`,
+                                            `${pairC[1]} ${_quote}`,
+                                        ],
+                                    });
+                                }
+                            }
+                            trades += 1;
                         }
                         gains.push(perc);
                     } catch (e) {
@@ -761,28 +614,8 @@ export const onTriArbitCointest = async (
                 console.log("\nPAIR:", pairB, "DONE");
                 client?.emit(ep, `PAIR: ${pairB} DONE`);
                 // FOR EACH PAIR SET
-
-                console.log({ bal });
-                if (_base) {
-                    const px =
-                        _basePair == pairA
-                            ? opxA
-                            : _basePair == pairB
-                            ? opxB
-                            : opxC;
-                    if (flipped) {
-                        //bal = _base * px * (1 - TAKER);
-                    } else {
-                    }
-
-                    console.log("\nSELLING AT LAST\n", {
-                        _base,
-                        px,
-                        _basePair,
-                    });
-                }
                 const profit = toFixed(bal - START_BAL, 2);
-                console.log({ profit, trades, _base, _basePair, _quote });
+                console.log({ profit });
                 const symbo = getSymbol([C, B], "okx");
                 _data.push({ pair: symbo, profit, trades, w, l });
                 parseData(orders);

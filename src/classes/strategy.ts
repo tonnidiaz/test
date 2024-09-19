@@ -1,7 +1,4 @@
-import { data } from "@/data/data";
 import { parentStrategies } from "@/strategies";
-import { Backtest } from "@/strategies/class";
-import { strategy } from "@/strategies/funcs-test";
 import { MAKER_FEE_RATE, TAKER_FEE_RATE } from "@/utils/constants";
 import { IObj, ICandle } from "@/utils/interfaces";
 

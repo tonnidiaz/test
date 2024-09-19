@@ -131,12 +131,12 @@ export class MA_RSI extends Strategy {
     name: string = "MA_RSI";
     desc: string = "JUST A CE";
     buyCond(row: ICandle): boolean {
-        return MA_ONLY.prototype.buyCond(row) || RSI_ONLY.prototype.buyCond(row);
+        return MA_ONLY.prototype.buyCond(row) && RSI_ONLY.prototype.buyCond(row);
     }
 
     sellCond(row: ICandle): boolean {
         return (
-            MA_ONLY.prototype.sellCond(row) || RSI_ONLY.prototype.sellCond(row)
+            MA_ONLY.prototype.sellCond(row) && RSI_ONLY.prototype.sellCond(row)
         );
     }
 }
@@ -188,11 +188,20 @@ export class STOCHIE extends Strategy {
     }
 }
 
+class HL_HA_RSI extends Strategy{
+    buyCond(row:ICandle): boolean {
+        return HL_HA.prototype.buyCond(row) && RSI_ONLY.prototype.buyCond(row)
+    }
+    sellCond(row:ICandle): boolean {
+        return HL_HA.prototype.sellCond(row) && RSI_ONLY.prototype.sellCond(row)
+    }
+}
 export const strategies = [
     new MACD_ONLY(),
     new MACD_EXT(),
     new MA_ONLY(),
     new MA_EXT(),
     new MACD_MA(),
-    new HL(), new HL_HA(),
+    new MA_RSI(),
+    new HL(), new HL_HA(), new HL_HA_RSI(), new RITA(), new CE_ONLY(), new CE_MACD()
 ];

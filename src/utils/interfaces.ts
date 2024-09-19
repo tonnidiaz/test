@@ -79,7 +79,7 @@ export interface ICcy {
 export interface IBook {
     px: number;
     amt: number;
-    cnt: number;
+    cnt?: number;
 }
 export interface IOrderbook {
     ts: string;

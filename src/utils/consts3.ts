@@ -96,8 +96,19 @@ export const crossCoinFees: { [key: string]: { [key: string]: number } } = {
 export const pairsOfInterest: {
     [key: string]: { A: string; B: string; C: string[] }[];
 } = {
-    binance: [
-        { A: "USDT", B: "USDC", C: ["JUP", "FET", "CKB", "YGG", "PEOPLE"] },
-        { A: "USDT", B: "BTC", C: ["PEOPLE", "ONE", "NULS", "DATA", "FIDA"] },
+    // binance: [
+    //     { A: "USDT", B: "USDC", C: ["JUP", "FET", "CKB", "YGG", "PEOPLE"] },
+    //     { A: "USDT", B: "BTC", C: ["PEOPLE", "ONE", "NULS", "DATA", "FIDA"] },
+    // ],
+    bitget: [
+        { A: "USDT", B: "USDC", C: ["BGB"] },
+        { A: "USDT", B: "BTC", C: ["BGB"] },
+        { A: "EUR", B: "USDT", C: ["PEPE", "BGB"] },
+    ],
+    kucoin: [
+        { A: "USDT", B: "USDC", C: ["FLOKI", "GMT", "APE", "NEAR"] },
+    ],
+    okx: [
+        { A: "USDT", B: "USDC", C: ["KLAY", "1INCH", "SUSHI", "MKR", "ALGO"] },
     ],
 };

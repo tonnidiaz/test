@@ -26,13 +26,13 @@ export class TestPlatform {
     maker: number = MAKER_FEE_RATE;
     taker: number = TAKER_FEE_RATE;
     tickersPath: string;
-    netsPath: string
+    netsPath: string;
 
     demo: boolean;
 
     constructor({ demo = false, name }: { demo?: boolean; name?: TPlatName }) {
         this.demo = demo;
-        this.name = name ?? 'binance'
+        this.name = name ?? "binance";
         this.netsPath = `${netsRootDir}/${this.name}/nets.json`;
         this.tickersPath = `${netsRootDir}/${this.name}/tickers.json`;
     }
@@ -45,8 +45,11 @@ export class TestPlatform {
     ): Promise<IOrderbook | void | null | undefined> {
         this._log("GETTING BOOK FOR", pair);
     }
-    async getNets(coin?: string, offline?: boolean): Promise<ICoinNets[] | void | null | undefined> {
-        this._log("GETTING NETS FOR", coin ?? 'ALL');
+    async getNets(
+        coin?: string,
+        offline?: boolean
+    ): Promise<ICoinNets[] | void | null | undefined> {
+        this._log("GETTING NETS FOR", coin ?? "ALL");
     }
     async getKlines({
         start,
@@ -89,11 +92,12 @@ export class TestPlatform {
         return;
     }
 
-    _getSymbo(pair: string[]){return getSymbol(pair, this.name)}
+    _getSymbo(pair: string[]) {
+        return getSymbol(pair, this.name);
+    }
 }
 
 export class TestOKX extends TestPlatform {
-    
     maker: number = 0.08 / 100;
     taker: number = 0.1 / 100;
     client: RestClient;
@@ -103,7 +107,7 @@ export class TestOKX extends TestPlatform {
     passphrase: string;
 
     constructor({ demo = false }: { demo?: boolean }) {
-        super({ demo, name: 'okx' });
+        super({ demo, name: "okx" });
         this.flag = demo ? "1" : "0";
         this.apiKey = demo
             ? process.env.OKX_API_KEY_DEMO!
@@ -346,32 +350,66 @@ export class TestOKX extends TestPlatform {
         }
     }
 
-    async getNets(ccy?: string, offline?: boolean): Promise<ICoinNets[] | void | null | undefined> {
+    async getNets(
+        ccy?: string,
+        offline?: boolean
+    ): Promise<ICoinNets[] | void | null | undefined> {
         try {
-            const res = offline && existsSync(this.netsPath) ? await readJson(this.netsPath) : await readJson("_data/currencies/okx.json")
-            await writeJson(this.netsPath, res)
-            const data = res
+            const res =
+                offline && existsSync(this.netsPath)
+                    ? await readJson(this.netsPath)
+                    : await readJson("_data/currencies/okx.json");
+            await writeJson(this.netsPath, res);
+            const data = res;
 
-            const coins: string[] = Array.from(new Set(data.map(el=> el.ccy)))
-            const nets: ICoinNets[] = coins.map(el=> ({
+            const coins: string[] = Array.from(
+                new Set(data.map((el) => el.ccy))
+            );
+            const nets: ICoinNets[] = coins.map((el) => ({
                 coin: el,
-                name:el,
-                nets: data.filter(el2=> el2.ccy == el).map((el) => ({
-                    name: el.name,
-                    coin: el.ccy,
-                    chain: el.chain,
-                    contactAddr: '',
-                    minComfirm: Number(el.minDepArrivalConfirm),
-                    minWd: Number(el.minWd),
-                    maxWd: Number(el.maxWd),
-                    minDp: 0, maxDp: Infinity,
-                    wdFee: Number(el.maxFee),
-                    canDep: el.canDep
-                })),
+                name: el,
+                nets: data
+                    .filter((el2) => el2.ccy == el)
+                    .map((el) => ({
+                        name: el.name,
+                        coin: el.ccy,
+                        chain: el.chain,
+                        contactAddr: "",
+                        minComfirm: Number(el.minDepArrivalConfirm),
+                        minWd: Number(el.minWd),
+                        maxWd: Number(el.maxWd),
+                        minDp: 0,
+                        maxDp: Infinity,
+                        wdFee: Number(el.maxFee),
+                        canDep: el.canDep,
+                    })),
             }));
-            return nets.filter(el=> !ccy || el.coin == ccy)
-        } catch (e) {
-            
+            return nets.filter((el) => !ccy || el.coin == ccy);
+        } catch (e) {}
+    }
+
+    async getBook(
+        pair: string[]
+    ): Promise<IOrderbook | void | null | undefined> {
+        const ts = parseDate(new Date());
+        try {
+            super.getBook(pair);
+            const r = await this.client.getOrderBook(this._getSymbo(pair), "5");
+            const data = r[0];
+            const ob: IOrderbook = {
+                ts,
+                asks: data.asks.map((el) => ({
+                    px: Number(el[0]),
+                    amt: Number(el[1]),
+                })),
+                bids: data.bids.map((el) => ({
+                    px: Number(el[0]),
+                    amt: Number(el[1]),
+                })),
+            };
+            return ob;
+        } catch (err) {
+            this._log("FAILED TO GET BOOK FOR", pair, err);
         }
     }
 }
@@ -379,7 +417,7 @@ export class TestOKX extends TestPlatform {
 export class TestBybit extends TestPlatform {
     client: RestClientV5;
     constructor({ demo = false }: { demo?: boolean }) {
-        super({ demo, name: 'bybit' });
+        super({ demo, name: "bybit" });
         const apiKey = demo
             ? process.env.BYBIT_API_KEY_DEMO!
             : process.env.BYBIT_API_KEY!;

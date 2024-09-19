@@ -57,10 +57,10 @@ io.on("connection", (client) => {
         "cointest",
         async (d) => (prevData = await onCointest(d, client))
     );
-    // client.on(
-    //     "arbit-cointest",
-    //     async (d) => (prevData = await onArbitCointest(d, client))
-    // );
+    client.on(
+        "arbit-cointest",
+        async (d) => (prevData = await onArbitCointest(d, client))
+    );
     client.on(
         "cross-arbit-cointest",
         async (d) => (prevData = await onCrossArbitCointest(d, client))

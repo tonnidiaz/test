@@ -1,6 +1,6 @@
 import { Socket } from "socket.io";
 import { Server } from "ws";
-import { IObj } from "../interfaces";
+import { IObj, IRetData } from "../interfaces";
 import { ARBIT_ZERO_FEES, ARBIT_MIN_PERC } from "../constants";
 import { getInstrus, getKlinesPath, getMakerFee, getTakerFee } from "../funcs3";
 import { ensureDirExists } from "../orders/funcs";
@@ -13,6 +13,7 @@ import {
     getPricePrecision,
     getSymbol,
     readJson,
+    sleep,
     toFixed,
 } from "../functions";
 import { existsSync, writeFileSync } from "fs";
@@ -37,7 +38,7 @@ export const onTriArbitCointest = async (
         end,
         demo,
         bal,
-        show,
+        show, 
         only,
         join,
         prefix,
@@ -77,7 +78,7 @@ export const onTriArbitCointest = async (
             w: number;
             l: number;
         }[] = [];
-        let ret_data: IObj = {};
+        let ret_data: IRetData = {ep, clId, data: []};
         const year = Number(start.split("-")[0]);
 
         const A = _A ?? "USDT";
@@ -105,12 +106,13 @@ export const onTriArbitCointest = async (
             }
         };
         if (show) {
-            if (!existsSync(savePath)) {
-                return client?.emit(ep, { err: savePath + " DOES TO EXIST" });
+            if (!existsSync(savePath)) 
+                {client?.emit(ep, { err: savePath + " DOES TO EXIST" });
+                return 
             }
             _data = await readJson(savePath);
             client?.emit(ep, parseData());
-            return _data;
+            return ret_data;
         }
         if (save) ensureDirExists(savePath);
 
@@ -384,6 +386,7 @@ export const onTriArbitCointest = async (
                     trade = {};
                 };
                 for (let i = 1; i < iLen; i++) {
+                    await sleep(0.0001)
                     try {
                         const prev_rowA = dfA[i - 1];
                         const prev_rowB = dfB[i - 1];
@@ -640,71 +643,71 @@ export const onTriArbitCointest = async (
                         const MAX_PERC = 1.5
                         if (pos) {
                             
-                            if (flipped) {
-                                if (entryLimit) {
-                                    const _entryLimit = toFixed(
-                                        prev_rowC.c * (1 - C_CONST / 100),
-                                        pxPrC
-                                    );
-                                    if (calcPerc(entryLimit, _entryLimit) <= MAX_PERC){
-                                        entryLimit = _entryLimit
-                                    }
-                                } else if (exitLimit) {
-                                    const _exitLimit = toFixed(
-                                        prev_rowB.c * (1 + B_CONST / 100),
-                                        pxPrB
-                                    );
-                                    if (calcPerc(_exitLimit, exitLimit) <= MAX_PERC){
-                                        exitLimit = _exitLimit
-                                    }
-                                } else if (exitLimit2) {
-                                    const _exitLimit2 = toFixed(
-                                        ocMaxA * (1 + A_CONST / 100),
-                                        pxPrA
-                                    );
-                                    if (calcPerc(_exitLimit2, exitLimit2) <= MAX_PERC){
-                                        exitLimit2 = _exitLimit2
-                                    }
-                                }
-                            } else {
-                                if (entryLimit) {
-                                    const _entryLimit = toFixed(
-                                        prev_rowA.c * (1 - A_CONST / 100),
-                                        pxPrA
-                                    );
-                                    if (calcPerc(entryLimit, _entryLimit) <= MAX_PERC){
-                                        entryLimit = _entryLimit
-                                    }
-                                } else if (entryLimit2) {
-                                    const _entryLimit2 = toFixed(
-                                        prev_rowB.c * (1 - B_CONST / 100),
-                                        pxPrB
-                                    );
-                                    if (calcPerc(entryLimit2, _entryLimit2) <= MAX_PERC){
-                                        entryLimit2 = _entryLimit2
-                                    }
-                                } else if (exitLimit) {
-                                    const _exitLimit = toFixed(
-                                        ocMaxC * (1 + C_CONST / 100),
-                                        pxPrC
-                                    );
-                                    if (calcPerc(_exitLimit, exitLimit) <= MAX_PERC){
-                                        exitLimit = _exitLimit
-                                    }
-                                }
-                            }
+                            // if (flipped) {
+                            //     if (entryLimit) {
+                            //         const _entryLimit = toFixed(
+                            //             prev_rowC.c * (1 - C_CONST / 100),
+                            //             pxPrC
+                            //         );
+                            //         if (calcPerc(entryLimit, _entryLimit) <= MAX_PERC){
+                            //             entryLimit = _entryLimit
+                            //         }
+                            //     } else if (exitLimit) {
+                            //         const _exitLimit = toFixed(
+                            //             prev_rowB.c * (1 + B_CONST / 100),
+                            //             pxPrB
+                            //         );
+                            //         if (calcPerc(_exitLimit, exitLimit) <= MAX_PERC){
+                            //             exitLimit = _exitLimit
+                            //         }
+                            //     } else if (exitLimit2) {
+                            //         const _exitLimit2 = toFixed(
+                            //             ocMaxA * (1 + A_CONST / 100),
+                            //             pxPrA
+                            //         );
+                            //         if (calcPerc(_exitLimit2, exitLimit2) <= MAX_PERC){
+                            //             exitLimit2 = _exitLimit2
+                            //         }
+                            //     }
+                            // } else {
+                            //     if (entryLimit) {
+                            //         const _entryLimit = toFixed(
+                            //             prev_rowA.c * (1 - A_CONST / 100),
+                            //             pxPrA
+                            //         );
+                            //         if (calcPerc(entryLimit, _entryLimit) <= MAX_PERC){
+                            //             entryLimit = _entryLimit
+                            //         }
+                            //     } else if (entryLimit2) {
+                            //         const _entryLimit2 = toFixed(
+                            //             prev_rowB.c * (1 - B_CONST / 100),
+                            //             pxPrB
+                            //         );
+                            //         if (calcPerc(entryLimit2, _entryLimit2) <= MAX_PERC){
+                            //             entryLimit2 = _entryLimit2
+                            //         }
+                            //     } else if (exitLimit) {
+                            //         const _exitLimit = toFixed(
+                            //             ocMaxC * (1 + C_CONST / 100),
+                            //             pxPrC
+                            //         );
+                            //         if (calcPerc(_exitLimit, exitLimit) <= MAX_PERC){
+                            //             exitLimit = _exitLimit
+                            //         }
+                            //     }
+                            // }
                             continue;
                         }
 
-                        const _pxA = cPxA
-                        const _pxB = cPxB
-                        const _pxC = cPxC
+                        const _pxA = pxA
+                        const _pxB = pxB
+                        const _pxC = pxC
                         const _A2 = (A * _pxC) / (_pxA * _pxB)
                         const _perc = ceil((_A2 - A)/A * 100, 2)
 
-                        const _fpxA = cPxA
-                        const _fpxB = cPxB
-                        const _fpxC = cPxC
+                        const _fpxA = pxA
+                        const _fpxB = pxB
+                        const _fpxC = pxC
                         const _fA2 = (A * _fpxA * _fpxB) / _fpxC
 
                         const _fperc = ceil((_fA2 - A)/A * 100, 2)
@@ -736,18 +739,18 @@ export const onTriArbitCointest = async (
                         if (percCond && !pos) {
                             //console.log({ perc: `${perc}%` });
                             console.log({ A, B, C });
-                            console.log("GOING IN...\n");
+                            console.log("GOING IN BITCH...\n");
                             pos = true;
                             //  bal = 0
                             if (flipped) {
                                 // Buy ALGO at C
-                                entryLimit = cPxC * (1 - C_CONST / 100);
-                                exitLimit = cPxB * (1 + B_CONST / 100);
-                                exitLimit2 = ocMaxA * (1 + A_CONST / 100);
+                                entryLimit = _pxC * (1 - C_CONST / 100);
+                                exitLimit = _pxB * (1 + B_CONST / 100);
+                                exitLimit2 = _pxA * (1 + A_CONST / 100);
                             } else {
-                                entryLimit = cPxA * (1 - A_CONST / 100);
-                                entryLimit2 = cPxB * (1 - B_CONST / 100);
-                                exitLimit = ocMaxC * (1 + C_CONST / 100);
+                                entryLimit = _pxA * (1 - A_CONST / 100);
+                                entryLimit2 = _pxB * (1 - B_CONST / 100);
+                                exitLimit = _pxC * (1 + C_CONST / 100);
                             }
                         }
                         gains.push(perc);

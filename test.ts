@@ -434,9 +434,9 @@ const getOBook = async (pair: string[], plat: TPlatName)=>{
     console.log(r)
 }
 
-//getOBook(['SOL', 'USDT'], 'binance')
+getOBook(['SOL', 'USDT'], 'kucoin')
 const fn = async ()=>{
     await connectMongo(true)
     fetchAndStoreBooks()
 }
-fn()
+// fn()
