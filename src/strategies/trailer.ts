@@ -7,11 +7,6 @@ export class Trailer extends Backtest {
         console.log("inloop");
         const _row = this.row;
         const { h, c, o, l, v } = _row;
-        const TRAIL = 0.1; // .1
-        const trail = ceil(
-            this.prevrow.h * (1 - TRAIL / 100),
-            this.pricePrecision
-        );
 
         if (!this.pos && this.buyCond(this.prevrow, this.df, i)) {
             console.log("\nKAYA RA BUY\n");
@@ -66,24 +61,22 @@ export class Trailer extends Backtest {
             isSl = !this.isGreen; //_sell || true;
             let is_market = false;
 
-            const TRAIL_CONST = 1
+            const TRAIL_CONST = 1.5
             const trailPx = h * (1 - TRAIL_CONST / 100)
 
             const TP = 1;
             const minTP = o * (1 + TP / 100);
-            const openCond =
-                (this.prevrow.c >= trail && isO) || this.prevrow.c >= minTP;
             if (false) {
             }
             
-            else if (trail >= minTP) {
+            else if (trailPx >= minTP) {
                 this.exit = true ? minTP : trailPx;
                 isSl = false;
             }
 
             const exit = this.exit;
 
-            console.log({ isSl, exit: this.exit, trail, _sl });
+            console.log({ isSl, exit: this.exit, trailPx, _sl });
             if (
                 //v > 0 &&
                 this.exit != 0 &&
