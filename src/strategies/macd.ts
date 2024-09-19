@@ -50,6 +50,18 @@ export class MACD_MA extends Strategy {
         return MACD_ONLY.prototype.sellCond(row) && MA_ONLY.prototype.sellCond(row)
     }
 }
+
+export class MACD_OR_MA extends Strategy {
+    desc: string = `Enter: macd > 0 && sma20 >  sma50, Exit: oposite`;
+
+    buyCond(row: ICandle): boolean {
+        return MACD_ONLY.prototype.buyCond(row) || MA_ONLY.prototype.buyCond(row)
+    }
+
+    sellCond(row: ICandle): boolean {
+        return MACD_ONLY.prototype.sellCond(row) || MA_ONLY.prototype.sellCond(row)
+    }
+}
 export class MACD_MA_RSI extends Strategy {
     desc: string = `Enter: macd > 0 && sma20 >  sma50, Exit: oposite`;
 
@@ -202,6 +214,7 @@ export const strategies = [
     new MA_ONLY(),
     new MA_EXT(),
     new MACD_MA(),
+    new MACD_OR_MA(),
     new MA_RSI(),
     new HL(), new HL_HA(), new HL_HA_RSI(), new RITA(), new CE_ONLY(), new CE_MACD()
 ];

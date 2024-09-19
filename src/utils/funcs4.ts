@@ -3,7 +3,7 @@ import { test_platforms } from "./consts";
 import { pairsOfInterest } from "./consts3";
 import { IOrderbook, TPlatName } from "./interfaces";
 import { existsSync, readJson, timedLog, writeJson } from "./functions";
-import { botJobSpecs } from "./constants";
+import { bookJobs, botJobSpecs } from "./constants";
 import { TuBook, TuConfig } from "@/models";
 import { configDotenv } from "dotenv";
 import mongoose from "mongoose";
@@ -26,7 +26,7 @@ async function platBookFetcher(platName: string, pairs: string[][], job: Job) {
     const plat = new test_platforms[platName as TPlatName]({ demo: false });
     if (plat && config?.fetch_orderbook_enabled) {
         timedLog(`[${platName}] GETTING BOOKS...`);
-        pairs.forEach(async (pair) => {
+        pairs.forEach(async (pair, i) => {
             const bookDoc =
                 (await TuBook.findOne({ pair, plat: platName }).exec()) ??
                 new TuBook({ pair, plat: platName });
@@ -42,8 +42,9 @@ async function platBookFetcher(platName: string, pairs: string[][], job: Job) {
                 await bookDoc.save();
             }
             timedLog(`[${platName}] Book for ${pair} done!!`);
+            if (i == pairs.length -1){timedLog(`[${platName}] BOOKS GOT!!\n`);}
         });
-        timedLog(`[${platName}] BOOKS GOT!!\n`);
+        
     } else {
         timedLog("KILLING JOB");
         job.cancel(false);
@@ -65,9 +66,12 @@ export async function fetchAndStoreBooks() {
         }
 
         platPairs = Array.from(new Set(platPairs.sort()));
-        const jb = scheduleJob(`${platName}__job`, botJobSpecs(2), () => {
+        const jobId = `${platName}__job`
+        const jb = scheduleJob(jobId, botJobSpecs(config.book_fetch_interval), () => {
             platBookFetcher(platName, platPairs, jb);
         });
+
+        bookJobs.push({job: jb, id: jobId, active: true})
 
         timedLog("BOOK FETCHER JOBS SCHEDULED!!");
     }

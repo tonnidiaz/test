@@ -60,15 +60,16 @@ export const getExactDate = (interval: number) => {
 };
 
 /**
+ * { fast: 12, slow: 45, signal: 92, profit: 3.21, trades: 90 }
  * 
  * slow and signal begin at 2
  */
 export const tuMacd = (df: ICandle[], _slow?: number, _fast?: number, _signal?:number) => {
-    const def = true;
+    const def = false;
     const faster = true;
-    const fast = _fast ?? (def ? 12 : faster ? 1 : 26) /* 5 */,
-        slow = _slow ??  ( def ? 26 : faster ? 2 : 90) /* 12 */,
-        signal = _signal ?? (def ? 9 : faster ? 2 : 26) ; /* 5 */
+    const fast = _fast ?? (def ? 12 : 12) /* 5 */,
+        slow = _slow ??  ( def ? 26 : 45) /* 12 */,
+        signal = _signal ?? (def ? 9 : 92) ; /* 5 */
 
     const prices = df.map((el) => el[useHaClose ? "ha_c" : "c"]);
 

@@ -17,6 +17,6 @@ export const TuBookSchema = new Schema({
     pair: {type: [String], required: true},
     plat: {type: String, enum: platList, required: true},
     book: {type: [TOrderbook], default: []} 
-}, {timestamps: true})
+}, {timestamps: true, versionKey: false})
 
 export interface ITuBook extends HydratedDocumentFromSchema<typeof TuBookSchema> {}

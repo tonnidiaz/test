@@ -434,9 +434,12 @@ const getOBook = async (pair: string[], plat: TPlatName)=>{
     console.log(r)
 }
 
-getOBook(['SOL', 'USDT'], 'kucoin')
+//getOBook(['SOL', 'USDT'], 'kucoin')
 const fn = async ()=>{
     await connectMongo(true)
     fetchAndStoreBooks()
 }
 // fn()
+const pth = "_data/rf/ma-params/2024/okx/MACD/SOL-USDT_60.json"
+const dt = readJson(pth)
+console.log(dt.find(el=> el.profit > 3 && el.trades >= 90))
