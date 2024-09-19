@@ -6,7 +6,7 @@ import { platList } from "@/utils/consts3";
 const crossList: IObj = {};
 const triList: IObj = {};
 
-for (let plat of platList) {
+for (let plat of platList.filter(el=> el != 'binance' && el != 'bybit' && el != 'gateio')) {
     triList[plat] = new TuArbitWs(plat, "tri");
     crossList[plat] = new TuArbitWs(plat, "cross");
 }
