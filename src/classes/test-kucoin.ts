@@ -5,7 +5,7 @@ import { MAKER_FEE_RATE, TAKER_FEE_RATE } from "@/utils/constants";
 import { ensureDirExists } from "@/utils/orders/funcs";
 import { getInterval, parseDate } from "@/utils/funcs2";
 import { botLog, getSymbol, readJson, sleep, writeJson } from "@/utils/functions";
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosResponse, isAxiosError } from "axios";
 import { existsSync, writeFileSync } from "fs";
 import { ICoinNets, IOrderbook, TPlatName } from "@/utils/interfaces";
 import { safeJsonParse } from "@/utils/funcs3";
@@ -116,8 +116,7 @@ export class TestKucoin extends TestPlatform {
             });
             const data = r.data
 
-            if (r.code != "200000") return this._log(`FAILED TO GET BOOK FOR ${pair}`, data)
-
+            if (r.code != "200000" || !r.data) return this._log(`FAILED TO GET BOOK FOR ${pair}`, data)
             const ob: IOrderbook = {
                 ts,
                 asks: data.asks.slice(0, 5).map((el) => ({
@@ -131,7 +130,8 @@ export class TestKucoin extends TestPlatform {
             };
             return ob
         } catch (err) {
-            this._log("FAILED TO GET BOOK FOR", pair, err);
+            this._log("FAILED TO GET BOOK FOR", pair);
+            this._err(err)
         }
     }
 

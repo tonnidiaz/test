@@ -2,7 +2,7 @@ import { MAKER_FEE_RATE, TAKER_FEE_RATE } from "@/utils/constants";
 import { ensureDirExists } from "@/utils/orders/funcs";
 import { getInterval, parseDate } from "@/utils/funcs2";
 import { botLog, getSymbol, readJson, writeJson } from "@/utils/functions";
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosResponse, isAxiosError } from "axios";
 import crypto from "crypto";
 
 import { writeFileSync } from "fs";
@@ -72,7 +72,15 @@ export class TestPlatform {
         return;
     }
     _log(...args) {
-        console.log(`\n[${this.constructor.name}]`, ...args, "\n");
+        console.log(`[${this.constructor.name}]`, ...args, "\n");
+    }
+
+    _err(err: any){
+        if (isAxiosError(err)){
+            this._log({code: err.response?.status ?? err.status ?? err.code ?? err.name ,msg: err.response?.data ?? err.message})
+        }else{
+            this._log((err?.body?.message  ?? err?.message?.toString() ?? err?.message ?? err) )
+        }
     }
     async getTrades({
         start,
@@ -409,7 +417,8 @@ export class TestOKX extends TestPlatform {
             };
             return ob;
         } catch (err) {
-            this._log("FAILED TO GET BOOK FOR", pair, err);
+            this._log("FAILED TO GET BOOK FOR", pair);
+            this._err(err)
         }
     }
 }

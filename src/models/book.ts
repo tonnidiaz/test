@@ -14,7 +14,7 @@ const TOrderbook = {
 }
 
 export const TuBookSchema = new Schema({
-    pair: {type: [String], required: true},
+    pair: {type: String, required: true},
     plat: {type: String, enum: platList, required: true},
     book: {type: [TOrderbook], default: []} 
 }, {timestamps: true, versionKey: false})

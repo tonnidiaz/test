@@ -122,7 +122,7 @@ export const pairsOfInterest: {
         { A: "USDT", B: "USDC", C: ["BGB"] },
         { A: "USDT", B: "BTC", C: ["BGB"] },
         { A: "EUR", B: "USDT", C: ["PEPE", "BGB"] },
-        { A: "USDT", C: ["HAI", "LAT", "OAS", "BABYDOGE", "ABBC"] },
+        { A: "USDT", C: ["LAT", "OAS", "BABYDOGE", "ABBC"] },
     ],
     kucoin: [
         { A: "USDT", B: "USDC", C: ["FLOKI", "GMT", "APE", "NEAR"] },
@@ -133,7 +133,7 @@ export const pairsOfInterest: {
         { A: "USDT", C: ["LAT", "SC"] },
     ],
     mexc: [
-        { A: "USDT", C: ["HAI", "LAT", "OAS", "BABYDOGE", "ABBC"] }, // -bitget
+        { A: "USDT", C: ["LAT", "OAS", "BABYDOGE", "ABBC"] }, // -bitget
         { A: "USDT", C: ["LAT", "SC"] }, // -okx
         { A: "USDT", C: ["CAS", "BLOK", "IRON", "HAI", "KARATE"] }, // -kucoin
     ],

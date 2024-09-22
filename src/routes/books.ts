@@ -14,7 +14,7 @@ router.get("/", async function (req, res, next) {
         const allBooks = await TuBook.find().exec()
         const availPlats= Array.from(new Set(allBooks.map(el=>el.plat)))
         for (let plat of availPlats){
-            plats.push({name: plat, pairs: allBooks.filter(el=> el.plat == plat).map(el=> el.pair)})
+            plats.push({name: plat, pairs: allBooks.filter(el=> el.plat == plat).map(el=> el.pair.split('-'))})
         }
         return res.json({ total, plats });
     } catch (e) {
@@ -31,7 +31,7 @@ router.get("/:platform", async function (req, res, next) {
         const _page = Number(page) || 1;
         const skip = (_page - 1) * _limit;
         console.log({ pair });
-        const _pair = (pair as string).split("-");
+        const _pair = (pair as string)
         console.log({ _pair });
         const books = await TuBook.find({ plat: platform, pair: _pair })
             .skip(skip)

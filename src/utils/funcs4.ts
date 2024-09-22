@@ -27,9 +27,8 @@ async function platBookFetcher(platName: string, pairs: string[][], job: Job) {
     if (plat && config?.fetch_orderbook_enabled) {
         timedLog(`[${platName}] GETTING BOOKS...`);
         pairs.forEach(async (pair, i) => {
-            const bookDoc =
-                (await TuBook.findOne({ pair, plat: platName }).exec()) ??
-                new TuBook({ pair, plat: platName });
+           setImmediate(async()=>{
+            const bookDoc = new TuBook({ pair: pair.join('-'), plat: platName });
             let book: IOrderbook[] = [];
             const savePath = `_data/ob/test/${platName}/${pair.join("-")}.json`;
             if (bookDoc.book) {
@@ -45,6 +44,7 @@ async function platBookFetcher(platName: string, pairs: string[][], job: Job) {
             if (i == pairs.length - 1) {
                 timedLog(`[${platName}] BOOKS GOT!!\n`);
             }
+           })
         });
     } else {
         timedLog("KILLING JOB");

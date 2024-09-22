@@ -433,11 +433,10 @@ const getOBook = async (pair: string[], plat: TPlatName) => {
     console.log(r);
 };
 
-//getOBook(['SOL', 'USDT'], 'kucoin')
-const fn = async () => {
-    await connectMongo(true);
-    fetchAndStoreBooks();
-};
+getOBook(['IRON', 'USDT'], 'kucoin')
+// const fn = async () => {
+//    const ob = await pla
+// };
 // fn()
 // const pth = "_data/rf/ma-params/2024/okx/MACD/SOL-USDT_60.json"
 // const dt = readJson(pth)

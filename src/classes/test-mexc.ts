@@ -310,7 +310,8 @@ export class TestMexc extends TestPlatform {
             };
             return ob
         } catch (err) {
-            this._log("FAILED TO GET BOOK FOR", pair, err);
+            this._log("FAILED TO GET BOOK FOR", pair);
+            this._err(err)
         }
     }
 }
