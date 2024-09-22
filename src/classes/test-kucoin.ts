@@ -1,13 +1,14 @@
 import { TestPlatform } from "./test-platforms";
 import { SpotClient } from "kucoin-api";
-import type { Kline } from "kucoin-api";
+import type { CurrencyInfo, Kline } from "kucoin-api";
 import { MAKER_FEE_RATE, TAKER_FEE_RATE } from "@/utils/constants";
 import { ensureDirExists } from "@/utils/orders/funcs";
 import { getInterval, parseDate } from "@/utils/funcs2";
-import { botLog, getSymbol, readJson, sleep } from "@/utils/functions";
+import { botLog, getSymbol, readJson, sleep, writeJson } from "@/utils/functions";
 import axios, { AxiosResponse } from "axios";
 import { existsSync, writeFileSync } from "fs";
-import { IOrderbook, TPlatName } from "@/utils/interfaces";
+import { ICoinNets, IOrderbook, TPlatName } from "@/utils/interfaces";
+import { safeJsonParse } from "@/utils/funcs3";
 
 export class TestKucoin extends TestPlatform {
     maker: number = 0.1 / 100;
@@ -131,6 +132,87 @@ export class TestKucoin extends TestPlatform {
             return ob
         } catch (err) {
             this._log("FAILED TO GET BOOK FOR", pair, err);
+        }
+    }
+
+    async getNets(coin?: string, offline?: boolean): Promise<ICoinNets[] | void | null | undefined> {
+        super.getNets(coin, offline)
+        try {
+            console.log({ offline });
+            let res = safeJsonParse(
+                offline && existsSync(this.netsPath)
+                    ? await readJson(this.netsPath)
+                    : (await this.client.getCurrencies()));
+
+            if (res.code && res.code != "200000") return this._log(`FAILED TO GET NETS`, res)
+            if (res.data) res = res.data;
+            writeJson(
+                this.netsPath,
+                res.sort((a, b) => a.currency.localeCompare(b.currency))
+            );
+
+            
+            const data: CurrencyInfo[] = res;
+
+            let coins: string[] = Array.from(
+                new Set(data.map((el) => el.currency))
+            );
+
+            coins = coins
+                .filter((el) => data.find((el2) => el2.currency == el)?.chains)
+                .sort((a, b) => a.localeCompare(b));
+
+            const tickers: { coin: string; ticker: number }[] = [];
+
+            if (offline && existsSync(this.tickersPath))
+                tickers.push(...(await readJson(this.tickersPath)));
+            else {
+                for (let el of coins) {
+                    let ticker = 0;
+                    if (el == "USDT" || el == "USDC" || true) {
+                        ticker = 1;
+                    } else {
+                        try {
+                            ticker = await this.getTicker([el, "USDT"]);
+
+                            await sleep(100);
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    }
+                    tickers.push({coin: el, ticker})
+                    writeJson(this.tickersPath, tickers)
+                }
+            }
+
+            writeJson(this.tickersPath, tickers);
+            const nets: ICoinNets[] = coins.map((el) => {
+                const net = data.find((el2) => el2.currency == el);
+                const ticker = tickers.find((el2) => el2.coin == el)!.ticker;
+                return {
+                    coin: net!.currency,
+                    name: net!.fullName,
+                    ticker,
+                    nets: net!.chains.map((el) => ({
+                        name: el.chainName,
+                        coin: net!.currency,
+                        chain: el.chainName,
+                        contactAddr: el.contractAddress,
+                        minComfirm: Number(el.confirms),
+                        minWd: Number(el.withdrawalMinSize),
+                        maxWd: Infinity,
+                        minDp: Number(0),
+                        maxDp: Infinity,
+                        wdFee: Number(el.withdrawalMinFee),
+                        wdFeeUSDT: Number(el.withdrawalMinFee) * ticker,
+                        canDep: el.isDepositEnabled && el.isWithdrawEnabled,
+                    })),
+                };
+            });
+
+            return nets.filter((el) => !coin || el.coin == coin);
+        } catch (e) {
+            this._log("FAILED TO GET NETS", e);
         }
     }
 }

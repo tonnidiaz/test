@@ -26,21 +26,21 @@ export function fillBuyOrder({
     pos: boolean;
     isA?: boolean
 }) {
-    console.log('\nFILL BUY ORDER');
+    // console.log('\nFILL BUY ORDER');
     const _balance = new BigNumber(balance)
-    console.log({balance, _balance, taker, entry})
+    // console.log({balance, _balance, taker, entry})
     let base : number | BigNumber = _balance.dividedBy(entry)// * (1 - taker);
 
     const fee = base.multipliedBy(taker)
-    console.log("BASE:")
-    console.log(`B4 FEE: ${base.toString()}`)
+    // console.log("BASE:")
+    // console.log(`B4 FEE: ${base.toString()}`)
     if (!noFees)
         {
            base = base.minus(fee) //base -= fee
             
         }
 
-    console.log(`AFTER FEE: ${base}\n`)
+    // console.log(`AFTER FEE: ${base}\n`)
     //console.log({balance, base, entry, taker, basePrecision});
     base = toFixed(base.toNumber(), basePrecision);
     //console.log(`BASE: ${base}`);
@@ -107,19 +107,19 @@ export const fillSellOrder = ({
     const _isTp = isSl == undefined ? exit >= entry : !isSl
     
     //console.log(`MIKA: ${exit >= entry ? "gain" : "loss"}`);
-    console.log("\nFILL SELL ORDER");
-    console.log({maker});
-    console.log({ exitLimit, exit, entry, base });
+    // console.log("\nFILL SELL ORDER");
+    // console.log({maker});
+    // console.log({ exitLimit, exit, entry, base });
     let _base = new BigNumber(base)
     let balance : number | BigNumber = _base.multipliedBy(exit) 
-    console.log("BALANCE")
+    // console.log("BALANCE")
     const fee = balance.multipliedBy(maker)
-    console.log(`B4 FEE: ${balance}`)
+    // console.log(`B4 FEE: ${balance}`)
     if (!noFees)
         {balance = balance.minus(fee)}
 
     balance = toFixed(balance.toNumber(), ( pricePrecision!));
-    console.log(`AFTER FEE: ${balance}\n`)
+    // console.log(`AFTER FEE: ${balance}\n`)
     const ts = row["ts"];
     
     const _entry = o ?? entry

@@ -6,11 +6,11 @@ export class MACD_ONLY extends Strategy {
     desc: string = `Enters: macd > 0  \n  Exit:  macd < 0`;
 
     buyCond(row: ICandle): boolean {
-        return row.hist > 0//row.macd > row.signal
+        return row.hist > 0; //row.macd > row.signal
     }
 
     sellCond(row: ICandle): boolean {
-        return row.hist < 0//row.macd < row.signal 
+        return row.hist < 0; //row.macd < row.signal
     }
 }
 export class MACD_EXT extends Strategy {
@@ -21,10 +21,9 @@ export class MACD_EXT extends Strategy {
     }
 
     sellCond(row: ICandle): boolean {
-        return row.hist < 0 && row.c < row.o
+        return row.hist < 0 && row.c < row.o;
     }
 }
-
 
 export class MA_ONLY extends Strategy {
     desc: string = `Enter: sma20 >  sma50, Exit: oposite `;
@@ -35,7 +34,6 @@ export class MA_ONLY extends Strategy {
 
     sellCond(row: ICandle): boolean {
         return row.sma_20 < row.sma_50;
- 
     }
 }
 
@@ -43,11 +41,15 @@ export class MACD_MA extends Strategy {
     desc: string = `Enter: macd > 0 && sma20 >  sma50, Exit: oposite`;
 
     buyCond(row: ICandle): boolean {
-        return MACD_ONLY.prototype.buyCond(row) && MA_ONLY.prototype.buyCond(row)
+        return (
+            MACD_ONLY.prototype.buyCond(row) && MA_ONLY.prototype.buyCond(row)
+        );
     }
 
     sellCond(row: ICandle): boolean {
-        return MACD_ONLY.prototype.sellCond(row) && MA_ONLY.prototype.sellCond(row)
+        return (
+            MACD_ONLY.prototype.sellCond(row) && MA_ONLY.prototype.sellCond(row)
+        );
     }
 }
 
@@ -55,33 +57,43 @@ export class MACD_OR_MA extends Strategy {
     desc: string = `Enter: macd > 0 && sma20 >  sma50, Exit: oposite`;
 
     buyCond(row: ICandle): boolean {
-        return MACD_ONLY.prototype.buyCond(row) || MA_ONLY.prototype.buyCond(row)
+        return (
+            MACD_ONLY.prototype.buyCond(row) || MA_ONLY.prototype.buyCond(row)
+        );
     }
 
     sellCond(row: ICandle): boolean {
-        return MACD_ONLY.prototype.sellCond(row) || MA_ONLY.prototype.sellCond(row)
+        return (
+            MACD_ONLY.prototype.sellCond(row) || MA_ONLY.prototype.sellCond(row)
+        );
     }
 }
 export class MACD_MA_RSI extends Strategy {
     desc: string = `Enter: macd > 0 && sma20 >  sma50, Exit: oposite`;
 
     buyCond(row: ICandle): boolean {
-        return true//MACD_ONLY.prototype.buyCond(row) || MA_ONLY.prototype.buyCond(row)
+        return true; //MACD_ONLY.prototype.buyCond(row) || MA_ONLY.prototype.buyCond(row)
     }
 
     sellCond(row: ICandle): boolean {
-        return MACD_ONLY.prototype.sellCond(row) && MA_ONLY.prototype.sellCond(row) && RSI_ONLY.prototype.sellCond(row)
+        return (
+            MACD_ONLY.prototype.sellCond(row) &&
+            MA_ONLY.prototype.sellCond(row) &&
+            RSI_ONLY.prototype.sellCond(row)
+        );
     }
 }
 export class MACD_HL_HA extends Strategy {
     desc: string = `Enter: macd > 0 && sma20 >  sma50, Exit: oposite`;
 
     buyCond(row: ICandle): boolean {
-        return MACD_EXT.prototype.buyCond(row) && HL_HA.prototype.buyCond(row)
+        return MACD_EXT.prototype.buyCond(row) && HL_HA.prototype.buyCond(row);
     }
 
     sellCond(row: ICandle): boolean {
-        return MACD_EXT.prototype.sellCond(row) && HL_HA.prototype.sellCond(row)
+        return (
+            MACD_EXT.prototype.sellCond(row) && HL_HA.prototype.sellCond(row)
+        );
     }
 }
 export class MA_EXT extends Strategy {
@@ -130,7 +142,9 @@ export class CE_MACD extends Strategy {
     name: string = "CE_MACD";
     desc: string = "JUST A CE";
     buyCond(row: ICandle): boolean {
-        return CE_ONLY.prototype.buyCond(row) || MACD_EXT.prototype.buyCond(row);
+        return (
+            CE_ONLY.prototype.buyCond(row) || MACD_EXT.prototype.buyCond(row)
+        );
     }
 
     sellCond(row: ICandle): boolean {
@@ -143,7 +157,9 @@ export class MA_RSI extends Strategy {
     name: string = "MA_RSI";
     desc: string = "JUST A CE";
     buyCond(row: ICandle): boolean {
-        return MA_ONLY.prototype.buyCond(row) && RSI_ONLY.prototype.buyCond(row);
+        return (
+            MA_ONLY.prototype.buyCond(row) && RSI_ONLY.prototype.buyCond(row)
+        );
     }
 
     sellCond(row: ICandle): boolean {
@@ -156,12 +172,18 @@ export class RITA extends Strategy {
     name: string = "RITA";
     desc: string = "JUST A CE";
     buyCond(row: ICandle): boolean {
-        return  (CE_ONLY.prototype.buyCond(row) || RSI_ONLY.prototype.buyCond(row) || MA_ONLY.prototype.buyCond(row))// || RSI_ONLY.prototype.buyCond(row))
+        return (
+            CE_ONLY.prototype.buyCond(row) ||
+            RSI_ONLY.prototype.buyCond(row) ||
+            MA_ONLY.prototype.buyCond(row)
+        ); // || RSI_ONLY.prototype.buyCond(row))
     }
 
     sellCond(row: ICandle): boolean {
-        return(
-            (CE_ONLY.prototype.sellCond(row) || RSI_ONLY.prototype.sellCond(row) || MA_ONLY.prototype.sellCond(row))// || RSI_ONLY.prototype.sellCond(row)
+        return (
+            CE_ONLY.prototype.sellCond(row) ||
+            RSI_ONLY.prototype.sellCond(row) ||
+            MA_ONLY.prototype.sellCond(row) // || RSI_ONLY.prototype.sellCond(row)
         );
     }
 }
@@ -181,31 +203,46 @@ export class HL_HA extends Strategy {
     name: string = "HL_HA";
     desc: string = "JUST A CE";
     buyCond(row: ICandle): boolean {
-        return row.ha_c > row.ha_o// || RSI_ONLY.prototype.buyCond(row)
+        return row.ha_c > row.ha_o; // || RSI_ONLY.prototype.buyCond(row)
     }
 
     sellCond(row: ICandle): boolean {
-        return row.ha_c < row.ha_o// || RSI_ONLY.prototype.sellCond(row)
+        return row.ha_c < row.ha_o; // || RSI_ONLY.prototype.sellCond(row)
     }
 }
 export class STOCHIE extends Strategy {
     name: string = "STOCHIE";
     desc: string = "JUST A CE";
     buyCond(row: ICandle): boolean {
-        return row.stoch_k > row.stoch_d// || RSI_ONLY.prototype.buyCond(row)
+        console.log('\n',{k: row.stoch_k, d: row.stoch_d} , '\n')
+        return row.stoch_k > row.stoch_d; // || RSI_ONLY.prototype.buyCond(row)
     }
 
     sellCond(row: ICandle): boolean {
-        return row.stoch_k < row.stoch_d// || RSI_ONLY.prototype.sellCond(row)
+        console.log('\n',{k: row.stoch_k, d: row.stoch_d} , '\n')
+        return row.stoch_k < row.stoch_d; // || RSI_ONLY.prototype.sellCond(row)
     }
 }
 
-class HL_HA_RSI extends Strategy{
-    buyCond(row:ICandle): boolean {
-        return HL_HA.prototype.buyCond(row) && RSI_ONLY.prototype.buyCond(row)
+class HL_HA_RSI extends Strategy {
+    buyCond(row: ICandle): boolean {
+        return HL_HA.prototype.buyCond(row) && RSI_ONLY.prototype.buyCond(row);
     }
-    sellCond(row:ICandle): boolean {
-        return HL_HA.prototype.sellCond(row) && RSI_ONLY.prototype.sellCond(row)
+    sellCond(row: ICandle): boolean {
+        return (
+            HL_HA.prototype.sellCond(row) && RSI_ONLY.prototype.sellCond(row)
+        );
+    }
+}
+
+class ACCS_BANDS extends Strategy {
+    buyCond(row: ICandle): boolean {
+        console.log('\n',{accs_l: row.accs_lower, accs_m: row.accs_middle, accs_u: row.accs_upper},'\n')
+        return row.accs_lower > row.accs_middle
+    }
+    sellCond(row: ICandle): boolean {
+        console.log('\n',{accs_l: row.accs_lower, accs_m: row.accs_middle, accs_u: row.accs_upper},'\n')
+        return row.accs_upper < row.accs_middle
     }
 }
 export const strategies = [
@@ -216,5 +253,12 @@ export const strategies = [
     new MACD_MA(),
     new MACD_OR_MA(),
     new MA_RSI(),
-    new HL(), new HL_HA(), new HL_HA_RSI(), new RITA(), new CE_ONLY(), new CE_MACD()
+    new HL(),
+    new HL_HA(),
+    new HL_HA_RSI(),
+    new RITA(),
+    new CE_ONLY(),
+    new CE_MA(),
+    new CE_MACD(),
+    new ACCS_BANDS()
 ];

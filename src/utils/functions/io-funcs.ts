@@ -273,11 +273,11 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
         } = data;
         const startPair = data.from;
         let _data: {
-            pair: string[];
+            pair: string;
             profit: number;
             trades: number;
-            aside: 0 | number;
-            total: number;
+            aside?: number;
+            total?: number;
         }[] = [];
 
         const _parseData = () => {
@@ -307,7 +307,7 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
         const year = start.split("-")[0];
 
         const strNum = Number(data.strategy);
-        const str = objStrategies[strNum - 1]
+        const str = objStrategies[strNum - 1];
 
         prefix = prefix ? `${prefix}_` : "";
         const sub = demo ? "demo" : "live";
@@ -319,7 +319,11 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
         if (only) {
         } else if (show) {
             if (existsSync(savePath)) {
-                prevData = { ...prevData, platform, data: await readJson(savePath) };
+                prevData = {
+                    ...prevData,
+                    platform,
+                    data: await readJson(savePath),
+                };
                 client?.emit(ep, prevData);
             } else {
                 client?.emit(ep, { err: "NOTHING TO SHOW" });
@@ -328,30 +332,7 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
             return prevData;
         }
 
-        if (_platName == "okx") {
-            _instruments = okxInstrus
-                .filter((el) => el.state == "live")
-                .map((el) => [el.baseCcy, el.quoteCcy]);
-        } else {
-            const okxCoinsPath = savePath.replace(_platName, "okx");
-            let okxCoins: IObj[] | null = null;
-
-            if (existsSync(okxCoinsPath)) {
-                okxCoins = await readJson(okxCoinsPath);
-            }
-
-            _instruments = getInstrus(_platName);
-
-            // if (okxCoins != null) {
-            //     _instruments = _instruments.filter(
-            //         (el) =>
-            //             okxCoins!.findIndex(
-            //                 (el2) => el2.pair.toString() == el.toString()
-            //             ) == -1
-            //     );
-            // }
-        }
-
+        _instruments = getInstrus(_platName);
         _instruments = _instruments.sort(); //.sort((a, b)=> a.toString() > b.toString() ? 1 : -1)
         let coins = _instruments;
 
@@ -359,7 +340,7 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
             coins = coins.filter((el) => el[0] == only[0] && el[1] == only[1]);
         } else if (quote) coins = coins.filter((el) => el[1] == `${quote}`);
 
-        if ((from_last) && existsSync(savePath)) {
+        if (from_last && existsSync(savePath)) {
             console.log("HERE", only);
             _data = (await readJson(savePath)).sort((a, b) =>
                 a.pair > b.pair ? 1 : -1
@@ -368,7 +349,7 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
             if (from_last) {
                 console.log("\nCONTINUING WHERE WE LEFT OF...\n");
 
-                last = _data[_data.length - 1]?.pair;
+                last = _data[_data.length - 1]?.pair.split('/');
             }
         }
 
@@ -396,7 +377,7 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
 
         for (let pair of coins) {
             try {
-                await sleep(0.0000001)
+                //await sleep(0.0000001);
                 msg = `BEGIN PAIR ${pair}`;
                 console.log(`${msg}`);
                 //client?.emit(ep, msg)
@@ -527,10 +508,10 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
                 console.log(pair, `TRADES: ${retData.trades}`);
                 console.log(pair, `PROFIT: ${retData.profit}\n`);
                 _data.push({
-                    pair,
+                    pair: pair.join('/'),
                     profit: retData.profit,
-                    aside: retData.aside,
-                    total: retData.profit + retData.aside,
+                    // aside: retData.aside,
+                    // total: retData.profit + retData.aside,
                     trades: retData.trades,
                 });
                 _data = [..._data].sort((a, b) =>
@@ -538,8 +519,7 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
                 );
 
                 _parseData();
-                if (!only)
-                writeFileSync(savePath, JSON.stringify(_data), {});
+                if (!only) writeFileSync(savePath, JSON.stringify(_data), {});
 
                 msg = `${pair} DONE`;
                 console.log(msg, "\n");

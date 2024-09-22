@@ -181,6 +181,7 @@ export class TestBitget extends TestPlatform {
     }
 
     async getNets(ccy?: string, offline?: boolean) {
+        super.getNets(ccy, offline)
         try {
             console.log({ offline });
             let res = safeJsonParse(

@@ -6,6 +6,7 @@ import { bybitInstrus } from "@/utils/data/instrus/bybit-instrus";
 import { existsSync } from "fs";
 import { parseDate, parseKlines } from "@/utils/funcs2";
 import {
+    calcPerc,
     ceil,
     getCoinPrecision,
     getPricePrecision,
@@ -19,7 +20,7 @@ import { scheduleJob } from "node-schedule";
 import { mexcInstrus } from "@/utils/data/instrus/mexc-instrus";
 import { objPlats } from "@/utils/consts2";
 import { ARBIT_ZERO_FEES, klinesRootDir, noFees } from "@/utils/constants";
-import { ICandle, TPlatName } from "@/utils/interfaces";
+import { ICandle, IObj, TPlatName } from "@/utils/interfaces";
 import { kucoinBTC } from "./data/kucoin-btc";
 
 import { Bot, Order, TriArbitOrder } from "@/models";
@@ -35,7 +36,6 @@ import { connectMongo, fetchAndStoreBooks } from "@/utils/funcs4";
 //clearTerminal();
 configDotenv();
 clearTerminal();
-
 
 const _gateioInstrus = gateioInstrus.filter(
     (el) => el.trade_status == "tradable"
@@ -417,29 +417,29 @@ const fPxs = { pxA: 57967.4, pxB: 3.063e-7, pxC: 0.01793 };
 const run = async () => {
     const plat = new TestKucoin({});
     const coins = ["SOL", "DOGE", "ETH", "BTC"];
-   
-    const tickers : number[]= []
-    for (let coin of coins){
-        const r = await plat.getTicker([coin, 'USDT'])
-        await sleep(2000)
-        tickers.push(r)
+
+    const tickers: number[] = [];
+    for (let coin of coins) {
+        const r = await plat.getTicker([coin, "USDT"]);
+        await sleep(2000);
+        tickers.push(r);
     }
-    console.log({tickers})
+    console.log({ tickers });
 };
 
-
-const getOBook = async (pair: string[], plat: TPlatName)=>{
-    const Plat = new test_platforms[plat]({demo: false})
-    const r = await Plat.getBook(pair)
-    console.log(r)
-}
+const getOBook = async (pair: string[], plat: TPlatName) => {
+    const Plat = new test_platforms[plat]({ demo: false });
+    const r = await Plat.getBook(pair);
+    console.log(r);
+};
 
 //getOBook(['SOL', 'USDT'], 'kucoin')
-const fn = async ()=>{
-    await connectMongo(true)
-    fetchAndStoreBooks()
-}
+const fn = async () => {
+    await connectMongo(true);
+    fetchAndStoreBooks();
+};
 // fn()
-const pth = "_data/rf/ma-params/2024/okx/MACD/SOL-USDT_60.json"
-const dt = readJson(pth)
-console.log(dt.find(el=> el.profit > 3 && el.trades >= 90))
+// const pth = "_data/rf/ma-params/2024/okx/MACD/SOL-USDT_60.json"
+// const dt = readJson(pth)
+// console.log(dt.find(el=> el.profit > 3 && el.trades >= 90))
+

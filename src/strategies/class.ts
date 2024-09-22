@@ -332,7 +332,10 @@ export class Backtest {
             }
             if (this.prevrow.v == 0 
                 // && this.row.v == 0
-                ) continue
+                ) {
+                    // continue
+
+                }
             this.inloop({ i });
         }
         const oKeys = Object.keys(this.mData.data);

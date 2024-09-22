@@ -23,7 +23,6 @@ export const TAKER_FEE_RATE = 0.1 / 100,
     P_DIFF = 0.0 / 100;
 export const slPercent = 0.5 / 100,
     minDiff = 0;
-export const platforms = ["bybit", "okx"];
 export const dfsRootDir = "src/data/dfs",
     klinesRootDir = "src/data/klines",
     tradesRootDir = "src/data/trades";
@@ -76,7 +75,7 @@ export const getTrailingStop = (interval: number) => {
 export const TRAILING_STOP_PERC = .1//getTrailingStop(interval);
 export const MAX_PROFIT_PERC = (5000000 * 100) / 1000
 
-export const SELL_AT_LAST_BUY = true , PUT_ASIDE = false
+export const SELL_AT_LAST_BUY = false , PUT_ASIDE = false
 
 export const ETH_RATE = 2000, XRP_WITHDRAW_FEE = .25
 

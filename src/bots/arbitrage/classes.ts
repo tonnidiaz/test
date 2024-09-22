@@ -364,8 +364,9 @@ export class Arbit {
                     this.entry = buyPx;
                     this.exit = sellPx;
 
-                    console.log("\nFILL MARKET BUY\n");
+                    
                     if (this.entryLimit) {
+                        console.log("\nFILL MARKET BUY\n");
                         this.buy({
                             amt: this.platA.quote,
                             px: this.entry,

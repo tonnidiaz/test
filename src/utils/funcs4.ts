@@ -42,9 +42,10 @@ async function platBookFetcher(platName: string, pairs: string[][], job: Job) {
                 await bookDoc.save();
             }
             timedLog(`[${platName}] Book for ${pair} done!!`);
-            if (i == pairs.length -1){timedLog(`[${platName}] BOOKS GOT!!\n`);}
+            if (i == pairs.length - 1) {
+                timedLog(`[${platName}] BOOKS GOT!!\n`);
+            }
         });
-        
     } else {
         timedLog("KILLING JOB");
         job.cancel(false);
@@ -57,21 +58,34 @@ export async function fetchAndStoreBooks() {
     for (let platName of Object.keys(pairsOfInterest)) {
         let platPairs: string[][] = [];
         for (let pairs of pairsOfInterest[platName]) {
-            const pairA = [pairs.B, pairs.A];
-            for (let coinC of pairs.C) {
-                const pairB = [coinC, pairs.B];
-                const pairC = [coinC, pairs.A];
-                platPairs.push(pairA, pairB, pairC);
+            if (pairs.B) {
+                /* TRI COINS */
+                const pairA = [pairs.B, pairs.A];
+                for (let coinC of pairs.C) {
+                    const pairB = [coinC, pairs.B];
+                    const pairC = [coinC, pairs.A];
+                    platPairs.push(pairA, pairB, pairC);
+                }
+            } else {
+                /* CROSS-COINS */
+                for (let coinC of pairs.C) {
+                    const pairC = [coinC, pairs.A];
+                    platPairs.push(pairC);
+                }
             }
         }
 
         platPairs = Array.from(new Set(platPairs.sort()));
-        const jobId = `${platName}__job`
-        const jb = scheduleJob(jobId, botJobSpecs(config.book_fetch_interval), () => {
-            platBookFetcher(platName, platPairs, jb);
-        });
+        const jobId = `${platName}__job`;
+        const jb = scheduleJob(
+            jobId,
+            botJobSpecs(config.book_fetch_interval),
+            () => {
+                platBookFetcher(platName, platPairs, jb);
+            }
+        );
 
-        bookJobs.push({job: jb, id: jobId, active: true})
+        bookJobs.push({ job: jb, id: jobId, active: true });
 
         timedLog("BOOK FETCHER JOBS SCHEDULED!!");
     }

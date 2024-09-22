@@ -1,5 +1,5 @@
 import { IObj, IOrderDetails, ICandle } from "./interfaces";
-import { atr, ema, rsi, macd } from "indicatorts";
+import { atr, ema, rsi, macd, stoch, stochasticOscillator, accelerationBands, sma } from "indicatorts";
 import path from "path";
 import { SL, TP, useHaClose } from "./constants";
 import { OrderDetails } from "okx-api";
@@ -173,10 +173,11 @@ export const heikinAshi = (df: ICandle[]) => {
 };
 
 export const tuCE = (df: ICandle[], _fast?: number, _slow?: number) => {
-    const mult = 1.8,
+    const mult = 2,
         atrLen = 1;
-    const highs = df.map((e) => e[useHaClose ? "ha_h" : "c"]);
-    const lows = df.map((e) => e[useHaClose ? "ha_l" : "c"]);
+    const highs = df.map((e) => e[useHaClose ? "ha_h" : "h"]);
+    const lows = df.map((e) => e[useHaClose ? "ha_l" : "l"]);
+    const opens = df.map((e) => e[useHaClose ? "ha_o" : "o"]);
     const closings = df.map((e) => e[useHaClose ? "ha_c" : "c"]);
 
     console.log("BEGIN CE...");
@@ -184,13 +185,16 @@ export const tuCE = (df: ICandle[], _fast?: number, _slow?: number) => {
     const ATR = atr(highs, lows, closings, { period: atrLen });
     const _atr = ATR.atrLine;
     const rsiLen = 2,
-        fastLen = _fast ?? 15, //89 /* 15 */,
-        slowLen =_slow ?? 33; //90; /* 50 */
-
-    const sma20 = ema(closings, { period: fastLen });
-    const sma50 = ema(closings, { period: slowLen });
+        fastLen =  1,// 10,//_fast ?? 15, //89 /* 15 */,
+        slowLen = 2 // 25//_slow ?? 33; //90; /* 50 */
+const useOpen = Math.max(...opens) < Math.max(...closings)
+    const sma20 = sma(closings, { period: fastLen });
+    const sma50 = sma(closings, { period: slowLen });
 
     const _rsi = rsi(closings, { period: rsiLen });
+const _stoch = stoch(highs, lows, closings, {dPeriod: 1, kPeriod: 2})
+const _accelerationBands = accelerationBands(highs, lows, closings, { })
+
     let sir = 1;
 
     const { histogram, macdLine, signalLine } = tuMacd(df);
@@ -204,6 +208,13 @@ export const tuCE = (df: ICandle[], _fast?: number, _slow?: number) => {
         df[i].signal = signalLine[i];
         /* END MACD */
         df[i]["rsi"] = _rsi[i];
+
+        df[i].stoch_k = _stoch.k[i]
+        df[i].stoch_d = _stoch.d[i]
+
+        df[i].accs_lower = _accelerationBands.lower[i]
+        df[i].accs_middle = _accelerationBands.middle[i]
+        df[i].accs_upper = _accelerationBands.upper[i]
         //continue
         const ceClosings = closings.slice(i - atrLen, i);
         const long_stop = Math.max(...ceClosings) - _atr[i] * mult;
