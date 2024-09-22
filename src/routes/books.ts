@@ -44,4 +44,12 @@ router.get("/:platform", async function (req, res, next) {
     }
 });
 
+router.post('/del', async(req,res)=>{
+    try {
+        await TuBook.deleteMany({}).exec()
+    } catch (e) {
+        console.log(e);
+        res.status(500).json({ msg: "Something went wrong!" });
+    }
+})
 export default router;
