@@ -1,4 +1,3 @@
-import { platforms } from "@/utils/constants";
 import { platList } from "@/utils/consts3";
 import mn, {
     HydratedDocument,

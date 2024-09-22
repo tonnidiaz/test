@@ -2,34 +2,14 @@ import { IBot } from "@/models/bot";
 import { TuWs } from "./tu";
 
 import { configDotenv } from "dotenv";
-import { Bot, Order } from "@/models";
+import { Bot } from "@/models";
 import {
-    calcSL,
-    calcTP,
-    findBotOrders,
     getInterval,
-    heikinAshi,
-    parseDate,
-    parseFilledOrder,
-    parseKlines,
-    tuCE,
 } from "@/utils/funcs2";
 import { ObjectId } from "mongoose";
-import { botLog, getPricePrecision, timedLog } from "@/utils/functions";
+import { timedLog } from "@/utils/functions";
 import { Bybit } from "./bybit";
-import { placeTrade } from "@/utils/orders/funcs";
-import {
-    DEV,
-    getTrailingStop,
-    stops,
-    platforms,
-    TP,
-    TRAILING_STOP_PERC,
-    SL,
-} from "@/utils/constants";
-import { IObj, IOpenBot } from "@/utils/interfaces";
-import { IOrder } from "@/models/order";
-import { scheduleJob } from "node-schedule";
+import { IOpenBot } from "@/utils/interfaces";
 
 const WS_URL_SPOT_PUBLIC = "wss://stream.bybit.com/v5/public/spot";
 

@@ -1,11 +1,8 @@
 import { IBot } from "@/models/bot";
-import { AlgoOrderDetailsResult, OrderDetails, WebsocketClient } from "okx-api";
+import { WebsocketClient } from "okx-api";
 import { configDotenv } from "dotenv";
-import { Bot, Order } from "@/models";
+import { Bot } from "@/models";
 import {
-    calcSL,
-    calcTP,
-    findBotOrders,
     getInterval,
     heikinAshi,
     parseDate,
@@ -14,13 +11,10 @@ import {
     tuCE,
 } from "@/utils/funcs2";
 import { ObjectId } from "mongoose";
-import { botLog, getPricePrecision, timedLog } from "@/utils/functions";
-import { OKX } from "./okx";
-import { placeTrade } from "@/utils/orders/funcs";
-import { DEV, getTrailingStop, stops, platforms, TP, TRAILING_STOP_PERC } from "@/utils/constants";
+import { botLog, timedLog } from "@/utils/functions";
+import { DEV } from "@/utils/constants";
 import { IObj } from "@/utils/interfaces";
 import { IOrder } from "@/models/order";
-import { scheduleJob } from "node-schedule";
 configDotenv();
 
 interface IOpenBot {
