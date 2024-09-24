@@ -117,18 +117,7 @@ export const parseKlines = (
             const k = klines[i];
 
             const [ts, o, h, l, c, v] = k.map((e) => Number(e));
-            df.push({
-                ts: parseDate(new Date(ts)),
-                o,
-                h,
-                l,
-                c,
-                v,
-                ha_o,
-                ha_h,
-                ha_l,
-                ha_c,
-            });
+            
             if (i > 0) {
                 const prev = Number(klines[i - 1][0]),
                     curr = Number(klines[i][0]);
@@ -144,9 +133,21 @@ export const parseKlines = (
                         curr: parseDate(new Date(curr)),
                     });
                     console.log("KLINE DATA INVALID");
-                    if (!useInvalid) return df;
+                    if (!useInvalid) break;
                 }
             }
+            df.push({
+                ts: parseDate(new Date(ts)),
+                o,
+                h,
+                l,
+                c,
+                v,
+                ha_o,
+                ha_h,
+                ha_l,
+                ha_c,
+            });
         }
         if (!invalid) console.log("\nKLINES OK\n");
 

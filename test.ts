@@ -33,6 +33,7 @@ import { TestMexc } from "@/classes/test-mexc";
 import { TestKucoin } from "@/classes/test-kucoin";
 import { test_platforms } from "@/utils/consts";
 import { connectMongo, fetchAndStoreBooks } from "@/utils/funcs4";
+import { TestBinance } from "@/classes/test-binance";
 
 //clearTerminal();
 configDotenv();
@@ -419,15 +420,9 @@ const run = async () => {
     await connectMongo(true);
 
     console.log("BEGIN");
-    const instrus = getInstrus("bitget")
-        .filter((el) => el[1] == "USDT")
-        .sort();
-    instrus.slice(0, 20).forEach((pair) => { 
-        setImmediate(async () => { 
-            await sleep(2000);
-            timedLog(`HEY FROM ${pair}`);
-        });
-    });
+   const plat = new TestBinance({})
+   const r = await plat.client2.capitalConfigs()
+   console.log(r[0].name)
 };
 
 const getOBook = async (pair: string[], plat: TPlatName) => {

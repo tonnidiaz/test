@@ -60,6 +60,7 @@ export class TestKucoin extends TestPlatform {
                 let after = firstTs + limit * interval * 60000;
                 const res = await this.client.getKlines({
                     symbol,
+                    
                     type: getInterval(interval, "kucoin"),
                     endAt: Math.round(after / 1000),
                     startAt: Math.round(firstTs / 1000),
@@ -197,7 +198,7 @@ export class TestKucoin extends TestPlatform {
                         name: el.chainName,
                         coin: net!.currency,
                         chain: el.chainName,
-                        contactAddr: el.contractAddress,
+                        contractAddr: el.contractAddress,
                         minComfirm: Number(el.confirms),
                         minWd: Number(el.withdrawalMinSize),
                         maxWd: Infinity,

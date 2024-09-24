@@ -263,7 +263,7 @@ export class Arbit {
                 this.lastRow = rowB;
 
                 let diff = ceil(((sellPx - buyPx) / buyPx) * 100, 2); //(sellPx - buyPx) / buyPx * 100
-                console.log({ diff });
+                console.log({ diff, buyPx, sellPx });
 
                 if (this.pos && this.otype == "limit") {
                     console.log("\nHas pos", {
@@ -361,11 +361,11 @@ export class Arbit {
                      * SELL [B] - WITHDRAW [B]
                      */
 
-                    this.entry = buyPx;
+                   
                     this.exit = sellPx;
-
                     
                     if (this.entryLimit) {
+                        this.entry = buyPx;
                         console.log("\nFILL MARKET BUY\n");
                         this.buy({
                             amt: this.platA.quote,
@@ -390,7 +390,7 @@ export class Arbit {
                         continue;
                     }
 
-                    if (this.exitLimit) {
+                    if (this.exitLimit /* && this.exit >= this.entry */) {
                         console.log("\nFILL MARKET SELL\n");
                         this.closePos({
                             amt: this.platB.base,

@@ -268,7 +268,7 @@ export class TestBitget extends TestPlatform {
                         name: el.chain,
                         coin: net!.coin,
                         chain: el.chain,
-                        contactAddr: el.contractAddress,
+                        contractAddr: el.contractAddress,
                         minComfirm: Number(el.withdrawConfirm),
                         minWd: Number(el.minWithdrawAmount),
                         maxWd: Infinity,
@@ -284,7 +284,8 @@ export class TestBitget extends TestPlatform {
 
             return nets.filter((el) => !ccy || el.coin == ccy);
         } catch (e) {
-            this._log("FAILED TO GET NETS", e);
+            this._log("FAILED TO GET NETS");
+            this._err(e)
         }
     }
     async getBook(

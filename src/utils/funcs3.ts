@@ -184,7 +184,7 @@ export const genSignature = (
         .join("&");
 console.log(paramString)
     const timestamp = Date.now().toString();
-    const prehashString =plat == 'mexc' ? `${paramString}`: `${timestamp}${apiKey}${paramString}`;
+    const prehashString =plat == 'mexc' || plat == "binance" ? `${paramString}`: `${timestamp}${apiKey}${paramString}`;
     console.log({prehashString})
     const signature = crypto
         .createHmac("sha256", apiSecret)

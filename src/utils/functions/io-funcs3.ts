@@ -221,6 +221,7 @@ export const onCrossArbitCointest = async (
                 const pxPrB = getPricePrecision(pair, platB);
                 const basePrA = getCoinPrecision(pair, "limit", platA);
                 const basePrB = getCoinPrecision(pair, "limit", platB);
+                console.log({pxPrA, basePrA, pxPrB, basePrB})
     
                 if (pxPrA == null || basePrA == null || pxPrB == null || basePrB == null) {
                     console.log("Precision error:", { pxPrA, basePrA, pxPrB, basePrB });

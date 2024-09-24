@@ -393,7 +393,7 @@ const getInstru = (pair: string[], plat: string) => {
 
 export function getPricePrecision(pair: string[], plat: string) {
     let instru = getInstru(pair, plat);
-
+    console.log({pair, plat})
     if (!instru) {
         console.log(`\ngetPricePrecision: ${pair} not on ${plat}\n`);
         return null;

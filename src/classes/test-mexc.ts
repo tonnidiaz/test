@@ -22,7 +22,7 @@ export class TestMexc extends TestPlatform {
     taker: number = 0.1 / 100;
     client: Mexc.Spot;
     apiKey: string;
-    apiSecret: string;
+    apiSecret: string; 
     passphrase: string;
     axiosClient: () => Axios;
 
@@ -200,7 +200,7 @@ export class TestMexc extends TestPlatform {
 
     async getNets(ccy?: string, offline?: boolean) {
         try {
-            console.log({ offline });
+            super.getNets(ccy, offline)
             const res = safeJsonParse(
                 offline && existsSync(this.netsPath)
                     ? await readJson(this.netsPath)
@@ -275,15 +275,12 @@ export class TestMexc extends TestPlatform {
                     coin: net!.coin,
                     name: net!.name,
                     ticker,
-                    nets: res
-                        .find((el2) => {
-                            return el2.coin == el;
-                        })!
+                    nets: net!
                         .networkList.map((el) => ({
                             name: el.name,
                             coin: el.coin,
                             chain: el.network,
-                            contactAddr: el.contract,
+                            contractAddr: el.contract,
                             minComfirm: Number(el.minConfirm),
                             minWd: Number(el.withdrawMin),
                             maxWd: Number(el.withdrawMax),
@@ -301,7 +298,8 @@ export class TestMexc extends TestPlatform {
 
             return nets.filter((el) => !ccy || el.coin == ccy);
         } catch (e) {
-            this._log("FAILED TO GET NETS", e);
+            this._log("FAILED TO GET NETS");
+            this._err(e)
         }
     }
     async testAxios() {

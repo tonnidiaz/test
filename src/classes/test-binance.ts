@@ -1,19 +1,61 @@
 import { data } from "@/data/data";
 import { ensureDirExists } from "@/utils/orders/funcs";
 import { parseDate } from "@/utils/funcs2";
-import axios from "axios";
+import axios, { Axios } from "axios";
 import { unlinkSync, writeFileSync } from "fs";
 import { TestPlatform } from "./test-platforms";
-import { IOrderbook, ITrade } from "@/utils/interfaces";
-import { MainClient, WebsocketClient } from "binance";
-import { getSymbol } from "@/utils/functions";
-import type { SymbolPrice } from "binance";
+import { ICoinNets, IOrderbook, ITrade } from "@/utils/interfaces";
+import { MainClient } from "binance";
+
+import {
+    existsSync,
+    getSymbol,
+    readJson,
+    sleep,
+    writeJson,
+} from "@/utils/functions";
+import type { AssetDetail, SymbolPrice } from "binance";
+import { genSignature, safeJsonParse } from "@/utils/funcs3";
+import { configDotenv } from "dotenv";
+import Binance from 'binance-api-node'
+import type {CoinInformation} from 'binance-api-node'
+
+configDotenv()
 export class TestBinance extends TestPlatform {
     client: MainClient;
-
+    client2:  ReturnType<typeof Binance>
+    axiosClient: () => Axios;
     constructor({ demo = false }: { demo?: boolean }) {
         super({ demo, name: "binance" });
-        this.client = new MainClient({});
+        const apiKey = process.env.BINANCE_API_KEY!;
+        const apiSecret = process.env.BINANCE_API_SECRET!;
+        console.log(apiKey, apiSecret)
+        this.client = new MainClient({
+           
+        });
+
+        this.client2 =  Binance({apiKey, apiSecret})
+
+        this.axiosClient = () => {
+            const ts = Date.now().toString();
+            return new Axios({
+                baseURL: "https://api.binance.com",
+                headers: {
+                    "X-MBX-APIKEY": apiKey,
+                    "Content-Type": "application/json",
+                },
+                params: {
+                    signature: genSignature(
+                        apiKey,
+                        apiSecret,
+                        { timestamp: ts, key: apiKey },
+                        this.name!
+                    ),
+                    key: apiKey,
+                    timestamp: ts,
+                },
+            });
+        };
     }
     async getKlines({
         symbol,
@@ -189,9 +231,133 @@ export class TestBinance extends TestPlatform {
                 })) as any,
             };
 
-            return ob
+            return ob;
         } catch (e) {
             this._log("FAILED TO GET ORDERBOOK FOR", pair, "\n", e);
+        }
+    }
+
+    async getNets(
+        ccy?: string,
+        offline?: boolean
+    ): Promise<ICoinNets[] | void | null | undefined> {
+        try {
+            super.getNets(ccy, offline);
+            const res = safeJsonParse(
+                offline && existsSync(this.netsPath)
+                    ? await readJson(this.netsPath)
+                    : await this.client2.capitalConfigs()
+            );
+
+            writeJson(
+                this.netsPath,
+                res.sort((a, b) => a.coin.localeCompare(b.coin))
+            );
+
+            const dummyData = [
+                {
+                    coin: "BTC",
+                    depositAllEnable: true,
+                    free: "0.08074558",
+                    freeze: "0.00000000",
+                    ipoable: "0.00000000",
+                    ipoing: "0.00000000",
+                    isLegalMoney: false,
+                    locked: "0.00000000",
+                    name: "Bitcoin",
+                    networkList: [
+                        {
+                            addressRegex: "^(bnb1)[0-9a-z]{38}$",
+                            coin: "BTC",
+                            depositDesc:
+                                "Wallet Maintenance, Deposit Suspended", // shown only when "depositEnable" is false.
+                            depositEnable: false,
+                            isDefault: false,
+                            memoRegex: "^[0-9A-Za-z\\-_]{1,120}$",
+                            minConfirm: 1, // min number for balance confirmation
+                            name: "BEP2",
+                            network: "BNB",
+                            specialTips:
+                                "Both a MEMO and an Address are required to successfully deposit your BEP2-BTCB tokens to Binance.",
+                            unLockConfirm: 0, // confirmation number for balance unlock
+                            withdrawDesc:
+                                "Wallet Maintenance, Withdrawal Suspended", // shown only when "withdrawEnable" is false.
+                            withdrawEnable: false,
+                            withdrawFee: "0.00000220",
+                            withdrawIntegerMultiple: "0.00000001",
+                            withdrawMax: "9999999999.99999999",
+                            withdrawMin: "0.00000440",
+                            sameAddress: true, // If the coin needs to provide memo to withdraw
+                            estimatedArrivalTime: 25,
+                            busy: false,
+                            contractAddressUrl: "https://bscscan.com/token/",
+                            contractAddress:
+                                "0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c",
+                        },
+                    ],
+                },
+            ];
+            const data: CoinInformation[] = res;
+            let coins: string[] = Array.from(
+                new Set(data.map((el) => el.coin))
+            );
+
+            coins = coins.sort((a, b) => a.localeCompare(b));
+
+            const tickers =
+                offline && existsSync(this.tickersPath)
+                    ? await readJson(this.tickersPath)
+                    : await Promise.all(
+                          coins.map(async (el) => {
+                              let ticker = 0;
+                              if (el == "USDT" || el == "USDC" || true) {
+                                  ticker = 1;
+                              } else {
+                                  try {
+                                      ticker = await this.getTicker([
+                                          el,
+                                          "USDT",
+                                      ]);
+                                      await sleep(100);
+                                  } catch (e) {
+                                      console.log(e);
+                                  }
+                              }
+                              return { coin: el, ticker };
+                          })
+                      );
+            writeJson(this.tickersPath, tickers);
+            const nets: ICoinNets[] = coins.map((el) => {
+                const net = data.find((el2) => el2.coin == el);
+                const ticker = tickers.find((el2) => el2.coin == el)!.ticker;
+                return {
+                    coin: net!.coin,
+                    name: net!.name,
+                    ticker,
+                    nets: net!.networkList.map((el) => ({
+                        name: el.name,
+                        coin: el.coin,
+                        chain: el.network,
+                        contractAddr: (el as any).contractAddress,
+                        minComfirm: Number(el.minConfirm),
+                        minWd: Number(el.withdrawMin),
+                        maxWd: Number(el.withdrawMax),
+                        minDp: 0,
+                        maxDp: Infinity,
+                        dpTip: el.depositDesc,
+                        wdTip: el.withdrawDesc,
+                        wdFee: Number(el.withdrawFee),
+                        wdFeeUSDT: Number(el.withdrawFee) * ticker,
+                        canDep: el.depositEnable,
+                        canWd: el.withdrawEnable,
+                    })),
+                } as ICoinNets;
+            });
+
+            return nets.filter((el) => !ccy || el.coin == ccy);
+        } catch (e) {
+            this._log("FAILED TO GET NETS");
+            this._err(e);
         }
     }
 }

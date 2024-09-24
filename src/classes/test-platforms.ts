@@ -1,7 +1,7 @@
 import { MAKER_FEE_RATE, TAKER_FEE_RATE } from "@/utils/constants";
 import { ensureDirExists } from "@/utils/orders/funcs";
 import { getInterval, parseDate } from "@/utils/funcs2";
-import { botLog, getSymbol, readJson, writeJson } from "@/utils/functions";
+import { botLog, getSymbol, readJson, sleep, writeJson } from "@/utils/functions";
 import axios, { AxiosResponse, isAxiosError } from "axios";
 import crypto from "crypto";
 
@@ -12,12 +12,14 @@ import {
     APIResponseV3WithTime,
     CategorySymbolListV5,
     OHLCVKlineV5,
+    CoinInfoV5,
 } from "bybit-api";
 import { Candle, RestClient, Trade } from "okx-api";
 import dotenv from "dotenv";
 import { ICoinNets, IOrderbook, ITrade, TPlatName } from "@/utils/interfaces";
 import { existsSync } from "fs";
 import { netsRootDir } from "@/utils/consts2";
+import { safeJsonParse } from "@/utils/funcs3";
 
 dotenv.config();
 
@@ -382,7 +384,7 @@ export class TestOKX extends TestPlatform {
                         name: el.name,
                         coin: el.ccy,
                         chain: el.chain,
-                        contactAddr: "",
+                        contractAddr: "",
                         minComfirm: Number(el.minDepArrivalConfirm),
                         minWd: Number(el.minWd),
                         maxWd: Number(el.maxWd),
@@ -570,4 +572,86 @@ export class TestBybit extends TestPlatform {
     async getOBData() {
         //const res = await this.client.getOrderbook({symbol: 'ETHUSDT',})
     }
-}
+    async getNets(coin?: string, offline?: boolean): Promise<ICoinNets[] | void | null | undefined> {
+        super.getNets(coin, offline);
+        try {
+            console.log({ offline });
+            let res = safeJsonParse(
+                offline && existsSync(this.netsPath)
+                    ? await readJson(this.netsPath)
+                    : (await this.client.getCoinInfo())
+            );
+            if (res.result?.rows) res = res.result.rows;
+            else{
+                return this._log("FAILED TO GET NETS", res)
+            }
+            writeJson(
+                this.netsPath,
+                res.sort((a, b) => a.coin.localeCompare(b.coin))
+            );
+          
+            const data: CoinInfoV5[] = res;
+            let coins: string[] = Array.from(
+                new Set(data.map((el) => el.coin))
+            );
+
+            coins = coins
+                .filter((el) => data.find((el2) => el2.coin == el)?.chains)
+                .sort((a, b) => a.localeCompare(b));
+
+            const tickers: { coin: string; ticker: number }[] = [];
+
+            if (offline && existsSync(this.tickersPath))
+                tickers.push(...(await readJson(this.tickersPath)));
+            else {
+                for (let el of coins) {
+                    let ticker = 0;
+                    if (el == "USDT" || el == "USDC" || true) {
+                        ticker = 1;
+                    } else {
+                        try {
+                            ticker = await this.getTicker([el, "USDT"]);
+
+                            await sleep(100);
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    }
+                    tickers.push({ coin: el, ticker });
+                    writeJson(this.tickersPath, tickers);
+                }
+            }
+
+            writeJson(this.tickersPath, tickers);
+            const nets: ICoinNets[] = coins.map((el) => {
+                const net = data.find((el2) => el2.coin == el);
+                const ticker = tickers.find((el2) => el2.coin == el)!.ticker;
+                return {
+                    coin: net!.coin,
+                    name: net!.coin,
+                    ticker,
+                    nets: net!.chains.map((el) => ({
+                        name: el.chain,
+                        coin: net!.coin,
+                        chain: el.chain,
+                        contractAddr: "",
+                        minComfirm: Number(el.confirmation),
+                        minWd: Number(el.withdrawMin),
+                        maxWd: Infinity,
+                        minDp: Number(el.depositMin),
+                        maxDp: Infinity,
+                        wdFee: Number(el.withdrawFee),
+                        wdFeeUSDT: Number(el.withdrawFee) * ticker,
+                        canDep: el.chainDeposit == '1',
+                        canWd: el.chainWithdraw == '1',
+                    })),
+                };
+            });
+
+            return nets.filter((el) => !coin || el.coin == coin);
+        } catch (e) {
+            this._log("FAILED TO GET NETS");
+            this._err(e)
+        }
+    }
+} 

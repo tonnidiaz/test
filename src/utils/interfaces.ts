@@ -129,7 +129,7 @@ export interface ICoinNets {
     nets: {
         coin: string;
         name: string;
-        contactAddr: string;
+        contractAddr: string;
         chain: string;
         wdTip?: string | null;
         dpTip?: string | null;

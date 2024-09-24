@@ -32,29 +32,18 @@ export const coinFees: { [key: string]: number } = {
 
 export const crossCoinFees: { [key: string]: { [key: string]: number } } = {
     bitget: {
-        JUV: 0.002,
-        ENJ: 3.61,
-        CUSD: 0.1,
-        BTG: 0.01,
-        USDT: 0.11, // C-CHAIN
-        SYS: 5,
-        PEPE2: 300000000,
-        ALEX: 25,
-        OVR: 37,
-        REEF: 480,
-        XETA: 50,
-        HALO: 150,
-        VRTX: 10,
-        POLYX: 2.3,
-        SCPT: 70,
-        PIP: 35,
-        GRAPE: 500,
-        MV: 50,
-        SIN: 160,
-        ZKF: 10000,
-        DAO: 38,
-        SCLP: 3,
-        MOBILE: 900,
+        USDT: 0.2, //TON | 0.11, // C-CHAIN
+        HALO: 80.33,
+        POLYX: 2.3, // POLYMESH:
+        QUICK: 67.41, // POLY:
+
+        SYS: .5, //SYS
+        ASR: 1, // CAP20 -- CAN'T WITHDRAW
+        CYBER: 0.27534 // HIGH AS FUCK
+       
+    },
+    binance: {
+        USDT: .1// ARB
     },
     mexc: {
         LAT: 1, // LAT: MED
@@ -102,6 +91,11 @@ export const crossCoinFees: { [key: string]: { [key: string]: number } } = {
     },
     kucoin: {
         USDT: 0.5,
+        POLYX: 1, // POLYMESH
+        HALO: 150, // BEP20
+        QUICK: 16, //  POLY
+        ALEX: 25, // HIGH AS FUCK
+        PIP: 35, // SOL: HIGH AS FUCK
     },
     okx: {
         USDT: 0.3, // OP
@@ -114,19 +108,22 @@ export const crossCoinFees: { [key: string]: { [key: string]: number } } = {
 export const pairsOfInterest: {
     [key: string]: { A: string; B?: string; C: string[] }[];
 } = {
-    // binance: [
-    //     { A: "USDT", B: "USDC", C: ["JUP", "FET", "CKB", "YGG", "PEOPLE"] },
-    //     { A: "USDT", B: "BTC", C: ["PEOPLE", "ONE", "NULS", "DATA", "FIDA"] },
-    // ],
+    binance: [
+        { A: "USDT", B: "USDC", C: ["JUP", "FET", "CKB", "YGG", "PEOPLE"] },
+        { A: "USDT", B: "BTC", C: ["PEOPLE", "ONE", "NULS", "DATA", "FIDA"] },
+        { A: "USDT", C: ["SYS"]}
+    ],
     bitget: [
         { A: "USDT", B: "USDC", C: ["BGB"] },
         { A: "USDT", B: "BTC", C: ["BGB"] },
         { A: "EUR", B: "USDT", C: ["PEPE", "BGB"] },
         { A: "USDT", C: ["LAT", "OAS", "BABYDOGE", "ABBC"] },
+        { A: "USDT", C: ["POLYX", ]}, // kucoin -
     ],
     kucoin: [
         { A: "USDT", B: "USDC", C: ["FLOKI", "GMT", "APE", "NEAR"] },
         { A: "USDT", C: ["CAS", "BLOK", "IRON", "HAI", "KARATE"] },
+        { A: "USDT", C: ["POLYX", ]}, // - bitget
     ], 
     okx: [
         { A: "USDT", B: "USDC", C: ["KLAY", "1INCH", "SUSHI", "MKR", "ALGO"] },

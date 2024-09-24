@@ -17,6 +17,7 @@
         "bcrypt": "^5.1.0",
         "bignumber.js": "^9.1.2",
         "binance": "^2.13.3",
+        "binance-api-node": "^0.12.7",
         "bitget-api": "^2.0.6",
         "bybit-api": "^3.10.5",
         "ccxt": "^4.3.48",
