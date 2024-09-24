@@ -37,7 +37,7 @@ export class TestBitget extends TestPlatform {
 
         this.client = new RestClientV2({});
         this.axiosClient = () =>
-            new Axios({ baseURL: "https://api.kucoin.com/api" });
+            new Axios({ baseURL: "https://api.bitget.com/api/v2/spot" });
     }
 
     async getKlines({
@@ -181,70 +181,44 @@ export class TestBitget extends TestPlatform {
     }
 
     async getNets(ccy?: string, offline?: boolean) {
-        super.getNets(ccy, offline)
+        super.getNets(ccy, offline);
         try {
             console.log({ offline });
             let res = safeJsonParse(
                 offline && existsSync(this.netsPath)
                     ? await readJson(this.netsPath)
-                    : (await this.axiosClient().get("/v3/currencies")).data
+                    : (await this.axiosClient().get("/public/coins")).data
             );
             if (res.data) res = res.data;
             writeJson(
                 this.netsPath,
-                res.sort((a, b) => a.currency.localeCompare(b.currency))
+                res.sort((a, b) => a.coin.localeCompare(b.coin))
             );
 
             const dummyData = [
                 {
-                    currency: "BTC",
-                    name: "BTC",
-                    fullName: "Bitcoin",
-                    precision: 8,
-                    confirms: null,
-                    contractAddress: null,
-                    isMarginEnabled: true,
-                    isDebitEnabled: true,
+                    coinId: "1",
+                    coin: "BTC",
+                    transfer: "true",
                     chains: [
                         {
-                            chainName: "BTC",
-                            withdrawalMinFee: "0.001",
-                            withdrawalMinSize: "0.0012",
-                            withdrawFeeRate: "0",
-                            depositMinSize: "0.0002",
-                            isWithdrawEnabled: true,
-                            isDepositEnabled: true,
-                            preConfirms: 1,
-                            contractAddress: "",
-                            chainId: "btc",
-                            confirms: 3,
-                        },
-                        {
-                            chainName: "KCC",
-                            withdrawalMinFee: "0.00002",
-                            withdrawalMinSize: "0.0008",
-                            withdrawFeeRate: "0",
-                            depositMinSize: null,
-                            isWithdrawEnabled: true,
-                            isDepositEnabled: true,
-                            preConfirms: 20,
+                            chain: "BTC",
+                            needTag: "false",
+                            withdrawable: "true",
+                            rechargeable: "true",
+                            withdrawFee: "0.005",
+                            extraWithdrawFee: "0",
+                            depositConfirm: "1",
+                            withdrawConfirm: "1",
+                            minDepositAmount: "0.001",
+                            minWithdrawAmount: "0.001",
+                            browserUrl:
+                                "https://blockchair.com/bitcoin/testnet/transaction/",
                             contractAddress:
-                                "0xfa93c12cd345c658bc4644d1d4e1b9615952258c",
-                            chainId: "kcc",
-                            confirms: 20,
-                        },
-                        {
-                            chainName: "BTC-Segwit",
-                            withdrawalMinFee: "0.0005",
-                            withdrawalMinSize: "0.0008",
-                            withdrawFeeRate: "0",
-                            depositMinSize: "0.0002",
-                            isWithdrawEnabled: false,
-                            isDepositEnabled: true,
-                            preConfirms: 2,
-                            contractAddress: "",
-                            chainId: "bech32",
-                            confirms: 2,
+                                "0xdac17f958d2ee523a2206206994597c13d831ec7",
+                            withdrawStep: "0",
+                            withdrawMinScale: "8",
+                            congestion: "normal",
                         },
                     ],
                 },
@@ -252,11 +226,11 @@ export class TestBitget extends TestPlatform {
             const data: typeof dummyData = res;
 
             let coins: string[] = Array.from(
-                new Set(data.map((el) => el.currency))
+                new Set(data.map((el) => el.coin))
             );
 
             coins = coins
-                .filter((el) => data.find((el2) => el2.currency == el)?.chains)
+                .filter((el) => data.find((el2) => el2.coin == el)?.chains)
                 .sort((a, b) => a.localeCompare(b));
 
             const tickers: { coin: string; ticker: number }[] = [];
@@ -277,32 +251,33 @@ export class TestBitget extends TestPlatform {
                             console.log(e);
                         }
                     }
-                    tickers.push({coin: el, ticker})
-                    writeJson(this.tickersPath, tickers)
+                    tickers.push({ coin: el, ticker });
+                    writeJson(this.tickersPath, tickers);
                 }
             }
 
             writeJson(this.tickersPath, tickers);
             const nets: ICoinNets[] = coins.map((el) => {
-                const net = data.find((el2) => el2.currency == el);
+                const net = data.find((el2) => el2.coin == el);
                 const ticker = tickers.find((el2) => el2.coin == el)!.ticker;
                 return {
-                    coin: net!.currency,
-                    name: net!.fullName,
+                    coin: net!.coin,
+                    name: net!.coin,
                     ticker,
                     nets: net!.chains.map((el) => ({
-                        name: el.chainName,
-                        coin: net!.currency,
-                        chain: el.chainName,
+                        name: el.chain,
+                        coin: net!.coin,
+                        chain: el.chain,
                         contactAddr: el.contractAddress,
-                        minComfirm: Number(el.confirms),
-                        minWd: Number(el.withdrawalMinSize),
+                        minComfirm: Number(el.withdrawConfirm),
+                        minWd: Number(el.minWithdrawAmount),
                         maxWd: Infinity,
-                        minDp: Number(el.depositMinSize),
+                        minDp: Number(el.minDepositAmount),
                         maxDp: Infinity,
-                        wdFee: Number(el.withdrawalMinFee),
-                        wdFeeUSDT: Number(el.withdrawalMinFee) * ticker,
-                        canDep: el.isDepositEnabled && el.isWithdrawEnabled,
+                        wdFee: Number(el.withdrawFee) + Number(el.extraWithdrawFee),
+                        wdFeeUSDT: Number(el.withdrawFee) * ticker,
+                        canDep: el.rechargeable == 'true',
+                        canWd: el.withdrawable == 'true',
                     })),
                 };
             });
@@ -315,15 +290,17 @@ export class TestBitget extends TestPlatform {
     async getBook(
         pair: string[]
     ): Promise<IOrderbook | void | null | undefined> {
-        const ts  = parseDate(new Date())
+        const ts = parseDate(new Date());
         try {
             super.getBook(pair);
-            const r = await this.client.getSpotOrderBookDepth({symbol: this._getSymbo(pair),
+            const r = await this.client.getSpotOrderBookDepth({
+                symbol: this._getSymbo(pair),
                 limit: 5,
             });
-            const data = r.data
+            const data = r.data;
 
-            if (r.code != "00000") return this._log(`FAILED TO GET BOOK FOR ${pair}`, data)
+            if (r.code != "00000")
+                return this._log(`FAILED TO GET BOOK FOR ${pair}`, data);
 
             const ob: IOrderbook = {
                 ts,
@@ -336,10 +313,10 @@ export class TestBitget extends TestPlatform {
                     amt: Number(el[1]),
                 })),
             };
-            return ob
+            return ob;
         } catch (err) {
             this._log("FAILED TO GET BOOK FOR", pair);
-            this._err(err)
+            this._err(err);
         }
     }
 }
@@ -402,4 +379,3 @@ export class TestBitget extends TestPlatform {
   ]
 }
 */
- 

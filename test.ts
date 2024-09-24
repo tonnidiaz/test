@@ -14,6 +14,7 @@ import {
     randomNum,
     readJson,
     sleep,
+    timedLog,
     toFixed,
 } from "@/utils/functions";
 import { scheduleJob } from "node-schedule";
@@ -27,7 +28,7 @@ import { Bot, Order, TriArbitOrder } from "@/models";
 import { clearTerminal } from "@/utils/functions";
 import { configDotenv } from "dotenv";
 import mongoose from "mongoose";
-import { parseArbitOrder } from "@/utils/funcs3";
+import { getInstrus, parseArbitOrder } from "@/utils/funcs3";
 import { TestMexc } from "@/classes/test-mexc";
 import { TestKucoin } from "@/classes/test-kucoin";
 import { test_platforms } from "@/utils/consts";
@@ -415,16 +416,18 @@ const fPxs = { pxA: 57967.4, pxB: 3.063e-7, pxC: 0.01793 };
 //calcTrade({flipped: true, amt: .6, ...pxs})
 //testTrades({ amt: 10, pxs, fPxs });
 const run = async () => {
-    const plat = new TestKucoin({});
-    const coins = ["SOL", "DOGE", "ETH", "BTC"];
+    await connectMongo(true);
 
-    const tickers: number[] = [];
-    for (let coin of coins) {
-        const r = await plat.getTicker([coin, "USDT"]);
-        await sleep(2000);
-        tickers.push(r);
-    }
-    console.log({ tickers });
+    console.log("BEGIN");
+    const instrus = getInstrus("bitget")
+        .filter((el) => el[1] == "USDT")
+        .sort();
+    instrus.slice(0, 20).forEach((pair) => { 
+        setImmediate(async () => { 
+            await sleep(2000);
+            timedLog(`HEY FROM ${pair}`);
+        });
+    });
 };
 
 const getOBook = async (pair: string[], plat: TPlatName) => {
@@ -433,7 +436,7 @@ const getOBook = async (pair: string[], plat: TPlatName) => {
     console.log(r);
 };
 
-getOBook(['IRON', 'USDT'], 'kucoin')
+// getOBook(['IRON', 'USDT'], 'kucoin')
 // const fn = async () => {
 //    const ob = await pla
 // };
@@ -442,3 +445,4 @@ getOBook(['IRON', 'USDT'], 'kucoin')
 // const dt = readJson(pth)
 // console.log(dt.find(el=> el.profit > 3 && el.trades >= 90))
 
+run();

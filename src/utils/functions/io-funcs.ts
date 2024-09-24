@@ -250,8 +250,9 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
 export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
     const ep = "cointest";
     clearTerminal();
+    console.log("PID:", process.pid);
     try {
-        let {
+        let { 
             interval,
             start,
             end,

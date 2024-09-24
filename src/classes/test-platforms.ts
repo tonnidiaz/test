@@ -390,6 +390,7 @@ export class TestOKX extends TestPlatform {
                         maxDp: Infinity,
                         wdFee: Number(el.maxFee),
                         canDep: el.canDep,
+                        canWd: el.canWd,
                     })),
             }));
             return nets.filter((el) => !ccy || el.coin == ccy);

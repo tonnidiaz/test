@@ -4,7 +4,8 @@ import {
     MAX_QUOTE,
     TAKER_FEE_RATE,
 } from "@/utils/constants";
-import { ceil, getPricePrecision, toFixed } from "@/utils/functions";
+import { coinFees, crossCoinFees } from "@/utils/consts3";
+import { ceil, getPricePrecision, sleep, toFixed } from "@/utils/functions";
 import { ICandle, IObj, IPlat } from "@/utils/interfaces";
 import { linearPositionModeEnum } from "bybit-api";
 
@@ -39,7 +40,7 @@ export class Arbit {
     enterTs = "";
     est_perc = 0;
     pair: string[];
-    SLIP = 0/100
+    SLIP = 0 / 100;
 
     otype: "market" | "limit" = "market";
 
@@ -88,8 +89,9 @@ export class Arbit {
         this.pair = pair;
 
         this.bal = bal;
-        this.platA = { name: platA, base: 0, quote: bal, df: dfA };
-        this.platB = { name: platB, base: 0, quote: 0, df: dfB };
+        const balA = bal
+        this.platA = { name: platA, base: 0, quote: balA, df: dfA };
+        this.platB = { name: platB, base: 0, quote: bal - balA, df: dfB };
         this.lastRow = dfA[0];
         this.pxPrA = pxPrA;
         this.pxPrB = pxPrB;
@@ -103,12 +105,12 @@ export class Arbit {
         this.entry = px;
         this.platA.quote -= amt;
         let _base = amt / px;
-        
-        const slip = _base * this.SLIP
-        _base -= slip
+
+        const slip = _base * this.SLIP;
+        _base -= slip;
 
         const fee = _base * this.TAKER;
-        
+
         _base -= fee;
         _base = toFixed(_base, this.basePrA);
         console.log({ base: _base, fee }, "\n");
@@ -117,13 +119,13 @@ export class Arbit {
         const { o, h, l, v } = row;
 
         this.trades.push({
-            side: `buy { o: ${o}, h: ${h}, l: ${l}, v: ${v} }`,
+            side: `buy { o: ${o}, h: ${h}, l: ${l}, v: ${v || 'null'} }`,
             ccy: this.pair[0],
             amt: _base,
             px: [this.prefEntryPx, px],
             ts: [this.enterTs, row.ts],
         });
-
+        this.entry = px
         this.entryLimit = undefined;
     }
 
@@ -133,15 +135,16 @@ export class Arbit {
         this.platB.base -= amt;
         let _quote = amt * px;
 
-        const slip = _quote * this.SLIP
-        _quote -= slip
+        const slip = _quote * this.SLIP;
+        _quote -= slip;
 
         const fee = _quote * this.MAKER;
         _quote -= fee;
         _quote = toFixed(_quote, this.pxPrB);
         console.log({ pr: this.pxPrB, quote: _quote, fee }, "\n");
         this.platB.quote += _quote;
-
+        if (_quote <= 5
+        ) this.stop =true
         const _trades = this.trades;
         const profit = ((px - this.entry) / this.entry) * 100;
 
@@ -152,7 +155,7 @@ export class Arbit {
         const { o, h, l, v } = row;
 
         this.trades.push({
-            side: `sell { o: ${o}, h: ${h}, l: ${l}, v: ${v} }`,
+            side: `sell { o: ${o}, h: ${h}, l: ${l}, v: ${v || 'null'} }`,
             ccy: this.pair[1],
             amt: _quote,
             px: [this.prefExitPx, px],
@@ -160,6 +163,8 @@ export class Arbit {
             est_perc,
             perc: Number(profit.toFixed(2)),
         });
+
+        this.exit = px
         this.exitLimit = undefined;
         return _quote;
     }
@@ -169,17 +174,24 @@ export class Arbit {
         if (side == "buy") {
             // BASE FROM A TO B
             this.platA.base -= amt;
-            const fee = 0;
-            this.platB.base += amt - fee;
+            
+            // USDT 1 fee MAX
+            const _plat = crossCoinFees[this.platA.name]
+            const fee = _plat ? (_plat[this.pair[0]] ?? 0 ): 0; // TRANSFER FEE
+            console.log('\n', {coin: this.pair[0], fee}, '\n')
+            this.platB.base += toFixed(amt - fee, this.basePrA);
             //this.pos = true;
         } else {
             if (amt >= MAX_QUOTE) this.stop = true;
 
-            const fee = 0; // TRANSFER FEE
+            // USDT 1 fee MAX
+            const _plat = crossCoinFees[this.platB.name]
+            const fee = _plat ? (_plat[this.pair[1]] ?? .8) : 0; // TRANSFER FEE
+            console.log('\n', {coin: this.pair[1], fee}, '\n')
             // QUOTE FROM B TO A
             this.platB.quote -= amt;
             let _quote = amt - fee;
-            this.platA.quote += _quote;
+            this.platA.quote += toFixed(_quote, this.pxPrB);
             this.pos = false;
         }
     }
@@ -201,7 +213,7 @@ export class Arbit {
     // }
 
     /**
-     * 
+     *
      * SELLS AND WITHDRAWS FROM B
      */
     closePos({ amt, px, row }: { amt: number; px: number; row: ICandle }) {
@@ -213,7 +225,7 @@ export class Arbit {
         this.tradeCnt += 1;
     }
 
-    run() {
+    async run() {
         const dfA = this.platA.df;
         const dfB = this.platB.df;
         const lenA = dfA.length;
@@ -222,10 +234,10 @@ export class Arbit {
         const _len = Math.min(lenA, lenB);
         for (let i = 1; i < _len; i++) {
             if (this.stop) break;
-
+            await sleep(.000001)
             try {
                 const rowA = dfA[i],
-                    rowB = dfB[i];
+                    rowB = dfB[i]; 
                 const prevrowA = dfA[i - 1],
                     prevrowB = dfB[i - 1];
 
@@ -235,21 +247,22 @@ export class Arbit {
                 const { o: p_oB, h: p_hB, c: p_cB, l: p_lB } = prevrowB;
                 const { o: oB, h: hB, c: cB, l: lB } = rowB;
 
-                console.log("\n", { tsA: rowA.ts, tsB: rowB.ts });
-
                 if (rowA.ts != rowB.ts) break;
 
                 if (rowA.v == 0) this.zvA += 1;
                 if (rowB.v == 0) this.zvB += 1;
 
-                const buyPx = rowA.o,
-                    sellPx = rowB.o;
+                const _slip = 0 / 100;
+                let buyPx = oA * (1 + _slip),
+                    sellPx = oB * (1 - _slip);
+                //if (rowA.v) buyPx = Math.min(hA, buyPx);
 
-                console.log({ ts: rowA.ts, pxA: buyPx, pxB: sellPx });
+                //if (rowB.v) sellPx = Math.max(lB, sellPx);
+                console.log("\n", { ts: rowA.ts });
 
                 this.lastRow = rowB;
 
-                let diff = ceil(((p_cB - p_cA) / p_cA) * 100, 2); //(sellPx - buyPx) / buyPx * 100
+                let diff = ceil(((sellPx - buyPx) / buyPx) * 100, 2); //(sellPx - buyPx) / buyPx * 100
                 console.log({ diff });
 
                 if (this.pos && this.otype == "limit") {
@@ -257,7 +270,7 @@ export class Arbit {
                         side: this.entryLimit ? "buy" : "sell",
                     });
                     if (this.entryLimit) {
-                        if (p_lA <= this.entryLimit) {
+                        if (p_lA < this.entryLimit) {
                             console.log("\nFILL BUY\n");
                             this.buy({
                                 amt: this.platA.quote,
@@ -286,7 +299,7 @@ export class Arbit {
                         continue;
                     }
                     if (!this.entryLimit && this.exitLimit) {
-                        if (this.exitLimit <= p_hB) {
+                        if (this.exitLimit < p_hB) {
                             console.log("\nFILL SELL\n");
                             this.closePos({
                                 amt: this.platB.base,
@@ -312,16 +325,17 @@ export class Arbit {
                         }
                     }
                 }
+                const CONST = .25
                 if (this.pos && this.otype == "limit") {
                     if (this.entryLimit) {
                         this.entryLimit = ceil(
-                            p_cA * (1 - 0.5 / 100),
+                            p_cA * (1 - CONST / 100),
                             this.pxPrA
                         );
                     }
                     if (this.exitLimit) {
                         this.exitLimit = ceil(
-                            p_cB * (1 + 0.5 / 100),
+                            p_cB * (1 + CONST / 100),
                             this.pxPrB
                         );
                     }
@@ -333,8 +347,8 @@ export class Arbit {
                     this.withdrawnA = false;
                     this.withdrawnB = false;
                     this.enterTs = rowA.ts;
-                    this.entryLimit = ceil(p_cA * (1 - 0.1 / 100), this.pxPrA);
-                    this.exitLimit = ceil(p_cB * (1 + 0.1 / 100), this.pxPrB);
+                    this.entryLimit = ceil(p_cA * (1 - CONST / 100), this.pxPrA);
+                    this.exitLimit = ceil(p_cB * (1 + CONST / 100), this.pxPrB);
 
                     this.prefEntryPx = this.entryLimit;
                     this.prefExitPx = this.exitLimit;
@@ -346,11 +360,13 @@ export class Arbit {
                      * BUY [A] - WITHDRAW [A]
                      * SELL [B] - WITHDRAW [B]
                      */
-                    this.entry = rowA.o;
-                    this.exit = rowB.o;
 
-                    console.log("\nFILL MARKET BUY\n");
+                    this.entry = buyPx;
+                    this.exit = sellPx;
+
+                    
                     if (this.entryLimit) {
+                        console.log("\nFILL MARKET BUY\n");
                         this.buy({
                             amt: this.platA.quote,
                             px: this.entry,

@@ -205,7 +205,8 @@ export class TestKucoin extends TestPlatform {
                         maxDp: Infinity,
                         wdFee: Number(el.withdrawalMinFee),
                         wdFeeUSDT: Number(el.withdrawalMinFee) * ticker,
-                        canDep: el.isDepositEnabled && el.isWithdrawEnabled,
+                        canDep: el.isDepositEnabled,
+                        canWd: el.isWithdrawEnabled,
                     })),
                 };
             });

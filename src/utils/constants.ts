@@ -29,7 +29,7 @@ export const dfsRootDir = "src/data/dfs",
 
 export const isMarket = true,
     cancelOnCond = true,
-    useHaClose = false,
+    useHaClose = true,
     isStopOrder = false,
     useSwindLow = false,
     noFees = false,

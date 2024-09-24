@@ -4,7 +4,7 @@ import { ARBIT_ZERO_FEES, ARBIT_MIN_PERC } from "../constants";
 import { getInstrus, getKlinesPath, getMakerFee, getTakerFee } from "../funcs3";
 import { IObj, IRetData } from "../interfaces";
 import { Arbit } from "@/bots/arbitrage/classes";
-import { parseKlines } from "../funcs2";
+import { heikinAshi, parseKlines, tuCE } from "../funcs2";
 import {
     readJson,
     getPricePrecision,
@@ -16,6 +16,7 @@ import { ensureDirExists } from "../orders/funcs";
 import { writeFileSync, existsSync } from "fs";
 import { test_platforms } from "../consts";
 import { TestPlatform } from "@/classes/test-platforms";
+import { objStrategies } from "@/strategies";
 
 export const onCrossArbitCointest = async (
     data: IObj,
@@ -41,6 +42,7 @@ export const onCrossArbitCointest = async (
         save_klines,
         start_pair,
         perc,
+        strNum
         // flipped,
     } = data;
     const ep = "cross-arbit-cointest";
@@ -237,7 +239,7 @@ export const onCrossArbitCointest = async (
                 const PlatA: TestPlatform = new test_platforms[platA]({demo})
                 const PlatB: TestPlatform = new test_platforms[platB]({demo})
     
-                const kA = offline || (skip_saved && existsSync(k1Path))
+                let kA = offline || (skip_saved && existsSync(k1Path))
                 ? await readJson(k1Path)
                 : await PlatA.getKlines({
                       start: startMs,
@@ -246,7 +248,7 @@ export const onCrossArbitCointest = async (
                       interval,
                       savePath: save_klines ? k1Path : undefined,
                   });//await readJson(k1Path);
-                const kB = offline || (skip_saved && existsSync(k2Path))
+                let kB = offline || (skip_saved && existsSync(k2Path))
                 ? await readJson(k2Path)
                 : await PlatB.getKlines({
                       start: startMs,
@@ -258,21 +260,20 @@ export const onCrossArbitCointest = async (
     
                 if (!kA.length || !kB.length) continue;
      
+                kA = kA.filter((el) => {
+                    const tsMs = Number(el[0]);
+                    
+                    return tsMs >= startMs && tsMs <= endMs;
+                });
+    
+                kB = kB.filter((el) => {
+                    const tsMs = Number(el[0]);
+                    return tsMs >= startMs && tsMs <= endMs;
+                });
+
                 let dfA = parseKlines(kA),
                     dfB = parseKlines(kB);
-    
-               
-    
-                dfA = dfA.filter((el) => {
-                    const tsMs = Date.parse(el.ts);
-                    return tsMs >= startMs && tsMs <= endMs;
-                });
-    
-                dfB = dfB.filter((el) => {
-                    const tsMs = Date.parse(el.ts);
-                    return tsMs >= startMs && tsMs <= endMs;
-                });
-    
+                    
                 // START AT THE LATEST START
                 const realStartMs = Math.max(
                     Date.parse(dfA[0].ts),
@@ -288,7 +289,8 @@ export const onCrossArbitCointest = async (
                     const tsMs = Date.parse(el.ts);
                     return tsMs >= realStartMs;
                 });
-    
+                const strat = objStrategies[strNum - 1]
+                console.log({strat: strat.name})
                 const bt = new Arbit({
                     platA,
                     platB,
@@ -303,6 +305,7 @@ export const onCrossArbitCointest = async (
                     pxPrA,
                     pxPrB,
                     MIN_PERC, 
+                    // strat
                 });
                 const res = await bt.run();
                 _data.push({

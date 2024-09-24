@@ -1,5 +1,14 @@
 import { IObj, IOrderDetails, ICandle } from "./interfaces";
-import { atr, ema, rsi, macd, stoch, stochasticOscillator, accelerationBands, sma } from "indicatorts";
+import {
+    atr,
+    ema,
+    rsi,
+    macd,
+    stoch,
+    stochasticOscillator,
+    accelerationBands,
+    sma,
+} from "indicatorts";
 import path from "path";
 import { SL, TP, useHaClose } from "./constants";
 import { OrderDetails } from "okx-api";
@@ -61,15 +70,20 @@ export const getExactDate = (interval: number) => {
 
 /**
  * { fast: 12, slow: 45, signal: 92, profit: 3.21, trades: 90 }
- * 
+ *
  * slow and signal begin at 2
  */
-export const tuMacd = (df: ICandle[], _slow?: number, _fast?: number, _signal?:number) => {
+export const tuMacd = (
+    df: ICandle[],
+    _slow?: number,
+    _fast?: number,
+    _signal?: number
+) => {
     const def = false;
     const faster = true;
     const fast = _fast ?? (def ? 12 : 12) /* 5 */,
-        slow = _slow ??  ( def ? 26 : 45) /* 12 */,
-        signal = _signal ?? (def ? 9 : 92) ; /* 5 */
+        slow = _slow ?? (def ? 26 : 45) /* 12 */,
+        signal = _signal ?? (def ? 9 : 92); /* 5 */
 
     const prices = df.map((el) => el[useHaClose ? "ha_c" : "c"]);
 
@@ -81,8 +95,11 @@ export const tuMacd = (df: ICandle[], _slow?: number, _fast?: number, _signal?:n
 };
 export const tuPath = (pth: string) => path.resolve(...pth.split("/"));
 
-export const parseKlines = (klines: (string | number)[][], useInvalid: boolean = false) => {
-    if (!klines.length) return []
+export const parseKlines = (
+    klines: (string | number)[][],
+    useInvalid: boolean = false
+) => {
+    if (!klines.length) return [];
     try {
         console.log(parseKlines, { len: klines.length });
         let invalid = false;
@@ -127,13 +144,11 @@ export const parseKlines = (klines: (string | number)[][], useInvalid: boolean =
                         curr: parseDate(new Date(curr)),
                     });
                     console.log("KLINE DATA INVALID");
-                    if (!useInvalid)
-                    return df;
+                    if (!useInvalid) return df;
                 }
             }
         }
-        if (!invalid)
-        console.log("\nKLINES OK\n");
+        if (!invalid) console.log("\nKLINES OK\n");
 
         return df;
     } catch (e) {
@@ -185,15 +200,15 @@ export const tuCE = (df: ICandle[], _fast?: number, _slow?: number) => {
     const ATR = atr(highs, lows, closings, { period: atrLen });
     const _atr = ATR.atrLine;
     const rsiLen = 2,
-        fastLen =  1,// 10,//_fast ?? 15, //89 /* 15 */,
-        slowLen = 2 // 25//_slow ?? 33; //90; /* 50 */
-const useOpen = Math.max(...opens) < Math.max(...closings)
+        fastLen = 1, // 10,//_fast ?? 15, //89 /* 15 */,
+        slowLen = 2; // 25//_slow ?? 33; //90; /* 50 */
+    const useOpen = Math.max(...opens) < Math.max(...closings);
     const sma20 = sma(closings, { period: fastLen });
     const sma50 = sma(closings, { period: slowLen });
 
     const _rsi = rsi(closings, { period: rsiLen });
-const _stoch = stoch(highs, lows, closings, {dPeriod: 1, kPeriod: 2})
-const _accelerationBands = accelerationBands(highs, lows, closings, { })
+    const _stoch = stoch(highs, lows, closings, { dPeriod: 1, kPeriod: 2 });
+    const _accelerationBands = accelerationBands(highs, lows, closings, {});
 
     let sir = 1;
 
@@ -209,12 +224,12 @@ const _accelerationBands = accelerationBands(highs, lows, closings, { })
         /* END MACD */
         df[i]["rsi"] = _rsi[i];
 
-        df[i].stoch_k = _stoch.k[i]
-        df[i].stoch_d = _stoch.d[i]
+        df[i].stoch_k = _stoch.k[i];
+        df[i].stoch_d = _stoch.d[i];
 
-        df[i].accs_lower = _accelerationBands.lower[i]
-        df[i].accs_middle = _accelerationBands.middle[i]
-        df[i].accs_upper = _accelerationBands.upper[i]
+        df[i].accs_lower = _accelerationBands.lower[i];
+        df[i].accs_middle = _accelerationBands.middle[i];
+        df[i].accs_upper = _accelerationBands.upper[i];
         //continue
         const ceClosings = closings.slice(i - atrLen, i);
         const long_stop = Math.max(...ceClosings) - _atr[i] * mult;
@@ -227,13 +242,13 @@ const _accelerationBands = accelerationBands(highs, lows, closings, { })
         if (i > 0) {
             const lsp = pdf.long_stop;
             const ssp = pdf.short_stop;
-            if (pdf[useHaClose ? "ha_c" : "c"] > lsp)
+            if (closings[i - 1] > lsp)
                 df[i].long_stop = Math.max(cdf.long_stop, pdf.long_stop);
-            if (pdf.ha_c < ssp)
+            if (closings[i - 1] < ssp)
                 df[i].short_stop = Math.min(cdf.short_stop, pdf.short_stop);
 
-            if (cdf[useHaClose ? "ha_c" : "c"] > ssp) sir = 1;
-            else if (cdf[useHaClose ? "ha_c" : "c"] < lsp) sir = -1;
+            if (closings[i] > ssp) sir = 1;
+            else if (closings[i] < lsp) sir = -1;
 
             df[i].sir = sir;
             df[i].buy_signal = Number(cdf.sir == 1 && pdf.sir == -1);
@@ -315,7 +330,7 @@ export const parseFilledOrder = (res: IObj, plat: string) => {
             cTime: Number(res.cTime),
         };
     } else if (plat == "bybit") {
-        res = res as AccountOrderV5; 
+        res = res as AccountOrderV5;
         data = {
             id: res.orderId,
             fillPx: Number(res.avgPrice),
@@ -325,7 +340,7 @@ export const parseFilledOrder = (res: IObj, plat: string) => {
             cTime: Number(res.createdTime),
         };
     } else if (plat == "bitget") {
-        const feeDetail = JSON.parse(res.feeDetail)
+        const feeDetail = JSON.parse(res.feeDetail);
         data = {
             id: res.orderId,
             fillPx: Number(res.priceAvg),
@@ -345,12 +360,12 @@ export const parseFilledOrder = (res: IObj, plat: string) => {
             fillTime: Number(_r.updateTime),
             cTime: Number(_r.time),
         };
-    } else if (plat == 'kucoin') {
+    } else if (plat == "kucoin") {
         const _res = res as KucoinOrder;
-        const funds = Number(_res.dealFunds)
-        const sz = Number(_res.dealSize)
+        const funds = Number(_res.dealFunds);
+        const sz = Number(_res.dealSize);
 
-        const price = Number(_res.price) || funds / sz
+        const price = Number(_res.price) || funds / sz;
         data = {
             id: _res.id!,
             fillPx: price,
@@ -359,7 +374,7 @@ export const parseFilledOrder = (res: IObj, plat: string) => {
             fillTime: Date.now(),
             cTime: Number(_res.createdAt),
         };
-    }else {
+    } else {
         // GATEIO
         const _res = res as GateOrder;
         data = {
@@ -376,18 +391,16 @@ export const parseFilledOrder = (res: IObj, plat: string) => {
 };
 
 export const findBotOrders = async (bot: IBot) => {
-    const orders = (
-        await Order.find({
-            bot: bot._id,
-            base: bot.base,
-            ccy: bot.ccy,
-        }).exec()
-    )
+    const orders = await Order.find({
+        bot: bot._id,
+        base: bot.base,
+        ccy: bot.ccy,
+    }).exec();
     return orders;
 };
 
 export const getLastOrder = async (bot: IBot) => {
-    const orders = await Order.find({bot: bot.id}).exec()
+    const orders = await Order.find({ bot: bot.id }).exec();
     return orders.length
         ? await Order.findById([...orders].pop()?.id).exec()
         : null;

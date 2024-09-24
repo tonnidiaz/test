@@ -8,7 +8,10 @@ export interface IObj {
     [key: string]: any;
 }
 export interface IRetData {
-    ep: string; clId: string; data: IObj; [key: string] : any
+    ep: string;
+    clId: string;
+    data: IObj;
+    [key: string]: any;
 }
 export interface ICandle {
     ts: string;
@@ -134,9 +137,10 @@ export interface ICoinNets {
         wdFee: number;
         wdFeeUSDT: number;
         maxWd: number;
-        minDp: number; maxDp: number;
+        minDp: number;
+        maxDp: number;
         minComfirm: number;
         canDep: boolean;
-
+        canWd: boolean;
     }[];
 }

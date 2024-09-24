@@ -36,7 +36,7 @@ export const crossCoinFees: { [key: string]: { [key: string]: number } } = {
         ENJ: 3.61,
         CUSD: 0.1,
         BTG: 0.01,
-        USDT: 0.5,
+        USDT: 0.11, // C-CHAIN
         SYS: 5,
         PEPE2: 300000000,
         ALEX: 25,
@@ -127,7 +127,7 @@ export const pairsOfInterest: {
     kucoin: [
         { A: "USDT", B: "USDC", C: ["FLOKI", "GMT", "APE", "NEAR"] },
         { A: "USDT", C: ["CAS", "BLOK", "IRON", "HAI", "KARATE"] },
-    ],
+    ], 
     okx: [
         { A: "USDT", B: "USDC", C: ["KLAY", "1INCH", "SUSHI", "MKR", "ALGO"] },
         { A: "USDT", C: ["LAT", "SC"] },

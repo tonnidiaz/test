@@ -212,7 +212,32 @@ export class TestMexc extends TestPlatform {
                 this.netsPath,
                 res.sort((a, b) => a.coin.localeCompare(b.coin))
             );
-            const data = res;
+
+            const dummyData = [{
+                "coin": "ZZZ",
+                "name": "GoSleep",
+                "networkList": [
+                    {
+                        "coin": "ZZZ",
+                        "depositDesc": null,
+                        "depositEnable": true,
+                        "minConfirm": 100,
+                        "name": "GoSleep",
+                        "network": "Arbitrum One(ARB)",
+                        "withdrawEnable": true,
+                        "withdrawFee": "6",
+                        "withdrawIntegerMultiple": null,
+                        "withdrawMax": "2000000",
+                        "withdrawMin": "20",
+                        "sameAddress": false,
+                        "contract": "0x7A2C1b8e26c48a5b73816B7EC826Fd4053F5F34b",
+                        "withdrawTips": null,
+                        "depositTips": null,
+                        "netWork": "ARB"
+                    }
+                ]
+            }]
+            const data: typeof dummyData = res;
 
             let coins: string[] = Array.from(
                 new Set(data.map((el) => el.coin))
@@ -247,8 +272,8 @@ export class TestMexc extends TestPlatform {
                 const net = data.find((el2) => el2.coin == el);
                 const ticker = tickers.find((el2) => el2.coin == el)!.ticker;
                 return {
-                    coin: net.coin,
-                    name: net.name,
+                    coin: net!.coin,
+                    name: net!.name,
                     ticker,
                     nets: res
                         .find((el2) => {
@@ -269,8 +294,9 @@ export class TestMexc extends TestPlatform {
                             wdFee: Number(el.withdrawFee),
                             wdFeeUSDT: Number(el.withdrawFee) * ticker,
                             canDep: el.depositEnable,
+                            canWd: el.withdrawEnable
                         })),
-                };
+                } as ICoinNets;
             });
 
             return nets.filter((el) => !ccy || el.coin == ccy);
