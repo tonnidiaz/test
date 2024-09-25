@@ -41,9 +41,14 @@ router.post("/bee/:id/edit", async (req, res) => {
     } catch (e) {
         console.log(e);
         res.status(500).send("swr");
-    }
-});
+    } 
+}); 
 
+router.get('/bee/:act', async (req, res)=>{
+    const {act} = req.params
+    const r = await Bee.updateMany({}, {active: act == 'activate' ? true: false}).exec()
+    res.json("VEES UPDATED")
+})
 
 export default router;
 

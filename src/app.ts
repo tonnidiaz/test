@@ -29,7 +29,7 @@ app.use(
 );
 /*------------------ mongodb ----------------------- */
 async function connectMongo() {
-    let mongoURL = (false ? process.env.MONGO_URL_LOCAL : process.env.MONGO_URL)!;
+    let mongoURL = (DEV ? process.env.MONGO_URL_LOCAL : process.env.MONGO_URL)!;
     try {
         console.log(mongoURL);
         await mongoose.connect(mongoURL, { dbName: "tb" });
@@ -44,7 +44,7 @@ async function connectMongo() {
 })();
 /*------------------ End mongodb ----------------------- */
 app.use(logger("dev"));
-app.use(express.json());
+app.use(express.json()); 
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));

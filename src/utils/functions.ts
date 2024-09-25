@@ -6,6 +6,8 @@ import { Response } from "express";
 import { IObj } from "./interfaces"
 import { IBee } from "@/models/bee";
 import { Job } from "node-schedule";
+import axios from "axios";
+import { api } from "./api";
 
 function randomInRange(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -254,9 +256,11 @@ export const beeJob = async (job: Job, bee: IBee)=>{
     try {
         if (!bee.active) return
         timedLog(`Bee-${bee.name} sting`)
-        bee.stings.push(Date.now().toString())
+        const r = await api().post('/sting', {interval: 10, name: bee.name})
+        console.log(r.data)
+        bee.stings.push(parseDate(new Date()))
         await bee.save()
     } catch (err) {
-        
+        console.log(err)
     }
 }
