@@ -20,7 +20,7 @@ export const initArbitWs = async () => {
             ...Object.values(crossArbitWsList),
         ];
         for (let ws of wsList) {
-            if (!DEV || false) await ws.initWs();
+            //if (!DEV || false) await ws.initWs();
         }
     } catch (e) {
         timedLog("FAILED TO INIT WS");

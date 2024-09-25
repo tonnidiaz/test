@@ -233,7 +233,8 @@ export class TestBinance extends TestPlatform {
 
             return ob;
         } catch (e) {
-            this._log("FAILED TO GET ORDERBOOK FOR", pair, "\n", e);
+            this._log("FAILED TO GET ORDERBOOK FOR", pair);
+            this._err(e)
         }
     }
 

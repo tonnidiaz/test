@@ -52,7 +52,9 @@ export class Impr5 extends Backtest {
             //return;
         }
 
-        if (this.pos && this.sellCond(this.prevrow, this.entry)) {
+        if (this.pos
+            //  && this.sellCond(this.prevrow, this.entry)
+        ) {
             const TRAIL = 0.5; // .1
             const trail = ceil(
                 this.prevrow.h * (1 - TRAIL / 100),

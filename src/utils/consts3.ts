@@ -1,4 +1,5 @@
-import { IObj, TPlatName } from "./interfaces";
+import { timedLog } from "./functions";
+import { IObj, ITask, TPlatName } from "./interfaces";
 
 export const platList = [
     "binance",
@@ -167,3 +168,17 @@ export const coinVols = [
         },
     },
 ];
+
+class TaskManager {
+    tasks: ITask[] = []
+
+    addTask(task: ITask){this.tasks.push(task)}
+    rmTask(id: string | undefined | null){
+        if (!id) return
+        timedLog(`Removing task ${id}....`)
+        this.tasks = this.tasks.filter(el=> el.id != id)
+        timedLog(`Task ${id} removed!!`)
+    }
+}
+
+export const taskManager = new TaskManager()

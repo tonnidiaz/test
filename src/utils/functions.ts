@@ -236,11 +236,11 @@ export const botLog = (bot: IBot, ...data: any) => {
 };
 
 export const timedLog = (...args) =>
-    console.log(`[${parseDate(new Date())}]`, ...args);
+    console.log(`\n[${parseDate(new Date())}]`, ...args);
 export function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
-
+ 
 export function toFixed(num: number, dec: number) {
     const re = new RegExp("^-?\\d+(?:.\\d{0," + (dec || -1) + "})?");
     const isLarge = `${num}`.includes("e");

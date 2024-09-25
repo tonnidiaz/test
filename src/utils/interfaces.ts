@@ -144,3 +144,6 @@ export interface ICoinNets {
         canWd: boolean;
     }[];
 }
+
+
+export interface ITask {id: string; interval: number; cb: (id: string)=> any}

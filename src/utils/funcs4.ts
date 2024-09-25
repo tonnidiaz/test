@@ -1,12 +1,13 @@
 import { Job, scheduleJob } from "node-schedule";
 import { test_platforms } from "./consts";
-import { pairsOfInterest } from "./consts3";
+import { pairsOfInterest, taskManager } from "./consts3";
 import { IOrderbook, TPlatName } from "./interfaces";
 import { existsSync, readJson, timedLog, writeJson } from "./functions";
-import { bookJobs, botJobSpecs } from "./constants";
+import { bookJobs, botJobSpecs, DEV } from "./constants";
 import { TuBook, TuConfig } from "@/models";
 import { configDotenv } from "dotenv";
 import mongoose from "mongoose";
+import { ITuConfig } from "@/models/config";
 
 configDotenv();
 export async function connectMongo(DEV: boolean) {
@@ -21,14 +22,21 @@ export async function connectMongo(DEV: boolean) {
         console.log(e);
     }
 }
-async function platBookFetcher(platName: string, pairs: string[][], job: Job) {
-    const config = await TuConfig.findOne({}).exec();
+
+
+export function addBooksTask(config: ITuConfig){
+    timedLog("Adding books task...")
+    taskManager.addTask({id: `task-books`, interval: config.book_fetch_interval, cb: fetchAndStoreBooks})
+}
+async function platBookFetcher(platName: string, pairs: string[][]) {
     const plat = new test_platforms[platName as TPlatName]({ demo: false });
-    if (plat && config?.fetch_orderbook_enabled) {
+    if (plat) {
         timedLog(`[${platName}] GETTING BOOKS...`);
         pairs.forEach(async (pair, i) => {
-           setImmediate(async()=>{
-            const bookDoc = new TuBook({ pair: pair.join('-'), plat: platName });
+            const bookDoc = new TuBook({
+                pair: pair.join("-"),
+                plat: platName,
+            });
             let book: IOrderbook[] = [];
             const savePath = `_data/ob/test/${platName}/${pair.join("-")}.json`;
             if (bookDoc.book) {
@@ -44,16 +52,18 @@ async function platBookFetcher(platName: string, pairs: string[][], job: Job) {
             if (i == pairs.length - 1) {
                 timedLog(`[${platName}] BOOKS GOT!!\n`);
             }
-           })
         });
     } else {
         timedLog("KILLING JOB");
-        job.cancel(false);
+        //job.cancel(false);
     }
 }
-export async function fetchAndStoreBooks() {
+export async function fetchAndStoreBooks(taskId: string) {
     const config = await TuConfig.findOne({}).exec();
-    if (!config?.fetch_orderbook_enabled) return;
+    if (!config?.fetch_orderbook_enabled) {
+        taskManager.rmTask(taskId);
+        return;
+    }
     timedLog("SCHEDULING BOOK FETCHER JOBS...");
     for (let platName of Object.keys(pairsOfInterest)) {
         let platPairs: string[][] = [];
@@ -76,17 +86,34 @@ export async function fetchAndStoreBooks() {
         }
 
         platPairs = Array.from(new Set(platPairs.sort()));
-        const jobId = `${platName}__job`;
-        const jb = scheduleJob(
-            jobId,
-            botJobSpecs(config.book_fetch_interval),
-            () => {
-                platBookFetcher(platName, platPairs, jb);
-            }
-        );
 
-        bookJobs.push({ job: jb, id: jobId, active: true });
+        platBookFetcher(platName, platPairs);
 
         timedLog("BOOK FETCHER JOBS SCHEDULED!!");
+    }
+}
+
+const globalJob = async () => {
+    try {
+        
+        const now = new Date();
+        const min = now.getMinutes();
+        if (DEV) console.log({ min, tasks: taskManager.tasks });
+        for (let task of taskManager.tasks) {
+            if (min % task.interval == 0) {
+                task.cb(task.id);
+            }
+        }
+    } catch (err) {
+        console.log(err);
+    }
+};
+
+export async function scheduleAllTasks() {
+    try {
+        timedLog("Init global job...")
+        scheduleJob(`job-${Date.now()}`, botJobSpecs(1), globalJob);
+    } catch (err) {
+        console.log("FAILED TO SCHEDULE ALL TASKS", err);
     }
 }

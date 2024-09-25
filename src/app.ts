@@ -54,7 +54,8 @@ import { addBotJob } from "./utils/orders/funcs";
 import { botLog } from "./utils/functions";
 import {  crossArbitWsList, initArbitWs, triArbitWsList } from "./classes/tu-ws";
 import { TuArbitWs } from "./classes/tu";
-import { fetchAndStoreBooks } from "./utils/funcs4";
+import { addBooksTask, fetchAndStoreBooks, scheduleAllTasks } from "./utils/funcs4";
+import { taskManager } from "./utils/consts3";
 
 dotenv.config();
 // view engine setup
@@ -141,7 +142,10 @@ const main = async () => {
     const config = await TuConfig.findOne({}).exec() ?? new TuConfig()
     await config.save()
 
-    fetchAndStoreBooks()
+    //fetchAndStoreBooks()
+    await scheduleAllTasks()
+    if (config.fetch_orderbook_enabled)
+        addBooksTask(config)
 
     const activeBots = await Bot.find({ active: true }).exec();
     setJobs([]);

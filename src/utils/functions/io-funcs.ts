@@ -313,7 +313,7 @@ export const onCointest = async (data: IObj, client?: Socket, io?: Server) => {
         prefix = prefix ? `${prefix}_` : "";
         const sub = demo ? "demo" : "live";
 
-        const savePath = `_data/rf/coins/${year}/${sub}/${prefix}${_platName}_${str.name}_${interval}m-${sub}.json`;
+        const savePath = `_data/rf/coins/${year}/${sub}/${prefix}${_platName}_${parent.toUpperCase()}_${str.name}_${interval}m-${sub}.json`;
 
         client?.emit(ep, `${platform}: BEGIN COINTEST...`);
 
