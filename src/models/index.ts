@@ -1,12 +1,7 @@
 import { InferSchemaType, model } from "mongoose";
 import { UserSchema } from "./user"
-import { BotSchema } from "./bot";
-import { OrderSchema } from "./order";
+import { BeeSchema } from "./bee";
 
-const User = model("User", UserSchema, )
-const Bot = model("Bot", BotSchema, )
-const Order = model("Order", OrderSchema, )
-export type TBot = typeof Bot
-export { User, Bot, Order }
+export const User = model("User", UserSchema, )
+export const Bee = model("Bee", BeeSchema, )
 
-const o = new Order()

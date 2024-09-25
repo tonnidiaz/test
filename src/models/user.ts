@@ -38,7 +38,6 @@ const UserSchema = new Schema(
             type: String,
             required: true,
         },
-        bots: {type: [Schema.ObjectId], ref: "Bot"}
     },
     { timestamps: true }
 );

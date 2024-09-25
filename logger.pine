@@ -1,7 +1,0 @@
-o = str.tostring(array.from((open)))
-h = str.tostring(array.from((high)))
-l = str.tostring(array.from((low)))
-c = str.tostring(array.from((close)))
-
-d = '"o": ' + o + ', "h": ' + h + ', "l": ' + l + ', "c": ' + c
-log.info('{' + d +  '}') 

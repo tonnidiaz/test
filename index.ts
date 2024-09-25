@@ -2,13 +2,12 @@
 import app from './src/app';
 var debug = require('debug')('backend:server');
 //var http = require('http');
-import io from './src/utils/io';
 import http from 'http'
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '8000');
+var port = normalizePort(process.env.PORT || '5000');
 app.set('port', port);
 
 /**
@@ -29,7 +28,6 @@ server.on('listening', onListening);
 
 /* SOCKETIO */
 try{
-    io.attach(server)
 }catch(e){
     console.log(e)
 }

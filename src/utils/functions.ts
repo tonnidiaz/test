@@ -1,9 +1,11 @@
-import { OTP } from "../models/otp";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import fs from "fs";
 const { env } = process;
 import { Response } from "express";
+import { IObj } from "./interfaces"
+import { IBee } from "@/models/bee";
+import { Job } from "node-schedule";
 
 function randomInRange(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -21,27 +23,11 @@ const genToken = (data: IObj, exp?: string | number | undefined) => {
           )
         : jwt.sign({ payload: data }, SECRET_KEY!);
 };
-const genOTP = async (phone?: string, email?: string) => {
-    const pin = randomInRange(1000, 9999);
-    const otp = new OTP();
-    otp.pin = pin;
-    if (phone) otp.phone = phone;
-    else otp.email = email;
-    await otp.save();
-    return otp;
-};
 
 export function clog(message?: any, ...params: any[]) {
     console.log(message, ...params);
 }
 
-import axios from "axios";
-import { IObj } from "./interfaces";
-import { IBot } from "@/models/bot";
-import { instruments } from "./constants";
-import { okxInstrus } from "@/data/okx-instrus";
-import { binanceInfo } from "./binance-info";
-import { parseDate } from "./funcs2";
 
 const tunedErr = (res: Response, status: number, msg: string, e?: any) => {
     if (e) {
@@ -207,16 +193,35 @@ export const isEmail = (emailAdress: string) => {
     let regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
     return emailAdress.match(regex) ? true : false;
 };
-export { sendMail, getStoreDetails, genToken, genOTP, randomInRange, tunedErr };
+export { sendMail, getStoreDetails, genToken, randomInRange, tunedErr };
 
 export const readJson = (fp: string) => {
     const data = fs.readFileSync(fp, { encoding: "utf-8" });
     return JSON.parse(data);
 };
 
-export const botLog = (bot: IBot, data: any) => {
-    console.log(`\n[${parseDate(new Date())}] [ ${bot.name} ]`, data, '\n');
+const ddNum = (e: any) => {
+    e = `${e}`.trim();
+    return e.length == 1 ? `0${e}` : e;
 };
+const toISOString = (date: string) => {
+    let dateArr = date.split(",");
+    let time = dateArr[1];
+    time = time
+        .split(":")
+        .map((el) => ddNum(el))
+        .join(":");
+    dateArr = dateArr[0].split("/");
+    date = `${dateArr[0]}-${ddNum(dateArr[1])}-${ddNum(dateArr[2])}`;
+    return `${date} ${time}+02:00`;
+};
+export const parseDate = (date: Date | string | number) =>
+    toISOString(
+        new Date(date).toLocaleString("en-ZA", {
+            timeZone: "Africa/Johannesburg",
+        })
+    );
+
 
 export const timedLog = (...args)=>console.log(`[${parseDate(new Date())}]`, ...args)
 export function capitalizeFirstLetter(string) {
@@ -228,72 +233,6 @@ export function toFixed(num: number, dec: number) {
     return `${num}`.includes('e') ? num : Number(num.toString().match(re)![0]);
 }
 
-export function precision(a: number) {
-    if (!isFinite(a)) return 0;
-    var e = 1,
-        p = 0;
-    while (Math.round(a * e) / e !== a) {
-        e *= 10;
-        p++;
-    }
-    return p;
-}
-
-export function getCoinPrecision(
-    pair: string[],
-    oType: 'limit' | 'market',
-    plat: "bybit" | "okx" | "binance"
-) {
-    const instru: IObj | undefined =
-        plat == "binance" ? binanceInfo.symbols.find(el=> el.baseAsset == pair[0] && el.quoteAsset == pair[1]) : (plat == "bybit"
-            ? instruments.find(
-                  (el) =>
-                      el.baseCoin == pair[0] && el.quoteCoin == pair[1]
-              )
-            : okxInstrus.find(
-                  (el) => el.baseCcy == pair[0] && el.quoteCcy == pair[1]
-              ));
-    if (!instru) return 0;
-    if (plat == "binance"){return Number(oType == "market" ? instru.quoteAssetPrecision : instru.baseAssetPrecision)}
-    const pr = (plat == "bybit"
-            ? oType == "market"
-                ? instru.quotePrecision
-                : instru?.basePrecision
-            : oType == "market"
-            ? instru.tickSz
-            : instru.lotSz);
-    return precision(Number(pr));
-}
-export function getPricePrecision(pair: string[], plat: "binance" | "bybit" | "okx") {
-    const instru: IObj | undefined =
-        plat == "binance" ? binanceInfo.symbols.find(el=> el.baseAsset == pair[0] && el.quoteAsset == pair[1]) : ( plat == "bybit"
-            ? instruments.find(
-                  (el) =>
-                      el.baseCoin == pair[0] && el.quoteCoin == pair[1]
-              )
-            : okxInstrus.find(
-                  (el) => el.baseCcy == pair[0] && el.quoteCcy == pair[1]
-              ));
-    if (!instru) return 0;
-    
-    return plat == 'binance' ? Number(instru.quoteAssetPrecision) :  precision(
-        Number(instru[plat == "bybit" ? "minPricePrecision" : "tickSz"])
-    );
-}
-export const sleep = async (ms: number) => {
-    await new Promise((res) => setTimeout(res, ms));
-};
-
-
-
-export const isSameDate = (d1: Date, d2: Date)=>{
-    const _d1 = d1.toISOString().split('T')
-    const _d1Date = _d1[0], _d1Time = _d1[1].slice(0, 5)
-
-    const _d2 = d2.toISOString().split('T')
-    const _d2Date = _d2[0], _d2Time = _d2[1].slice(0, 5)
-    return _d1Date == _d2Date && _d1Time == _d2Time
-}
 
 export const isBetween = (l: number, num: number, h: number)=>{
     let ret = false
@@ -309,4 +248,15 @@ export const isBetween = (l: number, num: number, h: number)=>{
 
 export function randomNum(min: number, max: number) {
     return Math.random() * (max - min) + min;
+}
+
+export const beeJob = async (job: Job, bee: IBee)=>{
+    try {
+        if (!bee.active) return
+        timedLog(`Bee-${bee.name} sting`)
+        bee.stings.push(Date.now().toString())
+        await bee.save()
+    } catch (err) {
+        
+    }
 }

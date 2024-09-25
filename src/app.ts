@@ -1,34 +1,3 @@
-/* const ddNum = (e: any) => {
-    e = `${e}`.trim();
-    return e.length == 1 ? `0${e}` : e;
-};
-const toISOString = (date: string) => {
-    let dateArr = date.split(",");
-    let time = dateArr[1];
-    time = time
-        .split(":")
-        .map((el) => ddNum(el))
-        .join(":");
-    dateArr = dateArr[0].split("/");
-    date = `${dateArr[0]}-${ddNum(dateArr[1])}-${ddNum(dateArr[2])}`;
-    return `${date} ${time}+02:00`;
-};
-const parseDate = (date: Date | string) =>
-    toISOString(
-        new Date(date).toLocaleString("en-ZA", {
-            timeZone: "Africa/Johannesburg",
-        })
-    );
-(function(){
-    if(console.log){
-        var old = console.log;
-        console.log = function(){
-            Array.prototype.unshift.call(arguments, `[${parseDate(new Date())}]`);
-            old.apply(this, arguments as any)
-        }
-    }  
-})(); */
-
 import createError from "http-errors";
 import express from "express";
 import path from "path";
@@ -37,19 +6,15 @@ import logger from "morgan";
 
 import indexRouter from "./routes/index";
 import usersRouter from "./routes/users";
-import authRouter from "./routes/auth";
-import botsRouter from "./routes/bots";
 
 const app = express();
 import { default as mongoose } from "mongoose";
 import cors from "cors";
-import { DEV, setJobs } from "./utils/constants";
+import { botJobSpecs, DEV } from "./utils/constants";
 import dotenv from "dotenv";
-import { Bot, Order } from "./models";
-import { addBotJob } from "./utils/orders/funcs";
-//import { wsOkx } from "./classes/main-okx";
-import { botLog } from "./utils/functions";
-import { wsOkx } from "./classes/main-okx";
+import { Bee } from "./models";
+import { scheduleJob } from "node-schedule";
+import { beeJob } from "./utils/functions";
 
 dotenv.config();
 // view engine setup
@@ -86,8 +51,6 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
-app.use("/auth", authRouter);
-app.use("/bots", botsRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -105,50 +68,31 @@ app.use(function (err, req, res, next) {
     res.render("error");
 });
 
-/* import schedule, {Job} from "node-schedule"
+const init = async () => {
+    try {
+        console.log("INIT...");
+        // Bee.watch().on("init", e=>{
+        //     console.log("ON INIT", e)
+        // }).on("error", e=>{
+        //     console.log("ON ERROR", e) 
+        // }).on("change", change=>{
+        //     console.log({change});
+        // }).on("close", e=>{
+        //     console.log("ON INIT", e) 
+        // })
+        
+        const activeBees = await Bee.find({ active: true }).exec();
+        console.log({ activeBees: activeBees.length });
 
-let cnt = 0
-const jobs : {job: Job, id: string}[] = []
-
-const job = schedule.scheduleJob("* * * * * *", function(){
-  console.log(`Hello world: ${cnt}`);
-  if (cnt >= 5){
-    const jb = jobs.find(e=>e.id == "1")?.job
-    jb?.cancel()
-    console.log("Job cancelled");
-    setTimeout(()=>{
-        cnt = 0
-        jb?.reschedule("* * * * * *")
-    }, 2000)
-  }
-  cnt ++
-});
-
-jobs.push({job, id: "1"}) */
-
-const main = async () => {
-    const activeBots = await Bot.find({ active: true }).exec();
-    setJobs([]);
-    for (let bot of activeBots) {
-        await addBotJob(bot);
-        botLog(bot, "INITIALIZING WS...");
-        if (bot.orders.length) {
-            const lastOrder = await Order.findById(
-                bot.orders[bot.orders.length - 1]
-            ).exec();
-            if (
-                lastOrder &&
-                lastOrder.side == "sell" &&
-                !lastOrder.is_closed &&
-                lastOrder.sell_price != 0
-            ) {
-                await wsOkx.addBot(bot.id);
-            }
-        } 
-       // await wsOkx.sub(bot);
+        for (let bee of activeBees) {
+            const job = scheduleJob(bee.id, botJobSpecs(bee.interval), () =>
+                beeJob(job, bee)
+            );
+        }
+    } catch (err) {
+        console.log(err);
     }
-    //new MainOKX()
 };
+init();
 
-main();
 export default app;
