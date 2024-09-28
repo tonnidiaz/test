@@ -1,0 +1,18 @@
+{
+    "version": 2,
+    "builds": [
+      {
+        "src": "apps/nxpress/package.json",
+        "use": "@vercel/node",
+        "config": {
+          "includeFiles": "dist/apps/nxpress/**"
+        }
+      }
+    ],
+    "routes": [
+      {
+        "src": "/nxpress/(.*)",
+        "dest": "apps/nxpress/$1"
+      }
+    ]
+  }

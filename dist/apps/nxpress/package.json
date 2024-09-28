@@ -1,9 +1,0 @@
-{
-  "name": "nxpress",
-  "version": "0.0.1",
-  "dependencies": {
-    "express": "4.18.3"
-  },
-  "main": "./main.js",
-  "type": "commonjs"
-}

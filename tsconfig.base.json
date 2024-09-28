@@ -13,6 +13,7 @@
     "lib": ["es2020", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
+    "noImplicitAny": false,
     "baseUrl": ".",
     "paths": {
       "@_-nx-wp/shared-lib": ["shared-lib/src/index.ts"]
