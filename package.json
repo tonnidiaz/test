@@ -13,6 +13,7 @@
     "@nx/jest": "19.8.2",
     "@nx/js": "19.8.2",
     "@nx/node": "19.8.2",
+    "@nx/webpack": "^19.8.2",
     "@nx/workspace": "19.8.2",
     "@swc-node/register": "~1.9.1",
     "@swc/core": "~1.5.7",
