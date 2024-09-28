@@ -1,5 +1,5 @@
 {
   "version": 2,
 
-  "installCommand": "yum install hostname && npm install"
+  "installCommand": "yum install -y hostname && npm install"
 }
