@@ -299,20 +299,20 @@
 </template>
 
 <script setup lang="ts">
-import $ from "jquery";
-import UDivider from "@/components/UI/UDivider.vue";
-import { useAppStore } from "~/src/stores/app";
+
+import UDivider from "~/components/UI/UDivider.vue";
+import { useAppStore } from "@/src/stores/app";
 import {
     selectIntervals,
     selectPlatforms,
-    selectParents,
-    socket,
+    selectSymbols,
+    socket, SITE
 } from "~/utils/constants";
-import { numToWords, parseDate } from "~/utils/funcs";
+import { formatter, numToWords, parseDate } from "~/utils/funcs";
 import { ref, reactive, onMounted, watch } from "vue";
-import type { IObj } from "~/utils/interfaces";
 import { toSelectStrategies } from "~/utils/funcs";
 import {storeToRefs} from 'pinia'
+import { IObj } from "@/src/common";
 
 
 const appStore = useAppStore();
@@ -495,7 +495,6 @@ const handleSubmit = async (e: any) => {
         console.log(e);
     }
 };
-
 watch(formState, state=>{
     sessionStorage.setItem(`${location.pathname}__state`, JSON.stringify(state))
 }, {deep: true, immediate: false})

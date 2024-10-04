@@ -1,12 +1,7 @@
+
+import { binanceInstrus, bitgetInstrus, bybitInstrus, gateioInstrus, kucoinInstrus, mexcInstrus, okxInstrus } from "@/src/common";
 import axios from "axios";
 import { Socket, io } from "socket.io-client";
-import { okxInstrus } from "../src/data/okx-instrus";
-import { bybitInstrus } from "~/src/data/bybit-instrus";
-import { binanceInfo } from "~/src/data/binance-info";
-import { gateioInstrus } from "../src/data/gateio-instrus";
-import { bitgetInstrus } from "../src/data/bitget-instrus";
-import { mexcInstrus } from "../src/data/mexc-instrus";
-import { kucoinInstrus } from "../src/data/kucoin-instrus";
 const SITE = "TuTrader";
 const __DEV__ = process.env.NODE_ENV == "development";
 const ROOT = __DEV__ ? "http://localhost:3000" : "https://tu-trader.vercel.app";
@@ -55,7 +50,7 @@ const populateSymbols = () =>{
     }
 
     if (use_binance)
-     for (let el of binanceInfo.symbols) {
+     for (let el of binanceInstrus) {
         if (el.isSpotTradingAllowed && el.status == 'TRADING')
             symbols.push([el.baseAsset, el.quoteAsset])
     }

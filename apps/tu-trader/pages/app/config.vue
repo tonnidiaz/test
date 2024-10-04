@@ -38,9 +38,9 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { selectIntervals, } from '~/utils/constants';
+import { selectIntervals, SITE} from '~/utils/constants';
 import { api, } from '~/utils/api';
-import type { IObj } from '~/utils/interfaces';
+import { IObj } from '@/src/common';
 
 const formState = ref<IObj>({});
 

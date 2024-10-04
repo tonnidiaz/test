@@ -1,4 +1,6 @@
 import $ from "jquery";
+import { api, localApi } from "./api";
+import type { IObj } from "@/src/common";
 export const formatter = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",

@@ -314,15 +314,18 @@
 </template>
 
 <script setup lang="ts">
+import { IObj } from "@/src/common";
 import $ from "jquery";
-import UDivider from "@/components/UI/UDivider.vue";
-import { useAppStore } from "~/src/stores/app";
+import { storeToRefs } from "pinia";
+import UDivider from "~/components/UI/UDivider.vue";
+import { useAppStore } from "@/src/stores/app";
 import {
     selectIntervals,
     selectPlatforms,
-    selectParents,
+    SITE,
+    socket,
 } from "~/utils/constants";
-import { numToWords } from "~/utils/funcs";
+import { formatter, parseDate } from "~/utils/funcs";
 
 const types = ["tri", "cross"],
     bases = [

@@ -1,4 +1,4 @@
-import { Schema, InferSchemaType, Document } from "mongoose";
+import { Schema, type InferSchemaType, Document } from "mongoose";
 import { UserPermissions } from "../utils/enums";
 
 const UserSchema = new Schema(

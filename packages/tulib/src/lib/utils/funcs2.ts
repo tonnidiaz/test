@@ -1,6 +1,6 @@
 import { Order } from "../models";
-import { IBot } from "../models/bot";
-import { IOrder } from "../models/order";
+import type { IBot } from "../models/bot";
+import type { IOrder } from "../models/order";
 
 export const findBotOrders = async (bot: IBot) => {
     const orders = await Order.find({

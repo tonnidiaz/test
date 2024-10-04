@@ -1,5 +1,5 @@
-import { platList } from "@common/utils/consts3";
-import { Schema, HydratedDocumentFromSchema } from "mongoose";
+import { platList } from "../common";
+import { Schema, type HydratedDocumentFromSchema } from "mongoose";
  const  TBook = {
     _id: false,
     px: Number,

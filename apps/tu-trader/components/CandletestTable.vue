@@ -53,6 +53,8 @@
 </template>
 
 <script setup lang="ts">
+import { type IObj } from '@/src/common';
+
 const q = ref(""),
     notes = ref(""),
     data = ref<IObj>();

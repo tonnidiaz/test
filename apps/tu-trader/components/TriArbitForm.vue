@@ -47,11 +47,9 @@
 
 
 <script setup lang="ts">
-import type { IObj, ISelectItem } from "~/utils/interfaces";
-import TuSelect from "./TuSelect.vue";
-import { useAppStore } from "~/src/stores/app";
-import { arbitTypes, botTypes, selectIntervals } from "~/utils/constants";
-import { useUserStore } from "~/src/stores/user";
+
+import { type IObj } from "@/src/common";
+import { useUserStore } from "@/src/stores/user";
 import { listToOpt } from "~/utils/funcs";
 const userStore = useUserStore();
 

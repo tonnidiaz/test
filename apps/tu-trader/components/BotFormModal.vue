@@ -225,12 +225,15 @@
 </template>
 
 <script setup lang="ts">
-import type { ISelectItem } from "~/utils/interfaces";
 import TuSelect from "./TuSelect.vue";
-import { useAppStore } from "~/src/stores/app";
+import { useAppStore } from "@/src/stores/app";
 import { arbitTypes, botTypes, selectIntervals } from "~/utils/constants";
-import { useUserStore } from "~/src/stores/user";
-import { listToOpt } from "~/utils/funcs";
+import { useUserStore } from "@/src/stores/user";
+import { listToOpt, toSelectStrategies } from "~/utils/funcs";
+import { type IObj } from "@/src/common";
+import { storeToRefs } from "pinia";
+import { localApi } from "~/utils/api";
+
 const userStore = useUserStore();
 
 const { strategies, platforms } = storeToRefs(useAppStore());

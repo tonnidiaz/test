@@ -1,11 +1,8 @@
-import { IBot, ITriArbitOrder } from "../models/bot";
+import type { IBot, ITriArbitOrder } from "../models/bot";
 import { TriArbitOrder, Order } from "../models";
 import axios from "axios";
 import * as crypto from "crypto";
-import { TPlatName, IObj } from "@common/utils/interfaces";
-import { klinesRootDir } from "@common/utils/constants";
-import { parseDate } from "@common/utils/funcs2";
-import { getSymbol } from "@common/utils/functions";
+import { type TPlatName, type IObj, getSymbol, klinesRootDir, parseDate } from "../common";
 import { botLog } from "./functions";
 
 export const getKlinesPath = ({

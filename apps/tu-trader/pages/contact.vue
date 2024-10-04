@@ -47,7 +47,7 @@
   </template>
 
   <script setup lang="ts">
-  import {ROOT, SITE, EMAIL} from '@/utils/constants';
+  import {ROOT, SITE, EMAIL} from '~/utils/constants';
 import $ from "jquery"
 
 function contactUs(e: any) {

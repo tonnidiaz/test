@@ -7,9 +7,7 @@
     "declaration": true,
     "types": ["node"],
     "baseUrl": "./",
-    "paths": {
-        "@common/*": ["../common/src/lib/*"]
-    }
+    "composite": true
   },
   "exclude": [
     "jest.config.ts",

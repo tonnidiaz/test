@@ -56,7 +56,7 @@
 
 <script setup lang="ts">
 import { el } from "date-fns/locale";
-import { useAppStore } from "~/src/stores/app";
+import { useAppStore } from "@/src/stores/app";
 
 const appStore = useAppStore();
 const { strategies, platforms } = storeToRefs(appStore);

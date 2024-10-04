@@ -1,17 +1,21 @@
 {
   "extends": "@repo/typescript-config/common.json",
   "compilerOptions": {
-    "module": "ESNext",
-    "target": "ESNext"
+    "module": "CommonJS",
+    // "target": "ESNext",
+    "rootDir": "../../",
+    "importsNotUsedAsValues": "preserve"
+    
+    // "paths": {"@common/*": ["../common/src/lib/*"]}
   },
   "files": [],
-  "include": [],
+  "include": ["../common/src/**/*.ts"],
   "references": [
-    {
-      "path": "./tsconfig.lib.json"
-    },
-    {
-      "path": "./tsconfig.spec.json"
-    }
+    // {
+    //   "path": "./tsconfig.lib.json"
+    // },
+    // {
+    //   "path": "./tsconfig.spec.json"
+    // }
   ]
 }

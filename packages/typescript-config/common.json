@@ -3,6 +3,9 @@
   "display": "Common",
   "extends": "./base.json",
   "compilerOptions": {
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "noImplicitAny": false,
+    "strict": false,
+    "verbatimModuleSyntax": false
   }
 }

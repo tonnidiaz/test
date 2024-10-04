@@ -126,8 +126,9 @@
     </NuxtLink>
 </template>
 <script setup lang="ts">
-import { delBot } from "~/utils/funcs";
-import { useUserStore } from "~/src/stores/user";
+import { delBot, clearBotOrders, activateBot } from "~/utils/funcs";
+import { useUserStore } from "@/src/stores/user";
+import { storeToRefs } from "pinia";
 
 const { setBots } = useUserStore();
 const { bots } = storeToRefs(useUserStore());

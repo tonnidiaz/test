@@ -3,8 +3,12 @@
   "extends": "./.nuxt/tsconfig.json",
   "compilerOptions": {
     "baseUrl": ".",
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "paths": {
+        // "@common": ["../../packages/common/src/index.ts"]
+    }
   },
+  "include": [],
   "exclude": ["bend-test", "bend-old", "bend-worker", "bend-express"]
 }
  

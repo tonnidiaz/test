@@ -11,10 +11,12 @@
 <script setup lang="ts">
 import Navbar from "~/components/Navbar.vue";
 import Sidebar from "~/components/Sidebar.vue";
-import { useAppStore } from "~/src/stores/app";
-import { useUserStore } from "~/src/stores/user";
-import { setSocket } from "~/utils/constants";
+import { useAppStore } from "@/src/stores/app";
+import { useUserStore } from "@/src/stores/user";
+import { BEND_URL, setSocket, socket } from "~/utils/constants";
 import { Socket, io } from "socket.io-client";
+import { storeToRefs } from "pinia";
+import { localApi, api } from "~/utils/api";
 
 const appStore = useAppStore();
 const { setReady, setStrategies, setPlatforms, setParents } = appStore;

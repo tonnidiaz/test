@@ -25,7 +25,6 @@
  watch(route, (old, val)=>{
    //console.log(old, val);
     //isOpen.value = false
-    let t = ensure
 }, {deep: true, immediate: true})
  useHead({
    //script: [{src: '/assets/pace-1.2.4/pace.min.js'}]

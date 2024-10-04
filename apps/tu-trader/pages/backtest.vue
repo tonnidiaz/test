@@ -311,15 +311,19 @@
 </template>
 
 <script setup lang="ts">
-import $ from "jquery";
-import UDivider from "@/components/UI/UDivider.vue";
-import { useAppStore } from "~/src/stores/app";
+import UDivider from "@/components/UDivider.vue";
+import { useAppStore } from "@/src/stores/app";
 import {
     selectIntervals,
     selectParents,
     selectPlatforms,
-} from "~/utils/constants";
-import { numToWords } from "~/utils/funcs";
+    selectSymbols,
+    socket,
+    SITE
+} from "@/utils/constants";
+import { formatter, parseDate, toSelectStrategies } from "@/utils/funcs";
+import { type IObj } from "@cmn/utils/interfaces";
+import { storeToRefs } from "pinia";
 const appStore = useAppStore();
 const initRes = { data: {} };
 

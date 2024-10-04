@@ -4,7 +4,6 @@ export * from './lib/models';
 export * from './lib/models/book';
 export * from './lib/models/bot';
 export * from './lib/models/config';
-
 export * from './lib/models/order';
 export * from './lib/models/otp';
 export * from './lib/models/test';
@@ -12,7 +11,6 @@ export * from './lib/models/user';
 export * from './lib/shared-lib';
 export * from './lib/utils/constants';
 export * from './lib/utils/consts2';
-export * from './lib/utils/consts3';
 export * from './lib/utils/enums';
 export * from './lib/utils/funcs2';
 export * from './lib/utils/funcs3';

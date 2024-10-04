@@ -172,11 +172,15 @@
 </template>
 
 <script setup lang="ts">
-import $ from "jquery"; 
+import { parseDate } from "@/src/common";
+import { IObj } from "@/src/common";
+import { storeToRefs } from "pinia";
 import TuDatePicker from "~/components/TuDatePicker.vue";
 import TuSelect from "~/components/TuSelect.vue";
-import { useAppStore } from "~/src/stores/app";
-import { selectPlatforms } from "~/utils/constants";
+import { useAppStore } from "@/src/stores/app";
+import { selectPlatforms, socket, SITE } from "~/utils/constants";
+import { formatter } from "~/utils/funcs";
+
 const appStore = useAppStore();
 const initRes = { data: [] };
 const res = ref<IObj>(initRes);

@@ -1,6 +1,6 @@
-import { platList } from "@common/utils/consts3";
+import { platList } from "../common";
 import {
-    HydratedDocumentFromSchema,
+    type HydratedDocumentFromSchema,
     Schema,
     Types,
 } from "mongoose";

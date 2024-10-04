@@ -422,11 +422,13 @@
 </template>
 
 <script setup lang="ts">
-import { el } from "date-fns/locale";
-import { useAppStore } from "~/src/stores/app";
-import VueJsonPretty from "vue-json-pretty";
-import "vue-json-pretty/lib/styles.css";
-import type { toFixed } from "~/bend-express/src/utils/functions";
+import { useAppStore } from "@/src/stores/app";
+import { sleep } from "@/src/common";
+import { SITE, alphabets, arbitTypes } from "~/utils/constants";
+import { IObj } from "@/src/common";
+import { storeToRefs } from "pinia";
+import { useTuFetch, api } from "~/utils/api";
+import { clearBotOrders, listToOpt, activateBot } from "~/utils/funcs";
 const { strategies, platforms } = storeToRefs(useAppStore());
 
 enum EOrder {

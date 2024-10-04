@@ -10,7 +10,6 @@
 </template>
 
 <script lang="ts" setup>
-import $ from "jquery";
 import { ref, computed, onMounted, onUnmounted } from "vue";
 const modalRef = ref<HTMLDivElement>();
 const props = defineProps({
@@ -39,7 +38,7 @@ const _onOverlayClick = (ev: any)=>{
     const modals = document.querySelectorAll('.tu-modal__cont');
     const menus = document.querySelectorAll('.menu');
    
-    const isChild = [...modals].some(el=> el.contains(ev.target)) || [...menus].some(el=> el.contains(ev.target))
+    const isChild = [...modals as any].some(el=> el.contains(ev.target)) || [...menus as any].some(el=> el.contains(ev.target))
     if (!isChild) open.value = false
 }
 onMounted(() => {

@@ -7,7 +7,7 @@
                     </div>
                     <button
                         class="h-25px w-25px rounded-full card-borde flex _ai-c _jc-c"
-                        @click="hideDrawer"
+                        @click="()=>hideDrawer()"
                     >
                         <i class="material-icons fs-18">close</i>
                     </button>
@@ -41,6 +41,8 @@
     </div>
 </template>
 <script setup lang="ts">
+import { SITE } from '~/utils/constants';
+
 const drawer = ref<HTMLDivElement>();
 
 function hideDrawer(rm = false) {

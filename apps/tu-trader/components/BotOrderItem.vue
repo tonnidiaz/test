@@ -139,6 +139,8 @@
 </template>
 
 <script lang="ts" setup>
+import { type IObj } from '@/src/common';
+
 defineProps({
     orders: Array<IObj>,
     isChild: { type: Boolean, default: false },

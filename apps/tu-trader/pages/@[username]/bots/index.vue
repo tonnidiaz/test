@@ -38,9 +38,11 @@
     </div>
 </template> 
 <script setup lang="ts">
+import { IObj } from "@/src/common";
 import { el } from "date-fns/locale";
-import { useUserStore } from "~/src/stores/user";
-import { useTuFetch } from "~/utils/api";
+import { storeToRefs } from "pinia";
+import { useUserStore } from "@/src/stores/user";
+import { BEND_URL, SITE } from "~/utils/constants";
 
 const _state = ref({all: false})
 const userStore = useUserStore();

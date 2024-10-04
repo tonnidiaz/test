@@ -23,7 +23,6 @@
 </template>
 
 <script setup lang="ts">
-import $ from "jquery";
 import CtxBody from "./CtxBody.vue";
 const x = ref(0),
     y = ref(0);

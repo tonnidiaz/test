@@ -23,6 +23,8 @@
 </template>
 
 <script setup lang="ts">
+import { formatter } from '~/utils/funcs';
+
 
 interface IStat {title: string, subtitle: any, click?: ()=> any, valClasses?: string, titleClasses?: string, classes?: string, hover?: string}
 const testStats : IStat[] = [

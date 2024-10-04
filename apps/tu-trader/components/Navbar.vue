@@ -99,11 +99,12 @@
         </div>
 </template>
 <script setup lang="ts">
-import { useUserStore } from "~/src/stores/user";
+
+import { useUserStore } from "@/src/stores/user";
 import CtxMenu from "./CtxMenu.vue";
 import { onMounted, ref } from "vue";
 import { storeToRefs } from "pinia";
-import { socket } from "~/utils/constants";
+import { SITE, socket } from "~/utils/constants";
 const ioConnected = ref(true)
 const menuOpen = ref(false);
 const { user } = storeToRefs(useUserStore());

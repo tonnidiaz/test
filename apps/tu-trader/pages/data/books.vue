@@ -91,7 +91,7 @@
 </template>
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { useAppStore } from "~/src/stores/app";
+import { useAppStore } from "@/src/stores/app";
 import {
     selectIntervals,
     selectParents,
@@ -99,9 +99,9 @@ import {
     SITE,
     symbols,
 } from "~/utils/constants";
-import type { IObj } from "~/utils/interfaces";
 import { storeToRefs } from "pinia";
-import { api, localApi } from "@/utils/api";
+import { api, localApi } from "~/utils/api";
+import { IObj } from "@/src/common";
 const appStore = useAppStore();
 
 const initRes = { data: {} };

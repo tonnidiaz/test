@@ -36,7 +36,10 @@
     </div>
 </template>
 <script lang="ts" setup>
-import { useUserStore } from '~/src/stores/user';
+import { IObj } from '@/src/common';
+import { useUserStore } from '@/src/stores/user';
+import { localApi } from '~/utils/api';
+import { STORAGE_KEYS, SITE } from '~/utils/constants';
 
     const btnDisabled = ref(false), setBtnDisabled = (v: boolean)=> btnDisabled.value = v;
     const passType = ref("password"), err = ref(""), setPassType = (v: string) => passType.value = v, setErr = (v: string) => err.value = v;
@@ -71,5 +74,5 @@ import { useUserStore } from '~/src/stores/user';
         }
      }
 
-    definePageMeta({layout: 'blank'})
+    definePageMeta({layout: 'blank' as any})
 </script>

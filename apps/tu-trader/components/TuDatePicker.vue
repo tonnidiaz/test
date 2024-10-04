@@ -32,7 +32,7 @@
 import { format, isDate } from "date-fns";
 const modalOpen = ref(false);
 
-import "v-calendar/dist/style.css";
+import { isValidDate } from "~/utils/funcs";
 
 const props = defineProps({
     modelValue: {
