@@ -2,9 +2,10 @@
     "name": "tu",
     "version": "0.0.0",
     "private": true,
+    "main": "src/index.ts",
     "scripts": {
-        "build": "tsc",
-        "start": "node dist/src/index.js",
+        "build": "rimraf dist && tsc",
+        "start": "tsx src/index.ts",
         "dev": "tsx watch src/index.ts"
     },
     "dependencies": {
@@ -24,6 +25,7 @@
         "tsx": "*",
         "typescript": "*",
         "ts-node": "*",
-        "ts-alias": "*"
+        "ts-alias": "*",
+        "rimraf": "*"
     }
 }
