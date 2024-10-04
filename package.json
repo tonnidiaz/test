@@ -1,0 +1,29 @@
+{
+    "name": "tu",
+    "version": "0.0.0",
+    "private": true,
+    "scripts": {
+        "build": "tsc",
+        "start": "node dist/src/index.js",
+        "dev": "tsx watch src/index.ts"
+    },
+    "dependencies": {
+        "express": "*",
+        "dotenv": "*",
+        "cors": "*",
+        "morgan": "*",
+        "cookie-parser": "*",
+        "pug": "*",
+        "http-errors": "*"
+    },
+    "devDependencies": {
+        "@types/cookie-parser": "*",
+        "@types/cors": "*",
+        "@types/express": "*",
+        "@types/node": "*",
+        "tsx": "*",
+        "typescript": "*",
+        "ts-node": "*",
+        "ts-alias": "*"
+    }
+}
