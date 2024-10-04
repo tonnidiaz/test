@@ -5,6 +5,7 @@ export default defineNuxtConfig({
         "postcss-import",
         /*"nuxt-simple-sitemap"*/
     ],
+    imports: {autoImport: true},
 
     //css: ['~/assets/css/tailwind.css'],
 

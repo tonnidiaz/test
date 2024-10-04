@@ -9,6 +9,6 @@
     }
   },
   "include": [],
-  "exclude": ["bend-test", "bend-old", "bend-worker", "bend-express"]
+  "exclude": ["../../node_modules"]
 }
  
