@@ -1,11 +1,18 @@
 import Image from "next/image";
 import { Button } from "@repo/ui/button";
 import styles from "./page.module.css";
+import {commonNames} from '@repo/common/src/lib/utils/constants'
+
 
 export default function Home() {
+    const names = commonNames
   return (
     <div className={styles.page}>
       <main className={styles.main}>
+        <h2>Names:</h2>
+        <ol>
+            {names.map((el, i)=> <li key={`name-${i}`}>{el} Doe</li>)}
+        </ol>
         <Image
           className={styles.logo}
           src="/next.svg"

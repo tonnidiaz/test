@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "target": "ESNext",
+    "outDir": "../../dist/out-tsc",
+    "declaration": true,
+    "types": ["node"],
+    "baseUrl": "./",
+    "paths": {
+        "@common/*": ["../common/src/lib/*"]
+    }
+  },
+  "exclude": [
+    "jest.config.ts",
+    "src/**/*.spec.ts",
+    "src/**/*.test.ts",
+    "../common/src/**/*.spec.ts"
+  ],
+  "include": ["src/**/*.ts", "../common/src/**/*.ts"]
+}

@@ -1,0 +1,8 @@
+{
+  "extends": "../.nuxt/tsconfig.server.json",
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "paths": {"@api/*": ["../bend-express/src/*"]}
+  },
+  "exclude": ["../bend-test", "../bend-old", "../bend-worker", "../bend-express"]
+}
