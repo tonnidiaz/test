@@ -1,8 +1,5 @@
 {
     "version": 2,
-    "crons":[
-        {"path": "/tasks/task1", "schedule": "*/1 * * * *"}
-    ],
     "builds": [
       {
         "src": "src/index.ts",
