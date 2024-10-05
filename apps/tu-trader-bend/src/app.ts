@@ -11,6 +11,8 @@ import logger from 'morgan';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import indexRouter from './routes';
+import { botJobSpecs } from '@repo/tulib/src';
+import { parseDate, timedLog } from '@repo/common/src';
 
 const app = express(); 
 
@@ -32,7 +34,10 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-
+app.get('/tasks/task1', (req, res)=>{
+    timedLog("Hello From task 1")
+    res.json({time: parseDate(new Date()), msg: "Task 1"})
+})
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
@@ -49,5 +54,12 @@ app.use(function (err, req, res, next) {
 });
 
 
+
+const main = async ()=>{
+    // Schedule a task that runs every minute
+    console.log(botJobSpecs(1));
+}
+
+main()
 export default app;
 
