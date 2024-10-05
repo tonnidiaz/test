@@ -9,21 +9,24 @@
         "dev": "tsx watch src/index.ts"
     },
     "dependencies": {
-        "express": "*",
-        "dotenv": "*",
-        "cors": "*",
-        "morgan": "*",
+        "@repo/common": "^1.0.0",
+        "@repo/tulib": "^1.0.0",
+        "@repo/typescript-config": "^0.0.0",
         "cookie-parser": "*",
-        "pug": "*",
-        "http-errors": "*"
+        "cors": "*",
+        "dotenv": "*",
+        "express": "*",
+        "http-errors": "*",
+        "morgan": "*",
+        "pug": "*"
     },
     "devDependencies": {
         "@types/cookie-parser": "*",
         "@types/cors": "*",
         "@types/express": "*",
         "@types/node": "*",
+        "rimraf": "*",
         "tsx": "*",
-        "typescript": "*",
-        "rimraf": "*"
+        "typescript": "*"
     }
 }
