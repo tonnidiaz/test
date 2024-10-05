@@ -1,12 +1,11 @@
 import { OTP } from '../models/otp';
-import { Response } from 'express';
 import { createTransport } from 'nodemailer';
 import { sign } from 'jsonwebtoken';
-import { IBot } from '../models/bot';
 import { mkdirSync, readFileSync, writeFileSync } from 'fs';
 import * as path from 'path'
-import {parseDate} from '@common/utils/funcs2'
-import { IObj } from '@common/utils/interfaces';
+import type { IObj } from '../common';
+import type { IBot } from '../models/bot';
+import {type Response} from 'express'
 
 export const clearTerminal = () => {
     process.stdout.write('\x1Bc');

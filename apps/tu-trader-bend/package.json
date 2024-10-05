@@ -1,0 +1,29 @@
+{
+    "name": "tu-trader-bend",
+    "version": "0.0.0",
+    "private": true,
+    "description": "Express app with typescript by Tu",
+    "author": "Tonni Diaz",
+    "scripts": {
+        "build": "rimraf dist && tsc",
+        "dev": "tsx watch src/index.ts"
+    },
+    "dependencies": {
+        "express": "*",
+        "dotenv": "*",
+        "cors": "*",
+        "morgan": "*",
+        "cookie-parser": "*",
+        "pug": "*",
+        "http-errors": "*"
+    },
+    "devDependencies": {
+        "@types/cookie-parser": "*",
+        "@types/cors": "*",
+        "@types/express": "*",
+        "@types/node": "*",
+        "tsx": "*",
+        "typescript": "*",
+        "rimraf": "*"
+    }
+}

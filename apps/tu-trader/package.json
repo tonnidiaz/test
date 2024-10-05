@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "build": "nuxt build",
-    "dev": "nuxt dev",
+    "dev": "NODE_OPTIONS=--max_old_space_size=4096 nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
@@ -15,8 +15,8 @@
     "@nuxt/ui": "^2.18.3",
     "@pinia/nuxt": "^0.5.2",
     "@popperjs/core": "^2.11.8",
-    "@repo/common": "^1.0.0",
-    "@repo/tulib": "^1.0.0",
+    "@repo/common": "1.0.0",
+    "@repo/tulib": "1.0.0",
     "axios": "^1.7.7",
     "bcrypt": "^5.1.1",
     "clipboard": "^2.0.11",

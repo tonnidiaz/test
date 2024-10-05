@@ -1,0 +1,23 @@
+{
+	"folders": [
+        {
+            "path": "."
+        },
+        {
+            "path": "apps/tu-trader"
+        },
+        {
+            "path": "../../Nuxt/tu-trader-lite"
+        },
+        {
+            "path": "../../__nx-wp/apps/nxpress"
+        },
+        {
+            "path": "../../tuxpress-gen"
+        },
+        {
+            "path": "apps/tu-trader-bend"
+        }
+    ],
+    "settings": {}
+}

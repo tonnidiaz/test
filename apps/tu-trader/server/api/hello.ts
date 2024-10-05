@@ -3,8 +3,9 @@ import { nuxtErr } from "../utils/funcs"
 
 export default defineEventHandler(async (e) =>{
     try {
-        const books = await TuBook.countDocuments()
-        return {hello: 'World', books}
+        console.log({user: e.context.user})
+        const books = 600
+        return {hello: 'World!!', books}
     } catch (err) {
         return nuxtErr(err)
     }
