@@ -3,17 +3,26 @@
   "version": "1.0.0",
   "description": "This library was generated with [Nx](https://nx.dev).",
   "main": "dist/index.js",
- 
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rimraf dist && tsc"
   },
   "author": "Tonni Diaz",
   "license": "ISC",
   "dependencies": {
+    "bignumber.js": "*",
+    "binance": "^2.13.5",
+    "binance-api-node": "^0.12.7",
+    "bitget-api": "^2.0.11",
     "bybit-api": "^3.10.19",
     "gate-api": "^5.60.1",
     "indicatorts": "^2.2.1",
     "kucoin-api": "^1.0.7",
-    "okx-api": "^1.4.6"
+    "mexc-api-sdk": "^1.0.3",
+    "okx-api": "^1.4.6",
+    "socket.io": "*"
+  },
+  "devDependencies": {
+    "rimraf": "*"
   }
 }

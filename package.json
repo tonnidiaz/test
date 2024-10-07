@@ -7,7 +7,8 @@
     "dev": "turbo dev",
     "dev:tu-trader": "",
     "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "dev:trader": "turbo dev --filter tu-trader --filter tu-trader-bend"
   },
   "devDependencies": {
     "prettier": "^3.2.5",

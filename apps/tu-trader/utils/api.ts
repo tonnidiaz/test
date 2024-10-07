@@ -5,6 +5,6 @@ export const useTuFetch : typeof useFetch= (...args)=> useFetch( BEND_URL + args
 export const api = (auth = false) => axios.create({ baseURL: BEND_URL, headers: {
     Authorization: auth ? `Bearer ${localStorage.getItem(STORAGE_KEYS.authTkn)}` : null, "Content-Type": "application/json"
 },  });
-export const localApi = (auth = false) => axios.create({ baseURL: '/api', headers: {
+export const localApi = (auth = false) => axios.create({ baseURL: API_URL, headers: {
     Authorization: auth ? `Bearer ${localStorage.getItem(STORAGE_KEYS.authTkn)}` : null, "Content-Type": "application/json"
 },  });

@@ -6,11 +6,10 @@
     "author": "Tonni Diaz",
     "scripts": {
         "build": "rimraf dist && tsc",
-        "dev": "tsx watch src/index.ts"
+        "dev": "tsx watch src/index.ts --tsconfig ./tsconfig.json"
     },
     "dependencies": {
         "@repo/common": "^1.0.0",
-        "@repo/tulib": "^1.0.0",
         "@repo/typescript-config": "^0.0.0",
         "cookie-parser": "*",
         "cors": "*",

@@ -11,8 +11,19 @@ import logger from 'morgan';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import indexRouter from './routes';
-import { botJobSpecs } from '@repo/tulib/src';
-import { parseDate, timedLog } from '@repo/common/src';
+
+
+/* Routes */
+import usersRouter from "./routes/users";
+import authRouter from "./routes/auth";
+import botsRouter from "./routes/bots";
+import rfRouter from "./routes/rf";
+import appRouter from "./routes/app";
+import ordersRouter from "./routes/orders";
+import booksRouter from "./routes/books";
+import { botJobSpecs } from '@cmn/utils/constants';
+import { parseDate } from '@cmn/utils/funcs2';
+import { timedLog } from '@cmn/utils/functions';
 
 const app = express(); 
 
@@ -34,6 +45,14 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
+app.use("/users", usersRouter);
+app.use("/auth", authRouter);
+app.use("/bots", botsRouter);
+app.use("/rf", rfRouter);
+app.use("/app", appRouter);
+app.use("/orders", ordersRouter);
+app.use("/books", booksRouter);
+
 app.get('/tasks/task1', (req, res)=>{
     timedLog("Hello From task 1")
     res.json({time: parseDate(new Date()), msg: "Task 1"})
@@ -62,4 +81,4 @@ const main = async ()=>{
 
 main()
 export default app;
-
+ 

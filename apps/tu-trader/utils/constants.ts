@@ -11,6 +11,7 @@ export const BEND_URL = __DEV__
     : heroku
     ? "https://tu-trader-3996d65ded90.herokuapp.com"
     : (koyeb ? "https://tu-trader.koyeb.app" : "https://tu-trader-mef0.onrender.com");
+export const API_URL = __DEV__ ? "http://localhost:5000" : "https://trader-bend.vercel.app"
 export const EMAIL = "tonnidiazed@gmail.com";
 export const DEVELOPER = "Tonni Diaz";
 export const SITE_SLOGAN = "A Tunedbass site";

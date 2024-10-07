@@ -1,17 +1,17 @@
 {
+    "$schema": "/media/tonni/win/src/Mint/Documents/RF/Web/tuxpress-gen/out/foo/tsconfig.json",
   "extends": "@repo/typescript-config/common.json",
   "compilerOptions": {
-    "module": "commonjs"
-  },
-  "files": [],
-  "include": [],
-  "references": [
-    {
-      "path": "./tsconfig.lib.json"
-    },
-    {
-      "path": "./tsconfig.spec.json"
+    "module": "commonjs",
+    "declaration": true,
+    "noEmit": false,
+    "baseUrl": ".",
+    "outDir": "./dist",
+    "paths": {
+        "@cmn/*": ["./src/*"]
     }
-  ]
+  },
+  "include": ["./src/**/*.ts", "**/*.ts"],
+  "exclude": ["dist", "out", ".out"]
 }
  

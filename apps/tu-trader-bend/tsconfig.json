@@ -2,18 +2,22 @@
     "extends": "@repo/typescript-config/base.json",
     "compilerOptions": {
         "module": "commonjs",
+        "lib": [ "es2022","es2020", "dom"],
+        // "module": "commonjs",
         "allowSyntheticDefaultImports": true,
         "target": "es2022",
-        "rootDir": "./",
+        "rootDir": "../../",
         "moduleResolution": "node",
         "baseUrl": ".",
         "outDir": "dist",
+        "rootDirs": ["../../packages/common/"],
         "paths": {
             "@/*": ["src/*"],
             "~/*": ["src/*"],
+            "@cmn/*": ["../../packages/common/src/*"],
             "*": ["node_modules/*", "src/types/*"]
         },
-        "esModuleInterop": true,
+        "esModuleInterop": false,
         "forceConsistentCasingInFileNames": true,
         "strict": false,
         "noImplicitAny": false,
@@ -22,6 +26,11 @@
         "isolatedModules": true,
         "sourceMap": true
     },
-    "include": ["src/**/*.ts", "./*.ts", "tests/**/*.ts"],
+    "include": [
+        "src/**/*.ts",
+        "./*.ts",
+        "tests/**/*.ts",
+        "../../packages/common/src/**/*.ts"
+    ],
     "exclude": ["node_modules", "**/*.spec.ts"]
 }
