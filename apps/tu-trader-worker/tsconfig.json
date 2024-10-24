@@ -3,13 +3,12 @@
     "compilerOptions": {
         "module": "commonjs",
         "lib": [ "es2022","es2020", "dom"],
-        // "module": "commonjs",
         "allowSyntheticDefaultImports": true,
         "target": "es2022",
         "rootDir": "../../",
         "moduleResolution": "node",
         "baseUrl": ".",
-        "outDir": "dist",
+        "outDir": "./dist",
         "rootDirs": ["../../packages/common/"],
         "paths": {
             "@/*": ["src/*"],
@@ -17,7 +16,7 @@
             "@cmn/*": ["../../packages/common/src/*"],
             "*": ["node_modules/*", "src/types/*"]
         },
-        "esModuleInterop": false,
+        "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
         "strict": false,
         "noImplicitAny": false,
@@ -32,5 +31,5 @@
         "tests/**/*.ts",
         "../../packages/common/src/**/*.ts"
     ],
-    "exclude": ["node_modules", "**/*.spec.ts"]
+    "exclude": ["node_modules", "../../**/*.spec.ts"]
 }

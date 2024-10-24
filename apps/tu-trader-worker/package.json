@@ -1,1 +1,33 @@
-{"name":"tu-trader-worker","version":"0.0.0","private":true,"description":"Express app with typescript by Tu","author":"Tonni Diaz","scripts":{"build":"rimraf dist && tsc","dev":"tsx watch src/index.ts"},"dependencies":{"express":"*","dotenv":"*","cors":"*","morgan":"*","cookie-parser":"*","pug":"*","http-errors":"*"},"devDependencies":{"@types/cookie-parser":"*","@types/cors":"*","@types/express":"*","@types/node":"*","tsx":"*","typescript":"*","rimraf":"*"}}
+{
+    "name": "tu-trader-worker",
+    "version": "0.0.0",
+    "private": true,
+    "description": "Express app with typescript by Tu",
+    "author": "Tonni Diaz",
+    "main": "dist/src/index.js",
+    "scripts": {
+        "build": "rimraf dist && tsc --project tsconfig.json && tsc-alias -p tsconfig.json",
+        "start": "node -r tsconfig-paths/register dist/apps/tu-trader-worker/src/index.js",
+        "dev": "tsx watch src/index.ts"
+    },
+    "dependencies": {
+        "cookie-parser": "*",
+        "cors": "*",
+        "dotenv": "*",
+        "express": "*",
+        "http-errors": "*",
+        "morgan": "*",
+        "pug": "*"
+    },
+    "devDependencies": {
+        "@types/cookie-parser": "*",
+        "@types/cors": "*",
+        "@types/express": "*",
+        "@types/node": "*",
+        "rimraf": "*",
+        "tsc-alias": "^1.8.10",
+        "tsconfig-paths": "^4.2.0",
+        "tsx": "*",
+        "typescript": "*"
+    }
+}
