@@ -1,0 +1,406 @@
+Build ready to start ▶️
+>> Cloning github.com/tonnidiaz/test.git commit sha 3487b9ccabdf075f3f2e6bff9a7bd9e0e354c0d7 into /builder/workspace
+Initialized empty Git repository in /builder/workspace/.git/
+From https://github.com/tonnidiaz/test
+ * branch            3487b9ccabdf075f3f2e6bff9a7bd9e0e354c0d7 -> FETCH_HEAD
+HEAD is now at 3487b9c tsconfig-paths
+Starting Docker daemon...
+Waiting for the Docker daemon to start...
+done
+Restoring data for SBOM from previous image
+4 of 6 buildpacks participating
+koyeb/build-command-nodejs 0.1.0
+heroku/nodejs-engine       2.6.2
+heroku/nodejs-corepack     2.6.2
+heroku/nodejs-npm-install  2.6.2
+Restoring metadata for "heroku/nodejs-engine:node_runtime_metrics" from app image
+Restoring metadata for "heroku/nodejs-engine:web_env" from app image
+Restoring metadata for "heroku/nodejs-engine:dist" from app image
+Restoring metadata for "heroku/nodejs-npm-install:npm_cache" from cache
+Restoring data for "heroku/nodejs-engine:dist" from cache
+Restoring data for "heroku/nodejs-npm-install:npm_cache" from cache
+[INFO] Found custom build command: 'cd ./apps/tu-trader-worker'
+[0m[1m[35m
+[Heroku Node.js Engine Buildpack]
+[0m[0m[1m[35m
+[Checking Node.js version]
+[0mDetected Node.js version range: >=18.0.0
+Resolved Node.js version: 21.5.0
+[0m[1m[35m
+[Installing Node.js distribution]
+[0mDownloading Node.js 21.5.0
+Extracting Node.js 21.5.0
+Installing Node.js 21.5.0
+[0m[1m[35m
+[Installing npm 10.8.2 via corepack 0.23.0]
+[0mPreparing npm@10.8.2...
+[1;35m[0m
+[1;35m# Heroku Node.js npm Install Buildpack[0m
+
+- Installing node modules
+  - Using npm version `[0;33m10.8.2[0m`
+  - Restoring npm cache
+  - Configuring npm cache directory
+  - Running `[0;33m[1;36mnpm ci "--production=false"[0m`
+
+      npm warn config production Use `--omit=dev` instead.
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: '@sveltejs/vite-plugin-svelte@4.0.0',
+      npm warn EBADENGINE   required: { node: '^18.0.0 || ^20.0.0 || >=22' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: '@sveltejs/vite-plugin-svelte-inspector@3.0.1',
+      npm warn EBADENGINE   required: { node: '^18.0.0 || ^20.0.0 || >=22' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: 'cssnano@7.0.6',
+      npm warn EBADENGINE   required: { node: '^18.12.0 || ^20.9.0 || >=22.0' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: 'cssnano-preset-default@7.0.6',
+      npm warn EBADENGINE   required: { node: '^18.12.0 || ^20.9.0 || >=22.0' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: 'cssnano-utils@5.0.0',
+      npm warn EBADENGINE   required: { node: '^18.12.0 || ^20.9.0 || >=22.0' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: 'postcss-calc@10.0.2',
+      npm warn EBADENGINE   required: { node: '^18.12 || ^20.9 || >=22.0' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: 'postcss-colormin@7.0.2',
+      npm warn EBADENGINE   required: { node: '^18.12.0 || ^20.9.0 || >=22.0' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: 'postcss-convert-values@7.0.4',
+      npm warn EBADENGINE   required: { node: '^18.12.0 || ^20.9.0 || >=22.0' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: 'postcss-discard-comments@7.0.3',
+      npm warn EBADENGINE   required: { node: '^18.12.0 || ^20.9.0 || >=22.0' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: 'postcss-discard-duplicates@7.0.1',
+      npm warn EBADENGINE   required: { node: '^18.12.0 || ^20.9.0 || >=22.0' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: 'postcss-discard-empty@7.0.0',
+      npm warn EBADENGINE   required: { node: '^18.12.0 || ^20.9.0 || >=22.0' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: 'postcss-discard-overridden@7.0.0',
+      npm warn EBADENGINE   required: { node: '^18.12.0 || ^20.9.0 || >=22.0' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: 'postcss-merge-longhand@7.0.4',
+      npm warn EBADENGINE   required: { node: '^18.12.0 || ^20.9.0 || >=22.0' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: 'postcss-merge-rules@7.0.4',
+      npm warn EBADENGINE   required: { node: '^18.12.0 || ^20.9.0 || >=22.0' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: 'postcss-minify-font-values@7.0.0',
+      npm warn EBADENGINE   required: { node: '^18.12.0 || ^20.9.0 || >=22.0' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: 'postcss-minify-gradients@7.0.0',
+      npm warn EBADENGINE   required: { node: '^18.12.0 || ^20.9.0 || >=22.0' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: 'postcss-minify-params@7.0.2',
+      npm warn EBADENGINE   required: { node: '^18.12.0 || ^20.9.0 || >=22.0' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: 'postcss-minify-selectors@7.0.4',
+      npm warn EBADENGINE   required: { node: '^18.12.0 || ^20.9.0 || >=22.0' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: 'postcss-normalize-charset@7.0.0',
+      npm warn EBADENGINE   required: { node: '^18.12.0 || ^20.9.0 || >=22.0' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: 'postcss-normalize-display-values@7.0.0',
+      npm warn EBADENGINE   required: { node: '^18.12.0 || ^20.9.0 || >=22.0' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: 'postcss-normalize-positions@7.0.0',
+      npm warn EBADENGINE   required: { node: '^18.12.0 || ^20.9.0 || >=22.0' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: 'postcss-normalize-repeat-style@7.0.0',
+      npm warn EBADENGINE   required: { node: '^18.12.0 || ^20.9.0 || >=22.0' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: 'postcss-normalize-string@7.0.0',
+      npm warn EBADENGINE   required: { node: '^18.12.0 || ^20.9.0 || >=22.0' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: 'postcss-normalize-timing-functions@7.0.0',
+      npm warn EBADENGINE   required: { node: '^18.12.0 || ^20.9.0 || >=22.0' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: 'postcss-normalize-unicode@7.0.2',
+      npm warn EBADENGINE   required: { node: '^18.12.0 || ^20.9.0 || >=22.0' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: 'postcss-normalize-url@7.0.0',
+      npm warn EBADENGINE   required: { node: '^18.12.0 || ^20.9.0 || >=22.0' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: 'postcss-normalize-whitespace@7.0.0',
+      npm warn EBADENGINE   required: { node: '^18.12.0 || ^20.9.0 || >=22.0' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: 'postcss-ordered-values@7.0.1',
+      npm warn EBADENGINE   required: { node: '^18.12.0 || ^20.9.0 || >=22.0' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: 'postcss-reduce-initial@7.0.2',
+      npm warn EBADENGINE   required: { node: '^18.12.0 || ^20.9.0 || >=22.0' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: 'postcss-reduce-transforms@7.0.0',
+      npm warn EBADENGINE   required: { node: '^18.12.0 || ^20.9.0 || >=22.0' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: 'postcss-unique-selectors@7.0.3',
+      npm warn EBADENGINE   required: { node: '^18.12.0 || ^20.9.0 || >=22.0' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn EBADENGINE Unsupported engine {
+      npm warn EBADENGINE   package: 'stylehacks@7.0.4',
+      npm warn EBADENGINE   required: { node: '^18.12.0 || ^20.9.0 || >=22.0' },
+      npm warn EBADENGINE   current: { node: 'v21.5.0', npm: '10.8.2' }
+      npm warn EBADENGINE }
+      npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+      npm warn deprecated npmlog@5.0.1: This package is no longer supported.
+      npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+      npm warn deprecated abab@2.0.6: Use your platform's native atob() and btoa() methods instead
+      npm warn deprecated are-we-there-yet@2.0.0: This package is no longer supported.
+      npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+      npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+      npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+      npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+      npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+      npm warn deprecated gauge@3.0.2: This package is no longer supported.
+      npm warn deprecated @humanwhocodes/object-schema@2.0.3: Use @eslint/object-schema instead
+      npm warn deprecated @humanwhocodes/config-array@0.13.0: Use @eslint/config-array instead
+      npm warn deprecated glob@8.1.0: Glob versions prior to v9 are no longer supported
+      npm warn deprecated vue@2.7.16: Vue 2 has reached EOL and is no longer actively maintained. See https://v2.vuejs.org/eol/ for more details.
+      
+      added 1826 packages, and audited 1889 packages in 38s
+      
+      336 packages are looking for funding
+        run `npm fund` for details
+      
+      9 vulnerabilities (6 low, 2 moderate, 1 high)
+      
+      To address issues that do not require attention, run:
+        npm audit fix
+      
+      To address all issues possible (including breaking changes), run:
+        npm audit fix --force
+      
+      Some issues need review, and may require choosing
+      a different dependency.
+      
+      Run `npm audit` for details.
+            
+  - Done (37.849s)
+- Running scripts
+  - Running `[0;33m[1;36mnpm run build[0m`
+
+      
+      > build
+      > turbo build
+      
+      
+      Attention:
+      Turborepo now collects completely anonymous telemetry regarding usage.
+      This information is used to shape the Turborepo roadmap and prioritize features.
+      You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+      https://turbo.build/repo/docs/telemetry
+      
+      turbo 2.1.3
+      
+      • Packages in scope: @repo/common, @repo/eslint-config, @repo/tulib, @repo/typescript-config, @repo/ui, app1, docs, pack1, tu-trader, tu-trader-bend, tu-trader-lite, tu-trader-next, tu-trader-sv, tu-trader-worker, web
+      • Running build in 15 packages
+      • Remote caching disabled
+      @repo/common:build: cache miss, executing df088fc2e93f79eb
+      pack1:build: cache miss, executing 4de323c8e0a28845
+      app1:build: cache miss, executing 96963d850bb43f55
+      tu-trader-worker:build: cache miss, executing 9919a3ae5a775a5e
+      docs:build: cache miss, executing 190e0960fb80b9ad
+      pack1:build: 
+      pack1:build: > pack1@0.0.0 build
+      pack1:build: > echo 'Add build script here'
+      pack1:build: 
+      pack1:build: Add build script here
+      @repo/common:build: 
+      @repo/common:build: > @repo/common@1.0.0 build
+      @repo/common:build: > rimraf dist && tsc
+      @repo/common:build: 
+      tu-trader-worker:build: 
+      tu-trader-worker:build: > tu-trader-worker@0.0.0 build
+      tu-trader-worker:build: > rimraf dist && tsc --project tsconfig.json && tsc-alias -p tsconfig.json
+      tu-trader-worker:build: 
+      app1:build: 
+      app1:build: > app1@0.0.0 build
+      app1:build: > echo 'Add build script here'
+      app1:build: 
+      docs:build: 
+      docs:build: > docs@0.1.0 build
+      docs:build: > next build
+      docs:build: 
+      app1:build: Add build script here
+      docs:build: Attention: Next.js now collects completely anonymous telemetry regarding usage.
+      docs:build: This information is used to shape Next.js' roadmap and prioritize features.
+      docs:build: You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+      docs:build: https://nextjs.org/telemetry
+      docs:build: 
+      docs:build:   ▲ Next.js 14.2.6
+      docs:build: 
+      docs:build:    Creating an optimized production build ...
+      docs:build:  ✓ Compiled successfully
+      docs:build:    Linting and checking validity of types ...
+      tu-trader-bend:build: cache miss, executing 077d8dd304f24a8b
+      tu-trader-sv:build: cache miss, executing 4d260ac50f2e6018
+      web:build: cache miss, executing e89065445f6dc455
+      tu-trader-next:build: cache miss, executing 1575fe424bda461a
+      tu-trader-lite:build: cache miss, executing f45a55658b432612
+      tu-trader:build: cache miss, executing 9fa9ecad8f0f4e16
+      tu-trader-sv:build: npm warn config ignoring workspace config at /workspace/apps/tu-trader-sv/.npmrc
+      tu-trader-sv:build: 
+      tu-trader-sv:build: > tu-trader-sv@0.0.1 build
+      tu-trader-sv:build: > vite build
+      tu-trader-sv:build: 
+      web:build: 
+      web:build: > web@0.1.0 build
+      web:build: > next build
+      web:build: 
+      tu-trader-next:build: 
+      tu-trader-next:build: > tu-trader-next@0.1.0 build
+      tu-trader-next:build: > next build
+      tu-trader-next:build: 
+      tu-trader:build: 
+      tu-trader:build: > build
+      tu-trader:build: > nuxt build
+      tu-trader:build: 
+      tu-trader-lite:build: 
+      tu-trader-lite:build: > build
+      tu-trader-lite:build: > nuxt build
+      tu-trader-lite:build: 
+      tu-trader-bend:build: 
+      tu-trader-bend:build: > tu-trader-bend@0.0.0 build
+      tu-trader-bend:build: > rimraf dist && tsc
+      tu-trader-bend:build: 
+      tu-trader:build: Nuxt 3.13.2 with Nitro 2.9.7
+      tu-trader-lite:build: Nuxt 3.13.2 with Nitro 2.9.7
+      web:build: Attention: Next.js now collects completely anonymous telemetry regarding usage.
+      web:build: This information is used to shape Next.js' roadmap and prioritize features.
+      web:build: You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+      web:build: https://nextjs.org/telemetry
+      web:build: 
+      tu-trader-next:build: Attention: Next.js now collects completely anonymous telemetry regarding usage.
+      tu-trader-next:build: This information is used to shape Next.js' roadmap and prioritize features.
+      tu-trader-next:build: You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+      tu-trader-next:build: https://nextjs.org/telemetry
+      tu-trader-next:build: 
+      web:build:   ▲ Next.js 14.2.6
+      web:build: 
+      web:build:    Creating an optimized production build ...
+      tu-trader-next:build:   ▲ Next.js 14.2.14
+      tu-trader-next:build: 
+      tu-trader-sv:build: vite v5.4.8 building SSR bundle for production...
+      tu-trader-next:build:    Creating an optimized production build ...
+      tu-trader-sv:build: transforming...
+      docs:build:    Collecting page data ...
+      docs:build:    Generating static pages (0/5) ...
+      docs:build:    Generating static pages (1/5) 
+      docs:build:    Generating static pages (2/5) 
+      docs:build:    Generating static pages (3/5) 
+      docs:build:  ✓ Generating static pages (5/5)
+      tu-trader-sv:build: ✓ 129 modules transformed.
+      tu-trader-sv:build: x Build failed in 2.34s
+      tu-trader-sv:build: error during build:
+      tu-trader-sv:build: [commonjs--resolver] Failed to resolve entry for package "fs". The package may have incorrect main/module/exports specified in its package.json.
+      tu-trader-sv:build:     at packageEntryFailure (file:///workspace/node_modules/vite/dist/node/chunks/dep-CDnG8rE7.js:46575:15)
+      tu-trader-sv:build:     at resolvePackageEntry (file:///workspace/node_modules/vite/dist/node/chunks/dep-CDnG8rE7.js:46572:3)
+      tu-trader-sv:build:     at tryNodeResolve (file:///workspace/node_modules/vite/dist/node/chunks/dep-CDnG8rE7.js:46388:16)
+      tu-trader-sv:build:     at Object.resolveId (file:///workspace/node_modules/vite/dist/node/chunks/dep-CDnG8rE7.js:46138:19)
+      tu-trader-sv:build:     at Object.handler (file:///workspace/node_modules/vite/dist/node/chunks/dep-CDnG8rE7.js:65596:15)
+      tu-trader-sv:build:     at file:///workspace/node_modules/rollup/dist/es/shared/node-entry.js:20730:40
+      tu-trader-sv:build:     at async PluginDriver.hookFirstAndGetPlugin (file:///workspace/node_modules/rollup/dist/es/shared/node-entry.js:20630:28)
+      tu-trader-sv:build:     at async resolveId (file:///workspace/node_modules/rollup/dist/es/shared/node-entry.js:19234:26)
+      tu-trader-sv:build:     at async ModuleLoader.resolveId (file:///workspace/node_modules/rollup/dist/es/shared/node-entry.js:19663:15)
+      tu-trader-sv:build:     at async Object.resolveId (file:///workspace/node_modules/vite/dist/node/chunks/dep-CDnG8rE7.js:12833:10)
+      docs:build:    Finalizing page optimization ...
+      docs:build:    Collecting build traces ...
+      tu-trader-sv:build: npm error Lifecycle script `build` failed with error:
+      tu-trader-sv:build: npm error code 1
+      tu-trader-sv:build: npm error path /workspace/apps/tu-trader-sv
+      tu-trader-sv:build: npm error workspace tu-trader-sv@0.0.1
+      tu-trader-sv:build: npm error location /workspace/apps/tu-trader-sv
+      tu-trader-sv:build: npm error command failed
+      tu-trader-sv:build: npm error command sh -c vite build
+      tu-trader-sv:build: ERROR: command finished with error: command (/workspace/apps/tu-trader-sv) /layers/heroku_nodejs-corepack/shim/bin/npm run build exited (1)
+      tu-trader-sv#build: command (/workspace/apps/tu-trader-sv) /layers/heroku_nodejs-corepack/shim/bin/npm run build exited (1)
+      
+       Tasks:    4 successful, 11 total
+      Cached:    0 cached, 11 total
+        Time:    16.158s 
+      Failed:    tu-trader-sv#build
+      
+       ERROR  run failed: command  exited (1)
+            
+  - Done (16.681s)
+- [0;36mDebug info[0m
+  - Command failed `npm run build`
+    exit status: 1
+    stdout: <see above>
+    stderr: <see above>
+
+[0;31m! Failed to execute build script.[0m
+[0;31m![0m
+[0;31m! The `[0;33mHeroku Node.js npm Install Buildpack[0m[0;31m` allows customization of the build process by executing the following scripts if they are defined in `[0;33mpackage.json[0m[0;31m`:[0m
+[0;31m! - `[0;33mheroku-prebuild[0m[0;31m` [0m
+[0;31m! - `[0;33mheroku-build[0m[0;31m` or `[0;33mbuild[0m[0;31m` [0m
+[0;31m! - `[0;33mheroku-postbuild[0m[0;31m`[0m
+[0;31m![0m
+[0;31m! An unexpected error occurred while executing `[0;33mnpm run build[0m[0;31m`. See the log output above for more information.[0m
+[0;31m![0m
+[0;31m! Ensure that this command runs locally without error and retry your build.[0m
+[31;1mERROR: [0mfailed to build: exit status 1
+Build failed ❌
