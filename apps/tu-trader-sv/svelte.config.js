@@ -22,7 +22,10 @@ const config = {
                 }
             }
         }
-	}
+	},
+    ssr: {
+        // noExternal: ['binance-api-node']
+      }
 }; 
 
 export default config;

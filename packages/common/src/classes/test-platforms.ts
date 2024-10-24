@@ -1,7 +1,7 @@
 import { MAKER_FEE_RATE, TAKER_FEE_RATE } from "@cmn/utils/constants";
 import { getInterval } from "@cmn/utils/funcs2";
 import { botLog, readJson, writeJson, ensureDirExists } from "@cmn/utils/bend/functions";
-import { parseDate } from "@cmn/utils/functions";
+import { handleErrs, parseDate } from "@cmn/utils/functions";
 import {  getSymbol, sleep } from "@cmn/utils/functions";
 import axios, { AxiosResponse, isAxiosError } from "axios";
 import crypto from "crypto";
@@ -81,11 +81,7 @@ export class TestPlatform {
     }
 
     _err(err: any){
-        if (isAxiosError(err)){
-            this._log({code: err.response?.status ?? err.status ?? err.code ?? err.name ,msg: err.response?.data ?? err.message})
-        }else{
-            this._log((err?.body?.message  ?? err?.message?.toString() ?? err?.message ?? err) )
-        }
+        this._log(handleErrs(err))
         return undefined
     }
     async getTrades({

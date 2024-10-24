@@ -1,4 +1,3 @@
-
 import { mexcInstrus } from "./data/instrus/mexc-instrus";
 import { binanceInstrus } from "./data/instrus/binance-instrus";
 import { kucoinInstrus } from "./data/instrus/kucoin-instrus";
@@ -7,13 +6,13 @@ import { bybitInstrus } from "./data/instrus/bybit-instrus";
 import { gateioInstrus } from "./data/instrus/gateio-instrus";
 import { okxInstrus } from "./data/instrus/okx-instrus";
 import { IObj, TPlatName } from "./interfaces";
+import { isAxiosError } from "axios";
 
 const test = false;
 
 export function randomInRange(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
-
 
 export const isEmail = (emailAdress: string) => {
     let regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
@@ -42,8 +41,6 @@ export const parseDate = (date?: Date | string | number) =>
         })
     );
 
-
-
 export const timedLog = (...args: any[]) =>
     console.log(`\n[${parseDate(new Date())}]`, ...args);
 export function capitalizeFirstLetter(string) {
@@ -63,11 +60,12 @@ export function ceil(num: number, dec: number) {
 }
 
 /**
- * 
+ *
  * @param num1 must be less than num2
  * @returns the percentage difference between the two numbers
  */
-export const calcPerc = (num1: number, num2: number) => ceil((num2 - num1)/ num1 * 100, 2)
+export const calcPerc = (num1: number, num2: number) =>
+    ceil(((num2 - num1) / num1) * 100, 2);
 
 export function precision(a: number) {
     if (!isFinite(a)) return 0;
@@ -204,7 +202,7 @@ const getInstru = (pair: string[], plat: string) => {
 
 export function getPricePrecision(pair: string[], plat: string) {
     let instru = getInstru(pair, plat);
-    console.log({pair, plat})
+    console.log({ pair, plat });
     if (!instru) {
         console.log(`\ngetPricePrecision: ${pair} not on ${plat}\n`);
         return null;
@@ -487,6 +485,21 @@ export const encodeDate = (date: string) => {
     return date.replaceAll(":", "^").replace(" ", "T");
 };
 
-export const parseBinanceInfo = (info: IObj) =>{
-    return info.symbols.map(el=>({...el, permissionSets: el.permissionSets.filter(el2 => el2 == "SPOT") }))
-}
+export const parseBinanceInfo = (info: IObj) => {
+    return info.symbols.map((el) => ({
+        ...el,
+        permissionSets: el.permissionSets.filter((el2) => el2 == "SPOT"),
+    }));
+};
+
+export const handleErrs = (err: any) => {
+    return isAxiosError(err)
+        ? {
+              code: err.response?.status ?? err.status ?? err.code ?? err.name,
+              msg: err.response?.data ?? err.message,
+          }
+        : (err?.body?.message ??
+              err?.message?.toString() ??
+              err?.message ??
+              err);
+};

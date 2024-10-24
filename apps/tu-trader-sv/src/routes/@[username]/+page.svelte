@@ -4,4 +4,5 @@
     import { parseDate } from '@cmn/utils/functions.js';
 
     const {data} = $props()
+    
 </script>

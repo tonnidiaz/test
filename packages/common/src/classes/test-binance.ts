@@ -12,13 +12,13 @@ import {
 import type { AssetDetail, SymbolPrice } from "binance";
 import { genSignature, safeJsonParse } from "@cmn/utils/funcs3";
 import { configDotenv } from "dotenv";
-import Binance from 'binance-api-node'
-import type {CoinInformation} from 'binance-api-node'
+import binanceApiNode from 'binance-api-node';
 
+import type {CoinInformation} from 'binance-api-node'
 configDotenv()
 export class TestBinance extends TestPlatform {
     client: MainClient;
-    client2:  ReturnType<typeof Binance>
+    client2:  ReturnType<typeof binanceApiNode>
     axiosClient: () => InstanceType<typeof Axios>;;
     constructor({ demo = false }: { demo?: boolean }) {
         super({ demo, name: "binance" });
@@ -28,8 +28,8 @@ export class TestBinance extends TestPlatform {
         this.client = new MainClient({
            
         });
-
-        this.client2 =  Binance({apiKey, apiSecret})
+        const _binanceApiNode = (binanceApiNode as any).default as typeof binanceApiNode
+        this.client2 =  _binanceApiNode({apiKey, apiSecret})
 
         this.axiosClient = () => {
             const ts = Date.now().toString();

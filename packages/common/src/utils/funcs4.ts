@@ -1,6 +1,6 @@
 import { Job, scheduleJob } from "node-schedule";
 import { test_platforms } from "./consts";
-import { pairsOfInterest, taskManager } from "./consts3";
+import { __DEV__, pairsOfInterest, taskManager } from "./consts3";
 import { IOrderbook, TPlatName } from "./interfaces";
 import { timedLog } from "./functions";
 import { bookJobs, botJobSpecs, DEV } from "./constants";
@@ -27,9 +27,9 @@ export async function connectMongo(DEV: boolean) {
 
 export function addBooksTask(config: ITuConfig){
     timedLog("Adding books task...")
-    taskManager.addTask({id: `task-books`, interval: config.book_fetch_interval, cb: fetchAndStoreBooks})
+    taskManager.addTask({id: `task-books`, interval: __DEV__ ? 1 : config.book_fetch_interval, cb: fetchAndStoreBooks})
 }
-async function platBookFetcher(platName: string, pairs: string[][]) {
+export async function platBookFetcher(platName: string, pairs: string[][]) {
     const plat = new test_platforms[platName as TPlatName]({ demo: false });
     if (plat) {
         timedLog(`[${platName}] GETTING BOOKS...`);
@@ -102,7 +102,7 @@ export async function fetchAndStoreBooks(taskId: string) {
     timedLog("BOOK FETCHER JOBS SCHEDULED!!")  
     }catch(e){
         timedLog("Failed to schedule book tasks", e)
-    }
+    } 
     ;
 }
 

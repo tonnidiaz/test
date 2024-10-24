@@ -49,22 +49,23 @@ app.use(function (err, req, res, next) {
   res.locals.error = req.app.get('env') === 'development' ? err : {};
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.render('error'); 
 });
 
 
-const init = async () => {
-    try{
+const init = async () => { 
+    try{ 
+        console.log("WORKER")
 await connectMongo(DEV)
         const config = await TuConfig.findOne({}).exec() || new TuConfig()
     await config.save()
-    const r = await localApi().get('/tasks')
-    console.log(r.data)
-    return
-        await scheduleAllTasks()
+    // const r = await localApi().post('/tasks/books', {books: [1,2,3,4]})
+    // console.log(r.data)
+    // return 
+    await scheduleAllTasks()
     if (config.fetch_orderbook_enabled)
         addBooksTask(config)
-    }
+    } 
     catch(e){ 
         console.log("Init error", e)
     }

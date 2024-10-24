@@ -1,7 +1,9 @@
 import { configDotenv } from "dotenv";
 import { Job } from "node-schedule";
-import path from "path";
-
+import path, { dirname } from "path";
+import { fileURLToPath } from "url";
+const _dirname = __dirname
+console.log({_dirname});
 try {
     configDotenv();
     console.log(process.env.ENV);
@@ -27,10 +29,9 @@ export const TAKER_FEE_RATE = 0.1 / 100,
     P_DIFF = 0.0 / 100;
 export const slPercent = 0.5 / 100,
     minDiff = 0;
-console.log({ __dirname });
 export const dfsRootDir = "../data/dfs",
-    klinesRootDir = path.join(__dirname, "../data/klines"),
-    tradesRootDir = path.join(__dirname, "../data/trades");
+    klinesRootDir = path.join(_dirname, "../data/klines"),
+    tradesRootDir = path.join(_dirname, "../data/trades");
 
 export const isMarket = true,
     cancelOnCond = true,

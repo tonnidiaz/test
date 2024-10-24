@@ -1,4 +1,4 @@
-import { InferSchemaType, Model, model, models } from "mongoose";
+import mn, { InferSchemaType, Model, model } from "mongoose";
 import { IUser, UserSchema } from "./user"
 import { BotSchema, IBot, TriArbitOrderSchema } from "./bot";
 import { IOrder, OrderSchema } from "./order";
@@ -7,14 +7,14 @@ import { TuBookSchema } from "./book";
 import { TuConfigSchema } from "./config";
 import { OTPSchema } from "./otp";
 
-const User: Model<IUser> = models.User || model("User", UserSchema, )
-const Bot: Model<IBot> = models.Bot || model("Bot", BotSchema, )
-const TuOrder : Model<IOrder> = models.Order || model("Order", OrderSchema, )
-export const TuBook = models.TuBook || model("TuBook", TuBookSchema, )
-export const TuConfig = models.TuConfig ||model("TuConfig", TuConfigSchema, )
-export const TriArbitOrder = models.TriArbitOrder || model("TriArbitOrder", TriArbitOrderSchema, )
-const Test = models.Test || model("Test", TestSchema, )
-export const OTP = models.OTP || model("OTP", OTPSchema)
+const User: Model<IUser> = mn.models.User || model("User", UserSchema, )
+const Bot: Model<IBot> = mn.models.Bot || model("Bot", BotSchema, )
+const TuOrder : Model<IOrder> = mn.models.Order || model("Order", OrderSchema, )
+export const TuBook = mn.models.TuBook || model("TuBook", TuBookSchema, )
+export const TuConfig = mn.models.TuConfig ||model("TuConfig", TuConfigSchema, )
+export const TriArbitOrder = mn.models.TriArbitOrder || model("TriArbitOrder", TriArbitOrderSchema, )
+const Test = mn.models.Test || model("Test", TestSchema, )
+export const OTP = mn.models.OTP || model("OTP", OTPSchema)
 
 export type TBot = typeof Bot
 export { User, Bot, TuOrder, Test }
