@@ -3,7 +3,6 @@
   "private": true,
   "scripts": {
     "sync-pkgs": "syncpack fix-mismatches",
-    "build": "turbo build",
     "dev": "turbo dev",
     "_dev": "turbo _dev",
     "dev:tu-trader": "",
