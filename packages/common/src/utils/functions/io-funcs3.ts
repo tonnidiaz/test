@@ -16,6 +16,7 @@ import { writeFileSync, existsSync } from "fs";
 import { test_platforms } from "../consts";
 import { TestPlatform } from "@cmn/classes/test-platforms";
 import { objStrategies } from "@cmn/strategies";
+import { Arbit } from "@cmn/bots/arbitrage/classes";
 
 export const onCrossArbitCointest = async (
     data: IObj,
@@ -295,7 +296,7 @@ export const onCrossArbitCointest = async (
                     platA,
                     platB,
                     MAKER: MAKER_B,
-                    TAKER: TAKER_A,
+                    TAKER: TAKER_A, 
                     bal,
                     dfA,
                     dfB,

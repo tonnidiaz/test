@@ -1,6 +1,6 @@
 import { Server, Socket } from "socket.io";
 import { IObj, ICandle, TPlatName, IRetData } from "../interfaces";
-import { tuCE, heikinAshi, parseDate, parseKlines, tuPath } from "../funcs2";
+import { tuCE, heikinAshi, parseKlines, tuPath } from "../funcs2";
 import {
     ETH_RATE,
     klinesDir,
@@ -11,25 +11,17 @@ import { existsSync, writeFileSync } from "fs";
 import {
     clog,
     getPricePrecision,
-    readJson,
     toFixed,
     getSymbol,
     clearTerminal,
     sleep,
+    parseDate,
 } from "../functions";
 import { objStrategies, strategies } from "@cmn/strategies";
-import { TestOKX } from "@cmn/classes/test-platforms";
 import { test_platforms } from "../consts";
-import { ensureDirExists } from "../orders/funcs";
-import { okxInstrus } from "@cmn/utils/data/instrus/okx-instrus";
-import { binanceInfo } from "../binance-info";
-import { bybitInstrus } from "../data/instrus/bybit-instrus";
-import { TestGateio } from "@cmn/classes/test-gateio";
-import { gateioInstrus } from "@cmn/utils/data/instrus/gateio-instrus";
-import { bitgetInstrus } from "@cmn/utils/data/instrus/bitget-instrus";
-import { mexcInstrus } from "../data/instrus/mexc-instrus";
 import { getInstrus } from "../funcs3";
 import { onTriArbitCointest } from "./io-funcs2";
+import { readJson, ensureDirExists } from "../bend/functions";
 
 export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
     const ep = "backtest";
@@ -89,8 +81,9 @@ export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
         start = start ?? parseDate(new Date());
         const year = start.split("-")[0];
         const pth =
-            "src/data/klines/binance/SOL-USDT_5m_2023-01-01 00 00 00+02:00_2023-10-31 23 59 00+02:00.json";
+            "@cmn/data/klines/binance/SOL-USDT_5m_2023-01-01 00 00 00+02:00_2023-10-31 23 59 00+02:00.json";
         const subPath = demo ? "demo" : "live";
+        
         klinesPath = test
             ? tuPath(pth)
             : tuPath(

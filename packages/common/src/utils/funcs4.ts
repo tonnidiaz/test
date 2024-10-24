@@ -2,12 +2,13 @@ import { Job, scheduleJob } from "node-schedule";
 import { test_platforms } from "./consts";
 import { pairsOfInterest, taskManager } from "./consts3";
 import { IOrderbook, TPlatName } from "./interfaces";
-import { existsSync, readJson, timedLog, writeJson } from "./functions";
+import { timedLog } from "./functions";
 import { bookJobs, botJobSpecs, DEV } from "./constants";
 import { TuBook, TuConfig } from "@cmn/models";
 import { configDotenv } from "dotenv";
 import mongoose from "mongoose";
 import { ITuConfig } from "@cmn/models/config";
+import { localApi } from "./api";
 
 configDotenv();
 export async function connectMongo(DEV: boolean) {
@@ -65,7 +66,11 @@ export async function fetchAndStoreBooks(taskId: string) {
         return;
     }
     timedLog("SCHEDULING BOOK FETCHER JOBS...");
+
+    const tasks : {platName: TPlatName; pairs: string[][]}[] = []
+
     for (let platName of Object.keys(pairsOfInterest)) {
+        
         let platPairs: string[][] = [];
         for (let pairs of pairsOfInterest[platName]) {
             if (pairs.B) {
@@ -86,11 +91,19 @@ export async function fetchAndStoreBooks(taskId: string) {
         }
 
         platPairs = Array.from(new Set(platPairs.sort()));
-
-        platBookFetcher(platName, platPairs);
-
-        timedLog("BOOK FETCHER JOBS SCHEDULED!!");
+        tasks.push({platName: platName as TPlatName, pairs: platPairs})
+        // platBookFetcher(platName, platPairs);
     }
+    
+    try{
+      // Send request to api to handle the books fetching
+    const r = await localApi().post('/tasks/books', tasks)
+    console.log(r.data)
+    timedLog("BOOK FETCHER JOBS SCHEDULED!!")  
+    }catch(e){
+        timedLog("Failed to schedule book tasks", e)
+    }
+    ;
 }
 
 const globalJob = async () => {

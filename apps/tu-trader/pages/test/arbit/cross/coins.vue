@@ -312,7 +312,7 @@ import { formatter, numToWords, parseDate } from "~/utils/funcs";
 import { ref, reactive, onMounted, watch } from "vue";
 import { toSelectStrategies } from "~/utils/funcs";
 import {storeToRefs} from 'pinia'
-import { IObj } from "@/src/common";
+import { type IObj } from "@repo/common/src/utils/interfaces";
 
 
 const appStore = useAppStore();

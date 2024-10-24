@@ -20,7 +20,7 @@
 //               return   botLog(bot, "FAILED TO PLACE BUY ORDER")
 //             }
 
-//             order = (await Order.findById(r).exec())!
+//             order = (await TuOrder.findById(r).exec())!
 //             pos = true
 
 

@@ -23,7 +23,7 @@ configDotenv()
 export class TestBinance extends TestPlatform {
     client: MainClient;
     client2:  ReturnType<typeof Binance>
-    axiosClient: () => Axios;
+    axiosClient: () => InstanceType<typeof Axios>;;
     constructor({ demo = false }: { demo?: boolean }) {
         super({ demo, name: "binance" });
         const apiKey = process.env.BINANCE_API_KEY!;

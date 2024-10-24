@@ -222,7 +222,7 @@
             </tu-card>
         </template>
     </tu-modal>
-</template>
+</template> 
 
 <script setup lang="ts">
 import TuSelect from "./TuSelect.vue";
@@ -230,7 +230,7 @@ import { useAppStore } from "@/src/stores/app";
 import { arbitTypes, botTypes, selectIntervals } from "~/utils/constants";
 import { useUserStore } from "@/src/stores/user";
 import { listToOpt, toSelectStrategies } from "~/utils/funcs";
-import { type IObj } from "@/src/common";
+import { type IObj } from "@repo/common/src/utils/interfaces";
 import { storeToRefs } from "pinia";
 import { localApi } from "~/utils/api";
 

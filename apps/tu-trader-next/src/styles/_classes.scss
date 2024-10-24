@@ -1,0 +1,167 @@
+@for $i from 1 to 50{
+    .br-#{$i} {
+        border-radius: #{$i}px !important;
+    }
+}
+@for $i from 1 through 700 {
+    .h-#{$i}px {
+        height: #{$i}px !important;
+    }
+    .w-#{$i}px {
+        width: #{$i}px !important;
+    }
+    .max-h#{$i} {
+        max-height: #{$i}px !important;
+    }
+    .max-w-#{$i} {
+        max-width: #{$i}px !important;
+    }
+    .min-w-#{$i} {
+        min-width: #{$i}px !important;
+    }
+    .max-h-#{$i}vh {
+        max-height: #{$i}vh !important;
+    }
+    .max-w-#{$i}vw {
+        max-width: #{$i}vw !important;
+    }
+    .min-h#{$i} {
+        min-height: #{$i}px !important;
+    }
+    .min-w#{$i} {
+        min-width: #{$i}px !important;
+    }
+    .h-#{$i}p {
+        height: #{$i}#{"%"} !important;
+    }
+    .w-#{$i}p {
+        width: #{$i}#{"%"} !important;
+    }
+    .my-#{$i}px {
+      margin-top: #{$i}px !important;
+      margin-bottom: #{$i}px !important;
+    }
+    .mx-#{$i}px {
+      margin-left: #{$i}px !important;
+      margin-right: #{$i}px !important;
+    }
+    .mt-#{$i}px {
+      margin-top: #{$i}px !important;
+    }
+    .mb-#{$i}px {
+      margin-bottom: #{$i}px !important;
+    }
+    .pdy-#{$i} {
+      padding-top: #{$i}px !important;
+      padding-bottom: #{$i}px !important;
+    }
+    .pdx-#{$i} {
+      padding-left: #{$i}px !important;
+      padding-right: #{$i}px !important;
+    }
+    .pdr-#{$i} {
+      padding-right: #{$i}px !important;
+    }
+    .pdl-#{$i} {
+      padding-left: #{$i}px !important;
+    }
+    .pdb-#{$i} {
+      padding-bottom: #{$i}px !important;
+    }
+    .br-#{$i} { 
+      border-radius: #{$i}px !important;
+    }
+    .pd-#{$i} { 
+      padding: #{$i}px !important;
+    }
+
+    .h-#{$i}vh{
+      height: #{$i}vh !important;
+    }
+
+    .w-#{$i}vw{
+      width: #{$i}vw !important;
+    }
+
+    @media screen and (max-width: #{$i}px) {
+        .w-#{$i}px {
+          width: calc(100vw) !important;
+        }
+        .min-w-#{$i} {
+            width: calc(100vw - 10px) !important;
+            min-width: 0 !important;
+        }
+      }
+  }
+
+  ._flex{
+    display: flex;
+    flex-direction: column;
+  }
+  ._jc-c{
+    justify-content: center;
+  }
+  ._jc-sb{
+    justify-content: space-between;
+  }
+
+  ._ai-c{
+    align-items: center;
+  }
+  ._ai-sb{
+    align-items: space-between;
+  }
+
+  .bg-body, .hover-body:hover{
+    background-color: $color-card !important; 
+  }
+  .bg-card, .hover-card:hover{
+    background-color: $color-card-2 !important;
+  }
+  .bg-card-0, .hover-card-0:hover{
+    background-color: $color-card-0 !important;
+  }
+
+
+  @for $i from 0 through 60 {
+    .fs-#{$i} {
+        font-size: #{$i}px !important;
+    }
+    .gap-#{$i}px {
+        gap: #{$i}px;
+    }
+}
+
+.card-border{
+    border: $card-border !important;
+}
+.border-card, .navbar, .sidebar{
+    
+   
+    border-color: $border-color !important;
+}
+.border-1{
+    border-width: 1px;
+}
+
+@for $i from 1 through 9{
+    .fw-#{$i}{
+        font-weight: $i * 100;
+    }
+}
+
+.ox-scroll{
+    overflow-x: scroll !important;
+}
+.oy-scroll{
+    overflow-y: scroll !important;
+}
+.ox-hidden{
+    overflow-x: hidden !important;
+}
+.oy-hidden{
+    overflow-y: hidden !important;
+}
+.wp-nowrap{
+    white-space: nowrap !important;
+}

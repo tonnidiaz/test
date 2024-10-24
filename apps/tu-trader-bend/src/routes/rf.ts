@@ -1,7 +1,7 @@
 
 import { Test } from "@cmn/models";
 import { test_platforms } from "@cmn/utils/consts";
-import { tunedErr } from "@cmn/utils/functions";
+import { tunedErr } from "@cmn/utils/bend/functions";
 import axios from "axios";
 import { Router } from "express";
 

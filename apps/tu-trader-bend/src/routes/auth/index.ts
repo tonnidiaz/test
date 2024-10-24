@@ -4,9 +4,10 @@ import { lightAuthMid } from "@/middleware/auth.mid";
 import { User } from "@cmn/models";
 import { DEV } from "@cmn/utils/constants";
 import { UserPermissions } from "@cmn/utils/enums";
-import { genToken, tunedErr, randomInRange, getStoreDetails, sendMail, isEmail } from "@cmn/utils/functions";
+import { isEmail, randomInRange } from "@cmn/utils/functions";
 import passwordRouter from "./password"
 import otpRouter from "./otp"
+import { genToken, tunedErr, sendMail, getStoreDetails } from "@cmn/utils/bend/functions";
 
 const importantEmails = [
     "tonnidiazed@gmail.com",

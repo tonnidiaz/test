@@ -1,7 +1,7 @@
 
 import { Bot, TriArbitOrder, TuOrder } from "@cmn/models";
+import { tunedErr } from "@cmn/utils/bend/functions";
 import { parseArbitOrder } from "@cmn/utils/funcs3";
-import { tunedErr } from "@cmn/utils/functions";
 import { IObj } from "@cmn/utils/interfaces";
 import express from "express";
 

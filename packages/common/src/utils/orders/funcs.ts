@@ -1,14 +1,10 @@
 import { OrderPlacer } from "@cmn/classes";
-import { Bot, Order } from "@cmn/models";
+import { Bot, TuOrder } from "@cmn/models";
 import { IBot } from "@cmn/models/bot";
 import { scheduleJob } from "node-schedule";
-import { SL2, botJobSpecs, isStopOrder, jobs } from "../constants";
-import path from "path";
-import fs from "fs";
-import { IOrder } from "@cmn/models/order";
+import {  botJobSpecs, jobs } from "../constants";
 import { OKX } from "@cmn/classes/okx";
 import {
-    botLog,
     ceil,
     getCoinPrecision,
     getMaxAmt,
@@ -22,12 +18,7 @@ import {
 } from "../functions";
 import { Bybit } from "@cmn/classes/bybit";
 import {
-    calcSL,
-    tuCE,
     findBotOrders,
-    heikinAshi,
-    parseDate,
-    parseKlines,
     getLastOrder,
     orderHasPos,
     getBotPlat,
@@ -35,6 +26,7 @@ import {
 import { objStrategies } from "@cmn/strategies";
 import { updateSellOrder, updateBuyOrder } from "./funcs2";
 import { objPlats } from "../consts2";
+import { botLog } from "../bend/functions";
 export const getJob = (id: string) => jobs.find((el) => el.id == id);
 
 export const tuJob = async (op: OrderPlacer, bot: IBot) => {
@@ -178,7 +170,7 @@ export const placeTrade = async ({
         //     bot.aside.push(aside);
         //     await bot.save();
         // }
-        let total_base = bot.total_base.find(
+        let total_base: any = bot.total_base.find(
             (el) => el.base == pair[0] && el.ccy == pair[1]
         );
         if (!total_base) {
@@ -186,7 +178,7 @@ export const placeTrade = async ({
             bot.total_base.push(total_base);
             await bot.save();
         }
-        let total_quote = bot.total_quote.find(
+        let total_quote: any = bot.total_quote.find(
             (el) => el.base == pair[0] && el.ccy == pair[1]
         );
         if (!total_quote) {
@@ -295,7 +287,7 @@ export const placeTrade = async ({
         const isBotC = side == 'sell' && bot.is_child
         let order =
             side == "buy" || isBotC
-                ? new Order({
+                ? new TuOrder({
                       _entry: isBotC ? 0 : price,
                       buy_timestamp: { i: ts },
                       side: side,
@@ -421,13 +413,4 @@ export const placeTrade = async ({
         console.log(error);
         return;
     }
-};
-export const ensureDirExists = (filePath: string) => {
-    var dirname = path.dirname(filePath);
-    if (fs.existsSync(dirname)) {
-        return true;
-    }
-    ensureDirExists(dirname);
-    console.log("Creating directory");
-    fs.mkdirSync(dirname);
 };

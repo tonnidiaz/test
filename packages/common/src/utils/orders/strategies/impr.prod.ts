@@ -12,7 +12,7 @@ import {
 import { botLog, ceil, toFixed } from "@cmn/utils/functions";
 import { ICandle } from "@cmn/utils/interfaces";
 import { placeTrade } from "../funcs";
-import { Order } from "@cmn/models";
+import { TuOrder } from "@cmn/models";
 
 export const ImprProd = async ({
     pos,
@@ -70,7 +70,7 @@ export const ImprProd = async ({
          if (!r) {
              return botLog(bot, "FAILED TO PLACE BUY ORDER");
          } 
-         order = (await Order.findById(r).exec())!;
+         order = (await TuOrder.findById(r).exec())!;
          //pos = true;
          }else{
              botLog(bot, "NOT PLACING BUY , OPEN >= TRAIL")

@@ -68,7 +68,7 @@
 </template>
 
 <script setup lang="ts">
-import { type IObj } from '@/src/common'; 
+import { type IObj } from '@repo/common/src/utils/interfaces'; 
 
 const q = ref(""), notes = ref(""), data = ref<IObj>();
 const NOTES_KEY = "notes"

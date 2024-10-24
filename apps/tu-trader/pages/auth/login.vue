@@ -36,7 +36,7 @@
     </div>
 </template>
 <script lang="ts" setup>
-import { IObj } from '@/src/common';
+import { type IObj } from '@repo/common/src/utils/interfaces';
 import { useUserStore } from '@/src/stores/user';
 import { localApi } from '~/utils/api';
 import { STORAGE_KEYS, SITE } from '~/utils/constants';

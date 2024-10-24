@@ -423,9 +423,9 @@
 
 <script setup lang="ts">
 import { useAppStore } from "@/src/stores/app";
-import { sleep } from "@/src/common";
+import { sleep } from "@repo/common/src/utils/functions";
 import { SITE, alphabets, arbitTypes } from "~/utils/constants";
-import { IObj } from "@/src/common";
+import { type IObj } from "@repo/common/src/utils/interfaces";
 import { storeToRefs } from "pinia";
 import { useTuFetch, api } from "~/utils/api";
 import { clearBotOrders, listToOpt, activateBot } from "~/utils/funcs";

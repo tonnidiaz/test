@@ -322,7 +322,7 @@ import {
     SITE
 } from "@/utils/constants";
 import { formatter, parseDate, toSelectStrategies } from "@/utils/funcs";
-import { type IObj } from "@cmn/utils/interfaces";
+import { type IObj } from "@repo/common/src/utils/interfaces";
 import { storeToRefs } from "pinia";
 const appStore = useAppStore();
 const initRes = { data: {} };

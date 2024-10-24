@@ -40,7 +40,7 @@
 import { ref, onMounted } from 'vue';
 import { selectIntervals, SITE} from '~/utils/constants';
 import { api, } from '~/utils/api';
-import { IObj } from '@/src/common';
+import { type IObj } from '@repo/common/src/utils/interfaces';
 
 const formState = ref<IObj>({});
 

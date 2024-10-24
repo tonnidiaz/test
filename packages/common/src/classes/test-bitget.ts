@@ -23,7 +23,7 @@ export class TestBitget extends TestPlatform {
     apiKey: string;
     apiSecret: string;
     passphrase: string;
-    axiosClient: () => Axios;
+    axiosClient: () => InstanceType<typeof Axios>;;
     constructor({ demo = false }: { demo?: boolean }) {
         super({ demo, name: "bitget" });
         this.flag = demo ? "1" : "0";

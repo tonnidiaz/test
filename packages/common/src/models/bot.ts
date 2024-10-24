@@ -1,6 +1,7 @@
 import { platList } from "@cmn/utils/consts3";
 import {
-    type HydratedDocumentFromSchema,
+    type Document,
+    InferSchemaType,
     Schema,
     Types,
 } from "mongoose";
@@ -108,8 +109,8 @@ export const BotSchema = new Schema(
         children: { type: [Schema.ObjectId], ref: "Bot" },
         arbit_settings: ArbitSettings,
     },
-    { timestamps: true }
+    { timestamps: true } 
 );
 
-export interface IBot extends HydratedDocumentFromSchema<typeof BotSchema> {}
-export interface ITriArbitOrder extends HydratedDocumentFromSchema<typeof TriArbitOrderSchema> {}
+export interface IBot extends Document, InferSchemaType<typeof BotSchema> {}
+export interface ITriArbitOrder extends Document, InferSchemaType<typeof TriArbitOrderSchema> {}

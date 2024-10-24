@@ -1,5 +1,5 @@
 import { IBot } from "@cmn/models/bot";
-import { Bot, Order } from "@cmn/models";
+import { Bot } from "@cmn/models";
 import { cancelJob, rescheduleJob } from "node-schedule";
 import { getJob, updateOrder } from "@cmn/utils/orders/funcs";
 

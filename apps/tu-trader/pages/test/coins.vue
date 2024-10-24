@@ -338,7 +338,7 @@
 </template>
 
 <script setup lang="ts">
-import { IObj } from "@/src/common";
+import { type IObj } from "@repo/common/src/utils/interfaces";
 import { storeToRefs } from "pinia";
 import UDivider from "~/components/UI/UDivider.vue";
 import { useAppStore } from "@/src/stores/app";

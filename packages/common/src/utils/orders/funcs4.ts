@@ -10,7 +10,7 @@ import {
     toFixed,
 } from "../functions";
 import { placeTrade } from "./funcs";
-import { Bot, Order, TriArbitOrder } from "@cmn/models";
+import { Bot, TuOrder, TriArbitOrder } from "@cmn/models";
 import { objPlats } from "../consts2";
 import { updateBuyOrder } from "./funcs2";
 
@@ -348,7 +348,7 @@ export const placeArbitOrdersFlipped = async ({
 
     // CREATE FAKE ORDER
     
-    const orderC = new Order({
+    const orderC = new TuOrder({
         _entry: cPxC,
         buy_timestamp: { i: ts, o: parseDate(Date.now()) },
         side: "buy",

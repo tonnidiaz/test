@@ -1,9 +1,9 @@
 
 import { User } from "@cmn/models";
+import { tunedErr, getStoreDetails, sendMail, genToken } from "@cmn/utils/bend/functions";
 import { DEV } from "@cmn/utils/constants";
-import { tunedErr, randomInRange, getStoreDetails, sendMail, genToken } from "@cmn/utils/functions";
+import { randomInRange } from "@cmn/utils/functions";
 import { Router } from "express";
-
 
 const router = Router();
 router.post("/resend", async (req, res) => {

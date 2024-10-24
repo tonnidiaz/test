@@ -1,10 +1,10 @@
 import { TestBitget } from "@cmn/classes/test-bitget";
 import { Bot } from "@cmn/models";
-import { strategies } from "@cmn/strategies";
+import { parentStrategies, strategies } from "@cmn/strategies";
+import { genToken } from "@cmn/utils/bend/functions";
 import { test_platforms } from "@cmn/utils/consts";
 import { objPlats } from "@cmn/utils/consts2";
 import { parseKlines } from "@cmn/utils/funcs2";
-import { genToken } from "@cmn/utils/functions";
 import { onCointest, onBacktest } from "@cmn/utils/functions/io-funcs";
 import express from "express";
 
@@ -24,6 +24,9 @@ router.get("/strategies", (req, res) => {
 });
 router.get("/platforms", (req, res) => {
     res.json(Object.keys(test_platforms));
+});
+router.get("/parents", (req, res) => {
+    res.json(Object.keys(parentStrategies));
 });
 
 router.post("/coins", async (req, res) => {

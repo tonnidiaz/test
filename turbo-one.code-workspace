@@ -11,6 +11,15 @@
         },
         {
             "path": "apps/tu-trader-bend"
+        },
+        {
+            "path": "apps/tu-trader-next"
+        },
+        {
+            "path": "../../Next/tu-trader-next"
+        },
+        {
+            "path": "apps/tu-trader-worker"
         }
     ],
     "settings": {}

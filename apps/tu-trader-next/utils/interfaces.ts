@@ -1,0 +1,1 @@
+export interface ISelectItem {label: string, value: any, disabled?: boolean; class?: string; html?: string}

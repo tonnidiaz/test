@@ -15,5 +15,4 @@ const OTPSchema: Schema = new Schema({
         required: true
     }
 },{timestamps: true})
-const OTP = model("OTP", OTPSchema)
-export {OTPSchema, OTP}
+export {OTPSchema}

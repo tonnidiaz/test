@@ -5,10 +5,10 @@
     "baseUrl": ".",
     "noImplicitAny": false,
     "paths": {
-        // "@common": ["../../packages/common/src/index.ts"]
+        "@cmn/*": ["../../packages/common/src/*"] 
     }
   },
-  "include": [],
+  "include": ["../../packages/common/src/**/*.ts"],
   "exclude": ["../../node_modules"]
 }
  

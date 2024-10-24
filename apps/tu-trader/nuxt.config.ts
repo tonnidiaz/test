@@ -6,10 +6,15 @@ export default defineNuxtConfig({
         /*"nuxt-simple-sitemap"*/
     ],
     imports: {autoImport: true},
-    nitro:{
-        
-    },
-
+    typescript: {
+        tsConfig: {
+          compilerOptions: {
+            paths: {
+              "@cmn/*": ["../../../packages/common/src/*"]
+            }
+          }
+        }
+      },
 
     //css: ['~/assets/css/tailwind.css'],
 

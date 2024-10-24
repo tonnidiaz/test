@@ -14,7 +14,7 @@ import {
 } from "@cmn/utils/functions";
 import { ICoinNets, IOrderbook, TPlatName } from "@cmn/utils/interfaces";
 import { netsRootDir } from "@cmn/utils/consts2";
-import { Axios } from "axios";
+import { Axios, AxiosInstance } from "axios";
 import { genSignature, safeJsonParse } from "@cmn/utils/funcs3";
 
 export class TestMexc extends TestPlatform {
@@ -24,7 +24,7 @@ export class TestMexc extends TestPlatform {
     apiKey: string;
     apiSecret: string; 
     passphrase: string;
-    axiosClient: () => Axios;
+    axiosClient: () => InstanceType<typeof Axios>;
 
     constructor({ demo = false }: { demo?: boolean }) {
         super({ demo, name: "mexc" });

@@ -48,7 +48,7 @@
 
 <script setup lang="ts">
 
-import { type IObj } from "@/src/common";
+import { type IObj } from "@repo/common/src/utils/interfaces";
 import { useUserStore } from "@/src/stores/user";
 import { listToOpt } from "~/utils/funcs";
 const userStore = useUserStore();

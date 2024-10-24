@@ -1,8 +1,14 @@
 import { configDotenv } from "dotenv";
 import { Job } from "node-schedule";
-configDotenv();
+import path from "path";
+
+try {
+    configDotenv();
+    console.log(process.env.ENV);
+} catch (err) {
+    console.log("Dotenv err", err);
+}
 export const DEV = process.env.ENV == "dev";
-console.log(process.env.ENV);
 
 export let jobs: { job: Job; id: string; active: boolean }[] = [];
 export const setJobs = (val: typeof jobs) => (jobs = val);
@@ -13,17 +19,18 @@ export const setBookJobs = (val: typeof bookJobs) => (bookJobs = val);
 export const test = false;
 export const botJobSpecs = (min: number) =>
     min == 60 ? "0 * * * *" : `*/${min} * * * *`; // = test ? "*/10 * * * * *" : "* * * * * *";
-export const dfsDir = "src/data/dfs/binance",
-    klinesDir = "src/data/klines/binance";
+export const dfsDir = "@cmn/data/dfs/binance",
+    klinesDir = "@cmn/data/klines/binance";
 
 export const MAKER_FEE_RATE = 0.1 / 100;
 export const TAKER_FEE_RATE = 0.1 / 100,
     P_DIFF = 0.0 / 100;
 export const slPercent = 0.5 / 100,
     minDiff = 0;
-export const dfsRootDir = "src/data/dfs",
-    klinesRootDir = "src/data/klines",
-    tradesRootDir = "src/data/trades";
+console.log({ __dirname });
+export const dfsRootDir = "../data/dfs",
+    klinesRootDir = path.join(__dirname, "../data/klines"),
+    tradesRootDir = path.join(__dirname, "../data/trades");
 
 export const isMarket = true,
     cancelOnCond = true,

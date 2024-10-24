@@ -101,7 +101,7 @@ import {
 } from "~/utils/constants";
 import { storeToRefs } from "pinia";
 import { api, localApi } from "~/utils/api";
-import { IObj } from "@/src/common";
+import { type IObj } from "@repo/common/src/utils/interfaces";
 const appStore = useAppStore();
 
 const initRes = { data: {} };

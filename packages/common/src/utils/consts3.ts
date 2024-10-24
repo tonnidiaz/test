@@ -180,5 +180,25 @@ class TaskManager {
         timedLog(`Task ${id} removed!!`)
     }
 }
-
+console.log(process.env.NODE_ENV)
+export const __DEV__ = process.env.NODE_ENV == "development";
 export const taskManager = new TaskManager()
+
+export const ROOT = __DEV__ ? "http://localhost:3000" : "https://tu-trader.vercel.app";
+const heroku = false,
+    koyeb = true;
+export const BEND_URL = __DEV__
+    ? "http://localhost:8000"
+    : heroku
+      ? "https://tu-trader-3996d65ded90.herokuapp.com"
+      : koyeb
+        ? "https://tu-trader.koyeb.app"
+        : "https://tu-trader-mef0.onrender.com";
+export const API_URL = __DEV__
+    ? "http://localhost:5000"
+    : "https://trader-bend.vercel.app";
+export const EMAIL = "tonnidiazed@gmail.com";
+export const DEVELOPER = "Tonni Diaz";
+export const SITE_SLOGAN = "A Tunedbass site";
+
+export const STORAGE_KEYS = { authTkn: "TB_AUTH_TOKEN" };

@@ -12,7 +12,7 @@ import {
 import { botLog, ceil, toFixed } from "@cmn/utils/functions";
 import { ICandle } from "@cmn/utils/interfaces";
 import { placeTrade } from "../funcs";
-import { Order } from "@cmn/models";
+import { TuOrder } from "@cmn/models";
 
 export const prodStrategy = async ({
     pos,
@@ -61,7 +61,7 @@ export const prodStrategy = async ({
             return botLog(bot, "FAILED TO PLACE BUY ORDER");
         }
 
-        order = (await Order.findById(r).exec())!;
+        order = (await TuOrder.findById(r).exec())!;
         pos = true;
     }
 

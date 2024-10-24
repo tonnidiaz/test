@@ -1,4 +1,3 @@
-import { connectMongo, TuBook } from "~/src/tulib"
 import { nuxtErr } from "../utils/funcs"
 
 export default defineEventHandler(async (e) =>{

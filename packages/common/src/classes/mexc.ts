@@ -1,11 +1,7 @@
 import { IBot } from "@cmn/models/bot";
-import { ensureDirExists } from "@cmn/utils/orders/funcs";
 import { getInterval, parseDate, parseFilledOrder } from "@cmn/utils/funcs2";
-import { botLog, capitalizeFirstLetter, getSymbol } from "@cmn/utils/functions";
-import { RestClientV5 } from "bybit-api";
-import type { OrderResultV5 } from "bybit-api";
-import { writeFileSync } from "fs";
-import { DEV, isStopOrder } from "@cmn/utils/constants";
+import { botLog, getSymbol } from "@cmn/utils/functions";
+import { DEV } from "@cmn/utils/constants";
 import { IOrderDetails } from "@cmn/utils/interfaces";
 import { Spot } from "mexc-api-sdk";
 
@@ -34,7 +30,7 @@ export class Mexc {
                 return;
             }
             return Number(
-                res.balances.find((el) => el.asset == ccy ?? this.bot.ccy)
+                res.balances.find((el) => el.asset == ccy || this.bot.ccy)
                     ?.free ?? 0
             );
         } catch (error) {

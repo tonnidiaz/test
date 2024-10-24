@@ -26,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import { type ISelectItem } from "@/src/common";
+import { type ISelectItem } from "@repo/common/src/utils/interfaces";
 import { computed, ref, watch } from "vue";
 const formRef = ref<HTMLFormElement>();
 const dropdownRef = ref<HTMLSelectElement>(),

@@ -38,7 +38,7 @@
     </div>
 </template> 
 <script setup lang="ts">
-import { IObj } from "@/src/common";
+import { type IObj } from "@repo/common/src/utils/interfaces";
 import { el } from "date-fns/locale";
 import { storeToRefs } from "pinia";
 import { useUserStore } from "@/src/stores/user";

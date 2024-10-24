@@ -3,7 +3,8 @@
   "private": true,
   "scripts": {
     "build": "nuxt build",
-    "dev": "NODE_OPTIONS=--max_old_space_size=4096 conc \"tsx ../../tsmerge.ts .\" \"nuxt dev\"",
+    "dev:conc": "NODE_OPTIONS=--max_old_space_size=4096 conc \"tsx ../../tsmerge.ts .\" \"nuxt dev --tsconfig tsconfig.json\"",
+    "dev": "NODE_OPTIONS=--max_old_space_size=4096 nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"

@@ -1,15 +1,13 @@
 import { Server } from "socket.io";
 import { CorsOptions } from "cors";
 import { IObj, IRetData } from "./interfaces";
-import { tuCE, heikinAshi, parseDate, parseKlines, tuPath } from "./funcs2";
+import { tuCE, heikinAshi, parseKlines, tuPath } from "./funcs2";
 import { klinesDir, klinesRootDir, tradesRootDir } from "./constants";
 import { existsSync } from "fs";
 import {
     clearTerminal,
-    getPricePrecision,
     getSymbol,
-    readJson,
-    toFixed,
+    parseDate,
 } from "./functions";
 import { objStrategies, parentStrategies, strategies } from "@cmn/strategies";
 import { TestOKX } from "@cmn/classes/test-platforms";
@@ -19,6 +17,7 @@ import { onCrossArbitCointest } from "./functions/io-funcs3";
 import { CrossArbitData } from "@cmn/classes/tu";
 import { Bot } from "@cmn/models";
 import { crossArbitWsList, triArbitWsList } from "@cmn/classes/tu-ws";
+import { readJson } from "./bend/functions";
 
 const corsOptions: CorsOptions = { origin: "*" };
 const io = new Server({ cors: corsOptions }); // yes, no server arg here; it's not required

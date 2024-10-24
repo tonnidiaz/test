@@ -13,35 +13,15 @@ import path from "path";
 import { SL, TP, useHaClose } from "./constants";
 import { OrderDetails } from "okx-api";
 import { IBot } from "@cmn/models/bot";
-import { Order } from "@cmn/models";
+import { TuOrder } from "@cmn/models";
 import { AccountOrderV5 } from "bybit-api";
 import { IOrder } from "@cmn/models/order";
 import { objPlats } from "./consts2";
 import { objStrategies } from "@cmn/strategies";
 import type { Order as GateOrder } from "gate-api";
 import type { SpotOrder as KucoinOrder } from "kucoin-api";
+import { parseDate } from "./functions";
 
-const ddNum = (e: any) => {
-    e = `${e}`.trim();
-    return e.length == 1 ? `0${e}` : e;
-};
-const toISOString = (date: string) => {
-    let dateArr = date.split(",");
-    let time = dateArr[1];
-    time = time
-        .split(":")
-        .map((el) => ddNum(el))
-        .join(":");
-    dateArr = dateArr[0].split("/");
-    date = `${dateArr[0]}-${ddNum(dateArr[1])}-${ddNum(dateArr[2])}`;
-    return `${date} ${time}+02:00`;
-};
-export const parseDate = (date: Date | string | number) =>
-    toISOString(
-        new Date(date).toLocaleString("en-ZA", {
-            timeZone: "Africa/Johannesburg",
-        })
-    );
 
 export const getExactDate = (interval: number) => {
     // Validate the interval
@@ -93,7 +73,7 @@ export const tuMacd = (
         histogram.push(_macd.macdLine[i] - _macd.signalLine[i]);
     return { ..._macd, histogram };
 };
-export const tuPath = (pth: string) => path.resolve(...pth.split("/"));
+export const tuPath = (pth: string) => pth// path.resolve(...pth.split("/"));
 
 export const parseKlines = (
     klines: (string | number)[][],
@@ -392,7 +372,7 @@ export const parseFilledOrder = (res: IObj, plat: string) => {
 };
 
 export const findBotOrders = async (bot: IBot) => {
-    const orders = await Order.find({
+    const orders = await TuOrder.find({
         bot: bot._id,
         base: bot.base,
         ccy: bot.ccy,
@@ -401,9 +381,9 @@ export const findBotOrders = async (bot: IBot) => {
 };
 
 export const getLastOrder = async (bot: IBot) => {
-    const orders = await Order.find({ bot: bot.id }).exec();
+    const orders = await TuOrder.find({ bot: bot.id }).exec();
     return orders.length
-        ? await Order.findById([...orders].pop()?.id).exec()
+        ? await TuOrder.findById([...orders].pop()?.id).exec()
         : null;
 };
 

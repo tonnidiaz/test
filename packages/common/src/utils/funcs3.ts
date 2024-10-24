@@ -8,7 +8,7 @@ import { okxInstrus } from "./data/instrus/okx-instrus";
 import { parseDate } from "./funcs2";
 import { botLog, getSymbol } from "./functions";
 import { kucoinInstrus } from "./data/instrus/kucoin-instrus";
-import { TriArbitOrder, Order } from "@cmn/models";
+import { TriArbitOrder, TuOrder } from "@cmn/models";
 import { max } from "indicatorts";
 import axios from "axios";
 export const getKlinesPath = ({
@@ -129,7 +129,7 @@ export const parseOrders = async (_bot: IBot, _start: number, max: number) => {
             orders.push(ord.order);
         }
     } else {
-        const ords = await Order.find({
+        const ords = await TuOrder.find({
             bot: _bot.id,
             is_arbit: _bot.parent != undefined,
         }).exec();
