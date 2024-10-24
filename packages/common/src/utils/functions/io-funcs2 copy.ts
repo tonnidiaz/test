@@ -3,7 +3,6 @@ import { Server } from "ws";
 import { IObj, IRetData } from "../interfaces";
 import { ARBIT_ZERO_FEES, ARBIT_MIN_PERC } from "../constants";
 import { getInstrus, getKlinesPath, getMakerFee, getTakerFee } from "../funcs3";
-import { ensureDirExists } from "../orders/funcs";
 import {
     ceil,
     getCoinPrecision,
@@ -11,9 +10,9 @@ import {
     getMinSz,
     getPricePrecision,
     getSymbol,
-    readJson,
     toFixed,
 } from "../functions";
+import { readJson, ensureDirExists, } from "@cmn/utils/bend/functions";
 import { existsSync, writeFileSync } from "fs";
 import { parseKlines } from "../funcs2";
 import { test_platforms } from "../consts";

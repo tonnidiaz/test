@@ -1,6 +1,6 @@
 import { Bot, TriArbitOrder } from "@cmn/models";
 import { IBot } from "@cmn/models/bot";
-import { botLog } from "../functions";
+import { botLog } from "../bend/functions";
 
 export const createChildBots = async (bot: IBot) => {
     botLog(bot, "CREATING CHILD BOTS...");

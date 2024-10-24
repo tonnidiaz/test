@@ -1,5 +1,6 @@
 import { IBot } from "@cmn/models/bot";
-import { botLog, getSymbol } from "@cmn/utils/functions";
+import { getSymbol } from "@cmn/utils/functions";
+import { botLog} from "@cmn/utils/bend/functions";
 import { IOrderDetails, IOrderbook } from "@cmn/utils/interfaces";
 
 export class Platform {

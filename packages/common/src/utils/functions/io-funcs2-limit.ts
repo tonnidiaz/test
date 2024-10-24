@@ -3,7 +3,7 @@ import { Server } from "ws";
 import { IObj, IRetData } from "../interfaces";
 import { ARBIT_ZERO_FEES, ARBIT_MIN_PERC } from "../constants";
 import { getInstrus, getKlinesPath, getMakerFee, getTakerFee } from "../funcs3";
-import { ensureDirExists } from "../orders/funcs";
+import {   readJson, ensureDirExists } from "@cmn/utils/bend/functions";
 import {
     calcPerc,
     ceil,
@@ -12,7 +12,6 @@ import {
     getMinSz,
     getPricePrecision,
     getSymbol,
-    readJson,
     sleep,
     toFixed,
 } from "../functions";

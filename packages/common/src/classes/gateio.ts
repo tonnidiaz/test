@@ -1,7 +1,8 @@
 import { IBot } from "@cmn/models/bot";
 import { DEV } from "@cmn/utils/constants";
-import { getInterval, parseDate, parseFilledOrder } from "@cmn/utils/funcs2";
-import { botLog, getSymbol } from "@cmn/utils/functions";
+import { getInterval, parseFilledOrder } from "@cmn/utils/funcs2";
+import { parseDate, getSymbol } from "@cmn/utils/functions";
+import { botLog } from "@cmn/utils/bend/functions";
 import { IOrderDetails } from "@cmn/utils/interfaces";
 import { SpotApi, ApiClient, Trade, Order } from "gate-api";
 

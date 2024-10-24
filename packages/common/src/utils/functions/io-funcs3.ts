@@ -5,19 +5,17 @@ import { getInstrus, getKlinesPath, getMakerFee, getTakerFee } from "../funcs3";
 import { IObj, IRetData } from "../interfaces";
 import { heikinAshi, parseKlines, tuCE } from "../funcs2";
 import {
-    readJson,
     getPricePrecision,
     getCoinPrecision,
     clearTerminal,
     getSymbol,
 } from "../functions";
-import { ensureDirExists } from "../orders/funcs";
 import { writeFileSync, existsSync } from "fs";
 import { test_platforms } from "../consts";
 import { TestPlatform } from "@cmn/classes/test-platforms";
 import { objStrategies } from "@cmn/strategies";
 import { Arbit } from "@cmn/bots/arbitrage/classes";
-
+import { ensureDirExists, writeJson, readJson } from "../bend/functions";
 export const onCrossArbitCointest = async (
     data: IObj,
     client?: Socket,

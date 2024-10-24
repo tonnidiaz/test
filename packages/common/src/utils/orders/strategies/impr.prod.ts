@@ -9,7 +9,8 @@ import {
     getBotPlat,
     getBotStrategy,
 } from "@cmn/utils/funcs2";
-import { botLog, ceil, toFixed } from "@cmn/utils/functions";
+import { ceil, toFixed } from "@cmn/utils/functions";
+import { botLog } from "@cmn/utils/bend/functions";
 import { ICandle } from "@cmn/utils/interfaces";
 import { placeTrade } from "../funcs";
 import { TuOrder } from "@cmn/models";

@@ -3,16 +3,15 @@ import { Server } from "ws";
 import { IObj } from "../interfaces";
 import { ARBIT_ZERO_FEES, ARBIT_MIN_PERC } from "../constants";
 import { getInstrus, getKlinesPath, getMakerFee, getTakerFee } from "../funcs3";
-import { ensureDirExists } from "../orders/funcs";
 import {
     getCoinPrecision,
     getMinAmt,
     getMinSz,
     getPricePrecision,
     getSymbol,
-    readJson,
     toFixed,
 } from "../functions";
+import { botLog, readJson, writeJson, ensureDirExists } from "@cmn/utils/bend/functions";
 import { existsSync, writeFileSync } from "fs";
 import { parseKlines } from "../funcs2";
 import { test_platforms } from "../consts";

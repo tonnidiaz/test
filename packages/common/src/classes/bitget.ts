@@ -1,11 +1,9 @@
-import { getInterval, parseDate, parseFilledOrder } from "@cmn/utils/funcs2";
-import { ensureDirExists } from "@cmn/utils/orders/funcs";
-import { TestPlatform } from "./test-platforms";
+import { getInterval, parseFilledOrder } from "@cmn/utils/funcs2";
 import { RestClientV2 } from "bitget-api";
-import { writeFileSync } from "fs";
-import { CompanyResultSortBy } from "indicatorts";
+import { botLog } from "@cmn/utils/bend/functions";
+import { parseDate } from "@cmn/utils/functions";
 import { IBot } from "@cmn/models/bot";
-import { botLog, capitalizeFirstLetter, getSymbol, sleep } from "@cmn/utils/functions";
+import { capitalizeFirstLetter, getSymbol, sleep } from "@cmn/utils/functions";
 import { IOrderDetails } from "@cmn/utils/interfaces";
 import { DEV } from "@cmn/utils/constants";
 

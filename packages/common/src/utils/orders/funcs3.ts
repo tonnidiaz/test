@@ -1,11 +1,11 @@
 import { IBot } from "@cmn/models/bot";
 import {
-    botLog,
     getCoinPrecision,
     getMinAmt,
     getMinSz,
     getPricePrecision,
 } from "../functions";
+import { botLog } from "@cmn/utils/bend/functions";
 import { objPlats } from "../consts2";
 import {
     getExactDate,
