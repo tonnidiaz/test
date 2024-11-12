@@ -1,0 +1,11 @@
+{
+	"name": "@repo/test",
+	"version": "0.0.1",
+	"type": "module",
+	"scripts": {
+		"dev": "tsx --watch main.ts"
+	},
+    "dependencies": {
+        "@repo/common": "*"
+    }
+}

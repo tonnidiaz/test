@@ -1,0 +1,239 @@
+@import "./vars";
+@import "./colors";
+@import "./forms";
+.z-200{
+    z-index: 200 !important
+}
+.params-area {
+    position: fixed; 
+    z-index: 50;
+    bottom: 0;
+    right: 0px;
+    transition: all 0.1s linear;
+    box-shadow: -3px -3px 5px rgba(0, 0, 0, 0.199);
+    max-height: calc(100vh - 150px);
+    padding: 0;
+    margin: 0 1rem;
+    .mb-2 {
+        margin-bottom: 0;
+    }
+    .content {
+        display: none;
+    }
+    .ctrl-btn {
+        transform: rotate(180deg);
+    }
+    &.open {
+        bottom: 0;
+        overflow-y: scroll;
+        padding: 1rem;
+        .overflow-y-scroll{
+            overflow-y: scroll;
+        }
+        
+        .mb-2 {
+            margin-bottom: 0.5rem;
+        }
+        .content {
+            display: unset;
+        }
+        .ctrl-btn {
+            transform: rotate(0deg);
+        }
+    }
+    .ctrl-btn {
+        float: right;
+    }
+}
+
+
+@media screen and (max-width: 767px) {
+    .sidebar {
+        border-radius: 15px;
+        flex-direction: row !important;
+        padding: 0 4px;
+        flex-wrap: nowrap;
+        box-shadow: $shadow;
+
+        position: fixed !important;
+        width: calc(100% - 20px) !important;
+        height: $sidenav-w !important;
+
+        bottom: 8px !important;
+        left: 10px;
+        top: unset !important;
+        align-items: center !important;
+        justify-content: space-around;
+        border: 1px solid $on-bg-tb;
+    }
+    main {
+        margin-bottom: $sidenav-w;
+    }
+}
+
+.pointer {
+    cursor: pointer;
+}
+.avatar.online,
+.avatar.offline {
+    &:before {
+        width: 27% !important;
+        height: 27% !important;
+        top: 0;
+        right: -0%;
+    }
+}
+.avatar.offline{
+    //&:before{@apply bg-warning} TODO: Apply warning color
+}
+
+.bot-card {
+    transition: 0.1s ease-in-out;
+    &:hover {
+        transform: scale(1.04);
+    }
+}
+
+.fab {
+    position: fixed;
+    z-index: 10;
+    right: 15px;
+    bottom: 15px;
+    box-shadow: $shadow;
+}
+
+
+#ctx-overlay{
+    z-index: calc($bottombar-z + 1);
+    position: fixed;
+    padding: 10px;
+    //width: 100%; height: 100vw;
+    top: 0; left: 0;
+    //width: 100vw; height: 100vh; background-color: var(--fallback-b1,oklch(var(--b1)/.5));  top: 0; left: 0;
+}
+
+.wp-wrap{
+    white-space: wrap !important;
+}
+
+html,
+body,
+.__nuxt-error-page,
+#__nuxt {
+    padding: 0;
+    margin: 0;
+    font-weight: 500;
+    font-family: Poppins, monospace;//DM Sans, "DM Sans Fallback: Arial",ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;//Inter, sans-serif;
+   // background-color: red !important;
+    //color: $fg-color;
+   
+}
+
+
+
+
+button{
+    text-align: center !important;
+    display: flex;
+    justify-content: center;
+}
+.navbar{height: $sidenav-w;
+*{align-self: center;}
+}
+
+.navbar, h1, h2, h3, h4, h5, h6, .text-heading {
+    color: $heading-color
+}
+
+.text-subtitle{
+    color: $fg-color-2
+}
+
+ul, li{
+    &.disc{
+        list-style-type: disc !important;
+    }
+}
+
+.font-monospace {
+    font-family: monospace;
+    &.all{
+        * {
+            font-family: monospace;
+        }
+    }
+}
+.font-inter {
+    font-family: Inter;
+    &.all{
+        * {
+            font-family: Inter;
+        }
+    }
+}
+.btn{
+    &.floating{
+        position: fixed;
+        z-index: 50;
+        margin: 10px;
+        bottom: 0;
+        right: 0
+    }
+}
+
+#floating-actions{
+    position: fixed;
+    margin: 10px;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    z-index: calc($bottombar-z + 1)
+}
+@media screen and (max-width: 767px) {
+    .params-area,
+    .fab, #floating-actions {
+        bottom: calc($sidenav-w + 15px) !important;
+        margin-bottom: 0;
+    }
+}
+
+
+.backtest-table{
+    tbody{
+        * {
+            @apply font-monospace
+        }
+    }
+}
+.linethrough{
+    text-decoration: underline;
+}
+.avatar.online,
+.avatar.offline {
+    &:before {
+        width: 27% !important;
+        height: 27% !important;
+        top: 0;
+        right: -0%;
+    }
+}
+.avatar.offline{
+    &:before{@apply bg-warning}
+}
+
+td {@apply px-3}
+.textarea{
+    line-height: 1.5;
+}
+
+.disabled, :disabled{
+    user-select: none;
+    pointer-events: none;
+}
+
+.status-textarea{
+    // max-width: min-content;
+    resize: vertical;
+}

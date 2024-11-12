@@ -20,6 +20,9 @@
         },
         {
             "path": "apps/tu-trader-worker"
+        },
+        {
+            "path": "apps/tu-trader-sv"
         }
     ],
     "settings": {}

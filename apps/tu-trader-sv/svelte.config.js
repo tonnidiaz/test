@@ -13,12 +13,13 @@ const config = {
 		// See https://svelte.dev/docs/kit/adapters for more information about adapters.
 		adapter: adapter(),
         alias: {
-            "@cmn/*": "../../packages/common/src/*"
+            "@cmn/*": "../../packages/common/src/*",
+            "@/*": "src/*"
         },
         typescript: {
             config: (c)=>{
                 return {...c,
-                    include: [...c.include, "../../../packages/common/**/*.ts"]
+                    include: [...c.include, "../../../packages/common/**/*.ts", "../../../node_modules/svelte/elements.d.ts"]
                 }
             }
         }

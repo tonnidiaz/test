@@ -1,0 +1,80 @@
+@import "./vars";
+
+$form-w: 350px;
+.auth-form, .formset {
+    margin: 0 auto;
+    width: $form-w;
+    legend{
+        font-weight: bold !important;
+        letter-spacing: 1px;
+        width: auto;
+        padding: 5px;
+    }
+}
+.auth-form{
+     background: $color-card;
+     border-radius: 4px;
+     
+}
+@media screen and (max-width: $form-w) {
+    .auth-form, .formset {
+        width: calc(100% - 10px) !important;
+    }
+}
+
+.pwd-val {
+    ul {
+        padding-left: 3vw;
+    }
+}
+
+.form-container {
+    margin-top: 20vh;
+}
+
+@media screen and (max-width: 460px) {
+    .form {
+        width: 100% !important;
+    }
+}
+
+.form {
+    width: 450px;
+    margin: 5vh auto;
+    // padding: 0;
+    .row {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+}
+
+input:disabled, textarea:disabled {
+    opacity: .7 !important;
+    border-color: revert !important;
+}
+
+
+input, textarea, select {
+   // color: $color-white-2;// !important;
+    &::placeholder{
+    opacity: 0.4 !important;
+    
+}
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active
+{
+ -webkit-box-shadow: 0 0 0 30px var(--fallback-b1,oklch(var(--b1)/var(--tw-bg-opacity))) inset !important;
+}
+
+.form-group{
+    @apply my-2;
+}
+
+.label{
+    padding: 0 !important;
+}

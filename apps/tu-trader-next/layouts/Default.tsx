@@ -10,8 +10,8 @@ import Loader from "../components/Loader";
 import {  pagesWithLayout, setSocket, socket } from "@/utils/constants";
 import { sleep } from "@cmn/utils/functions";
 import { io } from "socket.io-client";
-import { localApi } from "@cmn/utils/api";
-import { BEND_URL } from "@cmn/utils/consts3";
+import { localApi } from "@/utils/api";
+import { BEND_URL } from "@/utils/constants";
 
 const DefaultLayout = ({
     children,
@@ -89,11 +89,13 @@ const DefaultLayout = ({
         }
     }
     const init = async () => {
+        console.log("Init");
         console.log(pagesWithLayout.indexOf(location.pathname ) == -1 );
-        await getUser();
-        getStrategies();
-        getParents()
-        getPlatforms()
+
+        // await getUser();
+        // getStrategies();
+        // getParents()
+        // getPlatforms()
         dispatch(setReady(true));
     };
 

@@ -11,7 +11,7 @@
         "@cmn/*": ["./src/*"]
     }
   },
-  "include": ["./src/**/*.ts", "**/*.ts"],
+  "include": ["./src/**/*.ts", "**/*.ts", "../../apps/tu-trader-next/utils/api.ts"],
   "exclude": ["dist", "out", ".out", "**/*.spec.ts"]
 }
  

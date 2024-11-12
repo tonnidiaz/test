@@ -62,6 +62,7 @@ await connectMongo(DEV)
     // const r = await localApi().post('/tasks/books', {books: [1,2,3,4]})
     // console.log(r.data)
     // return 
+    if (DEV) return;
     await scheduleAllTasks()
     if (config.fetch_orderbook_enabled)
         addBooksTask(config)

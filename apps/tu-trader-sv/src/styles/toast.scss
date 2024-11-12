@@ -1,0 +1,23 @@
+@import "./vars";
+
+.toast{
+    //width: 400px;
+    min-height: 20px;
+    background-color: $dlg-bg-color;
+    position: fixed;
+    bottom: 20px;
+    left: 10px;
+    box-shadow: 0 0 0 2px #5c5c5c88;
+    z-index: 99999999;
+    border: 2px solid $dlg-border-color;
+    padding: 8px;
+    border-radius: 10px;
+    font-size: 15px !important;
+    font-weight: 500;
+    &.is-err{
+        color: red !important;
+    }
+    &.is-ok{
+        color: green !important
+    }
+}

@@ -7,4 +7,15 @@ export default defineConfig({
     define: {
         __dirname: JSON.stringify(dirname(fileURLToPath(import.meta.url))),
       },
+      css: {
+        preprocessorOptions: {
+          scss: {
+            silenceDeprecations: ["legacy-js-api"],
+          },
+        },
+      },
+
+      optimizeDeps: {
+        exclude: ["svelte-codemirror-editor", "codemirror", "@codemirror/language-javascript", "@codemirror/lang-vue",  /* ... */],
+    }
 });

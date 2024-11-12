@@ -38,13 +38,12 @@ export const crossCoinFees: { [key: string]: { [key: string]: number } } = {
         POLYX: 2.3, // POLYMESH:
         QUICK: 67.41, // POLY:
 
-        SYS: .5, //SYS
+        SYS: 0.5, //SYS
         ASR: 1, // CAP20 -- CAN'T WITHDRAW
-        CYBER: 0.27534 // HIGH AS FUCK
-       
+        CYBER: 0.27534, // HIGH AS FUCK
     },
     binance: {
-        USDT: .1// ARB
+        USDT: 0.1, // ARB
     },
     mexc: {
         LAT: 1, // LAT: MED
@@ -112,20 +111,20 @@ export const pairsOfInterest: {
     binance: [
         { A: "USDT", B: "USDC", C: ["JUP", "FET", "CKB", "YGG", "PEOPLE"] },
         { A: "USDT", B: "BTC", C: ["PEOPLE", "ONE", "NULS", "DATA", "FIDA"] },
-        { A: "USDT", C: ["SYS"]}
+        { A: "USDT", C: ["SYS"] },
     ],
     bitget: [
         { A: "USDT", B: "USDC", C: ["BGB"] },
         { A: "USDT", B: "BTC", C: ["BGB"] },
         { A: "EUR", B: "USDT", C: ["PEPE", "BGB"] },
         { A: "USDT", C: ["LAT", "OAS", "BABYDOGE", "ABBC"] },
-        { A: "USDT", C: ["POLYX", ]}, // kucoin -
+        { A: "USDT", C: ["POLYX"] }, // kucoin -
     ],
     kucoin: [
         { A: "USDT", B: "USDC", C: ["FLOKI", "GMT", "APE", "NEAR"] },
         { A: "USDT", C: ["CAS", "BLOK", "IRON", "HAI", "KARATE"] },
-        { A: "USDT", C: ["POLYX", ]}, // - bitget
-    ], 
+        { A: "USDT", C: ["POLYX"] }, // - bitget
+    ],
     okx: [
         { A: "USDT", B: "USDC", C: ["KLAY", "1INCH", "SUSHI", "MKR", "ALGO"] },
         { A: "USDT", C: ["LAT", "SC"] },
@@ -170,43 +169,37 @@ export const coinVols = [
 ];
 
 class TaskManager {
-    tasks: ITask[] = []
+    tasks: ITask[] = [];
 
-    addTask(task: ITask){this.tasks.push(task)}
-    rmTask(id: string | undefined | null){
-        if (!id) return
-        timedLog(`Removing task ${id}....`)
-        this.tasks = this.tasks.filter(el=> el.id != id)
-        timedLog(`Task ${id} removed!!`)
+    addTask(task: ITask) {
+        this.tasks.push(task);
+    }
+    rmTask(id: string | undefined | null) {
+        if (!id) return;
+        timedLog(`Removing task ${id}....`);
+        this.tasks = this.tasks.filter((el) => el.id != id);
+        timedLog(`Task ${id} removed!!`);
     }
 }
 
-import {configDotenv} from "dotenv"
-try{
-    configDotenv()
-}catch(e){
-    console.log(e)
+import { configDotenv } from "dotenv";
+try {
+    configDotenv();
+} catch (e) {
+    console.log(e);
+}
+export let __DEV__ = false;
+try {
+    console.log("ENV:", process.env.ENV);
+    __DEV__ = process.env.ENV == "dev";
+} catch (e) {
+    __DEV__ = location.hostname == 'localhost'
 }
 
-console.log("ENV:", process.env.ENV)
-export const __DEV__ = process.env.ENV == "dev";
-export const taskManager = new TaskManager()
+export const taskManager = new TaskManager();
 
-export const ROOT = __DEV__ ? "http://localhost:3000" : "https://tu-trader.vercel.app";
-const heroku = false,
-    koyeb = true;
-export const BEND_URL = __DEV__
-    ? "http://localhost:8000"
-    : heroku
-      ? "https://tu-trader-3996d65ded90.herokuapp.com"
-      : koyeb
-        ? "https://tu-trader.koyeb.app"
-        : "https://tu-trader-mef0.onrender.com";
-export const API_URL = __DEV__
-    ? "http://localhost:3000/api"
-    : "https://tutrader-sv.vercel.app";
+
 export const EMAIL = "tonnidiazed@gmail.com";
 export const DEVELOPER = "Tonni Diaz";
 export const SITE_SLOGAN = "A Tunedbass site";
 
-export const STORAGE_KEYS = { authTkn: "TB_AUTH_TOKEN" };
