@@ -2,7 +2,7 @@ import { IBot } from "@cmn/models/bot";
 import { getExactDate, getInterval, parseFilledOrder } from "@cmn/utils/funcs2";
 import {  capitalizeFirstLetter, getSymbol, sleep } from "@cmn/utils/functions";
 import { SpotClient } from "kucoin-api";
-import { writeFileSync } from "fs";
+import { writeFileSync } from "node:fs";
 import { botLog } from "@cmn/utils/bend/functions";
 import { parseDate } from "@cmn/utils/functions";
 import { DEV, isStopOrder } from "@cmn/utils/constants";

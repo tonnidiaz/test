@@ -3,7 +3,7 @@ import { CorsOptions } from "cors";
 import { IObj, IRetData } from "./interfaces";
 import { tuCE, heikinAshi, parseKlines, tuPath } from "./funcs2";
 import { klinesDir, klinesRootDir, tradesRootDir } from "./constants";
-import { existsSync } from "fs";
+import { existsSync } from "node:fs";
 import {
     clearTerminal,
     getSymbol,

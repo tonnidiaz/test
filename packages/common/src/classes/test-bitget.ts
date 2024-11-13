@@ -3,7 +3,7 @@ import { TestPlatform } from "./test-platforms";
 import { RestClientV2 } from "bitget-api";
 import { botLog, readJson, writeJson, ensureDirExists, existsSync } from "@cmn/utils/bend/functions";
 import { parseDate } from "@cmn/utils/functions";
-import { writeFileSync } from "fs";
+import { writeFileSync } from "node:fs";
 import { CompanyResultSortBy } from "indicatorts";
 import {
     getSymbol,

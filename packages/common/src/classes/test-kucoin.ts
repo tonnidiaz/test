@@ -7,7 +7,7 @@ import { getSymbol, sleep } from "@cmn/utils/functions";
 import { botLog, readJson, writeJson, ensureDirExists } from "@cmn/utils/bend/functions";
 import { parseDate } from "@cmn/utils/functions";
 import axios, { AxiosError, AxiosResponse, isAxiosError } from "axios";
-import { existsSync, writeFileSync } from "fs";
+import { existsSync, writeFileSync } from "node:fs";
 import { ICoinNets, IOrderbook, TPlatName } from "@cmn/utils/interfaces";
 import { safeJsonParse } from "@cmn/utils/funcs3";
 

@@ -6,7 +6,7 @@ import {  getSymbol, sleep } from "@cmn/utils/functions";
 import axios, { AxiosResponse, isAxiosError } from "axios";
 import crypto from "crypto";
 
-import { writeFileSync } from "fs";
+import { writeFileSync } from "node:fs";
 import {
     RestClientV5,
     KlineIntervalV3,
@@ -18,7 +18,7 @@ import {
 import { Candle, RestClient, Trade } from "okx-api";
 import dotenv from "dotenv";
 import { ICoinNets, IOrderbook, ITrade, TPlatName } from "@cmn/utils/interfaces";
-import { existsSync } from "fs";
+import { existsSync } from "node:fs";
 import { netsRootDir } from "@cmn/utils/consts2";
 import { safeJsonParse } from "@cmn/utils/funcs3";
 

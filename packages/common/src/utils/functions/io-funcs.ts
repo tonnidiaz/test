@@ -7,7 +7,7 @@ import {
     klinesRootDir,
     tradesRootDir,
 } from "../constants";
-import { existsSync, writeFileSync } from "fs";
+import { existsSync, writeFileSync } from "node:fs";
 import {
     clog,
     getPricePrecision,

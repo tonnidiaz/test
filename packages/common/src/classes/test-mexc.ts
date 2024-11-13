@@ -1,6 +1,6 @@
 import { getInterval } from "@cmn/utils/funcs2";
 import { TestPlatform } from "./test-platforms";
-import { writeFileSync } from "fs";
+import { writeFileSync } from "node:fs";
 import { CompanyResultSortBy } from "indicatorts";
 import * as Mexc from "mexc-api-sdk";
 import {

@@ -1,6 +1,6 @@
 import * as jwt from "jsonwebtoken";
 import * as nodemailer from "nodemailer";
-import * as fs from "fs";
+import * as nfs from "node:fs";
 const { env } = process;
 import { Response } from "express";
 import path from "path";
@@ -11,12 +11,12 @@ import { IObj } from "../interfaces";
 
 export const ensureDirExists = (filePath: string) => {
     var dirname = path.dirname(filePath);
-    if (fs.existsSync(dirname)) {
+    if (nfs.existsSync(dirname)) {
         return true;
     }
     ensureDirExists(dirname);
     console.log("Creating directory");
-    fs.mkdirSync(dirname);
+    nfs.mkdirSync(dirname);
 };
 
 
@@ -200,26 +200,26 @@ export const sendMail = async (
 };
 const jsonPath = __dirname + "/../assets/store.json";
 export const getStoreDetails = () => {
-    const buff = fs.readFileSync(jsonPath, { encoding: "utf-8" });
+    const buff = nfs.readFileSync(jsonPath, { encoding: "utf-8" });
     return JSON.parse(buff);
 };
 
 export const writeJson = (fp: string, data: any) => {
     console.log("\nSaving....");
     ensureDirExists(fp)
-    fs.writeFileSync(fp, JSON.stringify(data));
+    nfs.writeFileSync(fp, JSON.stringify(data));
     console.log(fp)
     console.log("SAVED!!\n");
 };
 
-export const existsSync = (fp: string) => fs.existsSync(fp);
+export const existsSync = (fp: string) => nfs.existsSync(fp);
 
 export const botLog = (bot: IBot, ...data: any) => {
     console.log(`\n[${parseDate(new Date())}] [ ${bot.name} ]`, ...data, "\n");
 };
 
 export const readJson = (fp: string) => {
-    const data = fs.readFileSync(fp, { encoding: "utf-8" });
+    const data = nfs.readFileSync(fp, { encoding: "utf-8" });
     return JSON.parse(data);
 };
 

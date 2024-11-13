@@ -1,5 +1,5 @@
 import axios, { Axios } from "axios";
-import { unlinkSync, writeFileSync } from "fs";
+import { unlinkSync, writeFileSync } from "node:fs";
 import { TestPlatform } from "./test-platforms";
 import { ICoinNets, IOrderbook, ITrade } from "@cmn/utils/interfaces";
 import { MainClient } from "binance";

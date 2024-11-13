@@ -3,7 +3,7 @@ import { TestPlatform } from "./test-platforms";
 import { botLog, readJson, writeJson, ensureDirExists, existsSync } from "@cmn/utils/bend/functions";
 import { parseDate } from "@cmn/utils/functions";
 import { ApiClient, SpotApi } from "gate-api";
-import { writeFileSync } from "fs";
+import { writeFileSync } from "node:fs";
 
 export class TestGateio extends TestPlatform {
     maker: number = 0.2 / 100;

@@ -5,7 +5,7 @@ import { botLog } from "@cmn/utils/bend/functions";
 import { parseDate } from "@cmn/utils/functions";
 import { RestClientV5 } from "bybit-api";
 import type { OrderResultV5 } from "bybit-api";
-import { writeFileSync } from "fs";
+import { writeFileSync } from "node:fs";
 import { DEV, isStopOrder } from "@cmn/utils/constants";
 import { IOrderDetails, IOrderbook } from "@cmn/utils/interfaces";
 import { Platform } from "./platforms";

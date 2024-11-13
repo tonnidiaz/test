@@ -13,7 +13,7 @@ import {
     getSymbol,
     toFixed,
 } from "../functions";
-import { existsSync, writeFileSync } from "fs";
+import { existsSync, writeFileSync } from "node:fs";
 import { parseKlines } from "../funcs2";
 import { test_platforms } from "../consts";
 

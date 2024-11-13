@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@repo/common": "^1.0.0",
+    "fs": "^0.0.1-security",
     "nuxt": "^3.13.2",
     "vue": "latest",
     "vue-router": "latest"

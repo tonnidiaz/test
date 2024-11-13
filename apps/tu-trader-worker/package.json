@@ -15,6 +15,7 @@
         "cors": "*",
         "dotenv": "*",
         "express": "*",
+        "fs": "^0.0.1-security",
         "http-errors": "*",
         "morgan": "*",
         "pug": "*"

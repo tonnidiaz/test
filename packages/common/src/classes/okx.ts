@@ -5,7 +5,7 @@ import {
     getExactDate,
 } from "@cmn/utils/funcs2";
 import {  getSymbol, sleep, timedLog } from "@cmn/utils/functions";
-import { writeFileSync } from "fs";
+import { writeFileSync } from "node:fs";
 import { RestClient, WebsocketClient } from "okx-api";
 import type { AlgoOrderResult, OrderDetails, OrderResult } from "okx-api";
 import { DEV } from "@cmn/utils/constants";

@@ -10,7 +10,7 @@ import {
     clearTerminal,
     getSymbol,
 } from "../functions";
-import { writeFileSync, existsSync } from "fs";
+import { writeFileSync, existsSync } from "node:fs";
 import { test_platforms } from "../consts";
 import { TestPlatform } from "@cmn/classes/test-platforms";
 import { objStrategies } from "@cmn/strategies";
