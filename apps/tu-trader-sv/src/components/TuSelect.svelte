@@ -2,7 +2,7 @@
     import type { ISelectItem } from "@/lib/interfaces";
     import { onMount, untrack } from "svelte";
 
-    let formRef: HTMLFormElement;
+    let formRef: HTMLDivElement;
     let dropdownRef: HTMLSelectElement = $state(),
         created = $state(false);
     // Check if Dropdowns are Exist
@@ -16,6 +16,9 @@
         placeholder?: string;
         value: any;
         disabled?: boolean;
+        required?: boolean;
+        searchable?: boolean;
+        class?: string
     }
 
     let {
@@ -23,7 +26,8 @@
         options,
         value = $bindable(),
         placeholder,
-        disabled,
+        disabled, required,
+        class: _class
     }: IProps = $props();
 
     // Create Custom Dropdown
@@ -323,10 +327,10 @@
 </script>
 
 <div class="mb-2 hidden">{JSON.stringify(options)}</div>
-<div class="tu-select">
+<div class={"tu-select " + _class}>
     <section class="section wrapper wrapper-section">
         <div class="container wrapper-column">
-            <form name="countries" class="tu-select-form" bind:this={formRef}>
+             <div   class="tu-select-form" bind:this={formRef}>
                 <div class="tu-select-form-group">
                     <span class="tu-select-form-arrow"
                         ><i class="fi fi-br-angle-small-down"></i></span
@@ -339,7 +343,7 @@
                         <option disabled>{placeholder}</option>
                     </select>
                 </div>
-            </form>
+            </div>
         </div>
     </section>
 </div>

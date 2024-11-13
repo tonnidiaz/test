@@ -2,7 +2,7 @@
     <TMeta title={`Vue to jsx - ${SITE}`} />
     <div class="p-3 border-1 border-card br-4">
         <h2 class="my-4 fs-24 fw-6">Vue to JSX converter</h2>
-        <UForm onSubmit={handleSubmit}>
+        <UForm onsubmit={handleSubmit}>
             <UFormGroup>
                 {#snippet label()}
                     Vue code
@@ -51,11 +51,11 @@
     import UFormGroup from "@/components/UFormGroup.svelte";
     import UTextarea from "@/components/UTextarea.svelte";
     import { SITE } from "@/lib/constants";
-    import { localApi } from "@cmn/utils/api";
     import { onMount } from "svelte";
     import { page } from "$app/stores";
     import { dev } from "$app/environment";
     import UCheckbox from "@/components/UCheckbox.svelte";
+    import { localApi } from "@/lib/api";
 
     const sessionStorageKey = `${$page.url.pathname}-code`;
     let vueCode = $state(""), svCode = $state(""), full = $state(false);

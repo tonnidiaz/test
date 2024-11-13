@@ -112,9 +112,7 @@ export const BEND_URL = __DEV__
       : koyeb
         ? "https://tu-trader.koyeb.app"
         : "https://tu-trader-mef0.onrender.com";
-export const API_URL = __DEV__
-    ? "http://localhost:3000/api"
-    : "https://tutrader-sv.vercel.app";
+export const API_URL = "/api"
 
     export const STORAGE_KEYS = { authTkn: "TB_AUTH_TOKEN" };
     export const SITE_SLOGAN = "A Tunedbass site";

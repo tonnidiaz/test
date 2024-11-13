@@ -1,4 +1,4 @@
-<template>
+
        <div class="navbar !z-[51]">
             <div class="navbar-start">
                 <div class="dropdown">
@@ -22,27 +22,27 @@
                         tabindex="0" 
                         class="menu menu-menu menu-sm text-left justify-start open border-1 border-card dropdown-content mt-3 z-[100] p-2 shadow bg-base-100 rounded-md"
                     >
-                        <li><NuxtLink to="/">Home</NuxtLink></li>
-                        <li><NuxtLink to="/test/arbit/cross/coins">Cross-arbit cointest</NuxtLink></li>
-                        <li><NuxtLink to="/rf/ws/book-ticker">RF Book Ticker</NuxtLink></li>
-                        <li><NuxtLink to="/rf/nets">Networks</NuxtLink></li>
-                        <li><NuxtLink to="/app/config">App config</NuxtLink></li>
-                        <li><NuxtLink to="/data/books">Orderbooks</NuxtLink></li>
-                        <li><NuxtLink to="/test/candles">Candletest</NuxtLink></li>
+                        <li><TuLink to="/">Home</TuLink></li>
+                        <li><TuLink to="/test/arbit/cross/coins">Cross-arbit cointest</TuLink></li>
+                        <li><TuLink to="/rf/ws/book-ticker">RF Book Ticker</TuLink></li>
+                        <li><TuLink to="/rf/nets">Networks</TuLink></li>
+                        <li><TuLink to="/app/config">App config</TuLink></li>
+                        <li><TuLink to="/data/books">Orderbooks</TuLink></li>
+                        <li><TuLink to="/test/candles">Candletest</TuLink></li>
                       
                     </ul>
                 </div>
             </div>
             <div class="navbar-center">
-                <a href="/" class="btn btn-ghost normal-case text-xl">{{SITE}}</a>
+                <a href="/" class="btn btn-ghost normal-case text-xl">{SITE}</a>
             </div>
             <div class="navbar-end">
                 <ul class="menu menu-horizontal p-0 px-1 md:flex hidden">
                     <li>
-                        <NuxtLink to="/about">About</NuxtLink>
+                        <TuLink to="/about">About</TuLink>
                     </li>
                     <li>
-                        <NuxtLink to="/contact">Contact us</NuxtLink>
+                        <TuLink to="/contact">Contact us</TuLink>
                     </li>
                 </ul>
            
@@ -50,64 +50,69 @@
                     <div class="indicator">
                         IO
                         <span
-                            :class="`badge badge-xs ${ioConnected ?'badge-primary': 'badge-warning'} indicator-item`"
+                        class={`badge badge-xs ${ioConnected ?'badge-primary': 'badge-warning'} indicator-item`}
                         ></span>
                     </div>
                 </button>
-            <div v-if="user" class="relative">
+            
+            {#if user}
+            <div class="relative">
                 <CtxMenu
-                  v-model="menuOpen"
+                  bind:open={menuOpen}
                   class="relative mr-4"
                 >
-                    <template v-slot:toggler
-                        ><UAvatar class="pointer"
-                            ><span class="text-md fw-7">{{
-                                user.username.slice(0, 1).toUpperCase()
-                            }}</span></UAvatar
-                        ></template
-                    >
-                    <template v-slot:children>
-                        <menu-item
+                    {#snippet toggler()}
+                    <UAvatar class="pointer"
+                    ><span class="text-md fw-7">{
+                        user.username.slice(0, 1).toUpperCase()
+                    }</span></UAvatar>
+                    {/snippet}
+                    
+                        <MenuItem
                             to="/profile"
                             icon="i-heroicons-user-circle-16-solid"
-                            >Profile</menu-item
-                        >
-                        <menu-item
-                            :to="`/@${user.username}/bots`"
+                            >Profile</MenuItem>
+                        <MenuItem
+                        to={`/@${user.username}/bots`}
                             icon="fi fi-br-user-robot-xmarks"
-                            >Bots</menu-item
+                            >Bots</MenuItem
                         >
-                        <menu-item
-                            :to="`/auth/logout`"
+                        <MenuItem
+                            to={`/auth/logout`}
                             icon="fi fi-br-sign-out-alt"
-                            >Logout</menu-item
+                            >Logout</MenuItem
                         >
-                    </template>
                 </CtxMenu>
             </div>
-            <div v-else>
-                <UButton variant="outline">
-                    <NuxtLink
-                        :to="`/auth/login?red=${$route.fullPath}`"
+            {:else}
+            <div>
+                <UButton>
+                    <TuLink
+                        to={`/auth/login?red=${location.pathname}`}
                         class="btn btn-sm btn-outline btn-primary"
                     >
                         Login
-                    </NuxtLink></UButton
+                    </TuLink></UButton
                 >
             </div>
+            {/if}
+            
         </div>
         </div>
-</template>
-<script setup lang="ts">
-import { useUserStore } from "~/src/stores/user";
-import CtxMenu from "./CtxMenu.vue";
-import { onMounted, ref } from "vue";
-import { storeToRefs } from "pinia";
-import { socket } from "~/utils/constants";
-const ioConnected = ref(true)
-const menuOpen = ref(false);
-const { user } = storeToRefs(useUserStore());
 
+<script lang="ts">
+
+import { SITE, socket } from "@/lib/constants";
+    import CtxMenu from "./CtxMenu.svelte";
+    import { userStore } from "@/stores/user.svelte";
+    import TuLink from "./TuLink.svelte";
+    import UButton from "./UButton.svelte";
+    import MenuItem from "./MenuItem.svelte";
+    import UAvatar from "./UAvatar.svelte";
+    import { onMount } from "svelte";
+let ioConnected = $state(true)
+let menuOpen = $state(false);
+let {user} = $derived(userStore)
 const menuItems = [
     [
         {
@@ -117,9 +122,9 @@ const menuItems = [
     ],
 ];
 
-onMounted(()=>{
-    socket?.on('connect', ()=> ioConnected.value = true)
-    socket?.on('disconnect', ()=> ioConnected.value = false)
+onMount(()=>{
+    socket?.on('connect', ()=> ioConnected = true)
+    socket?.on('disconnect', ()=> ioConnected = false)
 })
 </script>
 

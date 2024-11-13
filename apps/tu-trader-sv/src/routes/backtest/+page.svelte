@@ -66,7 +66,7 @@
                         >
                             <span>{ formState?.symbol }</span>
                             <UButton
-                            onclick={paramsAreaOpen = !paramsAreaOpen}
+                            onclick={_=>paramsAreaOpen = !paramsAreaOpen}
                                 class="ctrl-btn btn-primary mb-2"
                             >
                                 <i class="fi fi-rr-angle-down"></i>
@@ -169,10 +169,9 @@
                                             searchable
                                             innerHint="Search strategy..."
                                             placeholder="Strategy"
-                                            options="
+                                            options=
                                                 {toSelectStrategies(strategies)}
-                                            "
-                                            bind:value="{formState.strategy}"
+                                            bind:value={formState.strategy}
                                             required
                                             
                                         />
@@ -180,11 +179,8 @@
                                             class="flex flex-col gap- items-center"
                                         >
                                             <UButton
-                                                onclick="
-                                                    {socket?.emit('strategies')}
-                                                "
+                                                onclick={_=>socket?.emit('strategies')}
                                                 class="btn-xs btn-sm btn-ghost rounded-full"
-                                                variant="ghost"
                                             >
                                                 <span
                                                     ><i
@@ -193,6 +189,7 @@
                                                 ></span>
                                             </UButton>
                                             <a
+                                            aria-label="link"
                                                 target="_blank"
                                                 title="More info on strategies"
                                                 href="/utils/strategies"
@@ -210,7 +207,7 @@
 
                                     <TuSelect
                                         placeholder="Interval"
-                                        options="{selectIntervals}"
+                                        options={selectIntervals}
                                         bind:value="{formState.interval}"
                                         required
                                     />
@@ -230,15 +227,15 @@
                                         <UFormGroup label="Margin"
                                             ><TuSelect
                                                 placeholder="Margin"
-                                                options="{margins}"
-                                                bind:value="{formState.lev}"
+                                                options={margins}
+                                                bind:value={formState.lev}
                                             ></TuSelect
                                         ></UFormGroup>
                                         <UFormGroup label="Pair"
                                             ><TuSelect
                                                 placeholder="Pair"
                                                 options={selectSymbols}
-                                                bind:value="{formState.symbol}"
+                                                bind:value={formState.symbol}
                                                 searchable
                                                 innerHint="Search pair..."
                                             ></TuSelect
@@ -255,7 +252,7 @@
                                     <UFormGroup label="Custom Pair"
                                         ><UInput
                                             placeholder="e.g SOL/USDT"
-                                            bind:value="{formState.csymbol}"
+                                            bind:value={formState.csymbol}
                                             name="pair"
                                         ></UInput
                                     ></UFormGroup>
@@ -264,7 +261,7 @@
                                 <div class="flex justify-center">
                                     <UFormGroup>
                                         <TuDatePicker
-                                            bind:value="{formState.date}"
+                                            bind:value={formState.date}
                                         />
                                     </UFormGroup>
                                 </div>
@@ -296,17 +293,19 @@
 <script lang="ts">
     import BacktestTable from "@/components/BacktestTable.svelte";
     import TMeta from "@/components/TMeta.svelte";
+    import TuDatePicker from "@/components/TuDatePicker.svelte";
     import TuModalContainer from "@/components/TuModalContainer.svelte";
     import TuSelect from "@/components/TuSelect.svelte";
     import TuStats from "@/components/TuStats.svelte";
     import UButton from "@/components/UButton.svelte";
     import UCheckbox from "@/components/UCheckbox.svelte";
+    import UDivider from "@/components/UDivider.svelte";
     import UForm from "@/components/UForm.svelte";
     import UFormGroup from "@/components/UFormGroup.svelte";
     import UInput from "@/components/UInput.svelte";
     import { socket, SITE, selectPlatforms, selectIntervals, selectSymbols, selectParents } from "@/lib/constants";
     import { formatter, toSelectStrategies } from "@/lib/funcs";
-    import { appStore } from "@/stores/app";
+    import { appStore } from "@/stores/app.svelte";
     import { parseDate } from "@cmn/utils/functions";
     import type { IObj } from "@cmn/utils/interfaces";
     import { onMount } from "svelte";
@@ -315,7 +314,7 @@
 const initRes = { data: {} };
 
 let res = $state<IObj>(initRes);
-let { strategies, platforms, parents } = $appStore;
+let { strategies, platforms, parents } = $derived(appStore);
 
 let _state = $state({
     parent: "",

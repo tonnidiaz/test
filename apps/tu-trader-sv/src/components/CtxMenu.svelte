@@ -1,0 +1,131 @@
+<script lang="ts">
+    import { onMount, type Snippet } from "svelte";
+    import type { HTMLAttributes } from "svelte/elements";
+    import CtxBody from "./CtxBody.svelte";
+    import TuTeleport from "./TuTeleport.svelte";
+
+    let x = $state(0),
+        y = $state(0);
+
+    let menuRef = $state<any>(),
+        togglerRef = $state<HTMLDivElement>();
+    let menu = $state<any>();
+
+    let size = $state({ w: 0, h: 0 }),
+        pos = $state({ x: 0, y: 0 });
+
+    interface IProps extends HTMLAttributes<any> {
+        open: boolean;
+        toggler?: Snippet;
+    }
+    let {
+        open = $bindable(false),
+        toggler,
+        children,
+        ...props
+    }: IProps = $props();
+
+    const setMenuPos = () => {
+        let { x: _x, y: _y } = pos;
+
+        let { w, h } = size;
+
+        const { clientHeight, cleintWidth } = menu;
+        w = cleintWidth ?? w;
+        h = clientHeight ?? h;
+        console.log({w, h});
+
+        const rightPos = _x + w;
+        const bottomPos = _y + h;
+
+        let deltaW = window.innerWidth - _x;
+        let deltaH = window.innerHeight - _y;
+
+        if (rightPos > window.innerWidth) {
+            let newLeft = _x - w; //window.innerWidth - size.w - deltaW;
+            _x = newLeft;
+        }
+
+        if (bottomPos > window.innerHeight) {
+            let newTop = _y - h; // window.innerHeight - h - deltaH;
+            _y = newTop;
+        }
+
+        x = (_x / window.innerWidth) * 100;
+        y = (_y / window.innerHeight) * 100;
+    };
+    const toggleMenu = async (e: any) => {
+        console.log("Toggle menu");
+        open = true;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        const toggler: HTMLDivElement = togglerRef!;
+        let _menu: HTMLDivElement = menu!;
+        const togglerRect = toggler.getBoundingClientRect();
+
+        const clientX = togglerRect.left; //winSize.w - (togglerSize.w ?? 0 / 2);
+        const clientY = togglerRect.top; //winSize.h - (togglerSize.h ?? 0 / 2);//{ clientX, clientY } = e;
+        let _pos = {
+            x: clientX + togglerRect.width / 2,
+            y: clientY + togglerRect.height / 2,
+        };
+        pos = _pos;
+        console.log("pos:", {...pos});
+        setMenuPos();
+        updateListener();
+    };
+
+    $effect(() => {
+        setMenuPos();
+    });
+
+    const updateListener = () => {
+        document.body.addEventListener("mouseup", onDocClick);
+    };
+
+    const onDocClick = (e: any) => {
+        const _menu = menu;
+
+        if (_menu && !_menu.contains(e.target)) {
+            open = false;
+        }
+    };
+
+    onMount(() => {
+        updateListener();
+    });
+
+    // watch(
+    //     () => route.fullPath,
+    //     () => {
+    //         isOpen.value = false;
+    //     },
+    //     { deep: true, immediate: true }
+    // );
+</script>
+
+<div {...props}>
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <div bind:this={togglerRef} class="toggler pointer" onclick={toggleMenu}>
+        {@render toggler?.()}
+    </div>
+    {#if !open}
+        <CtxBody
+            bind:size
+            bind:this={menuRef}
+            class="hidden block"
+            setMenu={(v) => (menu = v)}>{@render children?.()}</CtxBody
+        >
+    {:else}
+        <TuTeleport to="#ctx-overlay">
+            <CtxBody
+                style={`top: ${y ?? 0}%;left: ${x ?? 0}%`}
+                bind:size
+                setMenu={(v) => (menu = v)}>{@render children?.()}</CtxBody
+            >
+        </TuTeleport>
+    {/if}
+</div>

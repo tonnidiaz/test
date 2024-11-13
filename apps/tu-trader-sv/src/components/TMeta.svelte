@@ -1,6 +1,7 @@
 <script lang="ts">
-    import { SITE } from "@/lib/constants";
-    import { SITE_SLOGAN, ROOT, DEVELOPER } from "@cmn/utils/consts3";
+    import { ROOT, SITE, SITE_SLOGAN } from "@/lib/constants";
+    import { appStore } from "@/stores/app.svelte";
+    import { DEVELOPER } from "@cmn/utils/consts3";
 
     const _title = `${SITE} - ${SITE_SLOGAN}`;
     const _description = `${SITE} is a Tunedbass site`;
@@ -44,7 +45,7 @@
 
 <svelte:head>
     <title>
-        {title || _title}
+       {title || _title}
     </title>
     <meta name="description" content={`${desc}\n${_description}`} />
     <meta property="og:type" content="website" />

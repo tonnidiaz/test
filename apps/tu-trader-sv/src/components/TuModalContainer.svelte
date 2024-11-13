@@ -41,10 +41,13 @@ onMount(() => {
     const ctxOverlay = document.getElementById('ctx-overlay')
     ctxOverlay?.removeEventListener('mouseup', _onOverlayClick)
     ctxOverlay?.addEventListener('mouseup', _onOverlayClick)
+    return ()=>{
+        const ctxOverlay = document.getElementById('ctx-overlay')
+    ctxOverlay?.removeEventListener('mouseup', _onOverlayClick)
+    }
 });
 
 onDestroy(()=>{
-    const ctxOverlay = document.getElementById('ctx-overlay')
-    ctxOverlay?.removeEventListener('mouseup', _onOverlayClick)
+    
 })
 </script>

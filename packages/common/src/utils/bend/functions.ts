@@ -22,15 +22,17 @@ export const ensureDirExists = (filePath: string) => {
 
 export const genToken = (data: IObj, exp?: string | number | undefined) => {
     const { SECRET_KEY } = process.env;
+    const _jwt: typeof jwt = (jwt as any).default
+    const __jwt = _jwt || jwt
     return exp
-        ? jwt.sign(
+        ? __jwt.sign(
               {
                   data,
               },
               SECRET_KEY!,
               { expiresIn: exp }
           )
-        : jwt.sign({ payload: data }, SECRET_KEY!);
+        : __jwt.sign({ payload: data }, SECRET_KEY!);
 };
 export const genOTP = async (phone?: string, email?: string) => {
     const pin = randomInRange(1000, 9999);
