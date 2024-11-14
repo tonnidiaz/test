@@ -21,6 +21,6 @@ export default defineConfig({
       },
 
       optimizeDeps: {
-        exclude: ["binance-api-node","node-schedule", "svelte-codemirror-editor", "codemirror", "@codemirror/language-javascript", "@codemirror/lang-vue",  /* ... */],
+        exclude: ["mexc-api-sdk", "binance-api-node","node-schedule", "svelte-codemirror-editor", "codemirror", "@codemirror/language-javascript", "@codemirror/lang-vue",  /* ... */],
     }
 });

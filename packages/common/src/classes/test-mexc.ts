@@ -1,16 +1,16 @@
 import { getInterval } from "@cmn/utils/funcs2";
 import { TestPlatform } from "./test-platforms";
 import { writeFileSync } from "node:fs";
-import { CompanyResultSortBy } from "indicatorts";
+// import { CompanyResultSortBy } from "indicatorts";
 import * as Mexc from "mexc-api-sdk";
 import {
     getSymbol,
-    sleep,
+    sleep, 
 } from "@cmn/utils/functions";
 import { botLog, readJson, writeJson, ensureDirExists, existsSync } from "@cmn/utils/bend/functions";
 import { parseDate } from "@cmn/utils/functions";
 import { ICoinNets, IOrderbook, TPlatName } from "@cmn/utils/interfaces";
-import { netsRootDir } from "@cmn/utils/consts2";
+// import { netsRootDir } from "@cmn/utils/consts2";
 import { Axios, AxiosInstance } from "axios";
 import { genSignature, safeJsonParse } from "@cmn/utils/funcs3";
 
