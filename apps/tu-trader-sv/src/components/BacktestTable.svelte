@@ -31,16 +31,16 @@
                             <th scope="col" class="px-6 py-3 text-gray-300">
                                 Ind: { row.i }
                                 </th>
-                            <td scope="col" class="px-6 py-3 font-monospace">
+                            <td class="px-6 py-3 font-monospace">
                                 {#each row.enterTs.split('\n') as el}
                                 <div>{ el }</div>
                                 {/each}
                                 <div class="text-gray-300">{ row.ts }</div>
                                 </td>
-                                <td scope="col"> <span class={row.side.class}>{row.side.value}</span></td>
-                                <td scope="col"> <div>{ row.fill }</div>
+                                <td > <span class={row.side.class}>{row.side.value}</span></td>
+                                <td> <div>{ row.fill }</div>
                                     <div class="text-gray-300">{ row.c }</div></td>
-                                <td scope="col">{ row.balance }</td>
+                                <td >{ row.balance }</td>
                            </tr>
                            {/each}
                         </tbody>

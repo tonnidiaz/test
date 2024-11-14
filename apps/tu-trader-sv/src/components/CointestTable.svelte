@@ -29,26 +29,26 @@
                     <tr
                     class={`bg-base-100 even:bg-base-200 border-gray-200 font-monospace`}
                 >
-                    <td scope="col" class="">
+                    <td class="">
                         <div class="text-gray-100 fw-6">Ind: { i }</div>
                     </td>
-                    <td scope="col" class="px-6 py-3 font-monospace">
+                    <td class="px-6 py-3 font-monospace">
                         <div class="text-gray-300">{ row.pair }</div>
                     </td>
                    
-                    <td scope="col">
+                    <td>
                         <span title={`ZAR ${_format(toZAR(row.profit))}`} class="text-gray-300">USDT { _format(row.profit)}</span>
                     </td>
-                     <td scope="col">
+                     <td>
                         <span>{ row.trades }</span>
                     </td>
-                    <td scope="col">
+                    <td>
                         <span>{ row.w }</span>
                     </td>
-                    <td scope="col">
+                    <td>
                         <span>{ row.l }</span>
                     </td>
-                    <td scope="col">
+                    <td>
                         <span title={`ZAR ${_format(toZAR(row.aside))}`} class="text-gray-300">USDT { _format(row.aside) }</span>
                     </td>
                    

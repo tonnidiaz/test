@@ -25,7 +25,7 @@ const config = {
         }
 	},
     ssr: {
-        // noExternal: ['binance-api-node']
+        noExternal: ['mongodb', "@mapbox/node-pre-gyp", 'engine.io-client']
       }
 }; 
 

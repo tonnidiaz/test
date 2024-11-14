@@ -510,19 +510,3 @@ $inspect(formState).with((type, val)=>{
 
 </script>
 
-<style lang="scss">
-.params-area {
-    max-width: 50vw;
-}
-
-@media screen and (max-width: 960px) {
-    .params-area {
-        max-width: 60vw;
-    }
-}
-@media screen and (max-width: 640px) {
-    .params-area {
-        max-width: calc(100vw - 20px);
-    }
-}
-</style>
