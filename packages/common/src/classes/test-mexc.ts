@@ -2,7 +2,7 @@ import { getInterval } from "@cmn/utils/funcs2";
 import { TestPlatform } from "./test-platforms";
 // import { writeFileSync } from "node:fs";
 // import { CompanyResultSortBy } from "indicatorts";
-// import Mexc from "mexc-api-sdk";
+// // import Mexc from "mexc-api-sdk";
 // import {
 //     getSymbol,
 //     sleep, 
@@ -13,16 +13,18 @@ import { TestPlatform } from "./test-platforms";
 // // import { netsRootDir } from "@cmn/utils/consts2";
 // import { Axios, AxiosInstance } from "axios";
 // import { genSignature, safeJsonParse } from "@cmn/utils/funcs3";
-
-const Mexc = ()=>import("mexc-api-sdk")
+import {Spot} from "mexc-api-sdk"
+// const Mexc = ()=>import("mexc-api-sdk")
 function test(){
-    console.log({Mexc, getInterval});
+    let spot : Spot = new Spot();
+    console.log({spot, getInterval});
 }
 test()
 export class TestMexc extends TestPlatform {
+    
     // maker: number = 0.1 / 100;
     // taker: number = 0.1 / 100;
-    // client: Mexc.Spot;
+    // client: Spot;
     // apiKey: string;
     // apiSecret: string; 
     // passphrase: string;
