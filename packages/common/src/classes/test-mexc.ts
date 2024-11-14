@@ -2,7 +2,7 @@ import { getInterval } from "@cmn/utils/funcs2";
 import { TestPlatform } from "./test-platforms";
 // import { writeFileSync } from "node:fs";
 // import { CompanyResultSortBy } from "indicatorts";
-import * as Mexc from "mexc-api-sdk";
+// import * as Mexc from "mexc-api-sdk";
 // import {
 //     getSymbol,
 //     sleep, 
@@ -15,7 +15,7 @@ import * as Mexc from "mexc-api-sdk";
 // import { genSignature, safeJsonParse } from "@cmn/utils/funcs3";
 
 function test(){
-    console.log({Mexc, getInterval});
+    console.log({ getInterval});
 }
 test()
 export class TestMexc extends TestPlatform {
