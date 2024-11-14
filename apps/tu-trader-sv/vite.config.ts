@@ -5,6 +5,11 @@ import { dirname } from 'path';
 
 export default defineConfig({ 
 	plugins: [sveltekit()],
+    build: {
+        commonjsOptions: {
+            include: [/@repo\/common/, /node_modules/],
+          },
+    },
     define: {
         __dirname: JSON.stringify(dirname(fileURLToPath(import.meta.url))),
       },
