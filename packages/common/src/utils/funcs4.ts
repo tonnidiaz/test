@@ -1,5 +1,5 @@
 // import { Job, scheduleJob } from "node-schedule";
-import { test_platforms } from "./consts";
+// import { test_platforms } from "./consts";
 import { __DEV__, pairsOfInterest, taskManager } from "./consts3";
 import { IOrderbook, TPlatName } from "./interfaces";
 import { timedLog } from "./functions";
@@ -29,34 +29,34 @@ export function addBooksTask(config: ITuConfig){
     taskManager.addTask({id: `task-books`, interval: __DEV__ ? 1 : config.book_fetch_interval, cb: fetchAndStoreBooks})
 }
 export async function platBookFetcher(platName: string, pairs: string[][]) {
-    const plat = new test_platforms[platName as TPlatName]({ demo: false });
-    if (plat) {
-        timedLog(`[${platName}] GETTING BOOKS...`);
-        pairs.forEach(async (pair, i) => {
-            const bookDoc = new TuBook({
-                pair: pair.join("-"),
-                plat: platName,
-            });
-            let book: IOrderbook[] = [];
-            const savePath = `_data/ob/test/${platName}/${pair.join("-")}.json`;
-            if (bookDoc.book) {
-                book = bookDoc.book as any[];
-            }
-            const r = await plat.getBook(pair);
-            if (r) {
-                book.push(r);
-                bookDoc.set("book", book);
-                await bookDoc.save();
-            }
-            timedLog(`[${platName}] Book for ${pair} done!!`);
-            if (i == pairs.length - 1) {
-                timedLog(`[${platName}] BOOKS GOT!!\n`);
-            }
-        });
-    } else {
-        timedLog("KILLING JOB");
-        //job.cancel(false);
-    }
+    // const plat = new test_platforms[platName as TPlatName]({ demo: false });
+    // if (plat) {
+    //     timedLog(`[${platName}] GETTING BOOKS...`);
+    //     pairs.forEach(async (pair, i) => {
+    //         const bookDoc = new TuBook({
+    //             pair: pair.join("-"),
+    //             plat: platName,
+    //         });
+    //         let book: IOrderbook[] = [];
+    //         const savePath = `_data/ob/test/${platName}/${pair.join("-")}.json`;
+    //         if (bookDoc.book) {
+    //             book = bookDoc.book as any[];
+    //         }
+    //         const r = await plat.getBook(pair);
+    //         if (r) {
+    //             book.push(r);
+    //             bookDoc.set("book", book);
+    //             await bookDoc.save();
+    //         }
+    //         timedLog(`[${platName}] Book for ${pair} done!!`);
+    //         if (i == pairs.length - 1) {
+    //             timedLog(`[${platName}] BOOKS GOT!!\n`);
+    //         }
+    //     });
+    // } else {
+    //     timedLog("KILLING JOB");
+    //     //job.cancel(false);
+    // }
 }
 export async function fetchAndStoreBooks(taskId: string) {
     const config = await TuConfig.findOne({}).exec();
