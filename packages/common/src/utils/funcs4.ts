@@ -23,7 +23,7 @@ export async function connectMongo(DEV: boolean, db:string = "tb") {
         console.log(e);
     }
 }
-
+export const funcs4Var = "This is funcs 4"
 
 export function addBooksTask(config: ITuConfig){
     timedLog("Adding books task...")
