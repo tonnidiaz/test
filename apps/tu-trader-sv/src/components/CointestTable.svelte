@@ -62,7 +62,6 @@
 <script lang="ts">
     import { formatter } from "@/lib/funcs";
     import type { IObj } from "@cmn/utils/interfaces";
-    import { watch } from "fs";
     import type { HTMLAttributes } from "svelte/elements";
     import UTextarea from "./UTextarea.svelte";
     import { onMount } from "svelte";
