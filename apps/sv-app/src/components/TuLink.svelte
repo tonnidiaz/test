@@ -4,4 +4,4 @@
 
     interface IProps extends HTMLAnchorAttributes {to?: string}
     let {children,to, href, class: _class,...props } : IProps = $props()
-</script> 
+</script>
