@@ -3,12 +3,11 @@ import { test_platforms } from "./consts";
 import { __DEV__, pairsOfInterest, taskManager } from "./consts3";
 import { IOrderbook, TPlatName } from "./interfaces";
 import { timedLog } from "./functions";
-import { bookJobs, botJobSpecs, DEV } from "./constants";
+import { bookJobs, botJobSpecs, DEV, localApi } from "./constants";
 import { TuBook, TuConfig } from "@cmn/models";
 // import { configDotenv } from "dotenv";
 import mongoose from "mongoose";
 import { ITuConfig } from "@cmn/models/config";
-import { localApi } from "../../../../apps/tu-trader-next/utils/api";
 
 // configDotenv();
 export async function connectMongo(DEV: boolean, db:string = "tb") {

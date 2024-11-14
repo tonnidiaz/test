@@ -2,6 +2,8 @@ import { configDotenv } from "dotenv";
 import { Job } from "node-schedule";
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
+import axios from "axios"
+
 const _dirname = __dirname
 console.log({_dirname});
 try {
@@ -94,3 +96,13 @@ export const MAX_QUOTE = 100000000,
     ARBIT_MIN_PERC = 0.3;
 
 export const useWS = true;
+export const API_URL = DEV ? "http://localhost:3000/api" : "https://tu-trader.vercel.app/api"
+export const localApi = (auth = false) =>
+    {
+        console.log({API_URL})
+        return axios.create({
+        baseURL: API_URL,
+        headers: {
+            "Content-Type": "application/json",
+        },
+    })}
