@@ -8,8 +8,8 @@ import { TestPlatform, TestBybit, TestOKX } from "@cmn/classes/test-platforms";
 
 export const test_platforms : {[key: string] : typeof TestPlatform} = {
     binance: TestBinance ,
-    bybit: TestBybit ,
-    okx: TestOKX ,
+    // bybit: TestBybit ,
+    // okx: TestOKX ,
     // kucoin: TestKucoin ,
     // bitget: TestBitget,
     // mexc: TestMexc,
