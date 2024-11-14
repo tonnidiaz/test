@@ -12,7 +12,7 @@ export const test_platforms : {[key: string] : typeof TestPlatform} = {
     // okx: TestOKX ,
     kucoin: TestKucoin ,
     // bitget: TestBitget,
-    mexc: TestMexc,
+    // mexc: TestMexc,
 };
 
 export const _plats = Object.keys(test_platforms)
