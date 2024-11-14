@@ -21,6 +21,6 @@ export default defineConfig({
       },
 
       optimizeDeps: {
-        exclude: ["svelte-codemirror-editor", "codemirror", "@codemirror/language-javascript", "@codemirror/lang-vue",  /* ... */],
+        exclude: ["binance-api-node", "svelte-codemirror-editor", "codemirror", "@codemirror/language-javascript", "@codemirror/lang-vue",  /* ... */],
     }
 });
