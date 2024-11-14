@@ -20,7 +20,7 @@
 <p><b>Timestamp:</b>&nbsp;{ts}</p>
 <div class="flex flex-col w-40">
     <button onclick={_=> ts = parseDate()} class="btn btn-primary button">Refresh timestamp</button>
-<input placeholder="Your name..." bind:value={name}/>
-<button onclick={sayHi} class="btn btn-primary button">Say hi</button>
+<input placeholder="Your name..." bind:value={name} class="input input-bordered input-sm"/>
+<button onclick={sayHi} class="btn btn-primary button btn-sm">Say hi</button>
 
 </div>
