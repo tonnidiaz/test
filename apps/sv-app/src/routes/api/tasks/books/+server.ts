@@ -1,10 +1,10 @@
 import { timedLog } from "@cmn/utils/functions"
 import type { RequestHandler } from "./$types"
 // import binanceApiNode from "binance-api-node"
-import { platBookFetcher } from "@cmn/utils/funcs4"
+// import { platBookFetcher } from "@cmn/utils/funcs4"
 
 export const GET: RequestHandler = ()=>{
-    timedLog("Hello", platBookFetcher)
+    timedLog("Hello")
     // const fn = (binanceApiNode as any).default as typeof binanceApiNode
     // const bin = fn()
     // console.log(bin)
