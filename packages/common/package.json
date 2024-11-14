@@ -21,6 +21,7 @@
     "kucoin-api": "^1.0.7",
     "mexc-api-sdk": "^1.0.3",
     "mongoose": "^8.7.2",
+    "node-mexc-apis": "^1.0.4",
     "okx-api": "^1.4.6",
     "socket.io": "*"
   },
