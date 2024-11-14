@@ -312,7 +312,7 @@
     import { appStore } from "@/stores/app.svelte";
     import { parseDate } from "@cmn/utils/functions";
     import type { IObj } from "@cmn/utils/interfaces";
-    import { onMount } from "svelte";
+    import { onMount, onDestroy } from "svelte";
 
 
 const initRes = { data: {} };
