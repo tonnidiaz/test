@@ -1,5 +1,6 @@
 import { getInterval } from "@cmn/utils/funcs2";
 import { TestPlatform } from "./test-platforms";
+import { Spot } from "mexc-api-sdk/src/modules";
 // import { writeFileSync } from "node:fs";
 // import { CompanyResultSortBy } from "indicatorts";
 // // import Mexc from "mexc-api-sdk";
@@ -13,15 +14,14 @@ import { TestPlatform } from "./test-platforms";
 // // import { netsRootDir } from "@cmn/utils/consts2";
 // import { Axios, AxiosInstance } from "axios";
 // import { genSignature, safeJsonParse } from "@cmn/utils/funcs3";
-import {Spot} from "mexc-api-sdk"
-// const Mexc = ()=>import("mexc-api-sdk")
+
 function test(){
     let spot : Spot = new Spot();
     console.log({spot, getInterval});
 }
 test()
 export class TestMexc extends TestPlatform {
-    
+    // s: Awaited<ReturnType<typeof mmexc>>
     // maker: number = 0.1 / 100;
     // taker: number = 0.1 / 100;
     // client: Spot;
