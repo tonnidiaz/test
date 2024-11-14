@@ -21,6 +21,7 @@
     import { setUser } from "@/stores/user.svelte";
     import Loader from "@/components/Loader.svelte";
     import Navbar from "@/components/Navbar.svelte";
+    import Sidebar from "@/components/Sidebar.svelte";
     let { children } = $props();
     let { ready } = $derived(appStore);
 
@@ -97,7 +98,8 @@
     <div>
         <Navbar />
         <div class="tu-app">
-            <main>
+            <Sidebar/>
+            <main style="padding: 0 10px">
                 {@render children()}
             </main>
         </div>

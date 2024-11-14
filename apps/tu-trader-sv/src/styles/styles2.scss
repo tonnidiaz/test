@@ -237,3 +237,19 @@ td {@apply px-3}
     // max-width: min-content;
     resize: vertical;
 }
+
+.menu-menu{
+    ul, ol{
+        display: contents;
+    }
+   li {
+    padding: 0 !important;
+    margin: 0 !important;
+    align-self: flex-start;
+    width: 100%;
+    // * {
+    //     align-self: flex-start;
+    //     width: 100%;
+    // }
+} 
+} 

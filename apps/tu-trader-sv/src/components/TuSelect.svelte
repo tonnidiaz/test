@@ -30,6 +30,10 @@
         class: _class
     }: IProps = $props();
 
+    // $effect(()=>{
+    //     const val = value
+    //     // console.log({val});
+    // })
     // Create Custom Dropdown
     const createCustomDropdown = async (dropdown: HTMLSelectElement) => {
         //console.log("CREATE", _options.value?.length);
@@ -188,14 +192,18 @@
     function setSelected(this, selected, dropdown: HTMLSelectElement, menu) {
         // Get Value and Label from Clicked Custom Option
         selectedItem = this;
-        let value = (this as any).dataset.value;
-        value = _options?.find((el) => el.value?.toString() == value)?.value;
+        let _value = (this as any).dataset.value;
+        _value = _options?.find((el) => el.value?.toString() == _value)?.value;
+        untrack(()=>{
+            value = _value
+        })
+        
         const label = (this as any).innerHTML;
 
         // Change the Text on Selected Element
         // Change the Value on Select Field
         selected.innerHTML = label;
-        dropdown.value = value;
+        dropdown.value = _value;
         menu.style.display = "none";
         menu.querySelector("input").value = "";
 

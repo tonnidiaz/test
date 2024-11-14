@@ -24,17 +24,20 @@
         children,
         ...props
     }: IProps = $props();
-
+$effect(()=>{
+    console.log({menu});
+})
     const setMenuPos = () => {
         let { x: _x, y: _y } = pos;
 
         let { w, h } = size;
 
         const { clientHeight, cleintWidth } = menu;
-        w = cleintWidth ?? w;
-        h = clientHeight ?? h;
-        console.log({w, h});
-
+        w = w || cleintWidth//cleintWidth ?? w;
+        h = h || clientHeight//clientHeight ?? h;
+        console.log(menu, open);
+        console.log({w, h}, {pos: {...pos}});
+return
         const rightPos = _x + w;
         const bottomPos = _y + h;
 
@@ -64,9 +67,9 @@
         const toggler: HTMLDivElement = togglerRef!;
         let _menu: HTMLDivElement = menu!;
         const togglerRect = toggler.getBoundingClientRect();
-
-        const clientX = togglerRect.left; //winSize.w - (togglerSize.w ?? 0 / 2);
-        const clientY = togglerRect.top; //winSize.h - (togglerSize.h ?? 0 / 2);//{ clientX, clientY } = e;
+        const winSize = {w: window.innerWidth, h: window.innerHeight}
+        const clientX = true ? togglerRect.left : winSize.w - (togglerRect.width?? 0 / 2);
+        const clientY = true ? togglerRect.top : winSize.h - (togglerRect.height ?? 0 / 2);//{ clientX, clientY } = e;
         let _pos = {
             x: clientX + togglerRect.width / 2,
             y: clientY + togglerRect.height / 2,
@@ -78,7 +81,7 @@
     };
 
     $effect(() => {
-        setMenuPos();
+        // setMenuPos();
     });
 
     const updateListener = () => {

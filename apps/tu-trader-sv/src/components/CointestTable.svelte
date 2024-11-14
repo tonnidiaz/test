@@ -1,11 +1,9 @@
-<template>
-    <div class="wp-nowrap">
+    <div class={"wp-nowrap " + _class || ""}>
         <div class="flex px-3 pt-2 pb-3.5">
             <UTextarea
                 class="w-50p font-monospace fw-6"
-                autoresize
-                v-model="notes"
-                resize
+                
+                bind:value={notes}
                 placeholder="Notes..."
             />
         </div>
@@ -27,88 +25,89 @@
                 </tr>
             </thead>
             <tbody>
-                <tr
-                    v-for="(row, i) of rows"
-                    :class="`bg-base-100 even:bg-base-200 border-gray-200 font-monospace`"
+                {#each rows as row, i}
+                    <tr
+                    class={`bg-base-100 even:bg-base-200 border-gray-200 font-monospace`}
                 >
                     <td scope="col" class="">
-                        <div class="text-gray-100 fw-6">Ind: {{ i }}</div>
+                        <div class="text-gray-100 fw-6">Ind: { i }</div>
                     </td>
                     <td scope="col" class="px-6 py-3 font-monospace">
-                        <div class="text-gray-300">{{ row.pair }}</div>
+                        <div class="text-gray-300">{ row.pair }</div>
                     </td>
                    
                     <td scope="col">
-                        <span :title="`ZAR ${_format(toZAR(row.profit))}`" class="text-gray-300">USDT {{ _format(row.profit) }}</span>
+                        <span title={`ZAR ${_format(toZAR(row.profit))}`} class="text-gray-300">USDT { _format(row.profit)}</span>
                     </td>
                      <td scope="col">
-                        <span>{{ row.trades }}</span>
+                        <span>{ row.trades }</span>
                     </td>
                     <td scope="col">
-                        <span>{{ row.w }}</span>
+                        <span>{ row.w }</span>
                     </td>
                     <td scope="col">
-                        <span>{{ row.l }}</span>
+                        <span>{ row.l }</span>
                     </td>
                     <td scope="col">
-                        <span :title="`ZAR ${_format(toZAR(row.aside))}`" class="text-gray-300">USDT {{ _format(row.aside) }}</span>
+                        <span title={`ZAR ${_format(toZAR(row.aside))}`} class="text-gray-300">USDT { _format(row.aside) }</span>
                     </td>
                    
                 </tr>
+                {/each}
+                
             </tbody>
         </table>
     </div>
-</template>
 
-<script setup lang="ts">
-const q = ref(""),
-    notes = ref(""),
-    data = ref<IObj>();
+<script lang="ts">
+    import { formatter } from "@/lib/funcs";
+    import type { IObj } from "@cmn/utils/interfaces";
+    import { watch } from "fs";
+    import type { HTMLAttributes } from "svelte/elements";
+    import UTextarea from "./UTextarea.svelte";
+    import { onMount } from "svelte";
+
+let q = $state(""),
+    notes = $state(""),
+    data = $state<IObj>();
 const NOTES_KEY = "notes";
 
-const props = defineProps({
-    rows: { type: Array<IObj>, default: [] },
-});
-
+interface IProps extends HTMLAttributes<any>{rows?: IObj[]}
+const {rows, class: _class,...props} : IProps = $props()
 const toZAR = (amt?: number) =>{
     return (amt ?? 0 )* 19
 }
 
 const _format = (num?: number) => formatter.format( (num  ?? 0)).replace('$', '')
-const filteredRows = computed<any[]>(() => {
-    if (!q.value) {
-        return props.rows;
-    }
+// const filteredRows = computed<any[]>(() => {
+//     if (!q.value) {
+//         return props.rows;
+//     }
 
-    return props.rows.filter((row: any) => {
-        return Object.values(row).some((value) => {
-            return String(value).toLowerCase().includes(q.value.toLowerCase());
-        });
-    });
-});
+//     return props.rows.filter((row: any) => {
+//         return Object.values(row).some((value) => {
+//             return String(value).toLowerCase().includes(q.value.toLowerCase());
+//         });
+//     });
+// });
 /* watch(props, val=>{
     console.log(val.rows);
     filteredRows.value = val.rows
 }, {deep: true, immediate: true}) */
 
-watch(
-    notes,
-    (val) => {
-        if (val.length && window != undefined) {
+$effect(()=>{
+    const val = notes
+    if (val.length && window != undefined) {
             sessionStorage.setItem(NOTES_KEY, val);
         }
-    },
-    { immediate: true, deep: true }
-);
+})
 
-onMounted(() => {
+onMount(() => {
     if (window != undefined) {
         const n = sessionStorage.getItem(NOTES_KEY);
-
-        if (n) notes.value = n;
+        if (n) notes = n;
     }
 });
 
-watch(props, (v) => {
-});
+
 </script>

@@ -1,4 +1,4 @@
-<div class="flex overflow-x-scroll">
+<div class={"flex overflow-x-scroll " + _class} {...props}>
     {#each stats as stat}
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -30,6 +30,7 @@
 <script lang="ts">
     import { formatter } from '@/lib/funcs';
     import UPopover from './UPopover.svelte';
+    import type { HTMLAttributes } from 'svelte/elements';
 
 
 interface IStat {title: string, subtitle: any, click?: ()=> any, valClasses?: string, titleClasses?: string, classes?: string, hover?: string}
@@ -40,13 +41,13 @@ const testStats : IStat[] = [
     {title: "L", subtitle: '44%'},
 ]
 
-interface IProps {stats?: IStat[]}
+interface IProps extends HTMLAttributes<any>{stats?: IStat[]}
 let {stats = [
     {title: "Trades", subtitle: 445},
     {title: "Profit", subtitle: `USDT ${formatter.format(127439943254).replace('$', '')}`},
     {title: "W", subtitle: '56%'},
     {title: "L", subtitle: '44%'},
-]}: IProps = $props()
+], class: _class,...props}: IProps = $props()
 
 </script>
 <style lang="scss"

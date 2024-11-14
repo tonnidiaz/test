@@ -16,6 +16,7 @@ import TuBtn from "@/components/TuBtn.svelte";
     import { onMount } from "svelte";
     import { writable } from "svelte/store";
     import type { PageData } from "../$types";
+    import CtxMenu2 from "@/components/CtxMenu2.svelte";
 
     let artist = $state("Diaz");
     let {cnt} = appStore
@@ -56,13 +57,16 @@ import TuBtn from "@/components/TuBtn.svelte";
     // $inspect(opts)
 
   let menuOpen = $state(false)
-
+$effect(()=>{
+    const rfval = opt
+    console.log({rfval});
+})
    
 </script> 
 <TMeta title="RF"/>
 <div class="p-4 flex flex-col gap-2" style="width: 500px;">
     <h1>Research Facility</h1>
-    <div class="p-2 border-1 border-card rounded-md bg-base-100 w-500px h-200px" id="portal">
+    <div class="p-2 border-1 border-card rounded-md bg-base-100 w-500px min-h-200px" id="portal">
       <div class="p-2 border-1 border-card">
         <h2>Global state</h2>
         <UButton onclick={_=>{appStore.cnt += 1}}>Counter {appStore.cnt}</UButton>
@@ -74,5 +78,29 @@ import TuBtn from "@/components/TuBtn.svelte";
             {/snippet}
             <p>This is menu</p>
         </CtxMenu>
+        <div class="my-3 p-2 border-1 border-card overflow-hidden oy-hidden">
+            <div class="flex justify-between">
+                <CtxMenu2>
+                {#snippet toggler()}
+                    <UButton class="btn-secondary">Menu2</UButton>
+                {/snippet}
+                <p>This is 2nd menu</p>
+                <p>This is 2nd menu</p>
+                <p>This is 2nd menu</p>
+            </CtxMenu2>
+            <CtxMenu2>
+                {#snippet toggler()}
+                    <UButton class="btn-secondary">Menu2</UButton>
+                {/snippet}
+                <p>This is 2nd menu</p>
+                <p>This is 2nd menu</p>
+                <p>This is 2nd menu</p>
+            </CtxMenu2>
+            </div>
+            
+            <div class="mt-2">
+                <h3>Some sub heading</h3>
+            </div>
+        </div>
     </div>
 </div>
