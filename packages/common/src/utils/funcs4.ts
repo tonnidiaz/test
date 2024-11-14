@@ -5,12 +5,12 @@ import { IOrderbook, TPlatName } from "./interfaces";
 import { timedLog } from "./functions";
 import { bookJobs, botJobSpecs, DEV } from "./constants";
 import { TuBook, TuConfig } from "@cmn/models";
-import { configDotenv } from "dotenv";
+// import { configDotenv } from "dotenv";
 import mongoose from "mongoose";
 import { ITuConfig } from "@cmn/models/config";
 import { localApi } from "../../../../apps/tu-trader-next/utils/api";
 
-configDotenv();
+// configDotenv();
 export async function connectMongo(DEV: boolean, db:string = "tb") {
     console.log("Connecting mongo...", { DEV });
     let mongoURL = (DEV ? process.env.MONGO_URL_LOCAL : process.env.MONGO_URL)!;
