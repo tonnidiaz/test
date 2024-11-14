@@ -13,7 +13,6 @@ import dotenv from 'dotenv';
 import indexRouter from './routes';
 import { TuConfig } from '@cmn/models';
 import { addBooksTask, connectMongo, scheduleAllTasks } from '@cmn/utils/funcs4';
-import { localApi } from '@cmn/utils/api';
 import { DEV } from '@cmn/utils/constants';
 
 const app = express();
@@ -62,7 +61,7 @@ await connectMongo(DEV)
     // const r = await localApi().post('/tasks/books', {books: [1,2,3,4]})
     // console.log(r.data)
     // return 
-    if (DEV) return;
+    // if (DEV) return;
     await scheduleAllTasks()
     if (config.fetch_orderbook_enabled)
         addBooksTask(config)

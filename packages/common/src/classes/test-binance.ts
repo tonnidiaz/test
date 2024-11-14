@@ -28,7 +28,9 @@ export class TestBinance extends TestPlatform {
         this.client = new MainClient({
            
         });
-        const _binanceApiNode = binanceApiNode//(binanceApiNode as any).default as typeof binanceApiNode
+        // console.log({binanceApiNode})
+        const _binanceApiNode =  (binanceApiNode as any).default//(binanceApiNode as any).default as typeof binanceApiNode || binanceApiNode;
+        console.log(typeof _binanceApiNode);
         this.client2 =  _binanceApiNode({apiKey, apiSecret})
 
         this.axiosClient = () => {
