@@ -14,7 +14,7 @@ import { TestPlatform } from "./test-platforms";
 // import { Axios, AxiosInstance } from "axios";
 // import { genSignature, safeJsonParse } from "@cmn/utils/funcs3";
 
-const Mexc = import("mexc-api-sdk")
+const Mexc = ()=>import("mexc-api-sdk")
 function test(){
     console.log({Mexc, getInterval});
 }
