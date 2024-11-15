@@ -37,7 +37,7 @@ RUN turbo prune --scope=${PROJECT} --docker
 FROM base AS builder
 ARG PROJECT
 
-# WORKDIR /app
+WORKDIR /app
 
 # Copy lockfile and package.json's of isolated subworkspace
 COPY --from=pruner /app/out/package-lock.json ./package-lock.json
@@ -55,7 +55,7 @@ RUN npm install --production
 RUN rm -rf ./**/*/src
 
 # Final image
-FROM alpine AS runner
+# FROM alpine AS runner
 ARG PROJECT
 
 RUN addgroup --system --gid 1001 nodejs
