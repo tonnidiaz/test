@@ -42,9 +42,10 @@ RUN npm prune --omit=dev
 FROM base
 
 # Copy built application
-# COPY --from=build /app/build /app/build
-COPY --from=build /app/node_modules /app/node_modules
-COPY --from=build /app/package.json /app
+COPY --from=build /app /app
+# COPY --from=build /app/node_modules /app/node_modules
+# COPY --from=build /app/apps/tu-trader-sv/package.json /app/apps/tu-trader-sv
+# COPY --from=build /app/package.json /app
 
 RUN ls
 RUN npm run
@@ -53,4 +54,4 @@ EXPOSE 3000
 # CMD [ "node", "./build/index.js" ]
 
 WORKDIR /app/apps/tu-trader-sv
-CMD ["npm", "run", "preview"]
+CMD ["npm", "run", "preview", "-w=tu-trader-sv"]
