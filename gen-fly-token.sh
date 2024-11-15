@@ -1,0 +1,1 @@
+fly tokens create deploy -x 999999h
