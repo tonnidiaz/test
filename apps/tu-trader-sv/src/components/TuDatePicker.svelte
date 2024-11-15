@@ -2,7 +2,7 @@
     import { format, isDate } from "date-fns";
     let modalOpen = $state(false);
 
-    import "v-calendar/dist/style.css";
+    // import "v-calendar/dist/style.css";
     import CtxMenu from "./CtxMenu.svelte";
     import UInput from "./UInput.svelte";
     import { untrack } from "svelte";
