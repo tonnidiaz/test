@@ -22,7 +22,7 @@ RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
 
 # Setup npm on the alpine base
-FROM alpine as base
+# FROM alpine as base
 RUN npm install turbo --global
 RUN npm install npm --global --force
 
