@@ -23,13 +23,13 @@ RUN apt-get update -qq && \
 
     # Install node modules
 COPY .npmrc package.json ./
-RUN npm install --include=dev
+RUN npm install --include=dev --scope=tu-trader-sv
 
 # Copy application code
 COPY . .
 
 # Build application
-RUN npm run build
+RUN npm run build --scope=tu-trader-sv
 
 # Remove development dependencies
 RUN npm prune --omit=dev
