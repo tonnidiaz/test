@@ -27,7 +27,8 @@ jobs:
 
     # Step 4: Build the app
     - name: Build the app
-      run: npm run build -w=tu-trader-sv
+      working-directory: apps/tu-trader-sv
+      run: npm run build # -w=tu-trader-sv
 
     # Step 5: Deploy to Fly.io
     - name: Deploy to Fly.io
