@@ -56,7 +56,7 @@ RUN rm -rf ./**/*/src
 
 # Final image
 # FROM alpine AS runner
-ARG PROJECT
+ARG PROJECT=tu-trader-sv
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nodejs
