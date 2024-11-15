@@ -34,6 +34,7 @@
 		"binance-api-node": "^0.12.9",
 		"date-fns": "^4.1.0",
 		"jquery": "^3.7.1",
+		"jsonwebtoken": "^9.0.2",
 		"nodemailer": "^6.9.16",
 		"socket.io-client": "^4.8.1",
 		"svelte-codemirror-editor": "^1.4.1"
