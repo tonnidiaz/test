@@ -35,7 +35,7 @@ RUN npm run
 RUN npm run build -w=tu-trader-sv
 
 # Remove development dependencies
-RUN npm prune --omit=dev
+# RUN npm prune --omit=dev
 
 
 # Final stage for app image
