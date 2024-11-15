@@ -43,4 +43,4 @@ jobs:
         export PATH="$HOME/.fly/bin:$PATH"
 
         # Deploy to Fly.io
-        fly deploy --remote-only
+        fly deploy --remote-only --dockerfile tu-trader-sv.Dockerfile -c fly.tu-trader-sv.toml
