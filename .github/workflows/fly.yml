@@ -8,29 +8,31 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    concurrency: deploy-group    # optional: ensure only one action runs at a time
     steps:
-    # Step 1: Checkout the repository
-    - name: Checkout code
-      uses: actions/checkout@v3
+    # # Step 1: Checkout the repository
+    # - name: Checkout code
+    #   uses: actions/checkout@v3
 
-    # Step 2: Set up Node.js
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 18  # Use the Node.js version compatible with your app
-        cache: 'npm'     # Use 'npm' or 'pnpm' if applicable
+    # # Step 2: Set up Node.js
+    # - name: Set up Node.js
+    #   uses: actions/setup-node@v3
+    #   with:
+    #     node-version: 18  # Use the Node.js version compatible with your app
+    #     cache: 'npm'     # Use 'npm' or 'pnpm' if applicable
 
-    # Step 3: Install dependencies
-    - name: Install dependencies
-      run: npm install -w=tu-trader-sv --frozen-lockfile # Use 'npm ci' or 'pnpm install --frozen-lockfile' if using npm/pnpm
+    # # Step 3: Install dependencies
+    # - name: Install dependencies
+    #   run: npm install -w=tu-trader-sv --frozen-lockfile # Use 'npm ci' or 'pnpm install --frozen-lockfile' if using npm/pnpm
 
-    # Step 4: Build the app
-    - name: Build the app
-      working-directory: apps/tu-trader-sv
-      run: npm run build # -w=tu-trader-sv
+    # # Step 4: Build the app
+    # - name: Build the app
+    #   working-directory: apps/tu-trader-sv
+    #   run: npm run build # -w=tu-trader-sv
 
     # Step 5: Deploy to Fly.io
+    - uses: actions/checkout@v4
+    - uses: superfly/flyctl-actions/setup-flyctl@master
     - name: Deploy to Fly.io
       working-directory: apps/tu-trader-sv
       env:
