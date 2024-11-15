@@ -49,4 +49,4 @@ COPY --from=build /app/package.json /app
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
 # CMD [ "node", "./build/index.js" ]
-CMD ["npm", "run", "preview", "-w=tu-trader-sv"]
+CMD ["npm", "run", "preview"]
