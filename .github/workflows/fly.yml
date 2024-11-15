@@ -1,0 +1,42 @@
+name: Deploy to Fly.io
+
+on:
+  push:
+    branches:
+      - turbo  # Adjust to your deployment branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the repository
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Step 2: Set up Node.js
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18  # Use the Node.js version compatible with your app
+        cache: 'npm'     # Use 'npm' or 'pnpm' if applicable
+
+    # Step 3: Install dependencies
+    - name: Install dependencies
+      run: npm install -w=tu-trader-sv --frozen-lockfile # Use 'npm ci' or 'pnpm install --frozen-lockfile' if using npm/pnpm
+
+    # Step 4: Build the app
+    - name: Build the app
+      run: npm run build -w=tu-trader-sv
+
+    # Step 5: Deploy to Fly.io
+    - name: Deploy to Fly.io
+      env:
+        FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      run: |
+        # Install Fly.io CLI
+        curl -L https://fly.io/install.sh | sh
+        export PATH="$HOME/.fly/bin:$PATH"
+
+        # Deploy to Fly.io
+        fly deploy --remote-only
