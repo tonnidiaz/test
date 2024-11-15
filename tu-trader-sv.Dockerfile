@@ -6,6 +6,11 @@ FROM node:${NODE_VERSION}-slim as base
 
 LABEL fly_launch_runtime="SvelteKit"
 
+# Tu:added
+# Install packages needed to build node modules
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
+    
 # Setup npm on the alpine base
 FROM alpine as base
 RUN npm install turbo --global
