@@ -41,6 +41,6 @@ jobs:
         # Install Fly.io CLI
         curl -L https://fly.io/install.sh | sh
         export PATH="$HOME/.fly/bin:$PATH"
-
+        echo deploying...
         # Deploy to Fly.io
-        fly deploy --remote-only --dockerfile tu-trader-sv.Dockerfile -c fly.tu-trader-sv.toml
+        fly deploy --remote-only --dockerfile tu-trader-sv.Dockerfile --config fly.tu-trader-sv.toml
