@@ -21,55 +21,28 @@ FROM base as build
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
 
-# Setup npm on the alpine base
-# FROM alpine as base
-RUN npm install turbo --global
-RUN npm install npm --global --force
+    # Install node modules
+COPY .npmrc package.json ./
+RUN npm install --include=dev
 
-# Prune projects
-FROM base AS pruner
-ARG PROJECT=tu-trader-sv
-
+# Copy application code
 COPY . .
-RUN turbo prune --scope=${PROJECT} --docker
 
-# Build the project
-FROM base AS builder
-ARG PROJECT
+# Build application
+RUN npm run build
 
-WORKDIR /app
+# Remove development dependencies
+RUN npm prune --omit=dev
 
-# Copy lockfile and package.json's of isolated subworkspace
-COPY --from=pruner /app/out/package-lock.json ./package-lock.json
-COPY --from=pruner /app/out/json/ .
 
-# First install the dependencies (as they change less often)
-RUN npm install -w=tu-trader-sv
+# Final stage for app image
+FROM base
 
-# Copy source code of isolated subworkspace
-COPY --from=pruner /app/out/full/ .
+# Copy built application
+COPY --from=build /app/build /app/build
+COPY --from=build /app/node_modules /app/node_modules
+COPY --from=build /app/package.json /app
 
-RUN turbo run build --scope=${PROJECT}
-
-RUN npm install --production
-RUN rm -rf ./**/*/src
-
-# Final image
-# FROM alpine AS runner
-ARG PROJECT=tu-trader-sv
-
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nodejs
-USER nodejs
-
-# WORKDIR /app
-RUN npm i debug
-COPY --from=builder --chown=nodejs:nodejs /app .
-WORKDIR /app/apps/${PROJECT}
-
-ARG PORT=3000
-ENV PORT=${PORT}
-ENV NODE_ENV=production
-EXPOSE ${PORT}
-
-CMD node dist/index
+# Start the server by default, this can be overwritten at runtime
+EXPOSE 3000
+CMD [ "node", "./build/index.js" ]
