@@ -42,10 +42,11 @@ RUN npm prune --omit=dev
 FROM base
 
 # Copy built application
-COPY --from=build /app/build /app/build
+# COPY --from=build /app/build /app/build
 COPY --from=build /app/node_modules /app/node_modules
 COPY --from=build /app/package.json /app
 
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
-CMD [ "node", "./build/index.js" ]
+# CMD [ "node", "./build/index.js" ]
+CMD ["npm", "run", "preview", "-w=tu-trader-sv"]
