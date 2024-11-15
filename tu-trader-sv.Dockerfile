@@ -22,11 +22,12 @@ RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
 
 # Install node modules
-COPY .npmrc package.json ./
-RUN npm install --include=dev -w=tu-trader-sv
-
+# COPY .npmrc package.json ./
 # Copy application code
 COPY . .
+RUN npm install --include=dev -w=tu-trader-sv
+
+
 
 # Check commands
 RUN npm run
