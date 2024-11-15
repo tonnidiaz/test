@@ -37,7 +37,7 @@ RUN turbo prune --scope=${PROJECT} --docker
 FROM base AS builder
 ARG PROJECT
 
-WORKDIR /app
+# WORKDIR /app
 
 # Copy lockfile and package.json's of isolated subworkspace
 COPY --from=pruner /app/out/package-lock.json ./package-lock.json
@@ -62,7 +62,7 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nodejs
 USER nodejs
 
-WORKDIR /app
+# WORKDIR /app
 RUN npm i debug
 COPY --from=builder --chown=nodejs:nodejs /app .
 WORKDIR /app/apps/${PROJECT}
