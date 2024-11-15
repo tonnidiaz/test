@@ -46,6 +46,8 @@ FROM base
 COPY --from=build /app/node_modules /app/node_modules
 COPY --from=build /app/package.json /app
 
+RUN ls
+RUN npm run
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
 # CMD [ "node", "./build/index.js" ]
