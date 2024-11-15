@@ -21,15 +21,17 @@ FROM base as build
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
 
-    # Install node modules
+# Install node modules
 COPY .npmrc package.json ./
-RUN npm install --include=dev --scope=tu-trader-sv
+RUN npm install --include=dev -w=tu-trader-sv
 
 # Copy application code
 COPY . .
 
+# Check commands
+RUN npm run
 # Build application
-RUN npm run build --scope=tu-trader-sv
+RUN npm run build -w=tu-trader-sv
 
 # Remove development dependencies
 RUN npm prune --omit=dev
