@@ -42,10 +42,11 @@ RUN npm run build -w=tu-trader-sv
 FROM base
 
 # Copy built application
-COPY --from=build /app /app
-# COPY --from=build /app/node_modules /app/node_modules
+COPY --from=build /app/apps/tu-trader-sv /app/apps/tu-trader-sv
+COPY --from=build /app/packages/common /app/packages/common
+COPY --from=build /app/node_modules /app/node_modules
 # COPY --from=build /app/apps/tu-trader-sv/package.json /app/apps/tu-trader-sv
-# COPY --from=build /app/package.json /app
+COPY --from=build /app/package.json /app
 
 RUN ls
 RUN npm run
