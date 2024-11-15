@@ -5,6 +5,10 @@ import { dirname } from 'path';
 
 export default defineConfig({ 
 	plugins: [sveltekit()],
+    // worker: {
+	// 	plugins: [sveltekit()],
+	// 	format: 'es',
+	// },
     build: {
         commonjsOptions: {
             include: [/@repo\/common/, /node_modules/],
