@@ -19,13 +19,13 @@ FROM base as build
 # Install packages needed to build node modules
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
-
-# Install node modules
-COPY .npmrc package.json ./
-RUN cd ../../ && npm install -w=tu-trader-sv --include=dev
+RUN cd ../../
 
 # Copy application code
 COPY . .
+# Install node modules
+COPY .npmrc package.json ./
+RUN npm install -w=tu-trader-sv --include=dev
 
 # Build application
 RUN npm run build -w=tu-trader-sv
