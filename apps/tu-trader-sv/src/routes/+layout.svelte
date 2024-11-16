@@ -60,6 +60,8 @@
             socket?.on("error", () => {
                 console.log(`IO ERR`);
             });
+            socket.on('connect_error', err => handleErrors(err))
+socket.on('connect_failed', err => handleErrors(err))
         } catch (err) {
             console.log("IO INIT ERR");
             console.log(err);
@@ -90,6 +92,11 @@
         });
         init();
     });
+
+
+    function handleErrors(err: Error): void {
+        // throw new Error("Function not implemented.");
+    }
 </script>
 
 {#if !ready}

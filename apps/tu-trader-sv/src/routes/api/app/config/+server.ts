@@ -1,22 +1,16 @@
 import { TuConfig } from "@cmn/models";
 import { taskManager } from "@cmn/utils/consts3";
 import { addBooksTask } from "@cmn/utils/funcs4";
-import express from "express";
+import { error, json } from "@sveltejs/kit";
 
-const router = express.Router();
-/* GET users listing. */
-router.get("/config", async function (req, res, next) {
+export const GET = async()=>{
+    const config = await TuConfig.findOne({}).exec();
+    return json(config?.toJSON())
+}
+
+export const POST = async({request: req}) =>{
     try {
-        
-        res.json(config?.toJSON());
-    } catch (e) {
-        console.log(e);
-        res.status(500).json({ msg: "Something went wrong!" });
-    }
-});
-router.post("/config", async function (req, res, next) {
-    try {
-        const body = req.body;
+        const body = await req.json();
         const config = await TuConfig.findOne({}).exec();
         const oldInterval = config?.book_fetch_interval;
 
@@ -38,11 +32,9 @@ router.post("/config", async function (req, res, next) {
             console.log("CANCELLING BOOK JOBS");
             taskManager.rmTask('task-books')
         }
-        res.json(config?.toJSON());
+        return json(config?.toJSON());
     } catch (e) {
         console.log(e);
-        res.status(500).json({ msg: "Something went wrong!" });
+        return error(500, { message: "Something went wrong!" });
     }
-});
-
-export default router;
+}

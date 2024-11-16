@@ -2,7 +2,7 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-
+process.stdout.write("\x1Bc");
 export default defineConfig({ 
 	plugins: [sveltekit()],
     // worker: {
@@ -15,6 +15,7 @@ export default defineConfig({
           },
     },
     define: {
+        // process: {...import.meta, env: import.meta.env},
         __dirname: JSON.stringify(dirname(fileURLToPath(import.meta.url))),
       },
       css: {
@@ -27,6 +28,6 @@ export default defineConfig({
 
       optimizeDeps: {
         exclude: ["svelte-codemirror-editor", "codemirror", "@codemirror/language-javascript", "@codemirror/lang-vue",  /* ... */],
-        include: ['@repo/common']
+        include: ['../../packages/common']
     }
 });

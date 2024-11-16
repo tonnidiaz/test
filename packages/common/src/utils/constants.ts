@@ -1,7 +1,6 @@
 import { configDotenv } from "dotenv";
 import { Job } from "node-schedule";
 import path, { dirname } from "path";
-import { fileURLToPath } from "url";
 import axios from "axios"
 
 const _dirname = __dirname

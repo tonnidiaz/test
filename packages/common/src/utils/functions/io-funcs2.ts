@@ -53,7 +53,7 @@ export const onTriArbitCointest = async (
     } = data;
 
     try {
-        console.log("BEGIN COINTEST...\n");
+        console.log("BEGIN CROSS COINTEST...");
         client?.emit(ep, "BEGIN COINTEST...");
         prefix = prefix ? `${prefix}_` : "";
 

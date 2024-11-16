@@ -1,4 +1,4 @@
-import { timedLog } from "./functions";
+import { clearTerminal, timedLog } from "./functions";
 import { IObj, ITask, TPlatName } from "./interfaces";
 
 export const platList = [
@@ -184,6 +184,7 @@ class TaskManager {
 }
 
 import { configDotenv } from "dotenv";
+// clearTerminal
 try {
     configDotenv();
 } catch (e) {
@@ -191,9 +192,11 @@ try {
 }
 export let __DEV__ = false;
 try {
+    console.log({process});
     console.log("ENV:", process.env.ENV);
     __DEV__ = process.env.ENV == "dev";
 } catch (e) {
+    console.log("[Process error]", e)
     __DEV__ = location.hostname == 'localhost'
 }
 
