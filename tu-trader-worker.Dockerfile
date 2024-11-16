@@ -22,16 +22,16 @@ RUN apt-get update -qq && \
 
 # Install node modules
 COPY package.json ./
-RUN npm install --include=dev
+RUN npm install --include=dev -w=tu-trader-worker
 
 # Copy application code
 COPY . .
 
 # Build application
-RUN npm run build
+RUN npm run build -w=tu-trader-worker
 
 # Remove development dependencies
-RUN npm prune --omit=dev
+# RUN npm prune --omit=dev
 
 
 # Final stage for app image
