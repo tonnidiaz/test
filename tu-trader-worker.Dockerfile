@@ -41,9 +41,11 @@ FROM base
 # Copy built application
 # COPY --from=build /app /app
 COPY --from=build /app/package.json /app
-COPY --from=build /app/packages/apps/tu-trader-worker /app/packages/apps/tu-trader-worker
-COPY --from=build /app/packages/common /app/packages/common
+COPY --from=build /app/apps/tu-trader-worker/package.json /app/apps/tu-trader-worker
 COPY --from=build /app/node_modules /app/node_modules
+COPY --from=build /app/packages/apps/tu-trader-worker/dist /app/packages/apps/tu-trader-worker/dist
+# COPY --from=build /app/packages/common /app/packages/common
+
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
 CMD [ "npm", "run", "start", "-w=tu-trader-worker" ]

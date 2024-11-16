@@ -4,7 +4,7 @@
     "private": true,
     "description": "Express app with typescript by Tu",
     "author": "Tonni Diaz",
-    "main": "dist/src/index.js",
+    "main": "dist/apps/tu-trader-worker/src/index.js",
     "scripts": {
         "build": "rimraf dist && tsc --project tsconfig.json && tsc-alias -p tsconfig.json",
         "start": "node -r tsconfig-paths/register dist/apps/tu-trader-worker/src/index.js",
