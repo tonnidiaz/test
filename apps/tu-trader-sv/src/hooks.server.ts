@@ -8,6 +8,7 @@ import jwt from "jsonwebtoken";
 
 const fn = async () => {
     console.log("Run once!!");
+    if (!__DEV__)
     captureLogs({appName: "tu-trader"})
     await connectMongo(__DEV__);
 };

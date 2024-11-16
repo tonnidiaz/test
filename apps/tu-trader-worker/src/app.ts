@@ -55,6 +55,7 @@ app.use(function (err, req, res, next) {
 
 const init = async () => { 
     try{ 
+        if (!DEV)
         captureLogs({appName: "tu-trader-worker"})
         console.log("WORKER")
 await connectMongo(DEV)

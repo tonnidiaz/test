@@ -91,9 +91,9 @@ export async function fetchAndStoreBooks(taskId: string) {
 
         platPairs = Array.from(new Set(platPairs.sort()));
         tasks.push({platName: platName as TPlatName, pairs: platPairs})
-        // platBookFetcher(platName, platPairs);
+        platBookFetcher(platName, platPairs);
     }
-    
+    return
     try{
       // Send request to api to handle the books fetching
     const r = await localApi().post('/tasks/books', tasks)

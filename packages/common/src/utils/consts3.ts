@@ -109,33 +109,32 @@ export const crossCoinFees: { [key: string]: { [key: string]: number } } = {
 export const pairsOfInterest: {
     [key: string]: { A: string; B?: string; C: string[] }[];
 } = {
-    binance: [{A: "USDT", B:"USDC", C: ["SOL"]}]
-    // binance: [
-    //     { A: "USDT", B: "USDC", C: ["JUP", "FET", "CKB", "YGG", "PEOPLE"] },
-    //     { A: "USDT", B: "BTC", C: ["PEOPLE", "ONE", "NULS", "DATA", "FIDA"] },
-    //     { A: "USDT", C: ["SYS"] },
-    // ],
-    // bitget: [
-    //     { A: "USDT", B: "USDC", C: ["BGB"] },
-    //     { A: "USDT", B: "BTC", C: ["BGB"] },
-    //     { A: "EUR", B: "USDT", C: ["PEPE", "BGB"] },
-    //     { A: "USDT", C: ["LAT", "OAS", "BABYDOGE", "ABBC"] },
-    //     { A: "USDT", C: ["POLYX"] }, // kucoin -
-    // ],
-    // kucoin: [
-    //     { A: "USDT", B: "USDC", C: ["FLOKI", "GMT", "APE", "NEAR"] },
-    //     { A: "USDT", C: ["CAS", "BLOK", "IRON", "HAI", "KARATE"] },
-    //     { A: "USDT", C: ["POLYX"] }, // - bitget
-    // ],
-    // okx: [
-    //     { A: "USDT", B: "USDC", C: ["KLAY", "1INCH", "SUSHI", "MKR", "ALGO"] },
-    //     { A: "USDT", C: ["LAT", "SC"] },
-    // ],
-    // mexc: [
-    //     { A: "USDT", C: ["LAT", "OAS", "BABYDOGE", "ABBC"] }, // -bitget
-    //     { A: "USDT", C: ["LAT", "SC"] }, // -okx
-    //     { A: "USDT", C: ["CAS", "BLOK", "IRON", "HAI", "KARATE"] }, // -kucoin
-    // ],
+    binance: [
+        { A: "USDT", B: "USDC", C: ["JUP", "FET", "CKB", "YGG", "PEOPLE"] },
+        { A: "USDT", B: "BTC", C: ["PEOPLE", "ONE", "NULS", "DATA", "FIDA"] },
+        { A: "USDT", C: ["SYS"] },
+    ],
+    bitget: [
+        { A: "USDT", B: "USDC", C: ["BGB"] },
+        { A: "USDT", B: "BTC", C: ["BGB"] },
+        { A: "EUR", B: "USDT", C: ["PEPE", "BGB"] },
+        { A: "USDT", C: ["LAT", "OAS", "BABYDOGE", "ABBC"] },
+        { A: "USDT", C: ["POLYX"] }, // kucoin -
+    ],
+    kucoin: [
+        { A: "USDT", B: "USDC", C: ["FLOKI", "GMT", "APE", "NEAR"] },
+        { A: "USDT", C: ["CAS", "BLOK", "IRON", "HAI", "KARATE"] },
+        { A: "USDT", C: ["POLYX"] }, // - bitget
+    ],
+    okx: [
+        { A: "USDT", B: "USDC", C: ["KLAY", "1INCH", "SUSHI", "MKR", "ALGO"] },
+        { A: "USDT", C: ["LAT", "SC"] },
+    ],
+    mexc: [
+        { A: "USDT", C: ["LAT", "OAS", "BABYDOGE", "ABBC"] }, // -bitget
+        { A: "USDT", C: ["LAT", "SC"] }, // -okx
+        { A: "USDT", C: ["CAS", "BLOK", "IRON", "HAI", "KARATE"] }, // -kucoin
+    ],
 };
 
 const K = 1000,

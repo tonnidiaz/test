@@ -29,7 +29,7 @@ export class TestBinance extends TestPlatform {
            
         });
         // console.log({binanceApiNode})
-        const _binanceApiNode =  (binanceApiNode as any).default//(binanceApiNode as any).default as typeof binanceApiNode || binanceApiNode;
+        const _binanceApiNode =  (binanceApiNode as any).default ?? binanceApiNode//(binanceApiNode as any).default as typeof binanceApiNode || binanceApiNode;
         console.log(typeof _binanceApiNode);
         this.client2 =  _binanceApiNode({apiKey, apiSecret})
 
