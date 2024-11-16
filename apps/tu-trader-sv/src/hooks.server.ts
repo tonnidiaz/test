@@ -1,12 +1,14 @@
 import { User } from "@cmn/models";
 import { __DEV__ } from "@cmn/utils/consts3";
 import { connectMongo } from "@cmn/utils/funcs4";
+import { captureLogs } from "@cmn/utils/functions2";
 import type { IObj } from "@cmn/utils/interfaces";
 import { error, type Handle, type RequestEvent, type ResolveOptions } from "@sveltejs/kit";
 import jwt from "jsonwebtoken";
 
 const fn = async () => {
     console.log("Run once!!");
+    captureLogs({appName: "tu-trader"})
     await connectMongo(__DEV__);
 };
 fn();
@@ -51,3 +53,5 @@ export const handle: Handle = async ({ resolve, event }) => {
 
     return resolve(event);
 };
+
+/*  */

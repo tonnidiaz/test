@@ -1,0 +1,411 @@
+[STDOUT] [2024-11-16T05:57:51.889Z] This is a log message
+[STDOUT] [2024-11-16T05:57:51.902Z] Direct STDOUT message
+[STDOUT] [2024-11-16T05:57:51.902Z] Connecting mongo... { DEV: [33mtrue[39m }
+[STDOUT] [2024-11-16T05:57:51.902Z] mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false
+[STDOUT] [2024-11-16T05:57:51.903Z] 
+Connection established
+
+[STDOUT] [2024-11-16T05:57:51.903Z] 
+SERVER MIDDLEWARE
+
+[STDOUT] [2024-11-16T05:58:01.607Z] 
+SERVER MIDDLEWARE
+
+[STDOUT] [2024-11-16T05:58:01.611Z] { user: [32m'tonnidiaz'[39m }
+[STDOUT] [2024-11-16T05:58:01.657Z] 
+SERVER MIDDLEWARE
+
+[STDOUT] [2024-11-16T05:59:21.064Z] 
+SERVER MIDDLEWARE
+
+[STDOUT] [2024-11-16T05:59:21.137Z] CANCELLING OLD BOOK JOBS
+[STDOUT] [2024-11-16T05:59:21.372Z] CANCELLING BOOK JOBS
+[STDOUT] [2024-11-16T05:59:21.743Z] 
+[2024-11-16 07:59:21+02:00] Removing task task-books....
+[STDOUT] [2024-11-16T05:59:21.744Z] 
+[2024-11-16 07:59:21+02:00] Task task-books removed!!
+[STDOUT] [2024-11-16T05:59:52.178Z] 
+SERVER MIDDLEWARE
+
+[STDOUT] [2024-11-16T05:59:52.192Z] RESCHEDULING BOOK JOBS
+[STDOUT] [2024-11-16T05:59:52.194Z] 
+[2024-11-16 07:59:52+02:00] Adding books task...
+[STDOUT] [2024-11-16T12:05:53.294Z] 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[STDOUT] [2024-11-16T12:05:54.191Z] [1;1H[STDOUT] [2024-11-16T12:05:54.191Z] [0J[STDOUT] [2024-11-16T12:05:54.396Z] [2m14:05:54[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2m/media/tonni/win/src/Mint/Documents/RF/Web/turbo-wp/turbo-one/packages/common/src/utils/functions2.ts[22m
+[STDOUT] [2024-11-16T12:05:55.920Z] 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[STDOUT] [2024-11-16T12:05:55.920Z] [1;1H[STDOUT] [2024-11-16T12:05:55.920Z] [0J[STDOUT] [2024-11-16T12:05:55.920Z] [2m14:05:55[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2m/media/tonni/win/src/Mint/Documents/RF/Web/turbo-wp/turbo-one/packages/common/src/utils/consts3.ts[22m
+[STDOUT] [2024-11-16T12:06:15.985Z] ENV: dev
+[STDOUT] [2024-11-16T12:06:20.923Z] Run once!!
+[STDOUT] [2024-11-16T12:06:20.923Z] 
+[CAPTURE LOGS]
+
+[STDOUT] [2024-11-16T12:06:21.574Z] This is a log message
+[STDOUT] [2024-11-16T12:06:21.657Z] Direct STDOUT message
+[STDOUT] [2024-11-16T12:06:21.744Z] Connecting mongo... { DEV: [33mtrue[39m }
+[STDOUT] [2024-11-16T12:06:21.753Z] mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false
+[STDOUT] [2024-11-16T12:06:21.992Z] 
+Connection established
+
+[STDOUT] [2024-11-16T12:06:22.591Z] 
+SERVER MIDDLEWARE
+
+[STDOUT] [2024-11-16T12:07:11.028Z] 
+SERVER MIDDLEWARE
+
+[STDOUT] [2024-11-16T12:07:11.869Z] { user: [32m'tonnidiaz'[39m }
+[STDOUT] [2024-11-16T12:07:11.902Z] 
+SERVER MIDDLEWARE
+
+[STDOUT] [2024-11-16T12:11:47.103Z] 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[STDOUT] [2024-11-16T12:11:47.104Z] [1;1H[STDOUT] [2024-11-16T12:11:47.120Z] [0J[STDOUT] [2024-11-16T12:11:47.121Z] [2m14:11:47[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2m/media/tonni/win/src/Mint/Documents/RF/Web/turbo-wp/turbo-one/packages/common/src/utils/functions2.ts[22m
+[STDOUT] [2024-11-16T12:11:48.229Z] Run once!!
+[STDOUT] [2024-11-16T12:11:48.230Z] 
+[CAPTURE LOGS]
+
+[STDOUT] [2024-11-16T12:11:48.241Z] Connecting mongo... { DEV: [33mtrue[39m }
+[STDOUT] [2024-11-16T12:11:48.242Z] mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false
+[STDOUT] [2024-11-16T12:11:48.243Z] 
+Connection established
+
+[STDOUT] [2024-11-16T12:11:48.244Z] 
+SERVER MIDDLEWARE
+
+[STDOUT] [2024-11-16T12:11:50.675Z] 
+SERVER MIDDLEWARE
+
+[STDOUT] [2024-11-16T12:11:50.698Z] { user: [32m'tonnidiaz'[39m }
+[STDOUT] [2024-11-16T12:11:50.732Z] 
+SERVER MIDDLEWARE
+
+[STDOUT] [2024-11-16T12:12:07.548Z] 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[STDOUT] [2024-11-16T12:12:07.549Z] [1;1H[STDOUT] [2024-11-16T12:12:07.549Z] [0J[STDOUT] [2024-11-16T12:12:07.550Z] [2m14:12:07[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2m/media/tonni/win/src/Mint/Documents/RF/Web/turbo-wp/turbo-one/packages/common/src/utils/functions2.ts[22m [33m(x2)[39m
+[STDOUT] [2024-11-16T12:12:08.290Z] Run once!!
+[STDOUT] [2024-11-16T12:12:08.291Z] 
+[CAPTURE LOGS]
+
+[STDOUT] [2024-11-16T12:12:08.292Z] Connecting mongo... { DEV: [33mtrue[39m }
+[STDOUT] [2024-11-16T12:12:08.293Z] mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false
+[STDOUT] [2024-11-16T12:12:08.294Z] 
+Connection established
+
+[STDOUT] [2024-11-16T12:12:08.296Z] 
+SERVER MIDDLEWARE
+
+[STDOUT] [2024-11-16T12:12:10.550Z] 
+SERVER MIDDLEWARE
+
+[STDOUT] [2024-11-16T12:12:10.556Z] { user: [32m'tonnidiaz'[39m }
+[STDOUT] [2024-11-16T12:12:10.597Z] 
+SERVER MIDDLEWARE
+
+[STDOUT] [2024-11-16T12:13:06.009Z] 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[STDOUT] [2024-11-16T12:13:06.033Z] [1;1H[STDOUT] [2024-11-16T12:13:06.034Z] [0J[STDOUT] [2024-11-16T12:13:06.035Z] [2m14:13:06[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2m/media/tonni/win/src/Mint/Documents/RF/Web/turbo-wp/turbo-one/packages/common/src/utils/functions2.ts[22m [33m(x3)[39m
+[STDOUT] [2024-11-16T12:13:07.184Z] Run once!!
+[STDOUT] [2024-11-16T12:13:07.185Z] 
+[CAPTURE LOGS]
+
+[STDOUT] [2024-11-16T12:13:07.186Z] Connecting mongo... { DEV: [33mtrue[39m }
+[STDOUT] [2024-11-16T12:13:07.187Z] mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false
+[STDOUT] [2024-11-16T12:13:07.200Z] 
+Connection established
+
+[STDOUT] [2024-11-16T12:13:07.216Z] 
+SERVER MIDDLEWARE
+
+[STDOUT] [2024-11-16T12:13:10.182Z] 
+SERVER MIDDLEWARE
+
+[STDOUT] [2024-11-16T12:13:10.205Z] { user: [32m'tonnidiaz'[39m }
+[STDOUT] [2024-11-16T12:13:10.230Z] 
+SERVER MIDDLEWARE
+
+[STDOUT] [2024-11-16T12:13:16.678Z] 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[STDOUT] [2024-11-16T12:13:16.760Z] [1;1H[STDOUT] [2024-11-16T12:13:16.762Z] [0J[STDOUT] [2024-11-16T12:13:16.763Z] [2m14:13:16[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2m/media/tonni/win/src/Mint/Documents/RF/Web/turbo-wp/turbo-one/packages/common/src/utils/functions2.ts[22m [33m(x4)[39m
+[STDOUT] [2024-11-16T12:13:17.395Z] Run once!!
+[STDOUT] [2024-11-16T12:13:17.397Z] 
+[CAPTURE LOGS]
+
+[STDOUT] [2024-11-16T12:13:17.412Z] Connecting mongo... { DEV: [33mtrue[39m }
+[STDOUT] [2024-11-16T12:13:17.515Z] mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false
+[STDOUT] [2024-11-16T12:13:17.517Z] 
+Connection established
+
+[STDOUT] [2024-11-16T12:13:17.557Z] 
+SERVER MIDDLEWARE
+
+[STDOUT] [2024-11-16T12:13:20.423Z] 
+SERVER MIDDLEWARE
+
+[STDOUT] [2024-11-16T12:13:20.447Z] { user: [32m'tonnidiaz'[39m }
+[STDOUT] [2024-11-16T12:13:20.499Z] 
+SERVER MIDDLEWARE
+
+[STDOUT] [2024-11-16T12:13:46.487Z] 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[STDOUT] [2024-11-16T12:13:46.495Z] [1;1H[STDOUT] [2024-11-16T12:13:46.506Z] [0J[STDOUT] [2024-11-16T12:13:46.515Z] [2m14:13:46[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2m/media/tonni/win/src/Mint/Documents/RF/Web/turbo-wp/turbo-one/packages/common/src/utils/functions2.ts[22m [33m(x5)[39m
+[STDOUT] [2024-11-16T12:13:47.171Z] Run once!!
+[STDOUT] [2024-11-16T12:13:47.186Z] 
+[CAPTURE LOGS]
+
+[STDOUT] [2024-11-16T12:13:47.191Z] Connecting mongo... { DEV: [33mtrue[39m }
+[STDOUT] [2024-11-16T12:13:47.207Z] mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false
+[STDOUT] [2024-11-16T12:13:47.213Z] 
+Connection established
+
+[STDOUT] [2024-11-16T12:13:47.263Z] 
+SERVER MIDDLEWARE
+
+[STDOUT] [2024-11-16T12:13:50.701Z] 
+SERVER MIDDLEWARE
+
+[STDOUT] [2024-11-16T12:13:50.744Z] { user: [32m'tonnidiaz'[39m }
+[STDOUT] [2024-11-16T12:13:50.855Z] 
+SERVER MIDDLEWARE
+
+[STDOUT] [2024-11-16T12:13:56.465Z] 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[STDOUT] [2024-11-16T12:13:56.466Z] [1;1H[STDOUT] [2024-11-16T12:13:56.468Z] [0J[STDOUT] [2024-11-16T12:13:56.637Z] [2m14:13:56[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2m/media/tonni/win/src/Mint/Documents/RF/Web/turbo-wp/turbo-one/packages/common/src/utils/functions2.ts[22m [33m(x6)[39m
+[STDOUT] [2024-11-16T12:13:56.654Z] 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[STDOUT] [2024-11-16T12:13:56.673Z] [1;1H[STDOUT] [2024-11-16T12:13:56.675Z] [0J[STDOUT] [2024-11-16T12:13:56.686Z] [2m14:13:56[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2m/media/tonni/win/src/Mint/Documents/RF/Web/turbo-wp/turbo-one/packages/common/src/utils/functions2.ts[22m [33m(x7)[39m
+[STDOUT] [2024-11-16T12:13:57.492Z] Run once!!
+[STDOUT] [2024-11-16T12:13:57.549Z] 
+[CAPTURE LOGS]
+
+[STDOUT] [2024-11-16T12:13:57.655Z] Connecting mongo... { DEV: [33mtrue[39m }
+[STDOUT] [2024-11-16T12:13:57.666Z] mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false
+[STDOUT] [2024-11-16T12:13:57.685Z] 
+Connection established
+
+[STDOUT] [2024-11-16T12:13:57.701Z] 
+SERVER MIDDLEWARE
+
+[STDOUT] [2024-11-16T12:14:00.284Z] 
+SERVER MIDDLEWARE
+
+[STDOUT] [2024-11-16T12:14:00.316Z] { user: [32m'tonnidiaz'[39m }
+[STDOUT] [2024-11-16T12:14:00.349Z] 
+SERVER MIDDLEWARE
+

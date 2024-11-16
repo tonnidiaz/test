@@ -1,0 +1,44 @@
+{
+    "logs": [
+        {
+            "log": "\nSERVER MIDDLEWARE\n\n",
+            "ts": "2024-11-16 16:05:18+02:00",
+            "type": "out"
+        },
+        {
+            "log": "\nSERVER MIDDLEWARE\n\n",
+            "ts": "2024-11-16 16:05:21+02:00",
+            "type": "out"
+        },
+        {
+            "log": "\nSERVER MIDDLEWARE\n\n",
+            "ts": "2024-11-16 16:05:23+02:00",
+            "type": "out"
+        },
+        {
+            "log": "\nSERVER MIDDLEWARE\n\n",
+            "ts": "2024-11-16 16:05:24+02:00",
+            "type": "out"
+        },
+        {
+            "log": "\nSERVER MIDDLEWARE\n\n",
+            "ts": "2024-11-16 16:05:25+02:00",
+            "type": "out"
+        },
+        {
+            "log": "\nSERVER MIDDLEWARE\n\n",
+            "ts": "2024-11-16 16:05:32+02:00",
+            "type": "out"
+        },
+        {
+            "log": "\nSERVER MIDDLEWARE\n\n",
+            "ts": "2024-11-16 16:05:34+02:00",
+            "type": "out"
+        },
+        {
+            "log": "Saving logs to database....\n",
+            "ts": "2024-11-16 16:06:25+02:00",
+            "type": "out"
+        }
+    ]
+}

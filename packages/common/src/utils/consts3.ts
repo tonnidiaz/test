@@ -10,6 +10,7 @@ export const platList = [
     "mexc",
     "gateio",
 ] as const;
+export const logTypes =  ["err", "out"] as const;
 export const coinFees: { [key: string]: number } = {
     BDX: 1,
     ALEX: 1.5, //MEXC
@@ -192,7 +193,7 @@ try {
 }
 export let __DEV__ = false;
 try {
-    console.log({process});
+    // console.log({process});
     console.log("ENV:", process.env.ENV);
     __DEV__ = process.env.ENV == "dev";
 } catch (e) {

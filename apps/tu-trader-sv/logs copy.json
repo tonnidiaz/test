@@ -1,0 +1,49 @@
+{
+    "logs": [
+        {
+            "log": "Connecting mongo... { DEV: \u001b[33mtrue\u001b[39m }\n",
+            "ts": "2024-11-16 15:23:55+02:00",
+            "type": "out"
+        },
+        {
+            "log": "mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false\n",
+            "ts": "2024-11-16 15:23:55+02:00",
+            "type": "out"
+        },
+        {
+            "log": "\nConnection established\n\n",
+            "ts": "2024-11-16 15:23:55+02:00",
+            "type": "out"
+        },
+        {
+            "log": "\nSERVER MIDDLEWARE\n\n",
+            "ts": "2024-11-16 15:23:55+02:00",
+            "type": "out"
+        },
+        {
+            "log": "\nSERVER MIDDLEWARE\n\n",
+            "ts": "2024-11-16 15:23:59+02:00",
+            "type": "out"
+        },
+        {
+            "log": "{ user: \u001b[32m'tonnidiaz'\u001b[39m }\n",
+            "ts": "2024-11-16 15:23:59+02:00",
+            "type": "out"
+        },
+        {
+            "log": "\nSERVER MIDDLEWARE\n\n",
+            "ts": "2024-11-16 15:24:47+02:00",
+            "type": "out"
+        },
+        {
+            "log": "{ user: \u001b[32m'tonnidiaz'\u001b[39m }\n",
+            "ts": "2024-11-16 15:24:47+02:00",
+            "type": "out"
+        },
+        {
+            "log": "\nSERVER MIDDLEWARE\n\n",
+            "ts": "2024-11-16 15:25:10+02:00",
+            "type": "out"
+        }
+    ]
+}

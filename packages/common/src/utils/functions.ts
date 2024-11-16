@@ -476,7 +476,7 @@ export const getSymbol = (pair: string[], plat: TPlatName) => {
 
     return pair.join(sep);
 };
-
+export const msToMin = (ts: number)=> ts / 60000
 export const clearTerminal = () => {
     process.stdout.write("\x1Bc");
 };

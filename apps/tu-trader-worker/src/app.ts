@@ -14,6 +14,7 @@ import indexRouter from './routes';
 import { TuConfig } from '@cmn/models';
 import { addBooksTask, connectMongo, scheduleAllTasks } from '@cmn/utils/funcs4';
 import { DEV } from '@cmn/utils/constants';
+import { captureLogs } from '@cmn/utils/functions2';
 
 const app = express();
 
@@ -54,6 +55,7 @@ app.use(function (err, req, res, next) {
 
 const init = async () => { 
     try{ 
+        captureLogs({appName: "tu-trader-worker"})
         console.log("WORKER")
 await connectMongo(DEV)
         const config = await TuConfig.findOne({}).exec() || new TuConfig()

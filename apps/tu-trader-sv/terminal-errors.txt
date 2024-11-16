@@ -1,0 +1,4 @@
+[STDERR] [2024-11-16T05:57:51.902Z] [31mThis is an error message[39m
+[STDERR] [2024-11-16T05:57:51.902Z] Direct STDERR message
+[STDERR] [2024-11-16T12:06:21.645Z] [31mThis is an error message[39m
+[STDERR] [2024-11-16T12:06:21.658Z] Direct STDERR message

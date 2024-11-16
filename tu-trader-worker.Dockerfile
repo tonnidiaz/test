@@ -4,9 +4,9 @@
 ARG NODE_VERSION=20.17.0
 FROM node:${NODE_VERSION}-slim as base
 
-LABEL fly_launch_runtime="SvelteKit"
+LABEL fly_launch_runtime="Node.js"
 
-# SvelteKit app lives here
+# Node.js app lives here
 WORKDIR /app
 
 # Set production environment
@@ -16,41 +16,33 @@ ENV NODE_ENV="production"
 # Throw-away build stage to reduce size of final image
 FROM base as build
 
-# Tu:added
 # Install packages needed to build node modules
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
 
 # Install node modules
-# COPY .npmrc package.json ./
+COPY package.json ./
+RUN npm install --include=dev
+
 # Copy application code
 COPY . .
-RUN npm install --include=dev -w=tu-trader-sv
 
-
-
-# Check commands
-RUN npm run
 # Build application
-RUN npm run build -w=tu-trader-sv
+RUN npm run build
 
 # Remove development dependencies
-# RUN npm prune --omit=dev
+RUN npm prune --omit=dev
 
 
 # Final stage for app image
 FROM base
 
 # Copy built application
-COPY --from=build /app/apps/tu-trader-sv /app/apps/tu-trader-sv
+# COPY --from=build /app /app
+COPY --from=build /app/package.json /app
+COPY --from=build /app/packages/apps/tu-trader-worker /app/packages/apps/tu-trader-worker
 COPY --from=build /app/packages/common /app/packages/common
 COPY --from=build /app/node_modules /app/node_modules
-# COPY --from=build /app/apps/tu-trader-sv/package.json /app/apps/tu-trader-sv
-COPY --from=build /app/package.json /app
-
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
-# CMD [ "node", "./build/index.js" ]
-
-WORKDIR /app/apps/tu-trader-sv
-CMD ["npm", "run", "preview", "-w=tu-trader-sv"]
+CMD [ "npm", "run", "start", "-w=tu-trader-worker" ]
