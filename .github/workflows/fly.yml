@@ -1,4 +1,4 @@
-name: Deploy to Fly.io
+name: Deploy [tu-trader-sv] to Fly.io
 
 on:
   push:
