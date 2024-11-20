@@ -17,6 +17,7 @@ import TuBtn from "@/components/TuBtn.svelte";
     import { writable } from "svelte/store";
     import type { PageData } from "../$types";
     import CtxMenu2 from "@/components/CtxMenu2.svelte";
+    import { page } from "$app/stores";
 
     let artist = $state("Diaz");
     let {cnt} = appStore
@@ -28,6 +29,10 @@ import TuBtn from "@/components/TuBtn.svelte";
  
     onMount(()=>{
         console.log("Mounted")
+        console.log($page.url.searchParams.get("red"))
+        setTimeout(()=>{
+            
+        }, 5000)
         return ()=>{
             console.log("UnMounted")
         }
@@ -70,6 +75,7 @@ $effect(()=>{
       <div class="p-2 border-1 border-card">
         <h2>Global state</h2>
         <UButton onclick={_=>{appStore.cnt += 1}}>Counter {appStore.cnt}</UButton>
+        <UButton class="btn-primary" loading>Hello fool</UButton>
       </div>
         <TuSelect options={opts} bind:value={opt}/>
         <CtxMenu bind:open={menuOpen}>
@@ -102,5 +108,13 @@ $effect(()=>{
                 <h3>Some sub heading</h3>
             </div>
         </div>
+        <UInput placeholder="Search here...">
+            {#snippet leading()}
+                k
+            {/snippet}
+            {#snippet trailing()}
+                S
+            {/snippet}
+        </UInput>
     </div>
 </div>

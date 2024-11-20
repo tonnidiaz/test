@@ -6,8 +6,9 @@ import { IBot } from "@cmn/models/bot";
 import { capitalizeFirstLetter, getSymbol, sleep } from "@cmn/utils/functions";
 import { IOrderDetails } from "@cmn/utils/interfaces";
 import { DEV } from "@cmn/utils/constants";
+import { Platform } from "./platforms";
 
-export class Bitget {
+export class Bitget extends Platform {
     name = "BITGET";
     maker: number = 0.1 / 100;
     taker: number = 0.1 / 100;
@@ -15,9 +16,9 @@ export class Bitget {
     apiKey: string;
     apiSecret: string;
     passphrase: string;
-    bot: IBot;
 
     constructor(bot: IBot) {
+        super(bot)
         this.apiKey = process.env.BITGET_API_KEY!;
         this.apiSecret = process.env.BITGET_API_SECRET!;
         this.passphrase = process.env.BITGET_PASSPHRASE!;
@@ -185,5 +186,21 @@ export class Bitget {
     }
     getSymbol() {
         return getSymbol([this.bot.base, this.bot.ccy], this.bot.platform);
+    }
+    async withdraw({ amt, coin, chain, addr }: { amt: number; coin: string; chain: string; addr: string; }) {
+        super.withdraw({amt, coin, chain, addr})
+        try {
+            const res = await this.client.spotWithdraw({
+                currency: coin, chain, amount: amt, address: addr
+            })
+            if (res.code != "200000") {
+                botLog(this.bot, "FAILED TO WITHDRAW");
+                console.log(res);
+                return;
+            }
+            return res.data.withdrawalId
+        } catch (err) {
+            console.log(err)
+        }
     }
 }

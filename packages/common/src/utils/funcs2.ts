@@ -21,6 +21,7 @@ import { objStrategies } from "@cmn/strategies";
 import type { Order as GateOrder } from "gate-api";
 import type { SpotOrder as KucoinOrder } from "kucoin-api";
 import { parseDate } from "./functions";
+import { SpotOrder } from "binance";
 
 
 export const getExactDate = (interval: number) => {
@@ -320,7 +321,20 @@ export const parseFilledOrder = (res: IObj, plat: string) => {
             fillTime: Number(res.updatedTime),
             cTime: Number(res.createdTime),
         };
-    } else if (plat == "bitget") {
+    } 
+    else if (plat == "binance") {
+        const _res = res as SpotOrder;
+        data = {
+            id: `${_res.orderId}`,
+            fillPx: Number(_res.price),
+            fillSz: Number(_res.executedQty),
+            fee: 0,
+            fillTime: Number(_res.updateTime),
+            cTime: Number(_res.time),
+        };
+        data.fee = data.fillSz * (.1/100)
+    }
+    else if (plat == "bitget") {
         const feeDetail = JSON.parse(res.feeDetail);
         data = {
             id: res.orderId,

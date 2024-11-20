@@ -141,7 +141,7 @@ export class TestKucoin extends TestPlatform {
     async getNets(coin?: string, offline?: boolean): Promise<ICoinNets[]  | null | undefined> {
         super.getNets(coin, offline)
         try {
-            console.log({ offline });
+            console.log({ offline,  path: this.netsPath, __dirname });
             let res = safeJsonParse(
                 offline && existsSync(this.netsPath)
                     ? await readJson(this.netsPath)

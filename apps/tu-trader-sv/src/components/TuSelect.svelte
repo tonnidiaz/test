@@ -1,6 +1,7 @@
 <script lang="ts">
     import type { ISelectItem } from "@/lib/interfaces";
     import { onMount, untrack } from "svelte";
+    import UFormGroup from "./UFormGroup.svelte";
 
     let formRef: HTMLDivElement;
     let dropdownRef: HTMLSelectElement = $state(),
@@ -16,6 +17,7 @@
         placeholder?: string;
         value: any;
         disabled?: boolean;
+        showLabel?: boolean;
         required?: boolean;
         searchable?: boolean;
         class?: string
@@ -27,7 +29,7 @@
         value = $bindable(),
         placeholder,
         disabled, required,
-        class: _class
+        class: _class, showLabel
     }: IProps = $props();
 
     // $effect(()=>{
@@ -333,8 +335,8 @@
     });
     /* -------------End Effects ---------------- */
 </script>
-
-<div class="mb-2 hidden">{JSON.stringify(options)}</div>
+<UFormGroup label={showLabel ? placeholder : undefined}>
+    <div class="mb-2 hidden">{JSON.stringify(options)}</div>
 <div class={"tu-select " + _class}>
     <section class="section wrapper wrapper-section">
         <div class="container wrapper-column">
@@ -355,6 +357,8 @@
         </div>
     </section>
 </div>
+</UFormGroup>
+
 
 <style>
     .v-hidden {

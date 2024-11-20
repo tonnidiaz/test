@@ -251,4 +251,20 @@ export class Kucoin extends Platform {
     //         console.log(e);
     //     }
     // }
+    async withdraw({ amt, coin, chain, addr }: { amt: number; coin: string; chain: string; addr: string; }) {
+        super.withdraw({amt, coin, chain, addr})
+        try {
+            const res = await this.client.submitWithdraw({
+                currency: coin, chain, amount: amt, address: addr
+            })
+            if (res.code != "200000") {
+                botLog(this.bot, "FAILED TO WITHDRAW");
+                console.log(res);
+                return;
+            }
+            return res.data.withdrawalId
+        } catch (err) {
+            console.log(err)
+        }
+    }
 }

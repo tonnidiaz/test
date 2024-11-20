@@ -108,6 +108,10 @@
                         to={`/@${user.username}/bots`}
                         icon="fi fi-br-user-robot-xmarks">Bots</MenuItem
                     >
+                    <MenuItem
+                        to={`/@${user.username}/account`}
+                        icon="fi fi-br-user-robot-xmarks">Account</MenuItem
+                    >
                     <MenuItem to={`/auth/logout`} icon="fi fi-br-sign-out-alt"
                         >Logout</MenuItem
                     >

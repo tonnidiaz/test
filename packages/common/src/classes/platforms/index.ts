@@ -73,4 +73,11 @@ export class Platform {
     async getBal(ccy?: string): Promise<number | void | undefined | null> {
         botLog(this.bot, `[${this.name}]: GETTING BALANCE...`);
     }
+    async withdraw({amt, coin, chain, addr, memo}: {amt: number; coin: string; chain: string; addr: string; memo?: string}) : Promise<string | null | void | undefined>{
+        botLog(this.bot, `[${this.name}]: WITHDRAWING ${coin} through ${chain}`);
+    }
+
+    _log(...args: any[] ){
+        botLog(this.bot, `[${this.name}]`, ...args)
+    }
 }

@@ -53,7 +53,7 @@ export class TestPlatform {
         coin?: string,
         offline?: boolean
     ): Promise<ICoinNets[]  | null | undefined> {
-       return this._log("GETTING NETS FOR", coin ?? "ALL");
+       return this._log("GETTING NETS FOR", coin ?? "ALL", {dir: this.netsPath});
     }
     async getKlines({
         start,

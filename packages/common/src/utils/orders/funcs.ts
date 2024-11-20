@@ -27,6 +27,7 @@ import { objStrategies } from "@cmn/strategies";
 import { updateSellOrder, updateBuyOrder } from "./funcs2";
 import { objPlats } from "../consts2";
 import { botLog } from "../bend/functions";
+import { Platform } from "@cmn/classes/platforms";
 export const getJob = (id: string) => jobs.find((el) => el.id == id);
 
 export const tuJob = async (op: OrderPlacer, bot: IBot) => {
@@ -140,7 +141,7 @@ export const placeTrade = async ({
     sl?: number;
     side: "buy" | "sell";
     price: number;
-    plat: OKX | Bybit;
+    plat: Platform;
     pair?: string[];
     ordType?: "Limit" | "Market";
 }) => {
@@ -216,11 +217,13 @@ export const placeTrade = async ({
             /// GET THE QUOTE BALANCE AND USE 75 IF THIS IS FIRST ORDER
 
             console.log(`\n[ ${bot.name} ]\tFIRST ORDER\n`);
-            amt = await plat.getBal(bot.ccy);
-            if (!amt) {
+            const _amt =  await plat.getBal(bot.ccy);
+            
+            if (!_amt) {
                 botLog(bot, "Failed to get balance");
                 return;
             }
+            amt = _amt
             /* Trade half assets */
             botLog(bot, "No amount specified");
             if (side == "buy") {

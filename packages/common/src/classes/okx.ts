@@ -333,11 +333,15 @@ export class OKX extends Platform {
             console.log(e);
         }
     }
-    async withdraw({coin, amt, clId, chain, fee}: {coin: string; amt: number; chain: string; clId?: string; fee: number}){
+    async withdraw({ amt, coin, chain, addr }: { amt: number; coin: string; chain: string; addr: string; }) {
+        super.withdraw({amt, coin, chain, addr})
         try {
-            const r  = await this.client.submitWithdraw({ccy: coin, toAddr: '', amt: amt.toString(), fee: `0`, dest: '3', clientId: clId, chain })
+            const res = await this.client.submitWithdraw({
+                ccy: coin, chain, amt: amt.toString(), toAddr: addr, dest: "3", fee: "0"
+            })
+            return res[0].wdId
         } catch (err) {
-            botLog(this.bot, "FAILED TO WITHDRAW FUNDS", err)
+            console.log(err)
         }
     }
 }

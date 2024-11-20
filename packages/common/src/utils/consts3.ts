@@ -1,3 +1,4 @@
+import { klinesRootDir } from "./constants";
 import { clearTerminal, timedLog } from "./functions";
 import { IObj, ITask, TPlatName } from "./interfaces";
 
@@ -199,6 +200,7 @@ try {
     console.log("[Process error]", e)
     __DEV__ = location.hostname == 'localhost'
 }
+
 
 export const taskManager = new TaskManager();
 

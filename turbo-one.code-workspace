@@ -10,9 +10,6 @@
             "path": "../../Nuxt/tu-trader-lite"
         },
         {
-            "path": "apps/tu-trader-bend"
-        },
-        {
             "path": "apps/tu-trader-next"
         },
         {
@@ -23,6 +20,9 @@
         },
         {
             "path": "apps/tu-trader-sv"
+        },
+        {
+            "path": "packages/common"
         }
     ],
     "settings": {}

@@ -3,11 +3,12 @@ import * as nodemailer from "nodemailer";
 import * as nfs from "node:fs";
 const { env } = process;
 import { Response } from "express";
-import path from "path";
+import path, { dirname } from "path";
 import { OTP } from "@cmn/models";
 import { IBot } from "@cmn/models/bot";
 import { randomInRange, parseDate } from "../functions";
 import { IObj } from "../interfaces";
+import { fileURLToPath } from "node:url";
 
 export const ensureDirExists = (filePath: string) => {
     var dirname = path.dirname(filePath);
@@ -198,6 +199,8 @@ export const sendMail = async (
         return null;
     }
 };
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 const jsonPath = __dirname + "/../assets/store.json";
 export const getStoreDetails = () => {
     const buff = nfs.readFileSync(jsonPath, { encoding: "utf-8" });
@@ -222,4 +225,4 @@ export const readJson = (fp: string) => {
     const data = nfs.readFileSync(fp, { encoding: "utf-8" });
     return JSON.parse(data);
 };
-
+ 

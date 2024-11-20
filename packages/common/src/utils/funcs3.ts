@@ -172,24 +172,42 @@ import crypto from "crypto";
 import { IObj, TPlatName } from "./interfaces";
 import { binanceInstrus } from "./data/instrus/binance-instrus";
 export const getLastItem = (arr: any[]) => [...arr].pop();
+
+const rmEmptyParams = (p: IObj)=>{
+    const p2 = {}
+    for (let k of Object.keys(p)){
+        if (!p[k] || p[k] == ""){continue}
+        p2[k] = p[k]
+    }
+
+    return p2
+}
 export const genSignature = (
     apiKey: string,
     apiSecret: string,
     params: IObj,
-    plat: TPlatName
+    plat: TPlatName, ts?: number
 ) => {
+    const timestamp = ts ??  Date.now().toString();
+    params = rmEmptyParams({...params});
     const paramString = Object.keys(params)
         .sort()
         .map((key) => `${key}=${params[key]}`)
         .join("&");
 console.log(paramString)
-    const timestamp = Date.now().toString();
-    const prehashString =plat == 'mexc' || plat == "binance" ? `${paramString}`: `${timestamp}${apiKey}${paramString}`;
-    console.log({prehashString})
+/* 
+crypto
+            .createHmac('sha256', this.config.apiSecret)
+            .update(queryString)
+            .digest('hex');
+*/
+    
+    const prehashString =plat == 'mexc' || plat == "binance" ? paramString : `${timestamp}${apiKey}${paramString}`;
+    console.log({prehashString, apiSecret})
     const signature = crypto
         .createHmac("sha256", apiSecret)
         .update(prehashString)
         .digest("hex");
 
-    return signature.toLocaleLowerCase();
+    return signature//.toLocaleLowerCase();
 };

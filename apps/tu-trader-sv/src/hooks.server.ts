@@ -47,8 +47,8 @@ export const handle: Handle = async ({ resolve, event }) => {
 
     const { pathname, searchParams } = event.url;
     const q = searchParams.get("q");
-
-    if (pathname == "/api/auth/login" && q == "token") {
+    const loginCond = pathname == "/api/auth/login" && q == "token"
+    if (loginCond || (req.method.toLowerCase() == "post" && req.url.includes("/user") )) {
         return authMed(event, resolve);
     }
 

@@ -47,11 +47,12 @@
 
     onMount(() => {
         try {
+  
             console.log("DEFAULT MOUNTED");
             setSocket(
                 io(BEND_URL /* */, {
                     auth: { username: "tonnidiaz" },
-                    timeout: 100 * 100000000000,
+                    timeout: 100 * 100000000000,autoConnect: false
                 })
             );
             socket?.on("connect", () => {
@@ -90,12 +91,22 @@ socket.on('connect_failed', err => handleErrors(err))
             setParents(data);
             console.log("GOT THE PARENTS");
         });
+
+
+        socket.connect()
         init();
     });
 
 
     function handleErrors(err: Error): void {
         // throw new Error("Function not implemented.");
+        console.log("Handle IO err");
+        return
+        if (err.message.includes('ERR_CONNECTION_REFUSED')) {
+        console.log('Suppressed connection error:', "err.message");
+    } else {
+        console.error("err");
+    }
     }
 </script>
 

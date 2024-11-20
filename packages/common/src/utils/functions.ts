@@ -7,6 +7,7 @@ import { gateioInstrus } from "./data/instrus/gateio-instrus";
 import { okxInstrus } from "./data/instrus/okx-instrus";
 import { IObj, TPlatName } from "./interfaces";
 import { isAxiosError } from "axios";
+import { error } from "console";
 
 const test = false;
 
@@ -493,13 +494,23 @@ export const parseBinanceInfo = (info: IObj) => {
 };
 
 export const handleErrs = (err: any) => {
-    return isAxiosError(err)
-        ? {
+    // console.log(err)
+    let _err: any;
+    if (isAxiosError(err)){
+        _err = {
               code: err.response?.status ?? err.status ?? err.code ?? err.name,
               msg: err.response?.data ?? err.message,
           }
-        : (err?.body?.message ??
-              err?.message?.toString() ??
-              err?.message ??
-              err);
+    }else if (err instanceof TypeError ){
+        _err = {...err}
+    }else{
+        _err  = err?.body?.message ??
+        err?.message?.toString() ??
+        err?.message ??
+        err
+    }
+
+    console.log(_err)
+    return _err
+
 };
