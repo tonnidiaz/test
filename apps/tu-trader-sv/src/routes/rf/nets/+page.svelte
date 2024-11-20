@@ -10,6 +10,7 @@
     import UInput from "@/components/UInput.svelte";
     import { localApi } from "@/lib/api";
     import { SITE } from "@/lib/constants";
+    import { sleep } from "@cmn/utils/functions";
     import type { IObj } from "@cmn/utils/interfaces";
     import { untrack } from "svelte";
 
@@ -35,8 +36,16 @@
         try {
             const { platA, platB, offline } = formState;
             console.log({ offline });
-
-            if (platA) {
+            if (platA){
+                mstate = {
+                    ...mstate,
+                    platB: undefined,
+                    coinB: undefined,
+                    netsB: undefined,
+                    netB: undefined,
+                };
+            }
+            if (platB){
                 mstate = {
                     ...mstate,
                     platA: undefined,
@@ -44,6 +53,9 @@
                     netsA: undefined,
                     netA: undefined,
                 };
+            }
+            if (platA) {
+                
                 const res = await localApi().get("/rf/nets", {
                     params: {
                         plat: platA,
@@ -54,13 +66,7 @@
                 mstate.netsA = res.data;
             }
             if (platB) {
-                mstate = {
-                    ...mstate,
-                    platB: undefined,
-                    coinB: undefined,
-                    netsB: undefined,
-                    netB: undefined,
-                };
+                
                 const res = await localApi().get("/rf/nets", {
                     params: {
                         plat: platB,
