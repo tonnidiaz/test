@@ -93,7 +93,7 @@ export class Impr5 extends Backtest {
             this.exitLimit = openCond
                 ? Math.max(minTP, this.exitLimit)
                 : this.exitLimit;
-            isSl = this.isGreen; //!openCond;
+            isSl = false//this.isGreen || !openCond;
             if (!isSl && this.exitLimit < _sl) {
                 this.exitLimit = _sl; // * (1 + .15/100)
             }

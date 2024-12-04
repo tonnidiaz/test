@@ -12,10 +12,10 @@
     import UTextarea from "./UTextarea.svelte";
     import { appStore } from "@/stores/app.svelte";
     import type { HTMLAttributes } from "svelte/elements";
-    import { untrack, type Snippet } from "svelte";
+    import { onMount, untrack, type Snippet } from "svelte";
     import { userStore } from "@/stores/user.svelte";
     import { localApi } from "@/lib/api";
-    import { botTypes, arbitTypes, selectIntervals } from "@/lib/constants";
+    import { botTypes, arbitTypes, selectIntervals, selectSymbols } from "@/lib/constants";
     import TriArbitForm from "./TriArbitForm.svelte";
     import TuSelect from "./TuSelect.svelte";
     import UAccordion from "./UAccordion.svelte";
@@ -57,8 +57,7 @@
             delete data.total_base;
             delete data.total_quote;
             delete data.arbit_orders;
-            console.log(data.symbol);
-            data.symbol = data.symbol?.split(",");
+            data.pair = data.pair?.split(",");
             data =
                 mode == "Create"
                     ? { ...data, user: user?.username }
@@ -83,11 +82,24 @@
             btnLoading = false;
         }
     };
+    onMount(()=>{
+        let d = sessionStorage.getItem("bot_form_state");
+        // console.log({d: JSON.parse(d)});
+        if (d){formState = JSON.parse(d)}
+    })
     $effect(() => {
         untrack(() => {
             formState = { ...formState, ...bot };
         });
     });
+
+    $effect(()=>{
+        const s = formState;
+        // console.log({s:{...s}});
+        sessionStorage.setItem("bot_form_state", JSON.stringify(s))
+    })
+
+    
 </script>
 
 <TuModal bind:open={open}>
@@ -293,7 +305,7 @@
                     />
                 </div>
                 {#if formState.type == "normal"}
-                    <div class="grid grid-cols-1 gap-3 my-1">
+                    <div class="grid grid-cols-2 gap-3 my-1">
                         <TuSelect
                             required
                             options={toSelectStrategies(strategies)}
@@ -301,6 +313,14 @@
                             searchable
                             placeholder="Strategy"
                             innerHint="Search strategy..."
+                        />
+                        <TuSelect
+                            required
+                            options={selectSymbols}
+                            bind:value={formState.pair}
+                            searchable
+                            placeholder="Pair"
+                            innerHint="Search pair..."
                         />
                     </div>
                 {/if}

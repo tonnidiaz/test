@@ -21,6 +21,7 @@ import { objStrategies, strategies } from "@cmn/strategies";
 import { test_platforms } from "../consts";
 import { getInstrus } from "../funcs3";
 import { onTriArbitCointest } from "./io-funcs2";
+import { onTriArbitCointest as onTriArbitCointest2 } from "./io-funcs2-limit";
 import { readJson, ensureDirExists } from "../bend/functions";
 
 export const onBacktest = async (data: IObj, client?: Socket, io?: Server) => {
@@ -553,7 +554,7 @@ export const onArbitCointest = async (
         if (data.type == "tri") {
             console.log("TRIANGULAR ARBITRAGE\n");
 
-            return await onTriArbitCointest({ ...data, ep }, client);
+            return await onTriArbitCointest2({ ...data, ep }, client);
         }
     } catch (e: any) {
         console.log(e.response?.data ?? e);

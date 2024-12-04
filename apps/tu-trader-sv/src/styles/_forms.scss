@@ -78,3 +78,7 @@ input:-webkit-autofill:active
 .label{
     padding: 0 !important;
 }
+
+.input {
+    box-sizing: content-box;
+}

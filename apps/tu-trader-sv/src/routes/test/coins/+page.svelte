@@ -58,12 +58,7 @@
             end: "2024-10-28 23:59:00",
         },
     });
-    $effect(() => {
-        sessionStorage.setItem(
-            `${location.pathname}__state`,
-            JSON.stringify(formState)
-        );
-    });
+   
 
     onMount(() => {
         //Check for saved state
@@ -72,7 +67,12 @@
             formState = JSON.parse(state);
         }
     });
-
+ $effect(() => {
+        sessionStorage.setItem(
+            `${location.pathname}__state`,
+            JSON.stringify(formState)
+        );
+    });
     const defState = {
         interval: 0,
         platform: "",

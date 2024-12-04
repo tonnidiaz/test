@@ -19,7 +19,9 @@ const config = {
         typescript: {
             config: (c)=>{
                 return {...c,
-                    include: [...c.include, "../../../packages/common/**/*.ts", "../../../node_modules/svelte/elements.d.ts"]
+                    exclude: [...c.exclude, "../../../packages/common/node_modules", "../../../node_modules", "../../../**/*.js", "../../../*.d.ts"],
+                    include: [...c.include, "../../../packages/common/**/*.ts", "../../../node_modules/svelte/elements.d.ts"],
+                    
                 }
             }
         }

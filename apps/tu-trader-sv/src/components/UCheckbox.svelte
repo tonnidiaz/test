@@ -1,5 +1,5 @@
 
-    <UFormGroup class={"text-center flex items-end fs-15 gap-1.5 justify-end " + _class} style="flex-direction: row-reverse" labelClass="mb-0" {...props}>
+    <UFormGroup class={"text-center flex items-end fs-15 gap-1.5 justify-end " + _class} style="flex-direction: row-reverse; width: fit-content" labelClass="mb-0" {...props}>
         <input
             
             disabled={disabled}

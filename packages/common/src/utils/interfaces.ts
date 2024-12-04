@@ -1,7 +1,7 @@
 
 import { ObjectId } from "mongoose";
 import { Socket } from "socket.io";
-import { platList, logTypes } from "./consts3";
+import { platList, logTypes, arbitTypes } from "./consts3";
 import { CrossArbitData } from "@cmn/classes/tu";
 import { IBot } from "@cmn/models/bot";
 
@@ -121,6 +121,7 @@ export interface ICrossArbitBot extends IArbitBot {
 }
 
 export type TPlatName = (typeof platList)[number];
+export type TArbitType = (typeof arbitTypes)[number];
 export type TLogType = (typeof logTypes)[number];
 export interface ILog {log: string | Uint8Array; type: TLogType; ts: string}
 export interface ICoinNets {
@@ -148,4 +149,4 @@ export interface ICoinNets {
 }
 
 
-export interface ITask {id: string; interval: number; cb: (id: string)=> any}
+export interface ITask {id: string; interval: number; cb: (id: string)=> any; active: boolean}

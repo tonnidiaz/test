@@ -20,7 +20,7 @@ export class Trailer extends Backtest {
                  //&& this.prevrow.c <= this.prevrow.o // && v > 0
                 //&& (l < o || (v > 0 && o == h && l == o && c == o))
             ) {
-                this.entryLimit = Math.min(this.prevrow.o, this.prevrow.c); //o;
+                this.entryLimit = this.prevrow.c//Math.min(this.prevrow.o, this.prevrow.c); //o;
                 if (l < this.entryLimit) {
                  
                     this.entry = this.entryLimit
@@ -80,7 +80,7 @@ export class Trailer extends Backtest {
             if (
                 //v > 0 &&
                 this.exit != 0 &&
-                (is_market || h > exit) && // || (h >= exit && v > 0 && h == o && l == o && c ==o )
+                (h > exit) && // || (h >= exit && v > 0 && h == o && l == o && c ==o )
                 (isSl || this.exit >= _sl)
             ) {
                 if (this.exit > o) {
@@ -90,22 +90,12 @@ export class Trailer extends Backtest {
                 }
                 this.isSl = this.exit < this.entry;
 
-                if (is_market) {
-                    this.exitLimit = o;
-                    console.log("FILLING MARKET SELL ORDER AT OPEN");
-                    //if (WCS1) this.exit = l
-                    this._fillSell({
-                        _base: this.base,
-                        _exit: this.exit,
-                        _row,
-                        isSl: this.isSl,
-                    });
-                } else {
+               
                     console.log("FILLING LIMIT SELL ORDER");
                     this.sell_order_filled = true;
                     this.amt_sold = this.base;
                 }
-            }
+            
         }
     }
 }

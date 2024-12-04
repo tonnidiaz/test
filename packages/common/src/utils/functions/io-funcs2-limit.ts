@@ -25,7 +25,7 @@ enum startAt {
     C,
 }
 
-export const onTriArbitCointest = async (
+export const onTriArbitCointestLimit = async (
     data: IObj,
     client?: Socket,
     io?: ws.Server
@@ -54,7 +54,7 @@ export const onTriArbitCointest = async (
     } = data;
 
     try {
-        console.log("BEGIN COINTEST...\n");
+        console.log("BEGIN LIMIT COINTEST...\n");
         client?.emit(ep, "BEGIN COINTEST...");
         prefix = prefix ? `${prefix}_` : "";
 
@@ -432,102 +432,7 @@ export const onTriArbitCointest = async (
                             });
                             if (flipped) {
                                 console.log("FLIPPED");
-                                if (entryLimit) {
-                                    //BUY AT C
-                                    console.log("BUYING AT C");
-                                    if (prev_rowC.l < entryLimit) {
-                                        console.log("BOUGHT AT C");
-                                        _base = bal / entryLimit;
-                                        _base = toFixed(
-                                            _base * (1 - TAKER),
-                                            basePrC
-                                        );
-                                        _basePair = pairB;
-
-                                        trade = {
-                                            ts: [prev_rowC.ts],
-                                            est_perc,
-                                            side: [
-                                                `[${pairC}] BUY {H: ${
-                                                    prev_rowC.h
-                                                }, L: ${prev_rowC.l}, V: ${
-                                                    prev_rowC.v || "null"
-                                                }}`,
-                                            ],
-                                            px: [`${pairC[1]} ${entryLimit}`],
-                                            amt: [`${pairC[0]} ${_base}`],
-                                        };
-                                        entryLimit = undefined;
-                                    } else {
-                                        console.log(
-                                            "COULD NOT BUY",
-                                            { prev_rowC, entryLimit },
-                                            "\n"
-                                        );
-                                    }
-                                } else if (exitLimit) {
-                                    //SELL AT B
-                                    console.log("SELLING AT B");
-                                    if (prev_rowB.h > exitLimit) {
-                                        _base = _base * exitLimit;
-                                        _base = toFixed(
-                                            _base * (1 - MAKER),
-                                            pxPrB
-                                        );
-                                        _basePair = pairA;
-
-                                        trade.ts?.push(prev_rowB.ts);
-                                        trade.side?.push(
-                                            `[${pairB}] SELL {H: ${
-                                                prev_rowB.h
-                                            }, L: ${prev_rowB.l}, V: ${
-                                                prev_rowB.v || "null"
-                                            }}`
-                                        );
-                                        trade.px?.push(
-                                            `${pairB[1]} ${exitLimit}`
-                                        );
-                                        trade.amt?.push(`${pairB[1]} ${_base}`);
-                                        exitLimit = undefined;
-                                        console.log("SOLD AT B");
-                                    }
-                                } else if (exitLimit2) {
-                                    //SELL AT A
-                                    console.log("SELLING AT A");
-                                    if (prev_rowA.h > exitLimit2) {
-                                        console.log("SOLD AT A");
-                                        _quote = _base * exitLimit2;
-                                        _quote = toFixed(
-                                            _quote * (1 - MAKER),
-                                            pxPrA
-                                        );
-                                        perc = ceil(
-                                            ((_quote - bal) / bal) * 100,
-                                            2
-                                        );
-
-                                        trade.ts?.push(prev_rowA.ts);
-                                        trade.side?.push(
-                                            `[${pairA}] SELL {H: ${
-                                                prev_rowA.h
-                                            }, L: ${prev_rowA.l}, V: ${
-                                                prev_rowA.v || "null"
-                                            }}`
-                                        );
-                                        trade.px?.push(
-                                            `${pairA[1]} ${exitLimit2}`
-                                        );
-                                        trade.amt?.push(
-                                            `${pairA[1]} ${_quote}`
-                                        );
-                                        trade.perc = perc;
-
-                                        exitLimit2 = undefined;
-                                        bal = _quote;
-                                        console.log({ bal });
-                                        closePos();
-                                    }
-                                }
+                               
                             } else {
                                 console.log("NORMAL");
                                 if (entryLimit) {
@@ -636,8 +541,6 @@ export const onTriArbitCointest = async (
                         const B_CONST = /* B == 'USDC' ? 0 : */ 0//1.5;
                         const A_CONST = B == "USDC" ? 0 : 0//1.5;
                         const C_CONST = 0//.5;
-                        const ocMaxA = Math.max(prev_rowA.o, prev_rowA.c)
-                        const ocMaxC = Math.max(prev_rowC.o, prev_rowC.c)
 
                         const MAX_PERC = 1.5
                         if (pos) {
@@ -698,20 +601,20 @@ export const onTriArbitCointest = async (
                             continue;
                         }
 
-                        const _pxA = pxA
-                        const _pxB = pxB
-                        const _pxC = pxC
+                        const _pxA = cPxA
+                        const _pxB = cPxB
+                        const _pxC = cPxC
                         const _A2 = (A * _pxC) / (_pxA * _pxB)
                         const _perc = ceil((_A2 - A)/A * 100, 2)
 
-                        const _fpxA = pxA
-                        const _fpxB = pxB
-                        const _fpxC = pxC
+                        const _fpxA = cPxA
+                        const _fpxB = cPxB
+                        const _fpxC = cPxC
                         const _fA2 = (A * _fpxA * _fpxB) / _fpxC
 
                         const _fperc = ceil((_fA2 - A)/A * 100, 2)
 
-                        flipped = _fperc > _perc
+                        flipped = false//_fperc > _perc
                         console.log({pxA, pxB, pxC})
                         
                         console.log({flipped, _perc, _fperc})
@@ -723,15 +626,7 @@ export const onTriArbitCointest = async (
                         const __pxC = flipped ? _fpxC : _pxC
 
                    const SLIP = 0.5; //0.5;
-                        const slipA = rowA.v == 0 ? SLIP / 100 : 0;
-                        const slipB = rowB.v == 0 ? SLIP / 100 : 0;
-                        const slipC = rowC.v == 0 ? SLIP / 100 : 0;
 
-                        const day = new Date(rowA.ts).getDay();
-                        const is_weekend = day == 6 || day == 7;
-                        const volCond =
-                            prev_rowA.v > 0 &&
-                            prev_rowB.v > 0 &&
                             prev_rowC.v > 0;
 
                         const percCond = est_perc >= MIN_PERC

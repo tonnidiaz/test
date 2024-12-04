@@ -9,7 +9,7 @@ export class Strategy {
     constructor() {
         this.name = this.constructor.name
     }
-    buyCond(...args: any): boolean {
+    buyCond(row: ICandle): boolean {
         return false;
     }
     sellCond(
@@ -85,3 +85,7 @@ export class Strategy {
         return o;
     }
 }
+
+
+export type TBuyCond = typeof Strategy.prototype.buyCond
+export type TSellCond = typeof Strategy.prototype.sellCond

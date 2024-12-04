@@ -15,6 +15,7 @@ import { TestPlatform } from "@cmn/classes/test-platforms";
 import { objStrategies } from "@cmn/strategies";
 import { Arbit } from "@cmn/bots/arbitrage/classes";
 import { ensureDirExists, writeJson, readJson } from "../bend/functions";
+// "cross-compare-arbit-cointest"
 export const onCrossArbitCointest = async (
     data: IObj,
     client?: Socket,

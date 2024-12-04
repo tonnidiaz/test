@@ -1,12 +1,12 @@
 {
     "extends": "../../packages/typescript-config/base.json",
     "compilerOptions": {
-        "module": "commonjs",
-        "lib": [ "es2022","es2020", "dom"],
+        // "module": "commonjs",
+        // "lib": [ "es2022","es2020", "dom"],
         "allowSyntheticDefaultImports": true,
-        "target": "es2022",
+        // "target": "es2022",
         "rootDir": "../../",
-        "moduleResolution": "node",
+        // "moduleResolution": "node",
         "baseUrl": ".",
         "outDir": "./dist",
         "rootDirs": ["../../packages/common/"],
@@ -23,7 +23,14 @@
         "skipLibCheck": true,
         "resolveJsonModule": true,
         "isolatedModules": true,
-        "sourceMap": true
+        "sourceMap": true,
+
+        // From svelte
+        "lib": ["esnext", "DOM", "DOM.Iterable"],
+        "moduleResolution": "bundler",
+        "module": "esnext",
+        // "noEmit": true,
+        "target": "esnext"
     },
     "include": [
         "src/**/*.ts",

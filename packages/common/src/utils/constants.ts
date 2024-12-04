@@ -1,11 +1,11 @@
 import { configDotenv } from "dotenv";
 import { Job } from "node-schedule";
-import path, { dirname } from "path";
+import path from "path";
 import axios from "axios"
-import { fileURLToPath } from "node:url";
+import nodeUrl from "node:url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __filename = nodeUrl.fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const _dirname = __dirname
 console.log({_dirname});
 try {
@@ -110,3 +110,5 @@ export const localApi = (auth = false) =>
     })}
 
 export const MEXC_API_ROOT_URL = "https://api.mexc.com/api/v3"
+
+export const useLimitTri = false

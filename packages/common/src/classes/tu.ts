@@ -1,5 +1,5 @@
-import { WebSocket } from "ws";
-import type { ClientOptions, RawData } from "ws";
+import ws, {WebSocket} from "ws";
+import type { ClientOptions, RawData, } from "ws";
 import type { ClientRequestArgs } from "http";
 import { Socket } from "socket.io";
 import mongoose from "mongoose";
@@ -14,6 +14,9 @@ import { IBot } from "@cmn/models/bot";
 import { test_platforms } from "@cmn/utils/consts";
 import { KUCOIN_WS_URL, safeJsonParse } from "@cmn/utils/funcs3";
 import { placeArbitOrdersFlipped, placeArbitOrders } from "@cmn/utils/orders/funcs4";
+
+const WS: typeof WebSocket = WebSocket || ws
+
 const readyStateMap = {
     0: "CONNECTING",
     1: "OPEN",
@@ -38,7 +41,7 @@ export class TuWs {
         this.plat = plat;
 
         console.log({ plat: this.plat, address });
-        this.ws = new WebSocket(address);
+        this.ws = new WS(address);
 
         this.lastSub = Date.now();
     }
@@ -309,7 +312,7 @@ export class TuArbitWs {
     async kill() {
         for (let abot of this.abots.filter((el) => el.demo)) {
             if (
-                this.ws?.ws instanceof WebSocket &&
+                this.ws?.ws instanceof WS &&
                 this.ws.ws.readyState == this.ws.ws.OPEN
             )
                 this.subUnsub(abot.bot, "unsub");
@@ -1116,7 +1119,7 @@ export class TuArbitWs {
             // if (pricePrecision == null) return;
 
             if (
-                this.ws?.ws instanceof WebSocket &&
+                this.ws?.ws instanceof WS &&
                 this.ws?.ws.readyState != this.ws?.ws.OPEN
             ) {
                 this._log("addBot(): NOT OPEN...RE-INIT");

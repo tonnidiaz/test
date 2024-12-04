@@ -11,6 +11,6 @@
     import type { Snippet } from "svelte";
     import type { HTMLDetailsAttributes } from "svelte/elements";
 
-    interface IProps extends HTMLDetailsAttributes{label?: Snippet; content?: Snippet}
-    const {label, content, class: _class, ...props} : IProps = $props()
+    interface IProps extends HTMLDetailsAttributes{label?: Snippet; content?: Snippet; multiple?: boolean}
+    const {label, content, class: _class, multiple, ...props} : IProps = $props()
 </script>

@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { page } from "$app/stores";
     import TMeta from "@/components/TMeta.svelte";
 
     import TuCard from "@/components/TuCard.svelte";
@@ -12,16 +13,18 @@
     import UInput from "@/components/UInput.svelte";
     import { localApi } from "@/lib/api";
     import { SITE } from "@/lib/constants";
+    import { userStore } from "@/stores/user.svelte";
     import { handleErrs } from "@cmn/utils/functions";
     import type { IObj } from "@cmn/utils/interfaces";
-    import { untrack } from "svelte";
+    import { redirect } from "@sveltejs/kit";
+    import { onMount, untrack } from "svelte";
 
     let mstate = $state<IObj>({ type: "tri" }),
         _state = $state<IObj>({});
 
     let err = $state<string>(),
         killed = $state(true),
-        connected = $state(true);
+        addresses = $state<IObj[]>([]);
     let newDepAddrModalOpen = $state(false);
     let nets = $state<IObj[]>([]);
     const CONTR_ADDR_LEN = -7;
@@ -34,6 +37,7 @@
         pair: ["SOL", "USDT"],
     });
 
+    let { user } = $derived(userStore);
     let addrForm = $state<IObj>({});
     const handleSubmit = async (e) => {
         try {
@@ -113,6 +117,24 @@
             console.log(e);
         }
     };
+
+    const getAddresses = async (username: string) => {
+        try {
+            const r = await localApi(true).get(`/user/${username}/addresses`);
+            addresses = r.data;
+        } catch (err) {
+            handleErrs(err);
+        }
+    };
+
+    onMount(() => {
+        if (!user) {
+            location.href = `/auth/login?red=${location.pathname}`;
+            return;
+        }
+        const { username } = user;
+        getAddresses(username);
+    });
     $effect(() => {
         const cA = mstate.chainA,
             cB = mstate.chainB;
@@ -122,15 +144,19 @@
         });
     });
 
-
     async function submitDepAddr(e: any) {
         try {
-            const r = await localApi(true).post("/user/address/add", {...addrForm, coin: mstate._coinA, chain: mstate.chainA, plat: mstate.platA })
-            console.log(r.data);
-            newDepAddrModalOpen = false
+            const r = await localApi(true).post("/user/address/add", {
+                ...addrForm,
+                coin: mstate._coinA,
+                chain: mstate.chainA,
+                plat: mstate.platA,
+            });
+            addresses = [r.data, ...addresses];
+            newDepAddrModalOpen = false;
         } catch (err) {
             console.log("Failed to add deposit address");
-            handleErrs(err)
+            handleErrs(err);
         }
     }
 </script>
@@ -142,14 +168,34 @@
             class="md:p-4 p-2 my-2 h-80vh border-md border-card border-1 br-10 flex-1 oy-scroll ox-scroll flex flex-col max-h-80vh"
         >
             <div class="flex gap-3 justify-center mb-3">
-                <h1 class="fs-14">Deposit addresses</h1>
+                <div>
+                    <h1 class="fs-14">Deposit addresses</h1>
+                    <div class="my-3">
+                        {#if addresses.length}
+                            <div class="flex gap-2 items-center">
+                                {#each addresses as addr}
+                                    <div
+                                        class="dep-addr-card rounded rounded-md border border-card border-1 p-3"
+                                    >
+                                        <h3><b>Coin:&nbsp;</b>{addr.coin}</h3>
+                                        <h3><b>Plat:&nbsp;</b>{addr.plat}</h3>
+                                        <p><b>Chain:&nbsp;</b>{addr.chain}</p>
+                                        <p title={addr.addr}>
+                                            <b>Address:&nbsp;</b>{addr.addr}
+                                        </p>
+                                    </div>
+                                {/each}
+                            </div>
+                        {:else}
+                            <h4 class="fs-30 fw-7 text-center">No addresses</h4>
+                        {/if}
+                    </div>
+                </div>
             </div>
             <TuTeleport to="#floating-actions">
                 <TuModal bind:open={newDepAddrModalOpen}>
                     {#snippet toggler()}
-                        <UButton class="btn-primary"
-                            >Add dep address</UButton
-                        >
+                        <UButton class="btn-primary">Add dep address</UButton>
                     {/snippet}
                     {#snippet content()}
                         <TuCard>
@@ -174,7 +220,7 @@
                                                 bind:value={formState.platA}
                                             />
                                         </UFormGroup>
-    
+
                                         <UCheckbox
                                             bind:value={formState.offline}
                                             label="Offline"
@@ -219,6 +265,7 @@
                                                                     class="btn-ghost"
                                                                     ><i
                                                                         class="fi fi-br-search"
+
                                                                     ></i></UButton
                                                                 >
                                                             {/snippet}
@@ -242,7 +289,8 @@
                                                     options={mstate.coinA?.nets
                                                         .toSorted(
                                                             (a, b) =>
-                                                                a.wdFee - b.wdFee
+                                                                a.wdFee -
+                                                                b.wdFee
                                                         )
                                                         .map((el) => ({
                                                             html: netHtml(el),
@@ -269,13 +317,24 @@
                                 </TuCard>
                                 <UForm onsubmit={submitDepAddr}>
                                     <UFormGroup label="Address">
-                                        <UInput placeholder="Deposit address..." required bind:value={addrForm.addr}/>
+                                        <UInput
+                                            placeholder="Deposit address..."
+                                            required
+                                            bind:value={addrForm.addr}
+                                        />
                                     </UFormGroup>
                                     <UFormGroup label="Memo (TAG)">
-                                        <UInput placeholder="Memo (TAG)..." bind:value={addrForm.memo}/>
+                                        <UInput
+                                            placeholder="Memo (TAG)..."
+                                            bind:value={addrForm.memo}
+                                        />
                                     </UFormGroup>
                                     <UFormGroup class="my-2">
-                                        <UButton disabled={!addrForm.addr} class="btn-primary w-full" type="submit">Add address</UButton>
+                                        <UButton
+                                            disabled={!addrForm.addr}
+                                            class="btn-primary w-full"
+                                            type="submit">Add address</UButton
+                                        >
                                     </UFormGroup>
                                 </UForm>
                             </div>
@@ -287,3 +346,11 @@
         <!-- <p>NETSA: {{mstate.netsA?.find(el=> el.coin == mstate.coinA)?.nets}}</p> -->
     </div>
 </div>
+
+<style lang="scss">
+    .dep-addr-card {
+        overflow-x: hidden;
+        text-overflow: ellipsis;
+        text-wrap: nowrap;
+    }
+</style>

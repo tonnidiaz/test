@@ -1,5 +1,6 @@
 import $ from "jquery";
 import type { IObj } from "@cmn/utils/interfaces";
+import { api, localApi } from "./api";
 export const formatter = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
@@ -40,7 +41,7 @@ export const clearBotOrders = async (el: any, bot: IObj, updateBot?: any) => {
     try {
         console.log(el, bot);
         el.innerHTML = `<span class="loading loading-dots loading-sm m-auto"></span>`;
-        const res = await localApi(true).post(`/bots/${bot._id}/clear-orders`);
+        const res = await localApi(true).post(`/bots/${bot._id}/clear-orders`, {});
 
         if (updateBot) updateBot(res.data);
         el.innerHTML = defHtml
@@ -58,7 +59,7 @@ export const delBot = async (el: any, bot: IObj, updateBot?: any) => {
     try {
         console.log(el, bot);
         el.innerHTML = `<span class="loading loading-dots loading-sm m-auto"></span>`;
-        const res = await localApi(true).post(`/bots/${bot._id}/delete`);
+        const res = await localApi(true).post(`/bots/${bot._id}/delete`, {});
 
         if (updateBot) updateBot(res.data);
         el.innerHTML = defHtml

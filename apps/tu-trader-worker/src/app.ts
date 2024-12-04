@@ -10,12 +10,15 @@ import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import indexRouter from './routes';
+
 import { TuConfig } from '@cmn/models';
 import { addBooksTask, connectMongo, scheduleAllTasks } from '@cmn/utils/funcs4';
 import { DEV } from '@cmn/utils/constants';
 import { captureLogs } from '@cmn/utils/functions2';
 
+/**Routes */
+import indexRouter from './routes';
+import botsRouter from './routes/bots';
 const app = express();
 
 dotenv.config();
@@ -36,6 +39,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
+app.use('/bots', botsRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

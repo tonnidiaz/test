@@ -11,6 +11,8 @@ export const platList = [
     "mexc",
     "gateio",
 ] as const;
+
+export const arbitTypes = ["tri", "cross", "comp"] as const;
 export const logTypes =  ["err", "out"] as const;
 export const coinFees: { [key: string]: number } = {
     BDX: 1,

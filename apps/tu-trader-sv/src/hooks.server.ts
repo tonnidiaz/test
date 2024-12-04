@@ -1,13 +1,16 @@
 import { User } from "@cmn/models";
 import { __DEV__ } from "@cmn/utils/consts3";
 import { connectMongo } from "@cmn/utils/funcs4";
+import { clearTerminal } from "@cmn/utils/functions";
 import { captureLogs } from "@cmn/utils/functions2";
 import type { IObj } from "@cmn/utils/interfaces";
 import { error, type Handle, type RequestEvent, type ResolveOptions } from "@sveltejs/kit";
 import jwt from "jsonwebtoken";
-
+import { isObjectIdOrHexString } from "mongoose";
+clearTerminal()
 const fn = async () => {
-    console.log("Run once!!");
+
+    console.log("Run once!!"); 
     if (!__DEV__)
     captureLogs({appName: "tu-trader"})
     await connectMongo(__DEV__);
@@ -54,5 +57,6 @@ export const handle: Handle = async ({ resolve, event }) => {
 
     return resolve(event);
 };
+
 
 /*  */

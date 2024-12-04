@@ -1,4 +1,4 @@
-<TMeta title={`${$page.status} error: ${$page.error.message} - ${SITE}`}/>
+<TMeta title={`${$page.status}: ${$page.error.message} - ${SITE}`}/>
 <div class="tu-error-page">
     <div class="error">
         <span class="status">{$page.status}</span>

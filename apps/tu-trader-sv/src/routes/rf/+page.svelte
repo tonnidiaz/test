@@ -1,17 +1,10 @@
 <script lang="ts">
-    import CtxMenu from "@/components/CtxMenu.svelte";
     import TMeta from "@/components/TMeta.svelte";
-import TuBtn from "@/components/TuBtn.svelte";
-    import TuField from "@/components/TuField.svelte";
     import TuSelect from "@/components/TuSelect.svelte";
-    import TuStats from "@/components/TuStats.svelte";
-    import TuTeleport from "@/components/TuTeleport.svelte";
     import UButton from "@/components/UButton.svelte";
-    import UFormGroup from "@/components/UFormGroup.svelte";
     import UInput from "@/components/UInput.svelte";
     import type { ISelectItem } from "@/lib/interfaces";
     import { appStore } from "@/stores/app.svelte";
-    import { sleep } from "@cmn/utils/functions";
     import type { IObj } from "@cmn/utils/interfaces";
     import { onMount } from "svelte";
     import { writable } from "svelte/store";
@@ -19,13 +12,7 @@ import TuBtn from "@/components/TuBtn.svelte";
     import CtxMenu2 from "@/components/CtxMenu2.svelte";
     import { page } from "$app/stores";
 
-    let artist = $state("Diaz");
     let {cnt} = appStore
-    let formState = $state<IObj>({
-        name: "Tonni Diaz",
-        age: 23,
-        car: { brand: "Honda", make: "Civic", speed: { min: 10, max: 380 } },
-    });
  
     onMount(()=>{
         console.log("Mounted")
@@ -40,15 +27,10 @@ import TuBtn from "@/components/TuBtn.svelte";
 
     let {data} : {data: PageData} = $props()
 
-    let btn: HTMLButtonElement;
    
 
-    const age = writable(0)
-    const person = writable({age: 5, name: "Thomas"})
     let opt = $state(1)
     let opts = $state<ISelectItem[]>([{label: "Option 1", value: 1}, {label: 'Option 2', value: 2}])
-    let now = $state([1, 2, 3,4]);
-    let trigger = $state(0)
     onMount(()=>{
         // console.log($path);
         setTimeout(()=>{
@@ -78,12 +60,12 @@ $effect(()=>{
         <UButton class="btn-primary" loading>Hello fool</UButton>
       </div>
         <TuSelect options={opts} bind:value={opt}/>
-        <CtxMenu bind:open={menuOpen}>
+        <CtxMenu2 bind:open={menuOpen}>
             {#snippet toggler()}
                 <UButton class="btn-primary w-150px">Toggle menu</UButton>
             {/snippet}
             <p>This is menu</p>
-        </CtxMenu>
+        </CtxMenu2>
         <div class="my-3 p-2 border-1 border-card overflow-hidden oy-hidden">
             <div class="flex justify-between">
                 <CtxMenu2>

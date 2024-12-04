@@ -23,6 +23,7 @@ const saveToDb = async (logs: ILog[], appName: string) =>{
     }
 }
 export const captureLogs =  ({appName} : {appName: string})=>{
+    return
     clearTerminal()
     console.log("\n[CAPTURE LOGS]\n");
 

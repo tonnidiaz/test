@@ -268,3 +268,7 @@ td {@apply px-3}
         max-width: calc(100vw - 20px);
     }
 }
+
+@for $i from 0 through 5{
+    .flex-#{$i} {flex: $i}
+}

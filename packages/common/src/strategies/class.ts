@@ -237,6 +237,7 @@ export class Backtest {
         _row: ICandle;
     }) {
         console.log("BUYING", { amt, _entry }, "\n");
+        this.entry = _entry
         if (
             this.maxSz == null ||
             this.minSz == null ||
@@ -255,6 +256,7 @@ export class Backtest {
 
             amt = this.maxSz * (1 - 0.5 / 100) * _entry;
             amt = toFixed(amt, this.pricePrecision);
+            
             return this._fillBuy({ amt, _entry, _row });
         }
         if (!this.entryLimit) this.entryLimit = this.entry;

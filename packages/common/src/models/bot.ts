@@ -1,4 +1,4 @@
-import { platList } from "@cmn/utils/consts3";
+import { arbitTypes, platList } from "@cmn/utils/consts3";
 import {
     type Document,
     InferSchemaType,
@@ -19,7 +19,7 @@ const ArbitSettings = {
     min_perc: { type: Number, default: 1 },
     _type: {
         type: String,
-        enum: ["tri", "cross"],
+        enum: arbitTypes,
         default: "tri",
     },
     _id: false,
@@ -40,8 +40,8 @@ export const BotSchema = new Schema(
         desc: String,
         active: { type: Boolean, default: false },
         demo: { type: Boolean, default: true },
-        base: { type: String, default: "ETH" },
-        ccy: { type: String, default: "USDT" },
+        base: {type: String, default: "SOL"},
+        ccy: {type: String, default: "USDT"},
         balCcy: { type: String, default: "USDT" },
         category: { type: String, default: "spot" },
         interval: { type: Number, default: 15 },
@@ -50,6 +50,8 @@ export const BotSchema = new Schema(
         strategy: { type: Number, default: 5 },
         user: { type: Schema.ObjectId, ref: "User" },
         parent: { type: Schema.ObjectId, ref: "Bot" },
+        /**Means bot is not paused by other bots */
+        canTrade: {type: Boolean, default: true},
         //orders: { type: [Schema.ObjectId], ref: "Order" },
         //arbit_orders: { type: [Schema.ObjectId], ref: "TriArbitOrder", default: [] },
         aside: {
