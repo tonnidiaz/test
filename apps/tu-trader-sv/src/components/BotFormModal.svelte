@@ -14,11 +14,12 @@
     import type { HTMLAttributes } from "svelte/elements";
     import { onMount, untrack, type Snippet } from "svelte";
     import { userStore } from "@/stores/user.svelte";
-    import { localApi } from "@/lib/api";
+    import { api, localApi } from "@/lib/api";
     import { botTypes, arbitTypes, selectIntervals, selectSymbols } from "@/lib/constants";
     import TriArbitForm from "./TriArbitForm.svelte";
     import TuSelect from "./TuSelect.svelte";
     import UAccordion from "./UAccordion.svelte";
+    import { handleErrs, isTuError } from "@cmn/utils/functions";
 
     let { strategies, platforms } = $derived(appStore);
 
@@ -66,18 +67,14 @@
             btnLoading = true;
             const url =
                 mode == "Create" ? "/bots/create" : `/bots/${bot!.id}/edit`;
-
-            const res = await localApi(true).post(url, data);
+            const _api = mode == "Create" ? localApi : api
+            const res = await _api(true).post(url, data);
             onDone?.(res.data);
             btnLoading = false;
             open = false;
         } catch (e: any) {
-            console.log(e);
-            const _err =
-                typeof e.response?.data == "string" &&
-                e.response?.data?.startsWith("tuned:")
-                    ? e.response.data.replace("tuned:", "")
-                    : "Something went wrong";
+            handleErrs(e);
+            const _err = isTuError(e) || "Something went wrong";
             err = _err;
             btnLoading = false;
         }
@@ -172,9 +169,15 @@
                             </div>
                             <div class="my-2 grid grid-cols-2 items-center">
                                 <UCheckbox
+                                    label="SUPER_MEGA BOT"
+                                    title="A BOT THAT USES ALL PAIRS FROM A PLATFORM"
+                                    bind:value={formState.arbit_settings.super_mega}
+                                ></UCheckbox>
+                                <UCheckbox
                                     label="MEGA BOT"
                                     title="A BOT WITH ARBITRAGE CHILDREN"
                                     bind:value={formState.arbit_settings.mega}
+                                    disabled={formState.arbit_settings.super_mega}
                                 ></UCheckbox>
                                 <UCheckbox
                                     label="Use Ws"
@@ -183,7 +186,7 @@
                                 ></UCheckbox>
                             </div>
 
-                            {#if !formState.arbit_settings.mega}
+                            {#if !formState.arbit_settings.mega || formState.arbit_settings.super_mega}
                                 <TriArbitForm bind:value={formState} />
                             {:else}
                                 <UAccordion>
@@ -338,7 +341,7 @@
                 {/if}
                 {#if err.length}
                     <p class="text-center text-xs text-red-400">
-                        {err?.replace("tuned:", "")}
+                        {err?.replace("tu:", "")}
                     </p>
                 {/if}
 

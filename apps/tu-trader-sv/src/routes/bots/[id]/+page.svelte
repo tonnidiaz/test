@@ -169,8 +169,8 @@
 
                 <div class="flex gap-4 justify-center mt-3 items-center">
                     <UButton
-                        onclick={(e: any) =>
-                            activateBot(
+                        onclick={async (e: any) =>
+                            await activateBot(
                                 e.currentTarget,
                                 _bot!,
                                 (val: any) => (_bot = val)

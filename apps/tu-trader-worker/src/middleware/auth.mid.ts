@@ -29,7 +29,7 @@ const authenticator = async (req : Request, res: Response, next: NextFunction, i
     } else {
         console.log("Not authenticated")
     }
-    if (!req.user && isRequired) {res.status(401).send("tuned:Not authenticated!"); return}
+    if (!req.user && isRequired) {res.status(401).send("tu:Not authenticated!"); return}
     next()
 }
 

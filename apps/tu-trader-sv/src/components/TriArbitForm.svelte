@@ -40,7 +40,7 @@
             placeholder="e.g APEX"
             title="The BASE for pair C, e.g APEX"
             type="string"
-            disabled={mode == "Edit" && formState.orders?.length}
+            disabled={formState.arbit_settings.super_mega || (mode == "Edit" && formState.orders?.length)}
         />
     </UFormGroup>
 </div>

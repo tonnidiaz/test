@@ -1,3 +1,4 @@
+import { tuErr } from "@/lib/server/funcs";
 import { crossArbitWsList, triArbitWsList } from "@cmn/classes/tu-ws";
 import { Bot, TriArbitOrder, TuOrder } from "@cmn/models";
 import type { IBot } from "@cmn/models/bot";
@@ -78,10 +79,9 @@ const rmvBotFromArbitWs = async (bot: IBot) => {
     }
 };
 export const deleteBot = async ({body, bot}: {body: IObj; bot: IBot})=>{
-    try {
         const id = bot.id
         if (bot.is_child)
-            return error(
+            return tuErr(
                 400,
                 "CHILD BOTS CAN NOT BE INDIVIDUALLY DELETED"
             );
@@ -111,8 +111,5 @@ export const deleteBot = async ({body, bot}: {body: IObj; bot: IBot})=>{
                 )
             ).reverse()
         );
-    } catch (err) {
-        handleErrs(err);
-        return error (500, "Failed to delete bot");
-    }
+    
 }

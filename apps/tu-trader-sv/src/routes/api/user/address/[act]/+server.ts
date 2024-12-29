@@ -5,7 +5,6 @@ import { error, json } from '@sveltejs/kit';
 export const POST = async ({request, params, locals}) =>{
 
 
-    try{
          const body = await request.json()
     const {act} = params
     const user = locals.user!
@@ -20,9 +19,6 @@ export const POST = async ({request, params, locals}) =>{
     }else{
         return json(act)
     }
-    }catch(err){
-        handleErrs(err)
-        return error(500, "Error adding deposit address")
-    }
+    
    
 }

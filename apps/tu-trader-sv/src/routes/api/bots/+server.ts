@@ -1,3 +1,4 @@
+import { tuErr } from "@/lib/server/funcs.js";
 import { User, Bot, TriArbitOrder, TuOrder } from "@cmn/models";
 import type { IBot } from "@cmn/models/bot";
 import { handleErrs } from "@cmn/utils/functions";
@@ -33,13 +34,12 @@ const parseBot = async (bot: IBot, deep = true) => {
 };
 
 export const GET = async ({request: req, url}) =>{
-    try {
         const  query = Object.fromEntries(url.searchParams);
         const username = query.user;
 
         const user = username ? await User.findOne({ username }).exec() : null;
         //console.log(user);
-        if (username && !user) return error(404, "Bots not found");
+        if (username && !user) return tuErr(404, "Bots not found");
         const bots = user
             ? await Bot.find({ user: user.id }).exec()
             : await Bot.find().exec();
@@ -50,9 +50,6 @@ export const GET = async ({request: req, url}) =>{
                 )
             ).reverse()
         );
-    } catch (error) {
-        handleErrs(error);
-        return error(500, "Something went wrong")
-    }
+
 }
 

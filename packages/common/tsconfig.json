@@ -8,7 +8,7 @@
     "noEmit": true,
     "baseUrl": ".",
     "outDir": "./dist",
-        "paths": {
+        "paths": { 
         "@cmn/*": ["./src/*"]
     },
     // "target": "ESNext",
@@ -19,7 +19,7 @@
 			"DOM",
 			"DOM.Iterable"
 		],
-		"moduleResolution": "bundler",
+		"moduleResolution": "bundler", 
 		"module": "esnext",
 		// "noEmit": true,
 		"target": "esnext"

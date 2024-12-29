@@ -5,6 +5,7 @@ import { getInstrus, getKlinesPath, getMakerFee, getTakerFee } from "../funcs3";
 import { readJson, ensureDirExists } from "@cmn/utils/bend/functions";
 import {
     calcPerc,
+    clearTerminal,
     getCoinPrecision,
     getMinAmt,
     getMinSz,
@@ -51,7 +52,8 @@ export const onTriArbitCointest = async (
     } = data;
 
     try {
-        console.log("BEGIN TRI COINTEST...");
+        clearTerminal()
+        console.log("BEGIN TRI COINTEST...", {offline});
         client?.emit(ep, "BEGIN COINTEST...");
         prefix = prefix ? `${prefix}_` : "";
 

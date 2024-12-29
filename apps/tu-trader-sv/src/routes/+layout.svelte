@@ -22,6 +22,7 @@
     import Loader from "@/components/Loader.svelte";
     import Navbar from "@/components/Navbar.svelte";
     import Sidebar from "@/components/Sidebar.svelte";
+    import { handleErrs } from "@cmn/utils/functions";
     let { children } = $props();
     let { ready } = $derived(appStore);
 
@@ -31,7 +32,7 @@
             const res = await localApi(true).post("/auth/login?q=token", {});
             setUser(res.data.user);
         } catch (e) {
-            console.log(e);
+            handleErrs(e);
         }
     };
     const init = async () => {
@@ -62,7 +63,7 @@
                 console.log(`IO ERR`);
             });
             socket.on('connect_error', err => handleErrors(err))
-socket.on('connect_failed', err => handleErrors(err))
+        socket.on('connect_failed', err => handleErrors(err))
         } catch (err) {
             console.log("IO INIT ERR");
             console.log(err);
@@ -123,3 +124,11 @@ socket.on('connect_failed', err => handleErrors(err))
         </div>
     </div>
 {/if}
+
+<div id="tu-toasts" class="toast toast-top toast-end">
+
+</div>
+
+  <style>
+    .toast{z-index: 100;}
+  </style>

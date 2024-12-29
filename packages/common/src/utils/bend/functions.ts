@@ -7,8 +7,9 @@ import path, { dirname } from "path";
 import { OTP } from "@cmn/models";
 import { IBot } from "@cmn/models/bot";
 import { randomInRange, parseDate } from "../functions";
-import { IObj } from "../interfaces";
+import { IObj, TPlatName } from "../interfaces";
 import { fileURLToPath } from "node:url";
+import { OKX_WS_URL_DEMO, OKX_WS_URL, BYBIT_WS_URL_DEMO, BYBIT_WS_URL, BINANCE_WS_URL, BITGET_WS_URL, MEXC_WS_URL } from "../consts2";
 
 export const ensureDirExists = (filePath: string) => {
     var dirname = path.dirname(filePath);
@@ -50,6 +51,15 @@ export const tunedErr = (res: Response, status: number, msg: string, e?: any) =>
     }
     res.status(status).send(`tuned:${msg}`);
     return undefined
+};
+
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const jsonPath = __dirname + "/../assets/store.json";
+export const getStoreDetails = () => {
+    const buff = nfs.readFileSync(jsonPath, { encoding: "utf-8" });
+    return JSON.parse(buff);
 };
 
 export const sendMail = async (
@@ -199,14 +209,6 @@ export const sendMail = async (
         return null;
     }
 };
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const jsonPath = __dirname + "/../assets/store.json";
-export const getStoreDetails = () => {
-    const buff = nfs.readFileSync(jsonPath, { encoding: "utf-8" });
-    return JSON.parse(buff);
-};
-
 export const writeJson = (fp: string, data: any) => {
     console.log("\nSaving....");
     ensureDirExists(fp)
@@ -216,13 +218,62 @@ export const writeJson = (fp: string, data: any) => {
 };
 
 export const existsSync = (fp: string) => nfs.existsSync(fp);
-
-export const botLog = (bot: IBot, ...data: any) => {
-    console.log(`\n[${parseDate(new Date())}] [ ${bot.name} ]`, ...data, "\n");
-};
-
 export const readJson = (fp: string) => {
     const data = nfs.readFileSync(fp, { encoding: "utf-8" });
     return JSON.parse(data);
 };
  
+export const botLog = (bot: IBot, ...data: any) => {
+    console.log(`\n[${parseDate(new Date())}] [ ${bot.name} ]`, ...data, "\n");
+};
+
+
+export const getWsUrl = (plat: TPlatName, demo: boolean) =>{
+    let url = ""
+    switch (plat) {
+        case "okx":
+            url = demo ? OKX_WS_URL_DEMO : OKX_WS_URL;
+            break;
+        case "bybit":
+            url = demo ? BYBIT_WS_URL_DEMO : BYBIT_WS_URL;
+            break;
+        case "binance":
+            url = BINANCE_WS_URL;
+            break;
+        case "bitget":
+            url = BITGET_WS_URL;
+            break;
+        case "mexc":
+            url = MEXC_WS_URL;
+            break;
+        case "kucoin":
+            url = "url";
+            break;
+    }
+    return url
+}
+
+export function getBookChannelName(plat: TPlatName) {
+    let channel = "";
+
+    switch (plat) {
+        case "okx":
+        case "bitget":
+            channel = "books5";
+            break;
+        case "bybit":
+            channel = `orderbook.200.`;
+            break;
+        case "binance":
+            channel = `ch`;
+            break;
+        case "kucoin":
+            channel = `/spotMarket/level2Depth5:`;
+            break;
+        case "mexc":
+            channel = "spot@public.limit.depth.v3.api@";
+            break;
+    }
+
+    return channel
+}

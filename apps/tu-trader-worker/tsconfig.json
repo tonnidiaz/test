@@ -9,7 +9,7 @@
         // "moduleResolution": "node",
         "baseUrl": ".",
         "outDir": "./dist",
-        "rootDirs": ["../../packages/common/"],
+        "rootDirs": ["../../packages/common/"], 
         "paths": {
             "@/*": ["src/*"],
             "~/*": ["src/*"],

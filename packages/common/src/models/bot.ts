@@ -15,6 +15,10 @@ const TriArbitOrder = {
 
 const ArbitSettings = {
     mega: {type: Boolean, default: false},
+    /**
+     * Listens to all pairs from specfied platform
+     */
+    super_mega: {type: Boolean, default: false},
     use_ws: {type: Boolean, default: false},
     min_perc: { type: Number, default: 1 },
     _type: {

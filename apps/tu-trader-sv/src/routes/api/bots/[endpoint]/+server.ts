@@ -1,14 +1,13 @@
+import { tuErr } from "@/lib/server/funcs.js";
 import type { IBot } from "@cmn/models/bot";
 import { Bot, TriArbitOrder, TuOrder, User } from "@cmn/models/index.js";
 import { parseBot } from "@cmn/utils/bend/funcs";
-import { handleErrs } from "@cmn/utils/functions.js";
 import { createChildBots } from "@cmn/utils/functions/bots-funcs.js";
 import type { IObj } from "@cmn/utils/interfaces.js";
-import { error, json } from "@sveltejs/kit";
+import { json } from "@sveltejs/kit";
 import { isValidObjectId } from "mongoose";
 
 const _createBot = async ({body} : {body: IObj}) =>{
-    try{
         const bot = new Bot();
         // console.log({body});
         for (let k of Object.keys(body)) {
@@ -24,7 +23,7 @@ const _createBot = async ({body} : {body: IObj}) =>{
         [bot.base, bot.ccy] = pair;
 
         const user = await User.findOne({ username: body.user }).exec();
-        if (!user) return error(400, "User account not available");
+        if (!user) return tuErr(400, "User account not available");
         bot.user = user.id;
 
         const total_quote = {
@@ -47,24 +46,16 @@ const _createBot = async ({body} : {body: IObj}) =>{
         user.bots.push(bot.id);
         await user.save();
         return json(bot.toJSON());
-    } catch (err) {
-        handleErrs(err);
-        return error(500, "Failed to create bot");
-    }
+    
 }
 export const POST = async ({request: req, params})=>{
-    try {
         const body = await req.json();
 
         const {endpoint} = params
         if (endpoint == "create"){
             return _createBot({body})
         }
-    }
-    catch(err){
-        handleErrs(err)
-        return error(500, "Something went wrong")
-    }
+   
         
 }
 
@@ -72,11 +63,10 @@ export const POST = async ({request: req, params})=>{
 
 
 export const GET = async ({request: req,params})=>{
-    try {
         const { endpoint: id } = params;
         if (isValidObjectId(id)){
            let bot = await Bot.findById(id).exec();
-        if (!bot) return error(404, "Bot not found");
+        if (!bot) return tuErr(404, "Bot not found");
 
         const _bot = await parseBot(bot);
 
@@ -85,8 +75,4 @@ export const GET = async ({request: req,params})=>{
         else{
             return json({id})
         }
-    } catch (err) {
-        handleErrs(err)
-        error(500, "Failed to get bot");
     }
-}

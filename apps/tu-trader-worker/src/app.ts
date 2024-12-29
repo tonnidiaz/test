@@ -11,14 +11,19 @@ import logger from 'morgan';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
-import { TuConfig } from '@cmn/models';
+import { Bot, TuConfig } from '@cmn/models';
 import { addBooksTask, connectMongo, scheduleAllTasks } from '@cmn/utils/funcs4';
-import { DEV } from '@cmn/utils/constants';
+import { DEV, setJobs } from '@cmn/utils/constants';
 import { captureLogs } from '@cmn/utils/functions2';
 
 /**Routes */
 import indexRouter from './routes';
 import botsRouter from './routes/bots';
+import { crossArbitWsList, initArbitWs, triArbitWsList } from '@cmn/classes/tu-ws';
+import { TuArbitWs } from '@cmn/classes/tu';
+import { botLog } from '@cmn/utils/bend/functions';
+import { addBotJob } from '@cmn/utils/orders/funcs';
+import { addBotToArbitWs } from './utils/funcs';
 const app = express();
 
 dotenv.config();
@@ -56,6 +61,44 @@ app.use(function (err, req, res, next) {
   res.render('error'); 
 });
 
+const main = async () => {
+    // CREATE CONFIG IF NONE
+    // if (DEV) return
+
+    const activeBots = await Bot.find({ active: true }).exec();
+    setJobs([]);
+    await initArbitWs()
+
+    for (let bot of activeBots) {
+        const triWs : TuArbitWs = triArbitWsList[bot.platform]
+        const crossWs : TuArbitWs = crossArbitWsList[bot.platform]
+
+       
+        
+        if (bot.type == 'arbitrage' ){
+            botLog(bot, "INITIALIZING WS...");
+            addBotToArbitWs(bot)
+        }else{
+             await addBotJob(bot);
+        }
+
+        // if (bot.orders.length) {
+        //     const lastOrder = await Order.findById(
+        //         bot.orders[bot.orders.length - 1]
+        //     ).exec();
+        //     if (
+        //         lastOrder &&
+        //         lastOrder.side == "sell" &&
+        //         !lastOrder.is_closed &&
+        //         lastOrder.sell_price != 0
+        //     ) {
+        //         //await plat.addBot(bot.id, true);
+        //     }
+        // }
+    }
+
+};
+
 
 const init = async () => { 
     try{ 
@@ -72,7 +115,11 @@ await connectMongo(DEV)
     await scheduleAllTasks()
     if (config.fetch_orderbook_enabled)
         addBooksTask(config)
+    
+    main()
     } 
+
+    
     catch(e){ 
         console.log("Init error", e)
     }

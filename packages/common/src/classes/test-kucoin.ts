@@ -56,6 +56,7 @@ export class TestKucoin extends TestPlatform {
             const klines: number[][] = [];
             let firstTs = start;
             const limit = 1500;
+            console.log({limit});
             while (firstTs <= end) {
                 cnt++;
                 let after = firstTs + limit * interval * 60000;

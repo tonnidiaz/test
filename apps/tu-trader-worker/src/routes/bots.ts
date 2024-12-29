@@ -1,6 +1,7 @@
 
 import { authMid } from "@/middleware/auth.mid";
-import { tunedErr } from "@/utils/funcs";
+import { addBotToArbitWs, tunedErr } from "@/utils/funcs";
+import { superMegaBots, TuMegaWs } from "@cmn/classes/tu-mega-ws";
 import { triArbitWsList, crossArbitWsList } from "@cmn/classes/tu-ws";
 import { Bot } from "@cmn/models";
 import { IBot } from "@cmn/models/bot";
@@ -8,14 +9,48 @@ import { clearOrders, parseBot } from "@cmn/utils/bend/funcs";
 import { botLog } from "@cmn/utils/bend/functions";
 import { jobs, botJobSpecs } from "@cmn/utils/constants";
 import { taskManager } from "@cmn/utils/consts3";
-import { parseDate } from "@cmn/utils/functions";
+import { getInstrus, getPricePrecision, handleErrs, parseDate } from "@cmn/utils/functions";
 import { createChildBots } from "@cmn/utils/functions/bots-funcs";
 import { addBotJob } from "@cmn/utils/orders/funcs";
 import express from "express"
 
 const router = express.Router();
 
+router.post("/:id/toggle-mega-bot", authMid, async (req, res)=>{
+    try {
+        const {side} = req.query;
+        const bot = await Bot.findById(req.params.id).exec()
+        if (!bot) return tunedErr(res,400, "Bot not found")
 
+        let megaBot = superMegaBots.find(el=> el.bot._id == bot._id)
+        
+        if (!megaBot)
+            {
+                megaBot = new TuMegaWs({bot})
+                superMegaBots.push(megaBot)
+    }
+        bot.set("active", side == "activate")
+        
+
+        if (side == "activate")
+            bot.activated_at = parseDate()
+        else
+            bot.deactivated_at = parseDate()
+        
+
+        megaBot.bot = bot;
+        await bot.save()
+        const r = await megaBot.subUnsub(bot.active ? 'sub' : 'unsub')
+        if (!r) return tunedErr(res, 500, "Failed to activate/deactivate bot")
+            
+        
+        res.json(await parseBot(bot))
+    
+    } catch (err) {
+        handleErrs(err)
+        return tunedErr(res, 500, "Failed to toggle megabot")
+    }
+})
 
 router.post("/:id/edit", authMid, async (req, res) => {
     try {
@@ -199,7 +234,7 @@ router.post("/:id/edit", authMid, async (req, res) => {
         const { A, B, C } = bot;
         botLog(bot, { oldA, oldB, oldC });
         botLog(bot, { A, B, C });
-        if (is_arb) {
+        if (is_arb) {await bot.save()
             if (oldA != A || oldB != B || oldC != C) {
                 await createChildBots(bot);
             }
@@ -256,7 +291,7 @@ router.post("/:id/delete", authMid, async (req, res) => {
             ).reverse()
         );
     } catch (error) {
-        console.log(error);
+        handleErrs(error);
         return tunedErr(res, 500, "Failed to delete bot");
     }
 });
@@ -274,17 +309,6 @@ const rmvBotFromArbitWs = async (bot: IBot) => {
     }
 };
 
-const addBotToArbitWs = async (bot: IBot) => {
-    const { arbit_settings: settings } = bot;
-    if (bot.type == "arbitrage" && bot.active && settings?.use_ws) {
-        botLog(bot, "Adding bot to ArbitWs...")
-        if (settings?._type == "tri")
-            await triArbitWsList[bot.platform].addBot(bot);
-        else {
-            await crossArbitWsList[bot.platA].addBot(bot);
-            await crossArbitWsList[bot.platB].addBot(bot);
-        }
-    }
-};
+
 
 export default router;
