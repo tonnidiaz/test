@@ -321,9 +321,9 @@ export class Arbit {
 
                 console.log({
                     pos: this.pos,
-                    buyCond: this.strat.buyCond(prevrowA, []),
+                    buyCond: this.strat.buyCond(prevrowA),
                 });
-                if (!this.pos && this.strat.buyCond(prevrowA, [])) {
+                if (!this.pos && this.strat.buyCond(prevrowA,)) {
                     console.log("\nKAYA RA BUY\n");
                     this.enterTs = rowA.ts;
                     console.log(`HAS BUY SIGNAL...`);

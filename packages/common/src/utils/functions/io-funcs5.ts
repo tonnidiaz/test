@@ -26,8 +26,7 @@ import {
 import { objStrategies, strategies } from "@cmn/strategies";
 import { test_platforms } from "../consts";
 import { getInstrus, getKlinesPath, getMakerFee, getTakerFee } from "../funcs3";
-import { onTriArbitCointest } from "./io-funcs2";
-import { onTriArbitCointest as onTriArbitCointest2 } from "./io-funcs2-limit";
+
 import { readJson, ensureDirExists } from "../bend/functions";
 
 

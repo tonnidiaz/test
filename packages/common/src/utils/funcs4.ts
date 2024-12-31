@@ -26,7 +26,7 @@ export const funcs4Var = "This is funcs 4"
 
 export function addBooksTask(config: ITuConfig){
     timedLog("Adding books task...")
-    taskManager.addTask({id: `task-books`, interval: __DEV__ ? 1 : config.book_fetch_interval, cb: fetchAndStoreBooks})
+    taskManager.addTask({id: `task-books`, interval: __DEV__ ? 1 : config.book_fetch_interval, cb: fetchAndStoreBooks, active: true})
 }
 export async function platBookFetcher(platName: string, pairs: string[][]) {
     const plat = new test_platforms[platName as TPlatName]({ demo: false });
