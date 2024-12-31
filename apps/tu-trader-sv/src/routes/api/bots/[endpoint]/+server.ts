@@ -39,7 +39,8 @@ const _createBot = async ({body} : {body: IObj}) =>{
         bot.start_bal = bot.start_amt;
         bot.balance = bot.start_amt;
 
-        if (is_arb) {
+        console.log({super_mega: bot.arbit_settings.super_mega});
+        if (is_arb && !bot.arbit_settings.super_mega) {
             await createChildBots(bot);
         }
         await bot.save();
@@ -58,9 +59,6 @@ export const POST = async ({request: req, params})=>{
    
         
 }
-
-
-
 
 export const GET = async ({request: req,params})=>{
         const { endpoint: id } = params;

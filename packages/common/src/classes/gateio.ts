@@ -5,19 +5,19 @@ import { parseDate, getSymbol } from "@cmn/utils/functions";
 import { botLog } from "@cmn/utils/bend/functions";
 import { IOrderDetails } from "@cmn/utils/interfaces";
 import { SpotApi, ApiClient, Trade, Order } from "gate-api";
+import { Platform } from "./platforms";
 
-export class Gateio {
+export class Gateio extends Platform {
     name = "GATEIO";
     maker: number = 0.2 / 100;
     taker: number = 0.2 / 100;
     client: SpotApi;
     apiKey: string;
     apiSecret: string;
-    bot: IBot;
     tradeApi: Trade;
 
-    constructor(bot: IBot) {
-        this.bot = bot;
+    constructor(bot: IBot, pair?: string[]) {
+        super(bot, pair);
         this.apiKey = process.env.GATEIO_API_KEY!;
         this.apiSecret = process.env.GATEIO_API_SECRET!;
 
@@ -105,20 +105,12 @@ export class Gateio {
         return d;
     }
 
-    async placeOrder(
-        amt: number,
-        price?: number,
-        side: "buy" | "sell" = "buy",
-        sl?: number,
-        clOrderId?: string
-    ) {
-        const pair = [this.bot.base, this.bot.ccy]
-        const od = { price, sl, amt, side };
+    async placeOrder({ amt, price, side, sl, clOrderId, useBaseCcy }: { amt: number; price?: number; side?: "buy" | "sell"; sl?: number; clOrderId?: string; useBaseCcy: boolean; }): Promise<string | void | undefined | null> {
 
+        await super.placeOrder({amt, price, side, sl, clOrderId, useBaseCcy});
+        const pair = [this.bot.base, this.bot.ccy]
         const ordType = price == undefined ? 'market' : 'limit'
-        botLog(this.bot, `PLACING ORDER: ${JSON.stringify(od)}`);
         try {
-            const { order_type } = this.bot;
           
           const  res = await this.client.createOrder({
                 currencyPair: getSymbol(pair, this.bot.platform),

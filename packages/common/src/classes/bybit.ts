@@ -13,8 +13,8 @@ export class Bybit extends Platform {
     apiSecret: string;
     client: RestClientV5;
 
-    constructor(bot: IBot) {
-        super(bot);
+    constructor(bot: IBot, pair?: string[]) {
+        super(bot, pair);
 
         this.apiKey = this.bot.demo
             ? process.env.BYBIT_API_KEY_DEMO!
@@ -46,15 +46,12 @@ export class Bybit extends Platform {
             console.log(error);
         }
     }
-    async placeOrder(
-        amt: number,
-        price?: number,
-        side: "buy" | "sell" = "buy",
-        sl?: number,
-        clOrderId?: string
-    ) {
-        const od = { price, sl, amt, side };
-        botLog(this.bot, `PLACING ORDER: ${JSON.stringify(od)}`);
+    async placeOrder({ amt, price, side, sl, clOrderId, useBaseCcy }: { amt: number; price?: number; side?: "buy" | "sell"; sl?: number; clOrderId?: string; useBaseCcy: boolean; }): Promise<string | void | undefined | null> {
+        /**
+         * tgtCcy - default: quoetCcy for buy, baseCcy for sell
+         */
+
+        await super.placeOrder({amt, price, side, sl, clOrderId, useBaseCcy});
         try {
             const { order_type } = this.bot;
             const is_market = price == undefined;
@@ -83,7 +80,7 @@ export class Bybit extends Platform {
     async getOrderbyId(orderId: string, isAlgo = false, pair?: string[]) {
         try {
             let data: IOrderDetails | null = null;
-            pair = pair ?? [this.bot.base, this.bot.ccy];
+            pair = pair || this.pair;
 
             botLog(this.bot, "GETTING ORDER FOR", pair);
             const symbo = getSymbol(pair, this.bot.platform);
@@ -187,7 +184,7 @@ export class Bybit extends Platform {
     }
 
     getSymbol() {
-        return `${this.bot.base}${this.bot.ccy}`;
+        return getSymbol(this.pair, this.bot.platform);
     }
     async cancelOrder({ ordId }: { ordId: string }) {
         try {

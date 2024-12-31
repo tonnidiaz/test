@@ -2,6 +2,8 @@ import { Bot } from "@cmn/models/index.js";
 import { deleteBot } from "./methods.js";
 import { handleErrs } from "@cmn/utils/functions.js";
 import { tuErr } from "@/lib/server/funcs.js";
+import { clearOrders, parseBot } from "@cmn/utils/bend/funcs.js";
+import { json } from "@sveltejs/kit";
 
 export const POST = async ({request: req, params})=>{
         const {id, endpoint} = params
@@ -16,6 +18,10 @@ export const POST = async ({request: req, params})=>{
         switch (endpoint){
             case "delete":
                 r =  await deleteBot({body, bot});
+                break
+            case "clear-orders":
+                await clearOrders(bot)
+                r = json(await parseBot(bot))
                 break
         }
         return r

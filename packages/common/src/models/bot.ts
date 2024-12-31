@@ -30,6 +30,9 @@ const ArbitSettings = {
 };
 export const TriArbitOrderSchema = new Schema({
     bot: {type: Schema.ObjectId, required: true, ref: "Bot"},
+    A: {type: String},
+    B: {type: String},
+    C: {type: String},
     order: {type: TriArbitOrder}
 },
 { timestamps: true })

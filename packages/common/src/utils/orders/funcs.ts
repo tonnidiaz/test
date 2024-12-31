@@ -51,68 +51,70 @@ export const addBotJob = async (bot: IBot) => {
 export const updateOrder = async ({
     bot,
     cancel = true,
+    pair
 }: {
     bot: IBot;
     cancel?: boolean;
+    pair?: string[]
 }) => {
     /* CHECK PREV ORDERS */
     try {
-        botLog(bot, "CHECKING PREV ORDERS");
-
-        let order = await getLastOrder(bot);
+        botLog(bot, pair, "CHECKING PREV ORDERS");
+        pair = pair || [bot.base, bot.ccy]
+        let order = await getLastOrder(bot, pair);
         let pos = orderHasPos(order);
 
         const plat = getBotPlat(bot);
 
         if (order && !pos && order.buy_order_id) {
             // CURRENTLY NOT PLACING LIMIT BUY ORDERS
-            botLog(bot, "CHECKING LIMIT BUY ORDER", order.buy_order_id);
+            botLog(bot, pair, "CHECKING LIMIT BUY ORDER", order.buy_order_id);
             const ordId = order.buy_order_id;
             const res = await plat.getOrderbyId(ordId);
             if (!res) {
-                botLog(bot, "FAILED TO GET BUY ORDER");
+                botLog(bot, pair, "FAILED TO GET BUY ORDER");
             } else if (res == "live") {
-                botLog(bot, "BUY ORDER STILL ACTIVE");
+                botLog(bot, pair, "BUY ORDER STILL ACTIVE");
 
                 if (cancel) {
-                    botLog(bot, "CANCELLING ORDER...");
+                    botLog(bot, pair, "CANCELLING ORDER...");
                     const r = await plat.cancelOrder({ ordId });
                     if (r) {
-                        botLog(bot, "BUY ORDER CANCELLED");
+                        botLog(bot, pair, "BUY ORDER CANCELLED");
                         order.buy_order_id = undefined;
                         await order.save();
                         console.log({ oid: order.buy_order_id });
                     } else {
-                        botLog(bot, "FAILED TO CANCEL BUY ORDER");
+                        botLog(bot, pair, "FAILED TO CANCEL BUY ORDER");
                     }
                 }
             } else {
-                botLog(bot, "FILLED");
+                botLog(bot, pair, "FILLED");
                 await updateBuyOrder(order, res);
             }
         } else if (order && pos && order.order_id) {
             const ordId = order.order_id;
-            botLog(bot, "CHECKING SELL ORDER...", { ordId });
+            botLog(bot, pair, "CHECKING SELL ORDER...", { ordId });
             const res = await plat.getOrderbyId(ordId);
             if (!res) {
-                botLog(bot, "FAILED TO GET SELL ORDER");
+                botLog(bot, pair, "FAILED TO GET SELL ORDER");
             } else if (res == "live") {
-                botLog(bot, "SELL ORDER STILL ACTIVE");
+                botLog(bot, pair, "SELL ORDER STILL ACTIVE");
 
                 if (cancel) {
-                    botLog(bot, "CANCELLING ORDER...");
+                    botLog(bot, pair, "CANCELLING ORDER...");
                     const r = await plat.cancelOrder({ ordId });
                     if (r) {
-                        botLog(bot, "SELL ORDER CANCELLED");
+                        botLog(bot, pair, "SELL ORDER CANCELLED");
                         order.order_id = undefined;
                         await order.save();
                         console.log({ oid: order.order_id });
                     } else {
-                        botLog(bot, "FAILED TO CANCEL SELL ORDER");
+                        botLog(bot, pair, "FAILED TO CANCEL SELL ORDER");
                     }
                 }
             } else {
-                botLog(bot, "FILLED");
+                botLog(bot, pair, "FILLED");
                 await updateSellOrder(order, res, bot);
             }
         }
@@ -133,6 +135,7 @@ export const placeTrade = async ({
     pair: _pair,
     sl,
     ordType = "Market",
+    is_child, useBaseCcy
 }: {
     bot: IBot;
     ts: string;
@@ -143,11 +146,14 @@ export const placeTrade = async ({
     price: number;
     plat: Platform;
     pair?: string[];
+    is_child?: boolean;
     ordType?: "Limit" | "Market";
+    useBaseCcy?: boolean
 }) => {
     try {
         const orders = await findBotOrders(bot);
-        const pair = _pair ?? [bot.base, bot.ccy];
+        const pair = _pair || [bot.base, bot.ccy];
+        const [base, quote] = pair;
         const minSz = getMinSz(pair, bot.platform);
         const maxSz = getMaxSz(pair, bot.platform);
         const maxAmt = getMaxAmt(pair, bot.platform);
@@ -188,11 +194,11 @@ export const placeTrade = async ({
             await bot.save();
         }
 
-        botLog(bot, "PLACE_TRADE", { amt, price, side });
+        botLog(bot, pair, "PLACE_TRADE", { amt, price, side });
 
         const putAside = async (amt: number) => {
             // if (!aside) return;
-            // botLog(bot, `PUTTING ${amt} ASIDE...`);
+            // botLog(bot, pair, `PUTTING ${amt} ASIDE...`);
             // order.new_ccy_amt = order.new_ccy_amt - amt; // LEAVE THE FEE
             // aside.amt = aside!.amt + amt;
             // bot.start_bal = order.new_ccy_amt - Math.abs(order.sell_fee);
@@ -206,36 +212,16 @@ export const placeTrade = async ({
             await order.save();
             await bot.save();
 
-            botLog(bot, `${amt} PUT ASIDE`);
+            botLog(bot, pair, `${amt} PUT ASIDE`);
         };
 
         if (ordType == "Limit" && price == 0) {
-            return botLog(bot, "ERR: PRICE REQUIRED FOR LIMIT ORDERS");
+            return botLog(bot, pair, "ERR: PRICE REQUIRED FOR LIMIT ORDERS");
         }
 
         if (!amt) {
-            /// GET THE QUOTE BALANCE AND USE 75 IF THIS IS FIRST ORDER
-
-            console.log(`\n[ ${bot.name} ]\tFIRST ORDER\n`);
-            const _amt =  await plat.getBal(bot.ccy);
-            
-            if (!_amt) {
-                botLog(bot, "Failed to get balance");
-                return;
-            }
-            amt = _amt
-            /* Trade half assets */
-            botLog(bot, "No amount specified");
-            if (side == "buy") {
-                if (orders.length) {
-                    const lastOrder = orders[orders.length - 1];
-                    amt = lastOrder.new_ccy_amt - lastOrder.sell_fee;
-                }
-            } else {
-                /// Sell all previously traded
-                const lastOrder = orders[orders.length - 1];
-                amt = lastOrder.base_amt - lastOrder.buy_fee;
-            }
+            return botLog(bot, pair, 'Please specify amount')
+           
         }
 
         if (side == "buy") {
@@ -243,10 +229,10 @@ export const placeTrade = async ({
             // const _base = amt / price;
             // if (_base < minSz ||  amt < (minAmt ?? 1)) {
             //     const msg = `BASE: ${_base} < MIN_SZ: ${minSz}`;
-            //     return botLog(bot, msg);
+            //     return botLog(bot, pair, msg);
             // } else if (_base > maxSz) {
             //     const msg = `BASE: ${_base} > MAX_SZ: ${maxSz}`;
-            //     botLog(bot, msg);
+            //     botLog(bot, pair, msg);
             //     amt = maxSz * (1 - 0.5 / 100) * _entry;
             //     amt = toFixed(amt, pxPr);
             //     return await placeTrade({
@@ -265,7 +251,7 @@ export const placeTrade = async ({
             // let _base = amt;
             // const _bal = _base * price;
             // if (_bal <( minAmt ?? 1)){
-            //     botLog(bot, "EKSE, THIS SHIT < MIN")
+            //     botLog(bot, pair, "EKSE, THIS SHIT < MIN")
             //     return;
             // }
             // else if (_bal > maxAmt) {
@@ -276,18 +262,18 @@ export const placeTrade = async ({
             // }
         }
 
-        botLog(bot, `Placing a ${amt} ${side}  order at ${price}...`);
+        botLog(bot, pair, `Placing a ${amt} ${side}  order at ${price}...`);
         sl = toFixed(sl ?? 0, pxPr);
         price = toFixed(price, pxPr);
         const _amt = amt;
         amt = ordType == "Market" ? amt : side == "sell" ? amt : amt / price;
 
         amt = toFixed(amt, basePrecision);
-        botLog(bot, `Placing a ${ordType} ${amt} ${side} order at ${price}...`);
+        botLog(bot, pair, `Placing a ${ordType} ${amt} ${side} order at ${price}...`);
 
         const clOrderId = Date.now().toString();
 
-        const isBotC = side == 'sell' && bot.is_child
+        const isBotC = side == 'sell' && is_child
         let order =
             side == "buy" || isBotC
                 ? new TuOrder({
@@ -295,8 +281,8 @@ export const placeTrade = async ({
                       buy_timestamp: { i: ts },
                       side: side,
                       bot: bot.id,
-                      base: bot.base,
-                      ccy: bot.ccy,
+                      base: base,
+                      ccy: quote,
                       ccy_amt: side == 'buy' ? _amt : 0,
                       base_amt: side == 'sell' ? _amt : 0
                   })
@@ -305,19 +291,19 @@ export const placeTrade = async ({
         if (side == "sell") {
             order._exit = price;
         }
-        if (bot.is_child){
+        if (is_child){
             order.is_arbit = true
-        }
+        } 
         
         order.cl_order_id = clOrderId;
 
         await order.save();
         const px = ordType == "Market" ? undefined : price;
 
-        const orderId = await plat.placeOrder(amt, px, side, sl, clOrderId);
+        const orderId = await plat.placeOrder({amt, price: px, side, sl, clOrderId, useBaseCcy});
 
         if (!orderId) {
-            botLog(bot, "Failed to place order");
+            botLog(bot, pair, "Failed to place order");
             return;
         }
 
@@ -331,12 +317,12 @@ export const placeTrade = async ({
                 let _filled = false;
                 while (!_filled) {
                     await sleep(500);
-                    botLog(bot, "CHECKING MARKET BUY ORDER...");
+                    botLog(bot, pair, "CHECKING MARKET BUY ORDER...");
                     const res = await plat.getOrderbyId(orderId);
 
                     if (!res) {
                         _filled = true;
-                        return botLog(bot, "FAILED TO CHECK MARKET BUY ORDER");
+                        return botLog(bot, pair, "FAILED TO CHECK MARKET BUY ORDER");
                     }
                     if (res != "live") {
                         _filled = true;
@@ -345,17 +331,17 @@ export const placeTrade = async ({
                 }
             }
         } else if (side == "sell" && ordType == "Market") {
-            botLog(bot, "CHECKING MARKET SELL STATUS...");
+            botLog(bot, pair, "CHECKING MARKET SELL STATUS...");
 
             let _filled = false;
             while (!_filled) {
                 await sleep(500);
-                botLog(bot, "CHECKING MARKET SELL ORDER...");
+                botLog(bot, pair, "CHECKING MARKET SELL ORDER...");
                 const res = await plat.getOrderbyId(orderId);
 
                 if (!res) {
                     _filled = true;
-                    return botLog(bot, "FAILED TO CHECK MARKET SELL ORDER");
+                    return botLog(bot, pair, "FAILED TO CHECK MARKET SELL ORDER");
                 }
                 if (res && res != "live") {
                     _filled = true;
@@ -410,7 +396,7 @@ export const placeTrade = async ({
         });
         await order.save();
         await bot.save();
-        botLog(bot, `${side} order placed, Bot updated`);
+        botLog(bot, pair, `${side} order placed, Bot updated`);
         return order._id;
     } catch (error) {
         console.log(error);

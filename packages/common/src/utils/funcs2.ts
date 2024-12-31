@@ -395,10 +395,10 @@ export const findBotOrders = async (bot: IBot) => {
     return orders;
 };
 
-export const getLastOrder = async (bot: IBot) => {
-    const orders = await TuOrder.find({ bot: bot.id }).exec();
-    return orders.length
-        ? await TuOrder.findById([...orders].pop()?.id).exec()
+export const getLastOrder = async (bot: IBot,  pair: string[]) => {
+    const orders = await TuOrder.find({ bot: bot.id, base: pair[0], ccy: pair[1] }).exec();
+    return orders.length 
+        ? [...orders].pop()
         : null;
 };
 

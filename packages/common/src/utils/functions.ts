@@ -329,10 +329,6 @@ export function getMaxSz(pair: string[], plat: string) {
             sz = Number(_i3.maxLmtSz);
             break;
 
-        case "gateio":
-            const _i4 = instru as (typeof gateioInstrus)[0];
-            sz = Number(_i4.max_base_amount);
-            break;
         case "mexc":
             const _i5 = instru as (typeof mexcInstrus)[0];
             sz = Infinity; //Number(_i5.max_base_amount)

@@ -6,7 +6,8 @@ export const tunedErr = (res: Response, status: number, msg: string, e?: any) =>
     if (e) {
         console.log(e);
     }
-     res.status(status).send(`tu:${msg}`);
+      res.status(status).send(`tu:${msg}`);
+      return null
 };
 
 export const addBotToArbitWs = async (bot: IBot) => {

@@ -18,7 +18,7 @@ import { captureLogs } from '@cmn/utils/functions2';
 
 /**Routes */
 import indexRouter from './routes';
-import botsRouter from './routes/bots';
+import botsRouter, { toggleMegaBot } from './routes/bots';
 import { crossArbitWsList, initArbitWs, triArbitWsList } from '@cmn/classes/tu-ws';
 import { TuArbitWs } from '@cmn/classes/tu';
 import { botLog } from '@cmn/utils/bend/functions';
@@ -69,18 +69,24 @@ const main = async () => {
     setJobs([]);
     await initArbitWs()
 
+    if (!DEV)
     for (let bot of activeBots) {
         const triWs : TuArbitWs = triArbitWsList[bot.platform]
         const crossWs : TuArbitWs = crossArbitWsList[bot.platform]
+        if (bot.type == 'arbitrage' && bot.arbit_settings.super_mega){
+            botLog(bot, 'Activating super-mega bot...')
+            await toggleMegaBot(bot, 'activate')
+        }
+
 
        
         
-        if (bot.type == 'arbitrage' ){
-            botLog(bot, "INITIALIZING WS...");
-            addBotToArbitWs(bot)
-        }else{
-             await addBotJob(bot);
-        }
+        // if (bot.type == 'arbitrage' ){
+        //     botLog(bot, "INITIALIZING WS...");
+        //     addBotToArbitWs(bot)
+        // }else{
+        //      await addBotJob(bot);
+        // }
 
         // if (bot.orders.length) {
         //     const lastOrder = await Order.findById(

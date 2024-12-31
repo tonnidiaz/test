@@ -1,5 +1,7 @@
-import { TriArbitOrder, TuOrder } from "@cmn/models";
+import { Bot, TriArbitOrder, TuOrder } from "@cmn/models";
 import { IBot } from "@cmn/models/bot";
+import { handleErrs } from "../functions";
+import { botLog } from "./functions";
 
 export const parseBot = async (bot: IBot, deep = true) => {
     //bot = await bot.populate("orders");
@@ -44,6 +46,7 @@ export const clearOrders = async (bot: IBot) => {
         await bot.save();
         botLog(bot, "ORDERS CLEARED");
     } catch (e) {
-        botLog(bot, "FAILED TO CLEAR ORDERS", e);
+        botLog(bot, "FAILED TO CLEAR ORDERS");
+        handleErrs(e)
     }
 };

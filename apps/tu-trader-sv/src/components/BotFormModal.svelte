@@ -167,7 +167,7 @@
                                     />
                                 </UFormGroup>
                             </div>
-                            <div class="my-2 grid grid-cols-2 items-center">
+                            <div class="my-2 gap-2 justify-center grid grid-cols-2 items-center">
                                 <UCheckbox
                                     label="SUPER_MEGA BOT"
                                     title="A BOT THAT USES ALL PAIRS FROM A PLATFORM"

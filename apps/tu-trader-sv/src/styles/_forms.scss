@@ -49,16 +49,18 @@ $form-w: 350px;
 
 }
 
-input:disabled, textarea:disabled {
-    opacity: .7 !important;
-    border-color: revert !important;
+.input:has(> input[disabled]), .input-disabled, .input:disabled, .input[disabled], .textarea:has(> textarea[disabled]), .textarea-disabled, .textarea:disabled {
+    opacity: .98 !important;
+    border-color: var(--fallback-bc,oklch(var(--bc)/0.1)) !important;
+    cursor: not-allowed;
 }
 
 
 input, textarea, select {
    // color: $color-white-2;// !important;
+   background-color: inherit;
     &::placeholder{
-    opacity: 0.4 !important;
+    opacity: 0.5 !important;
     
 }
 }

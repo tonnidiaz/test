@@ -1,25 +1,21 @@
 import { IBot } from "@cmn/models/bot";
 import { getExactDate, getInterval, parseFilledOrder } from "@cmn/utils/funcs2";
-import {  capitalizeFirstLetter, getSymbol, sleep } from "@cmn/utils/functions";
+import {  getSymbol, handleErrs, sleep } from "@cmn/utils/functions";
 import { SpotClient } from "kucoin-api";
-import { writeFileSync } from "node:fs";
-import { botLog } from "@cmn/utils/bend/functions";
 import { parseDate } from "@cmn/utils/functions";
-import { DEV, isStopOrder } from "@cmn/utils/constants";
+import { DEV } from "@cmn/utils/constants";
 import { Platform } from "./platforms";
-import type { SpotOrder } from "kucoin-api";
 import { IOrderDetails } from "@cmn/utils/interfaces";
 
 export class Kucoin extends Platform {
     client: SpotClient;
 
-    constructor(bot: IBot) {
-        super(bot);
-
+    constructor(bot: IBot, pair?: string[]) {
+        super(bot, pair);
         const apiKey = process.env.KUCOIN_API_KEY!;
         const apiSecret = process.env.KUCOIN_API_SECRET!;
         const passphrase = process.env.KUCOIN_API_PASS!
-        //console.log({apiKey, apiSecret, passphrase})
+        // console.log({apiKey, apiSecret, passphrase});
         this.client = new SpotClient({
             apiKey: apiKey,
             apiSecret: apiSecret,
@@ -28,37 +24,33 @@ export class Kucoin extends Platform {
     }
 
     async getBal(ccy?: string) {
-        console.log(`\nGETTING BALANCE FOR BOT=${this.bot.name}\n`);
+        this.log(`\nGETTING BALANCE...\n`);
         try {
             const res = await this.client.getBalances({
                 type: "trade",
                 currency: ccy ?? this.bot.ccy,
             });
             if (res.code != '200000') {
-                console.log(res);
+                this.log(res);
                 return;
             }
             return Number(res.data[0]?.available ?? 0);
         } catch (error) {
-            console.log(error);
+            handleErrs(error);
         }
     }
-    async placeOrder(
-        amt: number,
-        price?: number,
-        side: "buy" | "sell" = "buy",
-        sl?: number,
-        clOrderId?: string,
-        test = false
-    ) {
-        await super.placeOrder(amt, price, side, sl, clOrderId);
+    async placeOrder({ amt, price, side, sl, clOrderId, useBaseCcy }: { amt: number; price?: number; side?: "buy" | "sell"; sl?: number; clOrderId?: string; useBaseCcy?: boolean; }): Promise<string | void | undefined | null> {
+
+        await super.placeOrder({amt, price, side, sl, clOrderId, useBaseCcy});
         try {
+            const test = this.bot.demo
             const { order_type } = this.bot;
             const is_market = price == undefined;
             if (test){
-                console.log("TEST ORDER:\n")
+                this.log("TEST ORDER:\n")
             }
-            const res = await this.client.submitOrder({
+            const fn = test ? this.client.submitOrderTest.bind(this.client): this.client.submitOrder.bind(this.client)
+            const res = await fn({
                 symbol: this.getSymbol(),
                 type: is_market ? "market" : "limit",
                 side,
@@ -68,75 +60,72 @@ export class Kucoin extends Platform {
                 clientOid: clOrderId ?? `tb_ord_${Date.now()}`,
             });
             if (res.code != "200000") {
-                console.log(res);
+                this.log(res);
                 return;
             }
-            console.log(`\ORDER PLACED FOR BOT=${this.bot.name}\n`);
+
+            this.log("\nORDER PLACED SUCCESSFULLY!!\n");
 
             return res.data.orderId;
         } catch (error) {
-            botLog(this.bot,"FAILED TO PLACE ORDER", error);
+            this.log("FAILED TO PLACE ORDER");
+            if (DEV) console.log((error));
+            handleErrs(error)
             await sleep(5000)
             // Check if order was placed
             const r = await this.client.getOrderByClientOid({clientOid: clOrderId!,})
             if (r.code != '200000')
-                return botLog(this.bot, "ORDER WAS NOT PLACED")
+                return this.log( "ORDER WAS NOT PLACED")
             return r.data.id
         }
     }
-    async placeTestOrder( amt: number,
-        price?: number,
-        side: "buy" | "sell" = "buy",
-        sl?: number,
-        clOrderId?: string){
-            return await this.placeOrder(amt, price, side, sl, clOrderId, true)
-        }
+
 
     async getOrderbyId(orderId: string, isAlgo = false, pair?: string[]) {
         try {
             await super.getOrderbyId(orderId, isAlgo, pair);
             let data: IOrderDetails | null = null;
-            pair = pair ?? [this.bot.base, this.bot.ccy];
+            pair = pair || this.pair;
 
-            botLog(this.bot, "GETTING ORDER FOR", pair);
+            this.log( "GETTING ORDER FOR", pair);
             const symbo = getSymbol(pair, this.bot.platform);
             const res = await this.client.getOrderByOrderId({
                 orderId: orderId,
             });
 
             if (res.code != "200000") {
-                console.log(res);
+                this.log(res);
                 return;
             }
 
             if (!res.data) {
-                console.log(res);
-                botLog(this.bot, "ORDER NOT FOUND");
+                this.log(res);
+                this.log( "ORDER NOT FOUND");
                 return;
             }
             const d = res.data
 
-            if (DEV) console.log(d);
+            if (DEV) this.log(d);
             if (d.isActive) {
-                botLog(this.bot, "[Kucoin class] Order not yet filled");
+                this.log( "[Kucoin class] Order not yet filled");
                 return "live";
             }
 
             data = parseFilledOrder(d, this.bot.platform);
             return data;
         } catch (error) {
-            botLog(this.bot,"FAILED TO GET ORDER", error);
+            this.log("FAILED TO GET ORDER");
+            handleErrs(error)
            
         }
     }
     async getTicker() {
-        botLog(this.bot, "GETTING TICKER...");
+        this.log( "GETTING TICKER...");
         // const res = await this.client.getTickers({
         //     symbol: this.getSymbol(),
         //     category: "spot",
         // });
         // const ticker = Number(res.result.list[0].lastPrice);
-        // console.log({ ticker });
         return 0//ticker;
     }
     async getKlines({
@@ -165,7 +154,7 @@ export class Kucoin extends Platform {
             ? getSymbol(pair, this.bot.platform)
             : this.getSymbol();
 
-        console.log("[KUCOIN]: GETTING KLINES FOR:", symbol);
+        this.log("[KUCOIN]: GETTING KLINES FOR:", symbol);
         const res = await this.client.getKlines({
             symbol,
             type: getInterval(interval, this.bot.platform),
@@ -173,9 +162,8 @@ export class Kucoin extends Platform {
         });
         
         if (res.code != '200000') {
-            console.log(res);
-            return botLog(
-                this.bot,
+            this.log(res);
+            return this.log(
                 `FAILED TO GET KLIES FOR: ${symbol} ON KUCOIN`
             );
         }
@@ -185,9 +173,9 @@ export class Kucoin extends Platform {
 
         const last = Number(d[d.length - 1][0]);
 
-        botLog(this.bot, { end: parseDate(end), last: parseDate(last) });
+        this.log( { end: parseDate(end), last: parseDate(last) });
         if (end >= last + interval * 60000) {
-            botLog(this.bot, "END > LAST");
+            this.log( "END > LAST");
             return await this.getKlines({ start, end, interval, pair, limit });
         }
         return limit == 1 ? d[d.length - 1] : d;
@@ -199,7 +187,7 @@ export class Kucoin extends Platform {
     }
 
     getSymbol() {
-        return getSymbol([this.bot.base, this.bot.ccy], this.bot.platform);
+        return getSymbol(this.pair, this.bot.platform);
     }
     async cancelOrder({ ordId, isAlgo }: { ordId: string; isAlgo?: boolean }) {
         await super.cancelOrder({ ordId, isAlgo });
@@ -208,8 +196,8 @@ export class Kucoin extends Platform {
                 orderId: ordId,
             });
             if (res.code != "200000") {
-                botLog(this.bot, "FAILED TO CANCEL ORDER");
-                console.log(res);
+                this.log( "FAILED TO CANCEL ORDER");
+                this.log(res);
                 return;
             }
             return res.data.cancelledOrderIds[0];
@@ -227,8 +215,8 @@ export class Kucoin extends Platform {
     //             category: "spot",
     //         });
     //         if (res.retCode != 0) {
-    //             botLog(this.bot, res);
-    //             return botLog(this.bot, "FAILED TO GET ORDERBOOK");
+    //             this.log( res);
+    //             return this.log( "FAILED TO GET ORDERBOOK");
     //         }
     //         const data = res.result;
 
@@ -247,8 +235,7 @@ export class Kucoin extends Platform {
     //         };
     //         return ob
     //     } catch (e) {
-    //         botLog(this.bot, "FAILED TO GET ORDERBOOK");
-    //         console.log(e);
+    //         this.log( "FAILED TO GET ORDERBOOK");
     //     }
     // }
     async withdraw({ amt, coin, chain, addr }: { amt: number; coin: string; chain: string; addr: string; }) {
@@ -258,13 +245,13 @@ export class Kucoin extends Platform {
                 currency: coin, chain, amount: amt, address: addr
             })
             if (res.code != "200000") {
-                botLog(this.bot, "FAILED TO WITHDRAW");
-                console.log(res);
+                this.log( "FAILED TO WITHDRAW");
+                this.log(res);
                 return;
             }
             return res.data.withdrawalId
         } catch (err) {
-            console.log(err)
+            handleErrs(err)
         }
     }
 }

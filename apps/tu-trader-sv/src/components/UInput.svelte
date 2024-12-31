@@ -2,9 +2,10 @@
     import type { Snippet } from "svelte";
     import type { HTMLInputAttributes } from "svelte/elements";
 
-    interface IProps extends HTMLInputAttributes {
+    export interface IUInputProps extends HTMLInputAttributes {
         value?: any;
         override?: string;
+        inputClass?: string;
         trailing?: Snippet;
         leading?: Snippet;
     }
@@ -14,17 +15,18 @@
         value = $bindable(),
         class: _class,
         trailing,
-        leading,
+        leading, inputClass,
+        disabled,
         ...props
-    }: IProps = $props();
+    }: IUInputProps = $props();
     const defClass = override.split(" ").find((el) => el == "class")
         ? ""
         : "flex gap-3 items-center input input-bordered input-sm ";
 </script>
 
-<div class={defClass + _class || ''}>
+<div class={`${defClass + _class || ''} ${disabled && 'disabled'}`}>
     {@render leading?.()}
-    <input autocomplete="on" bind:value {...props} />
+    <input bind:value {...props} class={inputClass || ''} {disabled} />
     {@render trailing?.()}
 </div>
 

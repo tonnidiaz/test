@@ -14,8 +14,10 @@ import { Bot, TuOrder, TriArbitOrder } from "@cmn/models";
 import { objPlats } from "../consts2";
 import { updateBuyOrder } from "./funcs2";
 import { botLog } from "@cmn/utils/bend/functions";
+import { DEV } from "../constants";
 
 const SLEEP_MS = 500;
+
 export const placeArbitOrders = async ({
     bot,
     pairA,
@@ -36,9 +38,14 @@ export const placeArbitOrders = async ({
     pairB: string[];
     pairC: string[];
 }) => {
-    const _botA = await Bot.findById(bot.children[0]).exec();
-    const _botB = await Bot.findById(bot.children[1]).exec();
-    const _botC = await Bot.findById(bot.children[2]).exec();
+    botLog(bot, "PLACING NORMAL ORDERS...\n");
+    if (DEV)
+        botLog(bot, {pairA, pairB, pairC})
+
+    const isSuperMega = bot.arbit_settings.super_mega
+    const _botA = isSuperMega ? bot : await Bot.findById(bot.children[0]).exec();
+    const _botB = isSuperMega ? bot : await Bot.findById(bot.children[1]).exec();
+    const _botC = isSuperMega ? bot : await Bot.findById(bot.children[2]).exec();
 
     if (!_botA || !_botB || !_botC) {
         return botLog(bot, "ONE OF THE CHILD BOTS IS MISSING", {
@@ -48,9 +55,13 @@ export const placeArbitOrders = async ({
         });
     }
 
-    const platA = new objPlats[_botA.platform](_botA);
-    const platB = new objPlats[_botB.platform](_botB);
-    const platC = new objPlats[_botC.platform](_botC);
+    const baseA = pairA[0], quoteA = pairA[1]
+    const baseB = pairB[0], quoteB = pairB[1]
+    const baseC = pairC[0], quoteC = pairC[1]
+
+    const platA = new objPlats[_botA.platform](_botA, pairA);
+    const platB = new objPlats[_botB.platform](_botB, pairB);
+    const platC = new objPlats[_botC.platform](_botC, pairC);
 
     const { platform } = bot;
 
@@ -89,10 +100,11 @@ export const placeArbitOrders = async ({
             "CANNOT GET PRECISION OR MIN/MAX AMT/SZ FOR ONE OF THE PAIRS"
         );
     }
-    botLog(bot, "PLACING NORMAL ORDERS...\n");
-    //let order = await getLastOrder(_botC);
-    if (bot.balCcy != _botA.ccy)
-        return botLog(bot, "BAL_ERROR:", { last: bot.balCcy, bot: _botA.ccy });
+    
+    
+    const A = pairA[1], B = pairB[1], C = pairC[0];
+    if (bot.balCcy != A)
+        return botLog(bot, "BAL_ERROR:", { last: bot.balCcy, A });
 
     let bal = bot.balance;
     bal = toFixed(bal, pxPrA);
@@ -131,6 +143,8 @@ export const placeArbitOrders = async ({
 
     const arbitOrder = new TriArbitOrder({ bot: bot.id });
     let aord: typeof arbitOrder.order;
+
+    // amt = USDT
     const resA = await placeTrade({
         amt: bal,
         ordType: "Market",
@@ -140,10 +154,11 @@ export const placeArbitOrders = async ({
         plat: platA,
         side: "buy",
         ts,
+        is_child: true
     });
 
     if (!resA) return botLog(bot, "Failed to place BUY order for: [A]", pairA);
-    const orderA = await getLastOrder(_botA);
+    const orderA = await getLastOrder(_botA, pairA);
     if (!orderA) return botLog(bot, "Failed to get orderA");
     orderA.side = "buy";
     orderA.is_closed = true;
@@ -152,7 +167,9 @@ export const placeArbitOrders = async ({
     arbitOrder.order = aord;
     await arbitOrder.save();
     await sleep(SLEEP_MS);
+
     // The base from A becomes the Quote for B
+    // amtB = USDC [QUOTE]
     let amtB = orderA.base_amt - Math.abs(orderA.buy_fee);
     amtB = toFixed(amtB, pxPrB);
     const resB = await placeTrade({
@@ -164,10 +181,11 @@ export const placeArbitOrders = async ({
         plat: platB,
         side: "buy",
         ts,
+        is_child: true
     });
 
     if (!resB) return botLog(bot, "Failed to place BUY order for: [B]", pairB);
-    const orderB = await getLastOrder(_botB);
+    const orderB = await getLastOrder(_botB, pairB);
 
     if (!orderB) return botLog(bot, "Failed to get orderB");
     orderB.side = "buy";
@@ -177,7 +195,9 @@ export const placeArbitOrders = async ({
     arbitOrder.order = aord;
     await arbitOrder.save();
     await sleep(SLEEP_MS);
+
     // Sell base_amt from B At C to get A back
+    // Sell C(BASE)
     let amtC = orderB.base_amt - Math.abs(orderB.buy_fee);
     amtC = toFixed(amtC, basePrC);
     const resC = await placeTrade({
@@ -189,11 +209,12 @@ export const placeArbitOrders = async ({
         plat: platC,
         side: "sell",
         ts,
+        is_child: true
     });
 
     if (!resC) return botLog(bot, "Failed to place SELL order for: [C]", pairC);
 
-    const orderC = await getLastOrder(_botC);
+    const orderC = await getLastOrder(_botC, pairC);
 
     if (!orderC) return botLog(bot, "Failed to get order C");
     orderC.side = "sell";
@@ -233,9 +254,14 @@ export const placeArbitOrdersFlipped = async ({
     pairB: string[];
     pairC: string[];
 }) => {
-    const _botA = await Bot.findById(bot.children[0]).exec();
-    const _botB = await Bot.findById(bot.children[1]).exec();
-    const _botC = await Bot.findById(bot.children[2]).exec();
+    botLog(bot, "PLACING FLIPPED ORDERS...\n");
+if (DEV)
+        botLog(bot, {pairA, pairB, pairC})
+    const isSuperMega = bot.arbit_settings.super_mega;
+
+    const _botA = isSuperMega ? bot : await Bot.findById(bot.children[0]).exec();
+    const _botB = isSuperMega ? bot : await Bot.findById(bot.children[1]).exec();
+    const _botC = isSuperMega ? bot : await Bot.findById(bot.children[2]).exec();
 
     if (!_botA || !_botB || !_botC) {
         return botLog(bot, "ONE OF THE CHILD BOTS IS MISSING", {
@@ -245,9 +271,9 @@ export const placeArbitOrdersFlipped = async ({
         });
     }
 
-    const platA = new objPlats[_botA.platform](_botA);
-    const platB = new objPlats[_botB.platform](_botB);
-    const platC = new objPlats[_botC.platform](_botC);
+    const platA = new objPlats[_botA.platform](_botA, pairA);
+    const platB = new objPlats[_botB.platform](_botB, pairB);
+    const platC = new objPlats[_botC.platform](_botC, pairC);
 
     const { platform } = bot;
 
@@ -286,9 +312,7 @@ export const placeArbitOrdersFlipped = async ({
             "CANNOT GET PRECISION OR MIN/MAX AMT/SZ FOR ONE OF THE PAIRS"
         );
     }
-    botLog(bot, "PLACING FLIPPED ORDERS...\n");
 
-    let order = await getLastOrder(_botA);
 
     let bal = bot.balance;
     if (bot.balCcy != _botC.ccy)
@@ -331,35 +355,36 @@ export const placeArbitOrdersFlipped = async ({
     const arbitOrder = new TriArbitOrder({ bot: bot.id });
     let aord: typeof arbitOrder.order;
     // BUY C [APEX] at C
-    // const resC = await placeTrade({
-    //     amt: bal,
-    //     ordType: "Market",
-    //     price: cPxC,
-    //     pair: pairC,
-    //     bot: _botC,
-    //     plat: platC,
-    //     side: "buy",
-    //     ts,
-    // });
+    const resC = await placeTrade({
+        amt: bal,
+        ordType: "Market",
+        price: cPxC,
+        pair: pairC,
+        bot,
+        plat: platC,
+        side: "buy",
+        ts,
+        is_child: true
+    });
 
-    // if (!resC) return botLog(bot, "Failed to place BUY order for: [C]", pairC);
+    if (!resC) return botLog(bot, "Failed to place BUY order for: [C]", pairC);
 
-    // const orderC = await getLastOrder(_botC);
-    // if (!orderC) return botLog(bot, "Failed to get orderC");
+    const orderC = await getLastOrder(_botC, pairC)
+    if (!orderC) return botLog(bot, "Failed to get orderC");
 
     // CREATE FAKE ORDER
     
-    const orderC = new TuOrder({
-        _entry: cPxC,
-        buy_timestamp: { i: ts, o: parseDate(Date.now()) },
-        side: "buy",
-        bot: _botC.id,
-        base: _botC.base,
-        ccy: _botC.ccy,
-        ccy_amt: bal,
-        base_amt: 0,
-        is_arbit: true,
-    });
+    // const orderC = new TuOrder({
+    //     _entry: cPxC,
+    //     buy_timestamp: { i: ts, o: parseDate(Date.now()) },
+    //     side: "buy",
+    //     bot: _botC.id,
+    //     base: _botC.base,
+    //     ccy: _botC.ccy,
+    //     ccy_amt: bal,
+    //     base_amt: 0,
+    //     is_arbit: true,
+    // });
     const _b = bal / cPxC;
     const _fee = (_b * 0.1) / 100;
     now = Date.now();
@@ -392,10 +417,11 @@ export const placeArbitOrdersFlipped = async ({
         plat: platB,
         side: "sell",
         ts,
+        is_child: true
     });
 
     if (!resB) return botLog(bot, "Failed to place SELL order for: [B]", pairB);
-    const orderB = await getLastOrder(_botB);
+    const orderB = await getLastOrder(_botB, pairB);
 
     if (!orderB) return botLog(bot, "Failed to get orderB");
     orderB.side = "sell";
@@ -418,11 +444,12 @@ export const placeArbitOrdersFlipped = async ({
         plat: platA,
         side: "sell",
         ts,
+        is_child: true
     });
 
     if (!resA) return botLog(bot, "Failed to place SELL order for: [A]", pairA);
 
-    const orderA = await getLastOrder(_botA);
+    const orderA = await getLastOrder(_botA, pairA);
 
     if (!orderA) return botLog(bot, "Failed to get order A");
     orderA.side = "sell";

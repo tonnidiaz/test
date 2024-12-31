@@ -3,16 +3,18 @@ import { Job } from "node-schedule";
 import path from "path";
 import axios from "axios"
 import nodeUrl from "node:url";
+import { handleErrs } from "./functions";
 
 const __filename = nodeUrl.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const _dirname = __dirname
-console.log({_dirname});
+// console.log({_dirname});
 try {
     configDotenv();
-    console.log(process.env.ENV);
+    // console.log(process.env.ENV);
 } catch (err) {
-    console.log("Dotenv err", err);
+    console.log("Dotenv err");
+    handleErrs(err)
 }
 export const DEV = process.env.ENV == "dev";
 
@@ -35,6 +37,7 @@ export const slPercent = 0.5 / 100,
     minDiff = 0;
 export const dfsRootDir = "../data/dfs",
     klinesRootDir = path.join(_dirname, "../data/klines"),
+    instrusRootDir = path.join(_dirname, "./data/instrus"),
     tradesRootDir = path.join(_dirname, "../data/trades");
 
 export const isMarket = true,

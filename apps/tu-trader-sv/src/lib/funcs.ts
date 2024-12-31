@@ -51,7 +51,7 @@ export const clearBotOrders = async (el: any, bot: IObj, updateBot?: any) => {
         el.innerHTML = defHtml
         return true;
     } catch (err) {
-        console.log(err);
+        handleErrs(err);
         el.innerHTML = defHtml
         return false;
     }

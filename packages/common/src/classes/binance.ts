@@ -1,10 +1,10 @@
 import { IBot } from "@cmn/models/bot";
 import { getExactDate, parseFilledOrder } from "@cmn/utils/funcs2";
-import { capitalizeFirstLetter, getSymbol, handleErrs } from "@cmn/utils/functions";
-import { botLog } from "@cmn/utils/bend/functions";
-import { parseDate } from "@cmn/utils/functions";
-import { writeFileSync } from "node:fs";
-import { DEV, isStopOrder } from "@cmn/utils/constants";
+import {
+    capitalizeFirstLetter,
+    getSymbol,
+    handleErrs,
+} from "@cmn/utils/functions";
 import { IOrderDetails, IOrderbook } from "@cmn/utils/interfaces";
 import { Platform } from "./platforms";
 import { MainClient, SymbolPrice } from "binance";
@@ -14,8 +14,8 @@ export class Binance extends Platform {
     apiSecret: string;
     client: MainClient;
 
-    constructor(bot: IBot) {
-        super(bot);
+    constructor(bot: IBot, pair?: string[]) {
+        super(bot, pair);
 
         this.apiKey = this.bot.demo
             ? process.env.BINANCE_API_KEY!
@@ -24,31 +24,38 @@ export class Binance extends Platform {
             ? process.env.BINANCE_API_SECRET!
             : process.env.BINANCE_API_SECRET!;
         this.client = new MainClient({
-            api_key:  this.apiKey,
+            api_key: this.apiKey,
             api_secret: this.apiSecret,
         });
     }
-    
 
     async getBal(ccy?: string) {
-        console.log(`\nGETTING BALANCE FOR BOT=${this.bot.name}\n`);
+        this.log(`\nGETTING BALANCE FOR BOT=${this.bot.name}\n`);
         try {
             const res = await this.client.getWalletBalances();
-           
-            return Number(res.find(el=> el.walletName == ccy).balance);
+
+            return Number(res.find((el) => el.walletName == ccy).balance);
         } catch (error) {
-            console.log(error);
+            this.log(error);
         }
     }
-    async placeOrder(
-        amt: number,
-        price?: number,
-        side: "buy" | "sell" = "buy",
-        sl?: number,
-        clOrderId?: string
-    ) {
-        const od = { price, sl, amt, side };
-        botLog(this.bot, `PLACING ORDER: ${JSON.stringify(od)}`);
+    async placeOrder({
+        amt,
+        price,
+        side,
+        sl,
+        clOrderId,
+        useBaseCcy,
+    }: {
+        amt: number;
+        price?: number;
+        side?: "buy" | "sell";
+        sl?: number;
+        clOrderId?: string;
+        useBaseCcy: boolean;
+    }): Promise<string | void | undefined | null> {
+   
+        await super.placeOrder({ amt, price, side, sl, clOrderId, useBaseCcy });
         try {
             const { order_type } = this.bot;
             const is_market = price == undefined;
@@ -61,49 +68,47 @@ export class Binance extends Platform {
                 timeInForce: "GTC",
                 newClientOrderId: clOrderId,
             });
-         
-            console.log(`\ORDER PLACED FOR BOT=${this.bot.name}\n`);
+
+            this.log(`\ORDER PLACED\n`);
 
             return `${res.orderId}`;
         } catch (error) {
-            this._log("Failed to place order")
-            handleErrs(error)
+            this.log("Failed to place order");
+            handleErrs(error);
         }
     }
 
     async getOrderbyId(orderId: string, isAlgo = false, pair?: string[]) {
         try {
             let data: IOrderDetails | null = null;
-            pair = pair ?? [this.bot.base, this.bot.ccy];
+            pair = pair || this.pair;
 
-            botLog(this.bot, "GETTING ORDER FOR", pair);
+            this.log( "GETTING ORDER FOR", pair);
             const symbo = getSymbol(pair, this.bot.platform);
             const res = await this.client.getOrder({
                 symbol: symbo,
                 orderId: Number(orderId),
             });
 
-           
-
             if (res.status != "FILLED") {
-                this._log("Order not yet filled");
+                this.log("Order not yet filled");
                 return "live";
             }
 
             data = parseFilledOrder(res, this.bot.platform);
             return data;
         } catch (error) {
-            this._log("Failed to get order")
-            handleErrs(error)
+            this.log("Failed to get order");
+            handleErrs(error);
         }
     }
     async getTicker() {
-        botLog(this.bot, "GETTING TICKER...");
+        this.log( "GETTING TICKER...");
         const res = await this.client.getSymbolPriceTicker({
             symbol: this.getSymbol(),
         });
         const ticker = (res as SymbolPrice).price;
-        console.log({ ticker });
+        this.log({ ticker });
         return ticker;
     }
     async getKlines({
@@ -130,7 +135,7 @@ export class Binance extends Platform {
         //     ? getSymbol(pair, this.bot.platform)
         //     : this.getSymbol();
 
-        // console.log("[BINANCE]: GETTING KLINES FOR:", symbol);
+        // this.log("[BINANCE]: GETTING KLINES FOR:", symbol);
         // const res = await this.client.getKline({
         //     symbol,
         //     interval: interval as any,
@@ -140,7 +145,7 @@ export class Binance extends Platform {
         // });
         // let data = res.result.list;
         // if (!data) {
-        //     console.log(res);
+        //     this.log(res);
         //     return botLog(
         //         this.bot,
         //         `FAILED TO GET KLIES FOR: ${symbol} ON BINANCE`
@@ -151,9 +156,9 @@ export class Binance extends Platform {
 
         // const last = Number(d[d.length - 1][0]);
 
-        // botLog(this.bot, { end: parseDate(end), last: parseDate(last) });
+        // this.log( { end: parseDate(end), last: parseDate(last) });
         // if (end >= last + interval * 60000) {
-        //     botLog(this.bot, "END > LAST");
+        //     this.log( "END > LAST");
         //     return await this.getKlines({ start, end, interval, pair, limit });
         // }
         // return limit == 1 ? d[d.length - 1] : d;
@@ -165,7 +170,7 @@ export class Binance extends Platform {
     }
 
     getSymbol() {
-        return `${this.bot.base}${this.bot.ccy}`;
+        return getSymbol(this.pair, this.bot.platform);
     }
     async cancelOrder({ ordId }: { ordId: string }) {
         try {
@@ -175,8 +180,8 @@ export class Binance extends Platform {
             //     category: this.bot.category as any,
             // });
             // if (res.retCode != 0) {
-            //     botLog(this.bot, "FAILED TO CANCEL ORDER");
-            //     console.log(res);
+            //     this.log( "FAILED TO CANCEL ORDER");
+            //     this.log(res);
             //     return;
             // }
             // return res.result.orderId;
@@ -188,7 +193,7 @@ export class Binance extends Platform {
         //     const res = await this.client.getCoinInfo();
         //     return res;
         // } catch (e) {
-        //     console.log(e);
+        //     this.log(e);
         // }
     }
 
@@ -201,11 +206,10 @@ export class Binance extends Platform {
         //         category: "spot",
         //     });
         //     if (res.retCode != 0) {
-        //         botLog(this.bot, res);
-        //         return botLog(this.bot, "FAILED TO GET ORDERBOOK");
+        //         this.log( res);
+        //         return this.log( "FAILED TO GET ORDERBOOK");
         //     }
         //     const data = res.result;
-
         //     const ob: IOrderbook = {
         //         ts: parseDate(Number(res.result.ts)),
         //         bids: data.b.map((el) => ({
@@ -221,21 +225,35 @@ export class Binance extends Platform {
         //     };
         //     return ob
         // } catch (e) {
-        //     botLog(this.bot, "FAILED TO GET ORDERBOOK");
-        //     console.log(e);
+        //     this.log( "FAILED TO GET ORDERBOOK");
+        //     this.log(e);
         // }
     }
 
-    async withdraw({ amt, coin, chain, addr }: { amt: number; coin: string; chain: string; addr: string; }): Promise<string | null | void | undefined> {
-        super.withdraw({amt, coin,chain, addr})
-        try{
-            const r = await this.client.withdraw({coin, network: chain, address: addr, amount: amt});
-           
-            return r.id
-        }
-        catch(e){
-            this._log(`Failed to withdraw ${amt} of ${coin} through ${chain}`)
-            handleErrs(e)
+    async withdraw({
+        amt,
+        coin,
+        chain,
+        addr,
+    }: {
+        amt: number;
+        coin: string;
+        chain: string;
+        addr: string;
+    }): Promise<string | null | void | undefined> {
+        super.withdraw({ amt, coin, chain, addr });
+        try {
+            const r = await this.client.withdraw({
+                coin,
+                network: chain,
+                address: addr,
+                amount: amt,
+            });
+
+            return r.id;
+        } catch (e) {
+            this.log(`Failed to withdraw ${amt} of ${coin} through ${chain}`);
+            handleErrs(e);
         }
     }
 }

@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { dev } from "$app/environment";
     import BotFormModal from "@/components/BotFormModal.svelte";
     import BotOrderItem from "@/components/BotOrderItem.svelte";
     import CtxMenu2 from "@/components/CtxMenu2.svelte";
@@ -83,6 +84,9 @@
         // Watch [orderType, allOrders]
         const oType = orderType;
         const _orders = allOrders;
+        
+        oType;
+        if (dev) console.log({_orders});
         untrack(() => {
             filterOrders(_orders);
         });
@@ -100,6 +104,7 @@
                 for (let page = 1; page <= totalPages; page++) {
                     await sleep(500);
                     try {
+                        console.log('Getting orders...');
                         const res = await localApi().get("/orders", {
                             params: {
                                 limit,
@@ -107,7 +112,8 @@
                                 page,
                             },
                         });
-                        allOrders.push(...res.data);
+                        if (dev) console.log(res.data);
+                        allOrders = [...allOrders,...res.data];
                         // res.data.on("data", (chunk) => {
                         //     console.log(JSON.parse(chunk));
                         // });
@@ -246,14 +252,16 @@
                         <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
                         <li
                             class={!_bot.orders ? "disabled" : ""}
-                            onclick={(e) =>
-                                clearBotOrders(
+                            onclick={async(e) =>
+                               {const res = await clearBotOrders(
                                     (e.target as any).parentElement,
                                     _bot,
                                     (val) => {
                                         _bot = val;
                                     }
-                                )}
+                                );
+                                if (res) allOrders = []}
+                                }
                         >
                             <span>Clear orders</span>
                         </li>
@@ -383,8 +391,8 @@
                                 <div
                                     class="grid sm:grid-cols-2 gap-3 items-end mt-4 mb-1"
                                 >
-                                    <UFormGroup label="Arbit type">
                                         <TuSelect
+                                            showLabel
                                             bind:value={_bot.arbit_settings
                                                 ._type}
                                             class="w-full"
@@ -395,7 +403,6 @@
                                             required
                                             options={listToOpt(arbitTypes)}
                                         />
-                                    </UFormGroup>
                                     <UFormGroup label="Min. arbit %">
                                         <UInput
                                             disabled
@@ -442,7 +449,13 @@
                                         />
                                     </UFormGroup>
                                 </div>
-                                <div class="my-2 grid grid-cols-2 items-center">
+                                <div class="my-2 grid grid-cols-3 items-center">
+                                    <UCheckbox
+                                        disabled
+                                        label="Super mega"
+                                        title="Is a super-mega bot"
+                                        bind:value={_bot.arbit_settings.super_mega}
+                                    ></UCheckbox>
                                     <UCheckbox
                                         disabled
                                         label="Flipped"
@@ -452,7 +465,7 @@
                                     <UCheckbox
                                         disabled
                                         label="Use Ws"
-                                        title="Use websockets"
+                                        title="Uses websockets"
                                         bind:value={_bot.arbit_settings.use_ws}
                                     ></UCheckbox>
                                 </div>

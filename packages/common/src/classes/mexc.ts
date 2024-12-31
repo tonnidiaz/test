@@ -38,9 +38,8 @@ export class Mexc extends Platform {
     client: Spot;
     client2: TSpot;
     axiosClient: Axios;
-    constructor(bot: IBot) {
-        super(bot)
-        this.bot = bot;
+    constructor(bot: IBot, pair?: string[]) {
+        super(bot, pair);
         this.apiKey = process.env.MEXC_API_KEY!;
         this.apiSecret = process.env.MEXC_API_SECRET!;
         this.passphrase = process.env.MEXC_PASSPHRASE!;
@@ -86,17 +85,10 @@ export class Mexc extends Platform {
             console.log(error);
         }
     }
-    async placeOrder(
-        amt: number,
-        price?: number,
-        side: "buy" | "sell" = "buy",
-        sl?: number,
-        clOrderId?: string
-    ) {
-        const od = { price, sl, amt, side };
-        botLog(this.bot, `PLACING ORDER: ${JSON.stringify(od)}`);
+    async placeOrder({ amt, price, side, sl, clOrderId, useBaseCcy }: { amt: number; price?: number; side?: "buy" | "sell"; sl?: number; clOrderId?: string; useBaseCcy: boolean; }): Promise<string | void | undefined | null> {
+
+        await super.placeOrder({amt, price, side, sl, clOrderId, useBaseCcy});
         try {
-            const { order_type } = this.bot;
 
             const is_market = price == undefined;
             const res = await this.client.newOrder(
@@ -217,7 +209,7 @@ export class Mexc extends Platform {
     }
 
     getSymbol() {
-        return getSymbol([this.bot.base, this.bot.ccy], "mexc");
+        return getSymbol(this.pair, "mexc");
     }
     async cancelOrder({ ordId }: { ordId: string }) {
         try {
@@ -261,7 +253,7 @@ export class Mexc extends Platform {
         }
         catch(e){
             
-            this._log(`Failed to withdraw ${amt} of ${coin} through ${chain}`)
+            this.log(`Failed to withdraw ${amt} of ${coin} through ${chain}`)
             // console.log(e);
 
             handleErrs(e)

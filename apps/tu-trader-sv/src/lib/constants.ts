@@ -110,7 +110,7 @@ export const BEND_URL = __DEV__
     : heroku
       ? "https://tu-trader-3996d65ded90.herokuapp.com"
       : koyeb
-        ? "https://tu-trader.koyeb.app"
+        ? "https://bitter-nedda-tb-org2-a73c17f6.koyeb.app"
         : "https://tu-trader-mef0.onrender.com";
 export const API_URL = "/api"
 

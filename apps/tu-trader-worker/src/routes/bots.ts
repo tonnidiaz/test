@@ -9,20 +9,15 @@ import { clearOrders, parseBot } from "@cmn/utils/bend/funcs";
 import { botLog } from "@cmn/utils/bend/functions";
 import { jobs, botJobSpecs } from "@cmn/utils/constants";
 import { taskManager } from "@cmn/utils/consts3";
-import { getInstrus, getPricePrecision, handleErrs, parseDate } from "@cmn/utils/functions";
+import { getInstrus, getPricePrecision, handleErrs, parseDate, timedLog } from "@cmn/utils/functions";
 import { createChildBots } from "@cmn/utils/functions/bots-funcs";
 import { addBotJob } from "@cmn/utils/orders/funcs";
-import express from "express"
+import express, {type Response} from "express"
 
 const router = express.Router();
 
-router.post("/:id/toggle-mega-bot", authMid, async (req, res)=>{
-    try {
-        const {side} = req.query;
-        const bot = await Bot.findById(req.params.id).exec()
-        if (!bot) return tunedErr(res,400, "Bot not found")
-
-        let megaBot = superMegaBots.find(el=> el.bot._id == bot._id)
+export const toggleMegaBot = async (bot: IBot, side: 'activate' | 'deactivate', res?: Response) =>{
+    let megaBot = superMegaBots.find(el=> el.bot._id == bot._id)
         
         if (!megaBot)
             {
@@ -41,8 +36,17 @@ router.post("/:id/toggle-mega-bot", authMid, async (req, res)=>{
         megaBot.bot = bot;
         await bot.save()
         const r = await megaBot.subUnsub(bot.active ? 'sub' : 'unsub')
-        if (!r) return tunedErr(res, 500, "Failed to activate/deactivate bot")
+        timedLog("Done", {r})
+        if (!r) return !res ? undefined : tunedErr(res, 500, "Failed to activate/deactivate bot")
+}
+router.post("/:id/toggle-mega-bot", authMid, async (req, res)=>{
+    try {
+        const {side} = req.query;
+        const bot = await Bot.findById(req.params.id).exec()
+        if (!bot) return tunedErr(res,400, "Bot not found")
             
+        const r = await toggleMegaBot(bot, side as any, res)
+        if (r === null) return r;
         
         res.json(await parseBot(bot))
     
@@ -149,6 +153,7 @@ router.post("/:id/edit", authMid, async (req, res) => {
                 if (k == "balance" && updateBal) {
                     bot.set("balCcy", bot.ccy);
                 }
+                if (bot.type == 'arbitrage' && !bot.arbit_settings.super_mega)
                 if (commonFields.includes(k)) {
                     const childA = await Bot.findById(bot.children[0]).exec();
                     const childB = await Bot.findById(bot.children[1]).exec();
