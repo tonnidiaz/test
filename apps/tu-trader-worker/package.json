@@ -4,10 +4,16 @@
     "private": true,
     "description": "Express app with typescript by Tu",
     "author": "Tonni Diaz",
-    "main": "dist/apps/tu-trader-worker/src/index.js",
+    "type": "module",
     "scripts": {
-        "build": "rimraf dist && tsc --project tsconfig.json && tsc-alias -p tsconfig.json",
-        "start": "node -r tsconfig-paths/register dist/apps/tu-trader-worker/src/index.js",
+        "cp": "copyfiles -u 1 ./src/views/**/* ./src/public/**/* ./src/assets/**/* ./dist",
+        "build0": "rimraf dist && tsc --project tsconfig.json && tsc-alias -p tsconfig.json && npm run cp",
+        "build": "rimraf dist && tsc && npm run cp",
+        "esbuild": "rimraf dist && esbuild src/index.ts --bundle --platform=node --outfile=dist/bundle.js --resolve-extensions=.js,.ts && npm run cp",
+        "start0": "node -r tsconfig-paths/register dist/src/index.js",
+        "start": "node dist/src/index.js",
+        "start:es": "node dist/bundle.js",
+        "build:es": "rimraf dist && node esbuild.config.js && npm run cp",
         "dev": "tsx watch src/index.ts"
     },
     "dependencies": {
@@ -29,6 +35,7 @@
         "@types/cors": "*",
         "@types/express": "*",
         "@types/node": "*",
+        "esbuild-plugin-copy": "^2.1.1",
         "rimraf": "*",
         "tsc-alias": "^1.8.10",
         "tsconfig-paths": "^4.2.0",

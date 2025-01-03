@@ -1,15 +1,13 @@
 {
-    "extends": "../../packages/typescript-config/base.json",
+    // "extends": "../../packages/typescript-config/base.json",
     "compilerOptions": {
-        // "module": "commonjs",
-        // "lib": [ "es2022","es2020", "dom"],
+        "module": "ESNext",
         "allowSyntheticDefaultImports": true,
-        // "target": "es2022",
-        "rootDir": "../../",
-        // "moduleResolution": "node",
+        "target": "ESNext",
+        "rootDir": ".",
+        "moduleResolution": "node",
         "baseUrl": ".",
-        "outDir": "./dist",
-        "rootDirs": ["../../packages/common/"], 
+        "outDir": "dist", 
         "paths": {
             "@/*": ["src/*"],
             "~/*": ["src/*"],
@@ -24,19 +22,8 @@
         "resolveJsonModule": true,
         "isolatedModules": true,
         "sourceMap": true,
-
-        // From svelte
-        "lib": ["esnext", "DOM", "DOM.Iterable"],
-        "moduleResolution": "bundler",
-        "module": "esnext",
-        // "noEmit": true,
-        "target": "esnext"
+        "allowJs": true
     },
-    "include": [
-        "src/**/*.ts",
-        "./*.ts",
-        "tests/**/*.ts",
-        "../../packages/common/src/**/*.ts"
-    ],
-    "exclude": ["node_modules", "../../**/*.spec.ts"]
+    "include": ["src/**/*.ts", "./*.ts", "tests/**/*.ts", "../../packages/common/src/**/*.ts"],
+    "exclude": ["node_modules", "**/*.spec.ts", "../../**/*.spec.ts"]
 }

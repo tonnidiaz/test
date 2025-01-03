@@ -3,7 +3,7 @@ import { test_platforms } from "./consts";
 import { __DEV__, pairsOfInterest, taskManager } from "./consts3";
 import { IOrderbook, TPlatName } from "./interfaces";
 import { timedLog } from "./functions";
-import { bookJobs, botJobSpecs, DEV, localApi } from "./constants";
+import { bookJobs, botJobSpecs, DEV, instrusRootDir, localApi } from "./constants";
 import { TuBook, TuConfig } from "@cmn/models";
 import { configDotenv } from "dotenv";
 import mongoose from "mongoose";

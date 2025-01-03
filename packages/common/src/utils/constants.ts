@@ -3,18 +3,22 @@ import { Job } from "node-schedule";
 import path from "path";
 import axios from "axios"
 import nodeUrl from "node:url";
-import { handleErrs } from "./functions";
 
-const __filename = nodeUrl.fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const _dirname = __dirname
+
+export const getDirName = () => {
+    const _filename =typeof __filename != "undefined" ? __filename : nodeUrl.fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(_filename);
+   return __dirname
+}
+
+const _dirname = getDirName()
 // console.log({_dirname});
 try {
     configDotenv();
     // console.log(process.env.ENV);
 } catch (err) {
     console.log("Dotenv err");
-    handleErrs(err)
+    console.log(err);
 }
 export const DEV = process.env.ENV == "dev";
 

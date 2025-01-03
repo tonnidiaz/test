@@ -1,6 +1,5 @@
-import { klinesRootDir } from "./constants";
-import { clearTerminal, timedLog } from "./functions";
-import { IObj, ITask, TPlatName } from "./interfaces";
+import { timedLog } from "./functions";
+import { ITask } from "./interfaces";
 
 export const platList = [
     "binance",

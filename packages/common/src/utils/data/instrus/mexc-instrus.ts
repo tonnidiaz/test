@@ -6,7 +6,7 @@ const instru = {
         status: "1",
         baseAsset: "TRUMP1",
         baseAssetPrecision: 0,
-        quoteAsset: "USDT",
+        quoteAsset: "USDT", 
         quotePrecision: 15,
         quoteAssetPrecision: 15,
         baseCommissionPrecision: 0,
