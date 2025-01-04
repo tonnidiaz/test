@@ -54,7 +54,7 @@ export const tunedErr = (res: Response, status: number, msg: string, e?: any) =>
 };
 
 
-const __filename = fileURLToPath(import.meta.url);
+// const __filename = __filename//fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const jsonPath = __dirname + "/../assets/store.json";
 export const getStoreDetails = () => {
