@@ -1,4 +1,5 @@
-@import "./vars";
+@use "vars";
+@use "colors";
 
 $form-w: 350px;
 .auth-form, .formset {
@@ -12,7 +13,7 @@ $form-w: 350px;
     }
 }
 .auth-form{
-     background: $color-card;
+     background: colors.$color-card;
      border-radius: 4px;
      
 }

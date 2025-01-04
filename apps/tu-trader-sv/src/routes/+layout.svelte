@@ -1,9 +1,10 @@
 <script lang="ts">
+    import "@flaticon/flaticon-uicons/css/all/all.css";
     import "@/styles/globals.css";
     import "@/styles/styles2.scss";
     import "@/styles/page-progress.css";
     import "@/styles/select.scss";
-    import "@/styles/styles.scss";
+    import "@/styles/styles1.scss";
     import "@/styles/daisy.scss";
     import "@/styles/scrollbar.scss";
     import "@/styles/components.scss";

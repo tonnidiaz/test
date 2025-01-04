@@ -1,8 +1,8 @@
-@import "@material-design-icons/font";
-@import "@flaticon/flaticon-uicons/css/all/all";
-@import "./colors";
-@import "./vars";
-@import "./classes";
+
+@use "sass:meta";
+@use "colors";
+@use "vars";
+@use "classes";
 
 
 @font-face {
@@ -59,4 +59,4 @@
 @import url("../../static/assets/fonts/DMSans/fonts.css");
 
 
-@import "./_styles";
+@include meta.load-css("_styles");

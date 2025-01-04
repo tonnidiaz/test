@@ -1,5 +1,5 @@
 <script>
-
+    import "@/styles/main.scss"
     import { parseDate } from "@cmn/utils/functions";
 
 </script>
