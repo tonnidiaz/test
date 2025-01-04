@@ -189,14 +189,14 @@ export class Bitget extends Platform {
         super.withdraw({amt, coin, chain, addr})
         try {
             const res = await this.client.spotWithdraw({
-                currency: coin, chain, amount: amt, address: addr
+                coin: coin, chain, size : amt.toString(), address: addr, transferType: "on_chain"
             })
             if (res.code != "200000") {
                 this.log( "FAILED TO WITHDRAW");
                 this.log(res);
                 return;
             }
-            return res.data.withdrawalId
+            return res.data.orderId
         } catch (err) {
             this.log('Failed to withdraw')
             handleErrs(err)

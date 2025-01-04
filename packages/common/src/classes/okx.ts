@@ -334,7 +334,7 @@ export class OKX extends Platform {
         super.withdraw({amt, coin, chain, addr})
         try {
             const res = await this.client.submitWithdraw({
-                ccy: coin, chain, amt: amt.toString(), toAddr: addr, dest: "3", fee: "0"
+                ccy: coin, chain, amt: amt.toString(), toAddr: addr, dest: "3"
             })
             return res[0].wdId
         } catch (err) {

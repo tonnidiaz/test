@@ -13,12 +13,6 @@
             "path": "apps/tu-trader-next"
         },
         {
-            "path": "../../Next/tu-trader-next"
-        },
-        {
-            "path": "apps/tu-trader-worker"
-        },
-        {
             "path": "apps/tu-trader-sv"
         },
         {
