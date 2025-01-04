@@ -1,6 +1,6 @@
 import { configDotenv } from "dotenv";
 import { Job } from "node-schedule";
-import path from "path";
+import path from "node:path";
 import axios from "axios"
 import nodeUrl from "node:url";
 

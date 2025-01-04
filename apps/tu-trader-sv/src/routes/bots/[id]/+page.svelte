@@ -33,6 +33,8 @@
         allOrders = $state<IObj[]>([]),
         orderType = $state<EOrder>("all");
 
+    const isSuperMega = $derived(_bot?.arbit_settings?.super_mega)
+
     const moreInfo = [{ label: "More info", content: "Lorem Ipsum" }];
 
     const getChildPair = (bot: IObj, i: number) => {
@@ -100,7 +102,7 @@
                 const limit = 100;
                 const totalPages = Math.ceil(__bot.orders / limit);
                 const { orders } = __bot;
-
+                allOrders = []
                 for (let page = 1; page <= totalPages; page++) {
                     await sleep(500);
                     try {
@@ -152,8 +154,10 @@
 
                 <div class="flex gap-4 justify-center items-center">
                     <span class="fw-8">
+                        {#if _bot.type == "normal"}
                         {_bot.base}/{_bot.ccy}
-                        {_bot.type == "arbitrage" ? `${_bot.C}/${_bot.B}` : ""}
+                        {/if}
+                        {_bot.type == "arbitrage" ? (isSuperMega ? [ _bot.B, _bot.A]: [ _bot.C, _bot.B, _bot.A]) : ""}
                     </span>
                     <UBadge
                         label={(_bot.is_child &&
@@ -529,7 +533,7 @@
                             </div>
                         {/snippet}
                     </UAccordion>
-                    {#if _bot.children?.length}
+                    {#if _bot.children?.length && !isSuperMega}
                         <UAccordion multiple class="multiple">
                             {#snippet label()}
                                 Children

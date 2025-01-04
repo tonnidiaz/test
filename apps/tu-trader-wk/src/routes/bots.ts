@@ -8,8 +8,7 @@ import { IBot } from "@cmn/models/bot";
 import { clearOrders, parseBot } from "@cmn/utils/bend/funcs";
 import { botLog } from "@cmn/utils/bend/functions";
 import { jobs, botJobSpecs } from "@cmn/utils/constants";
-import { taskManager } from "@cmn/utils/consts3";
-import { getInstrus, getPricePrecision, handleErrs, parseDate, timedLog } from "@cmn/utils/functions";
+import { handleErrs, parseDate, timedLog } from "@cmn/utils/functions";
 import { createChildBots } from "@cmn/utils/functions/bots-funcs";
 import { addBotJob } from "@cmn/utils/orders/funcs";
 import express, {type Response} from "express"

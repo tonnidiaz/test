@@ -9,7 +9,7 @@
     import { onMount } from "svelte";
     import CtxMenu2 from "./CtxMenu2.svelte";
     import UDivider from "./UDivider.svelte";
-    let ioConnected = $state(true);
+    let ioConnected = $state(false);
     let menuOpen = $state(false);
     let { user } = $derived(userStore);
     const menuItems = [

@@ -9,7 +9,7 @@ import {
     accelerationBands,
     sma,
 } from "indicatorts";
-import path from "path";
+import path from "node:path";
 import { SL, TP, useHaClose } from "./constants";
 import { OrderDetails } from "okx-api";
 import { IBot } from "@cmn/models/bot";

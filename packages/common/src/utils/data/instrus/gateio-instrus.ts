@@ -1,5 +1,3 @@
-import { readJson } from "@cmn/utils/bend/functions"
-import { instrusRootDir } from "@cmn/utils/constants"
 
 const instru = {
         id: "0DOG_USDT",
@@ -19,5 +17,7 @@ const instru = {
 
     type Instru = typeof instru
 
-    export const gateioInstrus: Instru[] =  readJson(instrusRootDir + "/gateio-instrus.json")
+    import instrus from "./gateio-instrus.json"
+    export const gateioInstrus: Instru[] =  instrus as any
+    
     

@@ -3,7 +3,7 @@ import * as nodemailer from "nodemailer";
 import * as nfs from "node:fs";
 const { env } = process;
 import { Response } from "express";
-import path, { dirname } from "path";
+import path, { dirname } from "node:path";
 import { OTP } from "@cmn/models";
 import { IBot } from "@cmn/models/bot";
 import { randomInRange, parseDate } from "../functions";

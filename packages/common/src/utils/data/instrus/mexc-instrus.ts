@@ -1,5 +1,3 @@
-import { readJson } from "@cmn/utils/bend/functions"
-import { instrusRootDir } from "@cmn/utils/constants"
 
 const instru = {
         symbol: "TRUMP1USDT",
@@ -29,6 +27,7 @@ const instru = {
     
 
     type Instru = typeof instru
-
-    export const mexcInstrus: Instru[] =  readJson(instrusRootDir + "/mexc-instrus.json")
+    import instrus from "./mexc-instrus.json"
+    export const mexcInstrus: Instru[] =  instrus as any
+    
     

@@ -1,5 +1,3 @@
-import { readJson } from "@cmn/utils/bend/functions"
-import { instrusRootDir } from "@cmn/utils/constants"
 
 const instru =  {
         symbol: "AVA-USDT",
@@ -23,5 +21,7 @@ const instru =  {
     
     type Instru = typeof instru
 
-    export const kucoinInstrus: Instru[] =  readJson(instrusRootDir + "/kucoin-instrus.json")
+    import instrus from "./kucoin-instrus.json"
+    export const kucoinInstrus: Instru[] =  instrus as any
+    
     

@@ -23,6 +23,9 @@
         },
         {
             "path": "packages/common"
+        },
+        {
+            "path": "apps/tu-trader-wk"
         }
     ],
     "settings": {}

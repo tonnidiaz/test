@@ -7,7 +7,6 @@ import { gateioInstrus } from "./data/instrus/gateio-instrus";
 import { okxInstrus } from "./data/instrus/okx-instrus";
 import { IObj, TPlatName } from "./interfaces";
 import { isAxiosError } from "axios";
-import { error } from "console";
 
 const test = false;
 

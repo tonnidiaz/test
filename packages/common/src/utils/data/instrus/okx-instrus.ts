@@ -1,5 +1,4 @@
-import { readJson } from "@cmn/utils/bend/functions"
-import { instrusRootDir } from "@cmn/utils/constants"
+
 
 const instru = {
     alias: "",
@@ -36,4 +35,6 @@ const instru = {
 }
 type Instru = typeof instru
 
-export const okxInstrus: Instru[] =  readJson(instrusRootDir + "/okx-instrus.json")
+import instrus from "./okx-instrus.json"
+export const okxInstrus: Instru[] =  instrus as any
+

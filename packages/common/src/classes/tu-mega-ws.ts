@@ -198,7 +198,7 @@ export class TuMegaWs {
 
         // PairB [B, C]
         let bPairs = pairs.filter((el) => el[1] == B)
-        if (DEV) bPairs.slice(0, 3)
+        if (DEV) bPairs = bPairs.slice(0, 3)
         for (let pairB of bPairs ) {
             const C = pairB[0];
             const pairA = [B, A],
@@ -226,11 +226,11 @@ export class TuMegaWs {
                     active: true
                 });
 
-            const unsubA =
+            const unsubA = true ||
                 this.miniBots.findIndex((el) => el.A == pairA.toString()) == -1; // pairA not in any of active bots
-            const unsubB =
+            const unsubB = true ||
                 this.miniBots.findIndex((el) => el.B == pairB.toString()) == -1; // pairA not in any of active bots
-            const unsubC =
+            const unsubC = true ||
                 this.miniBots.findIndex((el) => el.C == pairC.toString()) == -1; // pairA not in any of active bots
             // if (this.ws?.readyState != this.ws?.OPEN) {
             //     this.log("NOT READY");
