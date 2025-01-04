@@ -5,24 +5,24 @@
     // "module": "commonjs",
     "declaration": true,
     "declarationMap": true,
-    "noEmit": true,
+    "noEmit": false,
     "baseUrl": ".",
     "outDir": "./dist",
         "paths": { 
         "@cmn/*": ["./src/*"]
     },
     // "target": "ESNext",
-    "types": ["vite/client"],
+    // "types": ["vite/client"],
     // From svelte
-    "lib": [
-			"esnext",
-			"DOM",
-			"DOM.Iterable"
-		],
-		"moduleResolution": "bundler", 
-		"module": "esnext",
+    // "lib": [
+	// 		"esnext",
+	// 		"DOM",
+	// 		"DOM.Iterable"
+	// 	],
+		// "moduleResolution": "bundler", 
+		// "module": "esnext",
 		// "noEmit": true,
-		"target": "esnext"
+		// "target": "esnext"
   },
   "include": ["./src/**/*.ts", "**/*.ts"],
   "exclude": ["dist", "out", ".out", "**/*.spec.ts"]

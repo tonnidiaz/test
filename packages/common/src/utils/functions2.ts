@@ -1,4 +1,3 @@
-import fs, { writeFileSync } from "node:fs"
 import { ILog } from "./interfaces";
 import { parseDate, clearTerminal, msToMin } from "./functions";
 import { TuLog } from "@cmn/models";
