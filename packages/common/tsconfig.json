@@ -19,8 +19,8 @@
 	// 		"DOM",
 	// 		"DOM.Iterable"
 	// 	],
-		// "moduleResolution": "bundler", 
-		// "module": "esnext",
+		"moduleResolution": "node", 
+		"module": "esnext",
 		// "noEmit": true,
 		// "target": "esnext"
   },

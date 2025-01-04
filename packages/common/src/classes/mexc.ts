@@ -8,7 +8,7 @@ import { IObj, IOrderDetails } from "@cmn/utils/interfaces";
 import { Spot,  } from "mexc-api-sdk"
 import Mexc2 from "node-mexc-apis";
 import { Platform } from "./platforms";
-import axios, { Axios, AxiosInstance, AxiosResponse } from "axios";
+import axios, { type AxiosInstance, type AxiosResponse } from "axios";
 import crypto from "crypto"
 
 type TSpot = typeof Mexc2.prototype.spot;
@@ -37,7 +37,7 @@ export class Mexc extends Platform {
 
     client: Spot;
     client2: TSpot;
-    axiosClient: Axios;
+    axiosClient:  AxiosInstance;
     constructor(bot: IBot, pair?: string[]) {
         super(bot, pair);
         this.apiKey = process.env.MEXC_API_KEY!;
