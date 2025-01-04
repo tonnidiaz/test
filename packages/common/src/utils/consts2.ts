@@ -54,18 +54,24 @@ export const BINANCE_WS_URL = "wss://stream.binance.com:9443/ws";
 export const BITGET_WS_URL = "wss://ws.bitget.com/v2/ws/public";
 export const KUCOIN_TOKEN_URL = "https://api.kucoin.com/api/v1/bullet-public";
 export const MEXC_WS_URL = "wss://wbs.mexc.com/ws";
-
-export const netsRootDir = "@cmn/utils/data/currencies";
+console.log({currentFilePath});
+export const netsRootDir = path.join(currentFilePath, "data", "currencies");
 import { OKX } from "@cmn/classes/okx";
 import { Bybit } from "@cmn/classes/bybit";
 import { Mexc } from "@cmn/classes/mexc";
 import { Binance } from "@cmn/classes/binance";
 import { Kucoin } from "@cmn/classes/kucoin";
-export const objPlats = {
+import { TPlatName } from "./interfaces";
+import { Platform } from "@cmn/classes/platforms";
+import path from "node:path";
+import { currentFilePath } from "..";
+
+export const objPlats: {[k: string]: typeof Platform} = {
     okx: OKX,
     bybit: Bybit,
     binance: Binance,
     kucoin: Kucoin,
+    mexc: Mexc,
 };
 
 interface IDate {

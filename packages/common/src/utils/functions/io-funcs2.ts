@@ -1,12 +1,11 @@
-import { Socket } from "socket.io";
-import { Server } from "ws";
+import { Socket ,Server} from "socket.io";
 import { IObj, IRetData } from "../interfaces";
 import { ARBIT_ZERO_FEES, ARBIT_MIN_PERC } from "../constants";
 import { getInstrus, getKlinesPath, getMakerFee, getTakerFee } from "../funcs3";
 import { readJson, ensureDirExists } from "@cmn/utils/bend/functions";
-import { parseDate } from "@cmn/utils/functions";
 import {
     calcPerc,
+    clearTerminal,
     getCoinPrecision,
     getMinAmt,
     getMinSz,
@@ -53,7 +52,8 @@ export const onTriArbitCointest = async (
     } = data;
 
     try {
-        console.log("BEGIN CROSS COINTEST...");
+        clearTerminal()
+        console.log("BEGIN TRI COINTEST...", {offline});
         client?.emit(ep, "BEGIN COINTEST...");
         prefix = prefix ? `${prefix}_` : "";
 
@@ -416,7 +416,10 @@ export const onTriArbitCointest = async (
 
                         const day = new Date(rowA.ts).getDay();
                         const is_weekend = day == 6 || day == 7;
-
+                        if (rowA.v == 0 || rowB.v == 0 || rowC.v == 0) {
+                            console.log("ZERO VOL")
+                            continue
+                        }
                         if (percCond) {
                             //console.log({ perc: `${perc}%` });
                             console.log({ A, B, C, flipped });

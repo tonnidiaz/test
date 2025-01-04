@@ -68,7 +68,7 @@ export const afterOrderUpdate = async ({
     prevrow = df[df.length - 2];
     row = df[df.length - 1]; //{ts: parseDate(end), o, h: o, l:o, c: o, v: prevrow.v, ha_o: o,ha_h: o, ha_l:o, ha_c: o };
 
-    let order = await getLastOrder(bot);
+    let order = await getLastOrder(bot, [bot.base, bot.ccy]);
     let pos = orderHasPos(order);
 
     botLog(bot, { ts: row.ts, o: row.o });

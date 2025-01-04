@@ -18,6 +18,7 @@ import { ICoinNets, IOrderbook, TPlatName } from "@cmn/utils/interfaces";
 import { Axios, AxiosInstance } from "axios";
 import { genSignature, safeJsonParse } from "@cmn/utils/funcs3";
 import Mexc from "node-mexc-apis";
+import { DEV } from "@cmn/utils/constants";
 
 type Spot = typeof Mexc.prototype.spot;
 function test() {
@@ -35,17 +36,18 @@ export class TestMexc extends TestPlatform {
     axiosClient: () => InstanceType<typeof Axios>;
     mexc: Mexc;
     constructor({ demo = false }: { demo?: boolean }) {
+        
         super({ demo, name: "mexc" });
         this.apiKey = process.env.MEXC_API_KEY!;
         this.apiSecret = process.env.MEXC_API_SECRET!;
         this.passphrase = process.env.MEXC_PASSPHRASE!;
-
-        this.mexc = new Mexc({
+        
+        this.mexc = new ((Mexc as any).default || Mexc)({
             apiKey: this.apiKey,
             apiSecret: this.apiSecret,
         });
         this.client = this.mexc.spot;
-
+       
         this.axiosClient = () => {
             const ts = Date.now().toString();
             return new Axios({
@@ -219,7 +221,11 @@ export class TestMexc extends TestPlatform {
                     : (await this.axiosClient().get("/capital/config/getall"))
                           .data
             );
-
+            if (DEV) console.log(res);
+            if (res.code && res.code != 200){
+                this._log("Failed to get nets", res)
+                return
+            }
             writeJson(
                 this.netsPath,
                 res.sort((a, b) => a.coin.localeCompare(b.coin))

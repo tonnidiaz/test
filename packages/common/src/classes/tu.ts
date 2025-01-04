@@ -1,149 +1,42 @@
-import { WebSocket } from "ws";
+import ws from "ws";
 import type { ClientOptions, RawData } from "ws";
 import type { ClientRequestArgs } from "http";
 import { Socket } from "socket.io";
 import mongoose from "mongoose";
 import { DEV } from "../utils/constants";
-import { OKX_WS_URL_DEMO, OKX_WS_URL, BYBIT_WS_URL_DEMO, BYBIT_WS_URL, BINANCE_WS_URL, BITGET_WS_URL, MEXC_WS_URL } from "../utils/consts2";
-import { sleep, timedLog, getSymbol, ceil, getPricePrecision } from "../utils/functions";
-import { botLog } from "@cmn/utils/bend/functions";
+import {
+    sleep,
+    timedLog,
+    getSymbol,
+    ceil,
+    getPricePrecision,
+} from "../utils/functions";
+import { botLog, getWsUrl } from "@cmn/utils/bend/functions";
 import { parseDate } from "@cmn/utils/functions";
-import { IObj, TPlatName, IOrderpage, ICrossArbitBot, ITriArbitBot, IOrderbook, IBook } from "../utils/interfaces";
+import {
+    IObj,
+    TPlatName,
+    IOrderpage,
+    ICrossArbitBot,
+    ITriArbitBot,
+    IOrderbook,
+    IBook,
+} from "../utils/interfaces";
 import { Bot } from "@cmn/models";
 import { IBot } from "@cmn/models/bot";
 import { test_platforms } from "@cmn/utils/consts";
 import { KUCOIN_WS_URL, safeJsonParse } from "@cmn/utils/funcs3";
-import { placeArbitOrdersFlipped, placeArbitOrders } from "@cmn/utils/orders/funcs4";
-const readyStateMap = {
-    0: "CONNECTING",
-    1: "OPEN",
-    2: "CLOSING",
-    3: "CLOSED",
-};
+import {
+    placeArbitOrdersFlipped,
+    placeArbitOrders,
+} from "@cmn/utils/orders/funcs4";
+import { TuWs } from "./tu-ws";
+import { WS } from "@cmn/utils/bend/consts";
 
-const SLEEP_MS = 10 * 1000;
+
+
 const PAUSE_MS = 2 * 1000;
 
-export class TuWs {
-    channels: { channel: string; data: IObj; plat: string }[] = [];
-    plat: TPlatName;
-    lastSub: number;
-    ws: WebSocket;
-
-    constructor(
-        address: string | URL,
-        plat: TPlatName,
-        options?: ClientOptions | ClientRequestArgs | undefined
-    ) {
-        this.plat = plat;
-
-        console.log({ plat: this.plat, address });
-        this.ws = new WebSocket(address);
-
-        this.lastSub = Date.now();
-    }
-
-    on(event: string, cb: (...data: any[]) => any) {
-        return this.ws.on(event as any, cb);
-    }
-
-    keepAlive(id?: string) {
-        if (this.ws.readyState === this.ws.OPEN) {
-            {
-                this.ws.ping();
-                if (this.plat == "bitget") this.ws.send("ping");
-            }
-
-            // if (DEV)
-            // console.log(`[ ${id ?? 'WS'} ] Ping sent to server\n`);
-        }
-    }
-
-    async sub(channel: string, plat: TPlatName, data: IObj = {}) {
-        if (plat == "mexc") channel += "@5";
-        else if (plat == "binance") channel = channel.replace('ch', '').toLowerCase() + "@depth";
-
-        console.log(
-            "\n",
-            { channel, state: readyStateMap[this.ws.readyState] },
-            "\n"
-        );
-        if (this.ws.readyState != this.ws.OPEN) {
-            this._log("NOT OPEN: ADDING CHANNELS INSTEAD");
-            this.channels.push({ channel, data, plat });
-        } else {
-            if (Date.now() - this.lastSub < 3000) {
-                await sleep(3000);
-            }
-
-            let json: IObj = {
-                op: "subscribe",
-                args:
-                    plat == "bybit"
-                        ? [channel]
-                        : [{ channel, ...data }],
-            };
-
-            switch (plat) {
-                case "kucoin":
-                    json = {
-                        type: "subscribe",
-                        topic: channel, //Topic needs to be subscribed. Some topics support to divisional subscribe the informations of multiple trading pairs through ",".
-                        privateChannel: false, //Adopted the private channel or not. Set as false by default.
-                        response: true,
-                    };
-                    break;
-                case "mexc":
-                case "binance":
-                    json = {
-                        method: plat == 'binance'?"SUBSCRIBE": "SUBSCRIPTION",
-                        params: [channel],
-                        id: Date.now()
-                    };
-                    break;
-            }
-            this.ws.send(JSON.stringify(json));
-            this.lastSub = Date.now();
-        }
-    }
-
-    unsub(channel: string, plat: TPlatName, data: IObj = {}) {
-        if (plat == "mexc") channel += "@5";
-        else if (plat == "binance") channel = channel.replace('ch', '').toLowerCase() + "@depth";
-        console.log(`\nUNSUSCRIBING FROM ${channel}`, data, "\n");
-
-        let json: IObj = {
-            op:"unsubscribe",
-            args:
-                plat == "bybit"
-                    ? [channel]
-                    : [{ channel, ...data }],
-        };
-
-        switch (plat) {
-            case "kucoin":
-                json = {
-                    type: "unsubscribe",
-                    topic: channel, //Topic needs to be subscribed. Some topics support to divisional subscribe the informations of multiple trading pairs through ",".
-                    privateChannel: false, //Adopted the private channel or not. Set as false by default.
-                    response: true,
-                };
-                break;
-            case "mexc":
-            case "binance":
-                json = {
-                    method: plat == 'binance'?"UNSUBSCRIBE": "UNSUBSCRIPTION",
-                    params: [channel],
-                    id: Date.now()
-                };
-                break;
-        }
-        this.ws.send(JSON.stringify(json));
-    }
-    _log(...args: any) {
-        timedLog(`[WS][${this.plat}] `, ...args);
-    }
-}
 
 export class CrossArbitData {
     platA: string | undefined;
@@ -183,26 +76,7 @@ export class TuArbitWs {
         this.currentReconnectAttempts = 0;
 
         this._log(this.name);
-        switch (plat) {
-            case "okx":
-                this.wsURL = demo ? OKX_WS_URL_DEMO : OKX_WS_URL;
-                break;
-            case "bybit":
-                this.wsURL = demo ? BYBIT_WS_URL_DEMO : BYBIT_WS_URL;
-                break;
-            case "binance":
-                this.wsURL = BINANCE_WS_URL;
-                break;
-            case "bitget":
-                this.wsURL = BITGET_WS_URL;
-                break;
-            case "mexc":
-                this.wsURL = MEXC_WS_URL;
-                break;
-            case "kucoin":
-                this.wsURL = "url";
-                break;
-        }
+        this.wsURL = getWsUrl(plat, demo);
     }
 
     async initWs() {
@@ -223,21 +97,17 @@ export class TuArbitWs {
                 if (!this.ws) return this._log("ON OPEN: BUT NO WS");
 
                 this._log("ON OPEN");
-                    for (let abot of this.abots.filter((el) => el.active)) {
-                        console.log("RESUBING FOR BOT: ", abot.bot.id);
-                        await this.sub(abot.bot);
-                    }
-                    this.ws.channels = [];
-                    this.currentReconnectAttempts = 0;
-                    this.open = true;
-                    setInterval(
-                        () =>
-                            this.ws?.keepAlive(
-                                `${this.arbitType}__${this.plat}`
-                            ),
-                        this.PING_INTERVAL
-                    );
-                
+                for (let abot of this.abots.filter((el) => el.active)) {
+                    console.log("RESUBING FOR BOT: ", abot.bot.id);
+                    await this.sub(abot.bot);
+                }
+                this.ws.channels = [];
+                this.currentReconnectAttempts = 0;
+                this.open = true;
+                setInterval(
+                    () => this.ws?.keepAlive(`${this.arbitType}__${this.plat}`),
+                    this.PING_INTERVAL
+                );
             });
             this.ws?.on("error" as any, async (e) => {
                 this._log("ON ERROR", e);
@@ -309,7 +179,7 @@ export class TuArbitWs {
     async kill() {
         for (let abot of this.abots.filter((el) => el.demo)) {
             if (
-                this.ws?.ws instanceof WebSocket &&
+                this.ws?.ws instanceof WS &&
                 this.ws.ws.readyState == this.ws.ws.OPEN
             )
                 this.subUnsub(abot.bot, "unsub");
@@ -319,7 +189,7 @@ export class TuArbitWs {
     }
 
     parseData(resp: any) {
-        const parsedResp =safeJsonParse(resp.toString());
+        const parsedResp = safeJsonParse(resp.toString());
         let { data, topic, d } = parsedResp;
         let channel: string | undefined;
         let symbol: string | undefined;
@@ -588,7 +458,7 @@ export class TuArbitWs {
             | ((channel: string, plat: TPlatName, data?: IObj) => void)
             | undefined
     ) {
-        this._log({channel1, fn})
+        this._log({ channel1, fn });
         const pair = [bot.base, bot.ccy];
         const symbol = getSymbol(pair, this.plat);
         const activePairs: string[] = [];
@@ -607,7 +477,7 @@ export class TuArbitWs {
 
         if (channel1 && fn) {
             // Orderbook channel, also returns ask n bid pxs
-            this._log("__DORA")
+            this._log("__DORA");
             switch (this.plat) {
                 case "okx":
                 case "bitget":
@@ -622,14 +492,14 @@ export class TuArbitWs {
                 case "kucoin":
                 case "binance":
                 case "mexc":
-                    this._log("__CASE")
+                    this._log("__CASE");
                     if (act == "sub" || unsubPair)
                         fn(channel1 + symbol, this.plat);
                     break;
             }
-        }else{
-        this._log("NO CH || !fn")
-    }
+        } else {
+            this._log("NO CH || !fn");
+        }
     }
     async unsub(bot: IBot) {
         await this.subUnsub(bot, "unsub");
@@ -638,8 +508,9 @@ export class TuArbitWs {
         if (DEV) this._log("ON MESSAGE");
         const r = this.parseData(resp);
         if (!r) {
-            if (DEV) this._log({resp: resp.toString()})
-            return };
+            if (DEV) this._log({ resp: resp.toString() });
+            return;
+        }
         const { channel, data, symbol } = r;
         //return;
         if (!symbol) return this._log("NO SYMBOL");
@@ -964,15 +835,16 @@ export class TuArbitWs {
                 fpxB,
                 fpxC,
             });
+            const { min_perc } = bot.arbit_settings!;
 
-            botLog(bot, { _perc: `${_perc}%`, _fperc: `${_fperc}%`, flipped });
+            botLog(bot, {
+                min_perc,
+                _perc: `${_perc}%`,
+                _fperc: `${_fperc}%`,
+                flipped,
+            });
             if (!abot.demo) {
-                if (this.plat == "kucoin" && bot.demo) {
-                    await sleep(5000);
-                    return true;
-                }
-
-                if (perc >= bot.arbit_settings!.min_perc) {
+                if (perc >= min_perc) {
                     // NOW CHECK IF THERE IS ENOUGH SIZES
                     let szA = 0,
                         szB = 0,
@@ -1092,6 +964,11 @@ export class TuArbitWs {
                     perc: _perc,
                     fperc: _fperc,
                 });
+            } else {
+                this._log("Hold...");
+                await sleep(5000);
+                this._log("Go on!");
+                return true;
             }
             abot.active = true;
             this._updateBots(abot);
@@ -1116,7 +993,7 @@ export class TuArbitWs {
             // if (pricePrecision == null) return;
 
             if (
-                this.ws?.ws instanceof WebSocket &&
+                this.ws?.ws instanceof WS &&
                 this.ws?.ws.readyState != this.ws?.ws.OPEN
             ) {
                 this._log("addBot(): NOT OPEN...RE-INIT");

@@ -101,12 +101,12 @@ export class TestBitget extends TestPlatform {
                 const res = await this.client.getSpotHistoricCandles({
                     symbol,
                     granularity: getInterval(interval, "bitget"),
-                    endTime: Math.round(after),
-                    limit: limit,
+                    endTime: Math.round(after).toString(),
+                    limit: limit.toString(),
                 });
                 let { data } = res;
                 if (!data || !data.length) {console.log(data); return null}
-                data = data.map((el) => el.map((el) => Number(el)));
+                data = data.map((el) => el.map((el) => Number(el))) as any;
 
                 const last =
                     klines.length == 0
@@ -128,7 +128,7 @@ export class TestBitget extends TestPlatform {
                     if (last >= _new) {
                         console.log("LAST > NEW", data.length);
                     }
-                    data = data.filter((el) => el[0] > last);
+                    data = data.filter((el) => Number(el[0]) > last);
                     console.log(data.length);
                 }
                 if (!data?.length) break;
@@ -154,7 +154,7 @@ export class TestBitget extends TestPlatform {
             const res = await this.client.getSpotHistoricCandles({
                 symbol,
                 granularity: getInterval(interval, "bitget"),
-                endTime: end,
+                endTime: end.toString(),
             });
 
             const { data } = res;
@@ -294,7 +294,7 @@ export class TestBitget extends TestPlatform {
             super.getBook(pair);
             const r = await this.client.getSpotOrderBookDepth({
                 symbol: this._getSymbo(pair),
-                limit: 5,
+                limit: '5',
             });
             const data = r.data;
 

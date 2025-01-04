@@ -56,6 +56,7 @@ export class TestKucoin extends TestPlatform {
             const klines: number[][] = [];
             let firstTs = start;
             const limit = 1500;
+            console.log({limit});
             while (firstTs <= end) {
                 cnt++;
                 let after = firstTs + limit * interval * 60000;
@@ -141,7 +142,7 @@ export class TestKucoin extends TestPlatform {
     async getNets(coin?: string, offline?: boolean): Promise<ICoinNets[]  | null | undefined> {
         super.getNets(coin, offline)
         try {
-            console.log({ offline });
+            console.log({ offline,  path: this.netsPath, __dirname });
             let res = safeJsonParse(
                 offline && existsSync(this.netsPath)
                     ? await readJson(this.netsPath)

@@ -1,27 +1,73 @@
 import { IBot } from "@cmn/models/bot";
 import { getInterval, parseFilledOrder } from "@cmn/utils/funcs2";
-import {  getSymbol } from "@cmn/utils/functions";
-import { DEV } from "@cmn/utils/constants";
+import {  getSymbol, handleErrs } from "@cmn/utils/functions";
+import { DEV, MEXC_API_ROOT_URL } from "@cmn/utils/constants";
 import { botLog } from "@cmn/utils/bend/functions";
 import { parseDate } from "@cmn/utils/functions";
-import { IOrderDetails } from "@cmn/utils/interfaces";
-import { Spot } from "mexc-api-sdk";
+import { IObj, IOrderDetails } from "@cmn/utils/interfaces";
+import { Spot,  } from "mexc-api-sdk"
+import Mexc2 from "node-mexc-apis";
+import { Platform } from "./platforms";
+import axios, { Axios, AxiosInstance, AxiosResponse } from "axios";
+import crypto from "crypto"
 
-export class Mexc {
-    bot: IBot;
+type TSpot = typeof Mexc2.prototype.spot;
+
+const genSignature = (params: IObj, secret: string) => {
+    const _params = {};
+    for (let k of Object.keys(params).sort()) {
+        const v = params[k];
+        if (!v) continue;
+        _params[k] = v;
+    }
+
+    const prehashString = new URLSearchParams(_params).toString();
+    console.log({ prehashString });
+    const signature = crypto
+        .createHmac("sha256", secret)
+        .update(prehashString)
+        .digest("hex");
+    return signature;
+};
+
+export class Mexc extends Platform {
     apiKey: string;
     apiSecret: string;
     passphrase: string;
 
     client: Spot;
-    constructor(bot: IBot) {
-        this.bot = bot;
+    client2: TSpot;
+    axiosClient: Axios;
+    constructor(bot: IBot, pair?: string[]) {
+        super(bot, pair);
         this.apiKey = process.env.MEXC_API_KEY!;
         this.apiSecret = process.env.MEXC_API_SECRET!;
         this.passphrase = process.env.MEXC_PASSPHRASE!;
 
         this.client = new Spot(this.apiKey, this.apiSecret);
+        
+        this.client2 = new ((Mexc2 as any).default || Mexc2)({
+            apiKey: this.apiKey,
+            apiSecret: this.apiSecret,
+        }).spot;
+        
+        this.axiosClient = axios.create({baseURL: MEXC_API_ROOT_URL, headers: {
+            "Content-Type": "application/json",
+            "X-MEXC-APIKEY": this.apiKey
+        }});
+        this.axiosClient.interceptors.request.use((config) => {
+            const timestamp = Date.now();
+            let params = config.params || {};
+        
+             params.timestamp = timestamp;
+            const signature = genSignature(params, this.apiSecret).toLowerCase()
+           
+            params = {...params, signature};
+            config.params = params;
+            return config;
+        });
     }
+
 
     async getBal(ccy?: string) {
         botLog(this.bot, "GETTING BAL...");
@@ -39,17 +85,10 @@ export class Mexc {
             console.log(error);
         }
     }
-    async placeOrder(
-        amt: number,
-        price?: number,
-        side: "buy" | "sell" = "buy",
-        sl?: number,
-        clOrderId?: string
-    ) {
-        const od = { price, sl, amt, side };
-        botLog(this.bot, `PLACING ORDER: ${JSON.stringify(od)}`);
+    async placeOrder({ amt, price, side, sl, clOrderId, useBaseCcy }: { amt: number; price?: number; side?: "buy" | "sell"; sl?: number; clOrderId?: string; useBaseCcy: boolean; }): Promise<string | void | undefined | null> {
+
+        await super.placeOrder({amt, price, side, sl, clOrderId, useBaseCcy});
         try {
-            const { order_type } = this.bot;
 
             const is_market = price == undefined;
             const res = await this.client.newOrder(
@@ -170,7 +209,7 @@ export class Mexc {
     }
 
     getSymbol() {
-        return getSymbol([this.bot.base, this.bot.ccy], "mexc");
+        return getSymbol(this.pair, "mexc");
     }
     async cancelOrder({ ordId }: { ordId: string }) {
         try {
@@ -185,6 +224,39 @@ export class Mexc {
             return res.orderId;
         } catch (error) {
             this._parseErr(error);
+        }
+    }
+
+    async withdraw({amt, coin, chain, addr, memo}: {amt: number; coin: string; chain: string; addr: string; memo?: string}){
+        let r: AxiosResponse<any, any> | undefined;
+        try{
+            /* 
+            {
+  coin: 'KARATE',
+  network: 'Hedera(HBAR)',
+  address: '0.0.858938',
+  memo: '140968',
+  chainName: null,
+  chainDisplayName: null,
+  netWork: null
+}
+            */
+            console.log(this.axiosClient.defaults.params);
+            const params = { address: addr, amount: amt.toString(), coin, netWork: chain, }
+             r = await this.axiosClient.post("/capital/withdraw", undefined, {params})
+            // r = await this.axiosClient.post("/capital/deposit/address", undefined, {params: {
+            //     coin: "KARATE", network: "Hedera(HBAR)"
+            // }})
+            console.log(r.data);
+            return r.data.id
+            
+        }
+        catch(e){
+            
+            this.log(`Failed to withdraw ${amt} of ${coin} through ${chain}`)
+            // console.log(e);
+
+            handleErrs(e)
         }
     }
 

@@ -1,13 +1,14 @@
 import { getInterval, parseFilledOrder } from "@cmn/utils/funcs2";
 import { RestClientV2 } from "bitget-api";
 import { botLog } from "@cmn/utils/bend/functions";
-import { parseDate } from "@cmn/utils/functions";
+import { handleErrs, parseDate } from "@cmn/utils/functions";
 import { IBot } from "@cmn/models/bot";
 import { capitalizeFirstLetter, getSymbol, sleep } from "@cmn/utils/functions";
 import { IOrderDetails } from "@cmn/utils/interfaces";
 import { DEV } from "@cmn/utils/constants";
+import { Platform } from "./platforms";
 
-export class Bitget {
+export class Bitget extends Platform {
     name = "BITGET";
     maker: number = 0.1 / 100;
     taker: number = 0.1 / 100;
@@ -15,13 +16,12 @@ export class Bitget {
     apiKey: string;
     apiSecret: string;
     passphrase: string;
-    bot: IBot;
 
-    constructor(bot: IBot) {
+    constructor(bot: IBot, pair?: string[]) {
+        super(bot, pair);
         this.apiKey = process.env.BITGET_API_KEY!;
         this.apiSecret = process.env.BITGET_API_SECRET!;
         this.passphrase = process.env.BITGET_PASSPHRASE!;
-        this.bot = bot;
         this.client = new RestClientV2({
             apiKey: this.apiKey,
             apiSecret: this.apiSecret,
@@ -53,7 +53,7 @@ export class Bitget {
             symbol = symbol ?? this.getSymbol();
 
             const _interval = getInterval(interval, this.bot.platform);
-            console.log(`[ BITGET GETTING KLINES.. FOR ` + symbol);
+            this.log(`[ BITGET GETTING KLINES.. FOR ` + symbol);
 
             const res = await this.client.getSpotCandles({
                 symbol,
@@ -67,45 +67,42 @@ export class Bitget {
             let d = [...klines];
             const last = Number(d[d.length - 1][0]);
 
-            botLog(this.bot, { end: parseDate(end), last: parseDate(last) });
+            this.log( { end: parseDate(end), last: parseDate(last) });
             if (end >= last + interval * 60000) {
-                botLog(this.bot, "END > LAST");
+                this.log( "END > LAST");
                 await sleep(200)
                 return await this.getKlines({ start, end, interval, symbol });
             }
             return d;
         } catch (e: any) {
-            console.log(e);
+            this.log('Failed to get klines')
+            handleErrs(e);
         }
     }
 
     async getBal(ccy?: string) {
-        console.log(`\nGETTING BALANCE FOR BOT=${this.bot.name}\n`);
+        this.log(`\nGETTING BALANCE FOR BOT=${this.bot.name}\n`);
         try {
             const res = await this.client.getSpotAccountAssets({
                 coin: ccy ?? this.bot.ccy,
             });
             if (res.code != "00000") {
-                console.log(res);
+                this.log(res);
                 return;
             }
             return Number(res.data[0].available);
         } catch (error) {
-            console.log(error);
+            this.log("Failed to get balance");
+            handleErrs(error)
         }
     }
-    async placeOrder(
-        amt: number,
-        price?: number,
-        side: "buy" | "sell" = "buy",
-        sl?: number,
-        clOrderId?: string
-    ) {
-        const pair = [this.bot.base, this.bot.ccy];
-        const od = { price, sl, amt, side };
+    async placeOrder({ amt, price, side, sl, clOrderId, useBaseCcy }: { amt: number; price?: number; side?: "buy" | "sell"; sl?: number; clOrderId?: string; useBaseCcy: boolean; }): Promise<string | void | undefined | null> {
 
+        await super.placeOrder({amt, price, side, sl, clOrderId, useBaseCcy});
+
+        const pair = this.pair;
         const ordType = price == undefined ? "market" : "limit";
-        botLog(this.bot, `PLACING ORDER: ${JSON.stringify(od)}`);
+        
         try {
             const { order_type } = this.bot;
 
@@ -120,41 +117,42 @@ export class Bitget {
             });
 
             if (res.code != "00000") {
-                console.log(res);
+                this.log(res);
                 return;
             }
-            console.log(`\ORDER PLACED FOR BOT=${this.bot.name}\n`);
+            this.log(`\ORDER PLACED FOR BOT=${this.bot.name}\n`);
 
             return res.data.orderId;
         } catch (error) {
-            console.log(error);
+            this.log("Failed to place order")
+            handleErrs(error);
         }
     }
     async getOrderbyId(orderId: string, isAlgo = false) {
         try {
             let data: IOrderDetails | null = null;
 
-            botLog(this.bot, "GETTING ORDER...");
+            this.log( "GETTING ORDER...");
             const res = await this.client.getSpotOrder({
                 orderId: orderId,
             });
 
             if (res.code != "00000") {
-                console.log(res);
+                this.log(res);
                 return;
             }
             const list = res.data;
 
             if (!list[0]) {
-                console.log(res);
-                botLog(this.bot, "ORDER NOT FOUND");
+                this.log(res);
+                this.log( "ORDER NOT FOUND");
                 return;
             }
             const d = list[0];
 
-            if (DEV) console.log(d);
+            if (DEV) this.log(d);
             if (list[0].status != "filled") {
-                botLog(this.bot, "Order not yet filled", {
+                this.log( "Order not yet filled", {
                     status: list[0].status,
                 });
                 return "live";
@@ -163,7 +161,8 @@ export class Bitget {
             data = parseFilledOrder(d, this.bot.platform);
             return data;
         } catch (error) {
-            console.log(error);
+            this.log('Failed to get order')
+            handleErrs(error);
         }
     }
     async cancelOrder({ ordId }: { ordId: string }) {
@@ -173,17 +172,34 @@ export class Bitget {
                 orderId: ordId,
             });
             if (res.code != "00000") {
-                console.log(res);
+                this.log(res);
                 return;
             }
 
             return res.data.orderId;
         } catch (e: any) {
-            console.log(e);
-            botLog(this.bot, "FAILED TO CANCEL ORDER");
+            this.log( "FAILED TO CANCEL ORDER");
+            handleErrs(e)
         }
     }
     getSymbol() {
-        return getSymbol([this.bot.base, this.bot.ccy], this.bot.platform);
+        return getSymbol(this.pair, this.bot.platform);
+    }
+    async withdraw({ amt, coin, chain, addr }: { amt: number; coin: string; chain: string; addr: string; }) {
+        super.withdraw({amt, coin, chain, addr})
+        try {
+            const res = await this.client.spotWithdraw({
+                coin: coin, chain, size : amt.toString(), address: addr, transferType: "on_chain"
+            })
+            if (res.code != "200000") {
+                this.log( "FAILED TO WITHDRAW");
+                this.log(res);
+                return;
+            }
+            return res.data.orderId
+        } catch (err) {
+            this.log('Failed to withdraw')
+            handleErrs(err)
+        }
     }
 }

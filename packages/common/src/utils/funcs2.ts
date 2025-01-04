@@ -9,7 +9,7 @@ import {
     accelerationBands,
     sma,
 } from "indicatorts";
-import path from "path";
+import path from "node:path";
 import { SL, TP, useHaClose } from "./constants";
 import { OrderDetails } from "okx-api";
 import { IBot } from "@cmn/models/bot";
@@ -21,6 +21,7 @@ import { objStrategies } from "@cmn/strategies";
 import type { Order as GateOrder } from "gate-api";
 import type { SpotOrder as KucoinOrder } from "kucoin-api";
 import { parseDate } from "./functions";
+import { SpotOrder } from "binance";
 
 
 export const getExactDate = (interval: number) => {
@@ -61,9 +62,9 @@ export const tuMacd = (
 ) => {
     const def = false;
     const faster = true;
-    const fast = _fast ?? (def ? 12 : 12) /* 5 */,
-        slow = _slow ?? (def ? 26 : 45) /* 12 */,
-        signal = _signal ?? (def ? 9 : 92); /* 5 */
+    const fast = _fast ?? (def ? 12 : (faster ? 1: 12)) /* 5 */,
+        slow = _slow ?? (def ? 26 : (faster ? 3: 45)) /* 12 */,
+        signal = _signal ?? (def ? 9 : (faster ? 3: 92)); /* 5 */
 
     const prices = df.map((el) => el[useHaClose ? "ha_c" : "c"]);
 
@@ -169,11 +170,12 @@ export const heikinAshi = (df: ICandle[]) => {
 };
 
 export const tuCE = (df: ICandle[], _fast?: number, _slow?: number) => {
-    const mult = 2,
+    const mult = 1.5,
         atrLen = 1;
+        const opens = df.map((e) => e[useHaClose ? "ha_o" : "o"]);
     const highs = df.map((e) => e[useHaClose ? "ha_h" : "h"]);
     const lows = df.map((e) => e[useHaClose ? "ha_l" : "l"]);
-    const opens = df.map((e) => e[useHaClose ? "ha_o" : "o"]);
+    
     const closings = df.map((e) => e[useHaClose ? "ha_c" : "c"]);
 
     console.log("BEGIN CE...");
@@ -181,11 +183,11 @@ export const tuCE = (df: ICandle[], _fast?: number, _slow?: number) => {
     const ATR = atr(highs, lows, closings, { period: atrLen });
     const _atr = ATR.atrLine;
     const rsiLen = 2,
-        fastLen = 1, // 10,//_fast ?? 15, //89 /* 15 */,
-        slowLen = 2; // 25//_slow ?? 33; //90; /* 50 */
-    const useOpen = Math.max(...opens) < Math.max(...closings);
-    const sma20 = sma(closings, { period: fastLen });
-    const sma50 = sma(closings, { period: slowLen });
+        fastLen = 20, // 10,//_fast ?? 15, //89 /* 15 */,
+        slowLen = 50; // 25//_slow ?? 33; //90; /* 50 */
+    // const useOpen = Math.max(...opens) < Math.max(...closings);
+    const sma20 = ema(closings, { period: fastLen });
+    const sma50 = ema(closings, { period: slowLen });
 
     const _rsi = rsi(closings, { period: rsiLen });
     const _stoch = stoch(highs, lows, closings, { dPeriod: 1, kPeriod: 2 });
@@ -320,7 +322,20 @@ export const parseFilledOrder = (res: IObj, plat: string) => {
             fillTime: Number(res.updatedTime),
             cTime: Number(res.createdTime),
         };
-    } else if (plat == "bitget") {
+    } 
+    else if (plat == "binance") {
+        const _res = res as SpotOrder;
+        data = {
+            id: `${_res.orderId}`,
+            fillPx: Number(_res.price),
+            fillSz: Number(_res.executedQty),
+            fee: 0,
+            fillTime: Number(_res.updateTime),
+            cTime: Number(_res.time),
+        };
+        data.fee = data.fillSz * (.1/100)
+    }
+    else if (plat == "bitget") {
         const feeDetail = JSON.parse(res.feeDetail);
         data = {
             id: res.orderId,
@@ -380,10 +395,10 @@ export const findBotOrders = async (bot: IBot) => {
     return orders;
 };
 
-export const getLastOrder = async (bot: IBot) => {
-    const orders = await TuOrder.find({ bot: bot.id }).exec();
-    return orders.length
-        ? await TuOrder.findById([...orders].pop()?.id).exec()
+export const getLastOrder = async (bot: IBot,  pair: string[]) => {
+    const orders = await TuOrder.find({ bot: bot.id, base: pair[0], ccy: pair[1] }).exec();
+    return orders.length 
+        ? [...orders].pop()
         : null;
 };
 

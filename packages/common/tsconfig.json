@@ -5,14 +5,26 @@
     // "module": "commonjs",
     "declaration": true,
     "declarationMap": true,
-    "noEmit": false,
+    "noEmit": true,
     "baseUrl": ".",
     "outDir": "./dist",
-        "paths": {
+        "paths": { 
         "@cmn/*": ["./src/*"]
-    }
+    },
+    // "target": "ESNext",
+    "types": ["vite/client"],
+    // From svelte
+    "lib": [
+			"esnext",
+			"DOM",
+			"DOM.Iterable"
+		],
+		"moduleResolution": "bundler", 
+		"module": "esnext",
+		// "noEmit": true,
+		"target": "esnext"
   },
-  "include": ["./src/**/*.ts", "**/*.ts", "../../apps/tu-trader-next/utils/api.ts"],
+  "include": ["./src/**/*.ts", "**/*.ts"],
   "exclude": ["dist", "out", ".out", "**/*.spec.ts"]
 }
  

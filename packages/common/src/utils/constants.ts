@@ -1,15 +1,24 @@
 import { configDotenv } from "dotenv";
 import { Job } from "node-schedule";
-import path, { dirname } from "path";
+import path from "node:path";
 import axios from "axios"
+import nodeUrl from "node:url";
 
-const _dirname = __dirname
-console.log({_dirname});
+
+export const getDirName = () => {
+    const _filename =typeof __filename != "undefined" ? __filename : nodeUrl.fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(_filename);
+   return __dirname
+}
+
+const _dirname = getDirName()
+// console.log({_dirname});
 try {
     configDotenv();
-    console.log(process.env.ENV);
+    // console.log(process.env.ENV);
 } catch (err) {
-    console.log("Dotenv err", err);
+    console.log("Dotenv err");
+    console.log(err);
 }
 export const DEV = process.env.ENV == "dev";
 
@@ -32,6 +41,7 @@ export const slPercent = 0.5 / 100,
     minDiff = 0;
 export const dfsRootDir = "../data/dfs",
     klinesRootDir = path.join(_dirname, "../data/klines"),
+    instrusRootDir = path.join(_dirname, "./data/instrus"),
     tradesRootDir = path.join(_dirname, "../data/trades");
 
 export const isMarket = true,
@@ -105,3 +115,7 @@ export const localApi = (auth = false) =>
             "Content-Type": "application/json",
         },
     })}
+
+export const MEXC_API_ROOT_URL = "https://api.mexc.com/api/v3"
+
+export const useLimitTri = false

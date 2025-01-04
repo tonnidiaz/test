@@ -6,14 +6,18 @@ import { IOrderDetails, IOrderbook } from "@cmn/utils/interfaces";
 export class Platform {
     name: string;
     bot: IBot;
-    constructor(bot: IBot) {
+    pair: string[]
+    constructor(bot: IBot, pair?: string[]) {
         this.name = this.constructor.name;
-        botLog(bot, `${this.name}: INIT, MODE = ${bot.demo ? "demo" : "live"}`);
         this.bot = bot;
+        this.pair = pair || [bot.base, bot.ccy]
+        botLog(bot, `${this.name}: INIT, MODE = ${bot.demo ? "demo" : "live"}`);
+        
+        botLog(bot, `[${this.name}] Initializer: ${pair}`)
     }
     async getOrderbook(symbol?: string) : Promise<IOrderbook | void | undefined | null> {
         symbol = symbol ?? this._getSymbol();
-        botLog(this.bot, `[${this.name}] GETTING ORDERBOOK FOR ${symbol}...`)
+        this.log( `[${this.name}] GETTING ORDERBOOK FOR ${symbol}...`)
     }
     async getKlines({
         start,
@@ -31,11 +35,11 @@ export class Platform {
         pair = pair ?? this._getPair();
         const symbol = getSymbol(pair, this.bot.platform);
 
-        botLog(this.bot, `[${this.name}]: GETTING KLINES FOR ${symbol}...`);
+        this.log( `GETTING KLINES FOR ${symbol}...`);
     }
 
     _getPair() {
-        return [this.bot.base, this.bot.ccy];
+        return this.pair;
     }
     _getSymbol() {
         return getSymbol(this._getPair(), this.bot.platform);
@@ -48,18 +52,19 @@ export class Platform {
         ordId: string;
         isAlgo?: boolean;
     }): Promise<string | undefined | null | void> {
-        botLog(this.bot, `[${this.name}]: CANCELLING ORDER...`);
+        this.log( `CANCELLING ORDER ${ordId}...`);
     }
 
-    async placeOrder(
-        amt: number,
+    async placeOrder({amt, price, side = "buy", sl, clOrderId, useBaseCcy}:
+        {amt: number,
         price?: number,
-        side: "buy" | "sell" = "buy",
+        side?: "buy" | "sell" ,
         sl?: number,
-        clOrderId?: string
+        clOrderId?: string,
+        useBaseCcy?: boolean}
     ): Promise<string | void | undefined | null> {
-        const od = { price, sl, amt, side };
-        botLog(this.bot, `[${this.name}]: PLACING ORDER`), { od };
+        const od = { price, sl, amt, side, useBaseCcy };
+        this.log( `PLACING ORDER FOR [${this.pair}]`), { od };
     }
 
     async getOrderbyId(
@@ -67,10 +72,17 @@ export class Platform {
         isAlgo = false,
         pair?: string[]
     ): Promise<IOrderDetails | null | "live" | undefined | void> {
-        botLog(this.bot, `[${this.name}]: GETTING ORDER ${orderId}...`);
+        this.log( `GETTING ORDER ${orderId}...`);
     }
 
     async getBal(ccy?: string): Promise<number | void | undefined | null> {
-        botLog(this.bot, `[${this.name}]: GETTING BALANCE...`);
+        this.log( `GETTING BALANCE...`);
+    }
+    async withdraw({amt, coin, chain, addr, memo}: {amt: number; coin: string; chain: string; addr: string; memo?: string}) : Promise<string | null | void | undefined>{
+        this.log( `WITHDRAWING ${coin} through ${chain}`);
+    }
+
+    log(...args: any[] ){
+        botLog(this.bot, `[${this.name}]: [${this.pair}]`, ...args)
     }
 }

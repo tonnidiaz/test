@@ -7,6 +7,10 @@ export class Impr5 extends Backtest {
         console.log("inloop");
 
         if (!this.pos && this.entryLimit) {
+            // Buy sec
+            /**
+             * The previous row
+             */
             const _row = this.prevrow;
             if (_row.l < this.entryLimit) {
                 const SLIP = _row.l < this.entryLimit ? 0 : .5/100
@@ -19,6 +23,11 @@ export class Impr5 extends Backtest {
                 });
             }
         } if (this.pos && this.exitLimit) {
+            // Sell sec
+
+            /**
+             * The previous row
+             */
             const _row = this.prevrow;
             if (_row.h > this.exitLimit) {
                 const SLIP = _row.h > this.exitLimit ? 0 : .5/100
@@ -84,7 +93,7 @@ export class Impr5 extends Backtest {
             this.exitLimit = openCond
                 ? Math.max(minTP, this.exitLimit)
                 : this.exitLimit;
-            isSl = this.isGreen; //!openCond;
+            isSl = false//this.isGreen || !openCond;
             if (!isSl && this.exitLimit < _sl) {
                 this.exitLimit = _sl; // * (1 + .15/100)
             }

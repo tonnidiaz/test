@@ -4,7 +4,7 @@ import {
     parseFilledOrder,
     getExactDate,
 } from "@cmn/utils/funcs2";
-import {  getSymbol, sleep, timedLog } from "@cmn/utils/functions";
+import {  getSymbol, handleErrs, sleep, timedLog } from "@cmn/utils/functions";
 import { writeFileSync } from "node:fs";
 import { RestClient, WebsocketClient } from "okx-api";
 import type { AlgoOrderResult, OrderDetails, OrderResult } from "okx-api";
@@ -12,7 +12,6 @@ import { DEV } from "@cmn/utils/constants";
 import { configDotenv } from "dotenv";
 import { IOrderDetails, IOrderbook } from "@cmn/utils/interfaces";
 import { Platform } from "./platforms";
-import { botLog } from "@cmn/utils/bend/functions";
 import { parseDate } from "@cmn/utils/functions";
 configDotenv();
 
@@ -29,8 +28,8 @@ export class OKX extends Platform {
     maxRetries = 5
     retries: number
 
-    constructor(bot: IBot) {
-        super(bot);
+    constructor(bot: IBot, pair?: string[]) {
+        super(bot, pair);
         this.retries = 0
         this.flag = this.bot.demo ? "1" : "0";
         this.apiKey = this.bot.demo ? env.OKX_API_KEY_DEMO! : env.OKX_API_KEY!;
@@ -53,25 +52,25 @@ export class OKX extends Platform {
     async getBal(ccy?: string) {
         await super.getBal(ccy);
         try {
-            const res = await this.client.getBalance(ccy ?? this.bot.ccy);
+            const res = await this.client.getBalance(ccy || this.pair[1]);
             return Number(res[0].details[0].availBal);
         } catch (error) {
-            console.log(error);
+            handleErrs(error);
         }
     }
 
     async getTicker() {
-        botLog(this.bot, "GETTING TICKER...");
+        this.log("GETTING TICKER...");
         const res = await this.client.getTicker(this.getSymbol());
         const ticker = Number(res[0].last);
-        console.log({ ticker });
+        this.log({ ticker });
         return ticker;
     }
 
     async cancelOrder({ ordId, isAlgo }: { ordId: string; isAlgo?: boolean }) {
         await super.cancelOrder({ ordId, isAlgo });
         try {
-            botLog(this.bot, "CANCELLING ORDER...");
+            this.log("CANCELLING ORDER...");
             const res = await (isAlgo
                 ? this.client.cancelAlgoOrder([
                       { algoId: ordId, instId: this.getSymbol() },
@@ -82,24 +81,23 @@ export class OKX extends Platform {
                   }));
 
             if (res[0].sCode != "0") {
-                botLog(this.bot, "FAILED TO CANCEL ORDER");
-                console.log(res[0]);
+                this.log("FAILED TO CANCEL ORDER");
+                this.log(res[0]);
                 return;
             }
             return ordId;
-        } catch (error) {}
+        } catch (error) {
+            handleErrs(error)
+        }
     }
-    async placeOrder(
-        amt: number,
-        price?: number,
-        side: "buy" | "sell" = "buy",
-        sl?: number,
-        clOrderId?: string
-    ) {
-        /* Place limit order at previous close */
+    
+    async placeOrder({ amt, price, side, sl, clOrderId, useBaseCcy }: { amt: number; price?: number; side?: "buy" | "sell"; sl?: number; clOrderId?: string; useBaseCcy: boolean; }): Promise<string | void | undefined | null> {
+        /**
+         * tgtCcy - default: quoetCcy for buy, baseCcy for sell
+         */
 
-        await super.placeOrder(amt, price, side, sl, clOrderId);
-        const symbol = getSymbol([this.bot.base, this.bot.ccy], this.bot.platform)
+        await super.placeOrder({amt, price, side, sl, clOrderId, useBaseCcy});
+        const symbol = getSymbol(this.pair, this.bot.platform)
         try {
             let res: OrderResult[] | AlgoOrderResult[];
 
@@ -111,6 +109,7 @@ export class OKX extends Platform {
                     side,
                     sz: amt.toString(),
                     clOrdId: clOrderId,
+                    // tgtCcy: useBaseCcy ? 'base_ccy' : 'quote_ccy'
                     //px: price.toString(),
                 });
             } else {
@@ -147,31 +146,32 @@ export class OKX extends Platform {
             }
 
             if (res[0].sCode != "0") {
-                botLog(this.bot,"FAILED TO PLACE ORDER", res[0]);
+                this.log("FAILED TO PLACE ORDER", res[0]);
                 // this.retries += 1
                 // if (this.retries <= this.maxRetries){
-                //     botLog(this.bot, `Retrying [${this.retries} / ${this.maxRetries}]...`)
+                //     this.log(`Retrying [${this.retries} / ${this.maxRetries}]...`)
                 //     await sleep(2000)
                 //     return await this.placeOrder(amt, price, side, sl, clOrderId)
                 // }
                 return;
             }
-            console.log(`\ORDER PLACED FOR BOT=${this.bot.name}\n`);
+            this.log("\nORDER PLACED SUCCESSFULLY!!\n");
             const d: any = res[0];
             const id: string =
                 side == "buy" ? d.ordId : price ? d.algoId : d.ordId;
             return id;
         } catch (error) {
-            botLog(this.bot,"FAILED TO PLACE ORDER", error);
+            this.log(`FAILED TO PLACE ORDER`);
+            handleErrs(error)
             await sleep(5000)
             // Check if order was placed
             const r = await this.client.getOrderDetails({clOrdId: clOrderId, instId: symbol})
             if (!r.length)
-                return botLog(this.bot, "ORDER WAS NOT PLACED")
+                return this.log(`ORDER NOT PLACED`)
             return r[0].ordId
             // this.retries += 1
             //     if (this.retries <= this.maxRetries){
-            //         botLog(this.bot, `Retrying [${this.retries} / ${this.maxRetries}]...`)
+            //         this.log(`Retrying [${this.retries} / ${this.maxRetries}]...`)
             //         await sleep(2000)
             //         return await this.placeOrder(amt, price, side, sl, clOrderId)
             //     }
@@ -185,7 +185,7 @@ export class OKX extends Platform {
     ): Promise<IOrderDetails | null | "live" | undefined> {
         await super.getOrderbyId(orderId, isAlgo, pair);
         try {
-            pair = pair ?? [this.bot.base, this.bot.ccy];
+            pair = pair || this.pair;
             let data: IOrderDetails | null = null;
             let finalRes: OrderDetails | null = null;
 
@@ -197,27 +197,25 @@ export class OKX extends Platform {
                       instId: symbo,
                   });
             if (DEV) {
-                console.log(`DEV: ${this.bot.name}`);
-                console.log(res);
+                this.log(res);
             }
             if (isAlgo && res[0].state == "effective") {
-                botLog(this.bot, "IS_EFFECTIVE");
+                this.log("IS_EFFECTIVE");
                 return await this.getOrderbyId(res[0].ordId);
             } else if (!isAlgo) {
                 if (res[0].state == "live") return "live";
                 else if (res[0].state == "filled") finalRes = res[0];
             }
             if (!finalRes) {
-                botLog(this.bot, "[OKX Class] ORDER NOT YET FILLED");
+                this.log("[OKX Class] ORDER NOT YET FILLED");
                 return "live";
             }
-            //console.log(this.bot.name, "FINAL RES", finalRes);
             data = parseFilledOrder(finalRes, this.bot.platform);
 
             return data;
         } catch (error: any) {
-            botLog(this.bot, "ERROR");
-            botLog(this.bot, error);
+            this.log("ERROR");
+            handleErrs(error);
             if (isAlgo && error?.code == "51603")
                 return await this.getOrderbyId(orderId);
         }
@@ -229,7 +227,7 @@ export class OKX extends Platform {
             mgnMode: "isolated",
             lever: `${val}`,
         });
-        console.log(res);
+        this.log(res);
     }
 
     async getKline() {
@@ -274,9 +272,8 @@ export class OKX extends Platform {
 
             let d = [...klines];
             if (!d.length) {
-                console.log(res);
-                return botLog(
-                    this.bot,
+                this.log(res);
+                return this.log(
                     "FAILED TO GET KLINES FOR ",
                     symbol,
                     "ON OKX"
@@ -284,9 +281,9 @@ export class OKX extends Platform {
             }
             const last = Number(d[d.length - 1][0]);
 
-            botLog(this.bot, { end: parseDate(end), last: parseDate(last) });
+            this.log({ end: parseDate(end), last: parseDate(last) });
             if (end >= last + 2 * interval * 60000) {
-                botLog(this.bot, "END > LAST");
+                this.log("END > LAST");
                 end -= interval * 60000;
                 return await this.getKlines({
                     start,
@@ -300,13 +297,13 @@ export class OKX extends Platform {
 
             return limit == 1 ? d[d.length - 1] : d;
         } catch (e) {
-            botLog(this.bot, "FAILED TO GET KLINES FOR ", symbol, "ON OKX");
-            botLog(this.bot, e);
+            this.log("FAILED TO GET KLINES FOR ", symbol, "ON OKX");
+            handleErrs(e);
         }
     }
 
     getSymbol() {
-        return `${this.bot.base}-${this.bot.ccy}`;
+        return this.pair.join('-');
     }
 
     async getCurrencies() {
@@ -314,7 +311,7 @@ export class OKX extends Platform {
             const res = await this.client.getCurrencies();
             return res;
         } catch (e) {
-            console.log(e);
+            this.log(e);
         }
     }
     async getOrderbook(
@@ -329,15 +326,19 @@ export class OKX extends Platform {
             };
             return ob
         } catch (e) {
-            botLog(this.bot, "FAILED TO GET ORDERBOOK");
-            console.log(e);
+            this.log("FAILED TO GET ORDERBOOK");
+            handleErrs(e);
         }
     }
-    async withdraw({coin, amt, clId, chain, fee}: {coin: string; amt: number; chain: string; clId?: string; fee: number}){
+    async withdraw({ amt, coin, chain, addr }: { amt: number; coin: string; chain: string; addr: string; }) {
+        super.withdraw({amt, coin, chain, addr})
         try {
-            const r  = await this.client.submitWithdraw({ccy: coin, toAddr: '', amt: amt.toString(), fee: `0`, dest: '3', clientId: clId, chain })
+            const res = await this.client.submitWithdraw({
+                ccy: coin, chain, amt: amt.toString(), toAddr: addr, dest: "3"
+            })
+            return res[0].wdId
         } catch (err) {
-            botLog(this.bot, "FAILED TO WITHDRAW FUNDS", err)
+            handleErrs(err)
         }
     }
 }

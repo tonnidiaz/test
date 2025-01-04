@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "This library was generated with [Nx](https://nx.dev).",
   "main": "dist/index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rimraf dist && tsc"
@@ -13,16 +14,16 @@
     "axios": "^1.7.7",
     "bignumber.js": "*",
     "binance": "^2.13.5",
-    "binance-api-node": "^0.12.7",
+    "binance-api-node": "^0.12.9",
     "bitget-api": "^2.0.11",
     "bybit-api": "^3.10.19",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
+    "cors": "*",
+    "dotenv": "*",
     "fs": "^0.0.1-security",
     "gate-api": "^5.60.1",
     "indicatorts": "^2.2.1",
     "jsonwebtoken": "^9.0.2",
-    "kucoin-api": "^1.0.7",
+    "kucoin-api": "^1.0.20",
     "mexc-api-sdk": "^1.0.3",
     "mongoose": "^8.7.2",
     "node-mexc-apis": "^1.0.4",
@@ -32,6 +33,7 @@
     "socket.io": "*"
   },
   "devDependencies": {
-    "rimraf": "*"
+    "rimraf": "*",
+    "vite": "^5.4.11"
   }
 }

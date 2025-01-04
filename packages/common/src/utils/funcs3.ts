@@ -17,70 +17,25 @@ export const getKlinesPath = ({
     interval,
     pair,
     year,
+    prefix = ""
 }: {
     plat: TPlatName;
     pair: string[];
     interval: number;
     demo?: boolean;
     year: number;
+    prefix?: string
 }) => {
     const t = demo ? "demo" : "live";
-    return `${klinesRootDir}/${plat}/${year}/${t}/${getSymbol(
+    const klinesPath = `${klinesRootDir}/${plat}/${year}/${t}/${prefix}${getSymbol(
         pair,
         plat
     )}_${interval}m-${t}.json`;
+    console.log({klinesPath});
+    return klinesPath
 };
 
-export const getInstrus = (_platName: TPlatName) => {
-    let _instruments: string[][] = [];
-
-    switch (_platName) {
-        case "bybit":
-            _instruments = bybitInstrus
-                .filter((el) => el.status == "Trading")
-                .map((el) => [el.baseCoin, el.quoteCoin]);
-            break;
-        case "binance":
-            _instruments = binanceInstrus
-                .filter((el) => el.isSpotTradingAllowed == true)
-                .map((el) => [el.baseAsset, el.quoteAsset]);
-            break;
-        case "gateio":
-            _instruments = gateioInstrus
-                .filter((el) => el.trade_status == "tradable")
-                .map((el) => [el.base, el.quote]);
-            break;
-        case "bitget":
-            _instruments = bitgetInstrus
-                .filter((el) => el.status == "online")
-                .map((el) => [el.baseCoin, el.quoteCoin]);
-            break;
-        case "mexc":
-            console.log(`\nMEXC BABAYYYYYYY\n`);
-            _instruments = mexcInstrus
-                .filter(
-                    (el) =>
-                        el.status == "1" &&
-                        el.isSpotTradingAllowed &&
-                        el.orderTypes
-                            .map((el) => el.toLowerCase())
-                            .includes("market")
-                )
-                .map((el) => [el.baseAsset, el.quoteAsset]);
-            break;
-        case "okx":
-            _instruments = okxInstrus
-                .filter((el) => el.state == "live")
-                .map((el) => [el.baseCcy, el.quoteCcy]);
-            break;
-        case "kucoin":
-            _instruments = kucoinInstrus
-                .filter((el) => el.enableTrading)
-                .map((el) => [el.baseCurrency, el.quoteCurrency]);
-            break;
-    }
-    return _instruments;
-};
+export {getInstrus} from "./functions"
 
 export const getMakerFee = (plat: string) => {
     plat = plat.toLowerCase();
@@ -172,24 +127,42 @@ import crypto from "crypto";
 import { IObj, TPlatName } from "./interfaces";
 import { binanceInstrus } from "./data/instrus/binance-instrus";
 export const getLastItem = (arr: any[]) => [...arr].pop();
+
+const rmEmptyParams = (p: IObj)=>{
+    const p2 = {}
+    for (let k of Object.keys(p)){
+        if (!p[k] || p[k] == ""){continue}
+        p2[k] = p[k]
+    }
+
+    return p2
+}
 export const genSignature = (
     apiKey: string,
     apiSecret: string,
     params: IObj,
-    plat: TPlatName
+    plat: TPlatName, ts?: number
 ) => {
+    const timestamp = ts ??  Date.now().toString();
+    params = rmEmptyParams({...params});
     const paramString = Object.keys(params)
         .sort()
         .map((key) => `${key}=${params[key]}`)
         .join("&");
 console.log(paramString)
-    const timestamp = Date.now().toString();
-    const prehashString =plat == 'mexc' || plat == "binance" ? `${paramString}`: `${timestamp}${apiKey}${paramString}`;
-    console.log({prehashString})
+/* 
+crypto
+            .createHmac('sha256', this.config.apiSecret)
+            .update(queryString)
+            .digest('hex');
+*/
+    
+    const prehashString =plat == 'mexc' || plat == "binance" ? paramString : `${timestamp}${apiKey}${paramString}`;
+    console.log({prehashString, apiSecret})
     const signature = crypto
         .createHmac("sha256", apiSecret)
         .update(prehashString)
         .digest("hex");
 
-    return signature.toLocaleLowerCase();
+    return signature//.toLocaleLowerCase();
 };

@@ -2,7 +2,7 @@ import { Server } from "socket.io";
 import { CorsOptions } from "cors";
 import { IObj, IRetData } from "./interfaces";
 import { tuCE, heikinAshi, parseKlines, tuPath } from "./funcs2";
-import { klinesDir, klinesRootDir, tradesRootDir } from "./constants";
+import { klinesDir, klinesRootDir, tradesRootDir, useLimitTri } from "./constants";
 import { existsSync } from "node:fs";
 import {
     clearTerminal,
@@ -13,11 +13,16 @@ import { objStrategies, parentStrategies, strategies } from "@cmn/strategies";
 import { TestOKX } from "@cmn/classes/test-platforms";
 import { test_platforms } from "./consts";
 import { onArbitCointest, onBacktest, onCointest } from "./functions/io-funcs";
+import { onCompArbitCointest } from "./functions/io-funcs5";
 import { onCrossArbitCointest } from "./functions/io-funcs3";
+import { onCrossCompareArbitCointest } from "./functions/io-funcs4";
 import { CrossArbitData } from "@cmn/classes/tu";
 import { Bot } from "@cmn/models";
 import { crossArbitWsList, triArbitWsList } from "@cmn/classes/tu-ws";
 import { readJson } from "./bend/functions";
+import { onTriArbitCointestLimit } from "./functions/io-funcs2-limit";
+import { onTriArbitCointest } from "./functions/io-funcs2";
+import { onTriArbitCointestGrids } from "./functions/io-funcs2-grids";
 
 const corsOptions: CorsOptions = { origin: "*" };
 const io = new Server({ cors: corsOptions }); // yes, no server arg here; it's not required
@@ -58,11 +63,23 @@ io.on("connection", (client) => {
     );
     client.on(
         "arbit-cointest",
-        async (d) => (prevData = await onArbitCointest(d, client))
+        async (d) => {
+            const ep = "arbit-cointest"
+            const fn = onTriArbitCointest//useLimitTri ? onTriArbitCointestLimit : onTriArbitCointest
+            prevData = await fn({...d, ep}, client)
+        }
+    );
+    client.on(
+        "comp-arbit-cointest",
+        async (d) => (prevData = await onCompArbitCointest(d, client))
     );
     client.on(
         "cross-arbit-cointest",
         async (d) => (prevData = await onCrossArbitCointest(d, client))
+    );
+    client.on(
+        "cross-compare-arbit-cointest",
+        async (d) => (prevData = await onCrossCompareArbitCointest(d, client))
     );
 
     client.on("strategies", (e) => {

@@ -1,5 +1,4 @@
-import { Socket } from "socket.io";
-import { Server } from "ws";
+import { Socket ,Server} from "socket.io";
 import { IObj } from "../interfaces";
 import { ARBIT_ZERO_FEES, ARBIT_MIN_PERC } from "../constants";
 import { getInstrus, getKlinesPath, getMakerFee, getTakerFee } from "../funcs3";

@@ -3,7 +3,7 @@ import { test_platforms } from "./consts";
 import { __DEV__, pairsOfInterest, taskManager } from "./consts3";
 import { IOrderbook, TPlatName } from "./interfaces";
 import { timedLog } from "./functions";
-import { bookJobs, botJobSpecs, DEV, localApi } from "./constants";
+import { bookJobs, botJobSpecs, DEV, instrusRootDir, localApi } from "./constants";
 import { TuBook, TuConfig } from "@cmn/models";
 import { configDotenv } from "dotenv";
 import mongoose from "mongoose";
@@ -26,7 +26,7 @@ export const funcs4Var = "This is funcs 4"
 
 export function addBooksTask(config: ITuConfig){
     timedLog("Adding books task...")
-    taskManager.addTask({id: `task-books`, interval: __DEV__ ? 1 : config.book_fetch_interval, cb: fetchAndStoreBooks})
+    taskManager.addTask({id: `task-books`, interval: __DEV__ ? 1 : config.book_fetch_interval, cb: fetchAndStoreBooks, active: true})
 }
 export async function platBookFetcher(platName: string, pairs: string[][]) {
     const plat = new test_platforms[platName as TPlatName]({ demo: false });
@@ -91,9 +91,9 @@ export async function fetchAndStoreBooks(taskId: string) {
 
         platPairs = Array.from(new Set(platPairs.sort()));
         tasks.push({platName: platName as TPlatName, pairs: platPairs})
-        // platBookFetcher(platName, platPairs);
+        platBookFetcher(platName, platPairs);
     }
-    
+    return
     try{
       // Send request to api to handle the books fetching
     const r = await localApi().post('/tasks/books', tasks)
