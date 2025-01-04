@@ -13,7 +13,7 @@ const fn = async () => {
     console.log("Run once!!"); 
     if (!__DEV__)
     captureLogs({appName: "tu-trader"})
-    await connectMongo(__DEV__);
+    await connectMongo(__DEV__, __DEV__ ? "tb" : "tu-trader");
 };
 fn();
 
