@@ -6,15 +6,15 @@
 <script lang="ts">
 import type {HTMLFormAttributes} from 'svelte/elements'
 
-interface IProps extends HTMLFormAttributes {onsubmit: (e: any)=>any; state?: any}
+interface IProps extends HTMLFormAttributes {state?: any}
 
-let {children,...props} : IProps = $props()
+let {children, onsubmit,...props} : IProps = $props()
 const _onSubmit = async (e: any)=>{
     e.preventDefault()
     const btns = [...e.target.querySelectorAll('button[type=submit]')]
     btns.forEach((btn: any)=>{
         btn.disabled = true})
-        await props.onsubmit?.(e)
+        await onsubmit?.(e)
     btns.forEach((btn: any)=>btn.disabled = false)
 }
 </script>

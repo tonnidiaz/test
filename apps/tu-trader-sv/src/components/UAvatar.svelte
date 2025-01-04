@@ -9,6 +9,6 @@
     import type { HTMLAttributes } from "svelte/elements";
 
 
-    interface IProps extends HTMLAttributes<any>{online?: boolean}
+    interface IProps extends HTMLAttributes<any>{online?: boolean; innerclass?: string}
 const {online, children, class: _class, ...props} : IProps = $props()
 </script>

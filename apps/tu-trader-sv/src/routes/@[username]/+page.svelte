@@ -1,5 +1,4 @@
-<h1>Hello T. Age: {parseDate()}</h1>
-<p>Date: {1 + 1}</p>
+<h1>Hello {data.name}.&nbsp; Age: {data.age}</h1>
 <script lang="ts">
     import { parseDate } from '@cmn/utils/functions.js';
 

@@ -1,3 +1,6 @@
+@use "colors";
+@use "vars";
+
 @for $i from 1 to 50{
     .br-#{$i} {
         border-radius: #{$i}px !important;
@@ -113,13 +116,13 @@
   }
 
   .bg-body, .hover-body:hover{
-    background-color: $color-card !important; 
+    background-color: colors.$color-card !important; 
   }
   .bg-card, .hover-card:hover{
-    background-color: $color-card-2 !important;
+    background-color: colors.$color-card-2 !important;
   }
   .bg-card-0, .hover-card-0:hover{
-    background-color: $color-card-0 !important;
+    background-color: colors.$color-card-0 !important;
   }
 
 
@@ -133,12 +136,12 @@
 }
 
 .card-border{
-    border: $card-border !important;
+    border: vars.$card-border !important;
 }
 .border-card, .navbar, .sidebar{
     
    
-    border-color: $border-color !important;
+    border-color: colors.$border-color !important;
 }
 .border-1{
     border-width: 1px;
