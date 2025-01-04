@@ -7,5 +7,3 @@ export const userStore = $state({
 
 export const setUser = (v: typeof userStore.user) =>
     (userStore.user = v);
-export const setBots = (v: typeof userStore.bots) =>
-    (userStore.bots = v);

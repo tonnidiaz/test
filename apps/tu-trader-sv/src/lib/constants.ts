@@ -102,7 +102,7 @@ export const arbitTypes = ["tri", "cross"];
 
 export const ROOT = __DEV__
     ? "http://localhost:3000"
-    : "https://tu-trader.vercel.app";
+    : "https://tu-trader-sv.vercel.app";
 const heroku = false,
     koyeb = true;
 export const BEND_URL = __DEV__
@@ -110,7 +110,7 @@ export const BEND_URL = __DEV__
     : heroku
       ? "https://tu-trader-3996d65ded90.herokuapp.com"
       : koyeb
-        ? "https://bitter-nedda-tb-org2-a73c17f6.koyeb.app"
+        ? "https://tu-trader.koyeb.app"
         : "https://tu-trader-mef0.onrender.com";
 export const API_URL = "/api"
 

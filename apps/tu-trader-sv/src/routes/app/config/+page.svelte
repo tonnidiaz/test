@@ -42,7 +42,7 @@
     import UCheckbox from "@/components/UCheckbox.svelte";
     import UForm from "@/components/UForm.svelte";
     import UFormGroup from "@/components/UFormGroup.svelte";
-    import { api, localApi } from "@/lib/api";
+    import { localApi } from "@/lib/api";
     import { selectIntervals, SITE } from "@/lib/constants";
     import type { IObj } from "@cmn/utils/interfaces";
     import { onMount } from "svelte";
@@ -65,7 +65,7 @@ async function delBooks (e: any){
 async function handleSubmit(e: any) {
     try {
         let fd = { ...formState };
-        const r = await api(true).post("/app/config", fd);
+        const r = await localApi(true).post("/app/config", fd);
         console.log(r.data);
         alert('Config saved!!')
     } catch (err) {

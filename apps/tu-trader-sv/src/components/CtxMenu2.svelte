@@ -1,7 +1,7 @@
 <script lang="ts">
+    import { calcPerc } from "@cmn/utils/functions";
     import { onMount, type Snippet } from "svelte";
     import type { HTMLAttributes } from "svelte/elements";
-    import TuTeleport from "./TuTeleport.svelte";
 
     interface IProps extends HTMLAttributes<any> {
         toggler?: Snippet;
@@ -79,7 +79,6 @@
     </div>
     <!-- <p>{JSON.stringify(pos)}</p> -->
     {#if open}
-    <TuTeleport to="#ctx-overlay">
         <div
             style={`left: ${pos.x}%; top: ${pos.y}%`}
             bind:this={menuRef}
@@ -89,8 +88,6 @@
         >
             {@render children?.()}
         </div>
-    </TuTeleport>
-        
     {/if}
 </div>
 

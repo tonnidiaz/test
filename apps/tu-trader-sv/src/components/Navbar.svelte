@@ -1,6 +1,6 @@
 <script lang="ts">
     import { SITE, socket } from "@/lib/constants";
-    import CtxMenu from "./CtxMenu.svelte.txt";
+    import CtxMenu from "./CtxMenu.svelte";
     import { userStore } from "@/stores/user.svelte";
     import TuLink from "./TuLink.svelte";
     import UButton from "./UButton.svelte";
@@ -8,8 +8,7 @@
     import UAvatar from "./UAvatar.svelte";
     import { onMount } from "svelte";
     import CtxMenu2 from "./CtxMenu2.svelte";
-    import UDivider from "./UDivider.svelte";
-    let ioConnected = $state(false);
+    let ioConnected = $state(true);
     let menuOpen = $state(false);
     let { user } = $derived(userStore);
     const menuItems = [
@@ -57,17 +56,6 @@
                 <li>
                     <TuLink to="/test/arbit/cross/coins"
                         >Cross-arbit cointest</TuLink
-                    >
-                </li>
-                <li><UDivider/></li>
-                <li>
-                    <TuLink to="/test/arbit/compare/cross/coins"
-                        >Cross-comp arbit cointest</TuLink
-                    >
-                </li>
-                <li>
-                    <TuLink to="/test/arbit/compare/coins"
-                        >Tri-comp arbit cointest</TuLink
                     >
                 </li>
                 <li><TuLink to="/rf/ws/book-ticker">RF Book Ticker</TuLink></li>
@@ -119,10 +107,6 @@
                     <MenuItem
                         to={`/@${user.username}/bots`}
                         icon="fi fi-br-user-robot-xmarks">Bots</MenuItem
-                    >
-                    <MenuItem
-                        to={`/account`}
-                        icon="fi fi-br-user-robot-xmarks">Account</MenuItem
                     >
                     <MenuItem to={`/auth/logout`} icon="fi fi-br-sign-out-alt"
                         >Logout</MenuItem

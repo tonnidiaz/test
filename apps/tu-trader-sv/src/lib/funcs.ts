@@ -1,7 +1,5 @@
 import $ from "jquery";
 import type { IObj } from "@cmn/utils/interfaces";
-import { api, localApi } from "./api";
-import { handleErrs, isTuError } from "@cmn/utils/functions";
 export const formatter = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
@@ -16,25 +14,22 @@ export function openDrawer() {
 
 export const activateBot = async (el: any, bot: IObj, updateBot?: any) => {
     try {
-        // el.innerHTML = `<span class="loading loading-dots loading-sm m-auto"></span>`;
+        el.innerHTML = `<span class="loading loading-dots loading-sm m-auto"></span>`;
         //await sleep(100000000000)
         //return false
-        const val = !bot.active; 
-        const isSuperMega = bot.arbit_settings.super_mega
-        const ep = isSuperMega ? 'toggle-mega-bot' : 'edit'
-        const res = await api(true).post(`/bots/${bot._id || bot.id}/${ep}`, {
+        const val = !bot.active;
+        const res = await api(true).post(`/bots/${bot._id ?? bot.id}/edit`, {
             key: "active",
             val: val,
-        }, {params: isSuperMega ? {side: !bot.active ? 'activate' : 'deactivate'} : undefined });
+        });
         if (updateBot) updateBot(res.data);
-        // el.innerHTML = `<span>${
-        //     res.data.active ? "Deactivate" : "Activate"
-        // }</span>`;
+        el.innerHTML = `<span>${
+            res.data.active ? "Deactivate" : "Activate"
+        }</span>`;
         return true;
     } catch (err) {
-        handleErrs(err);
-        // el.innerHTML = `<span>${bot.active ? "Deactivate" : "Activate"}</span>`;
-        showToast({err: true, msg: isTuError(err) || "Internal server error"})
+        console.log(err);
+        el.innerHTML = `<span>${bot.active ? "Deactivate" : "Activate"}</span>`;
         return false;
     }
 };
@@ -45,13 +40,13 @@ export const clearBotOrders = async (el: any, bot: IObj, updateBot?: any) => {
     try {
         console.log(el, bot);
         el.innerHTML = `<span class="loading loading-dots loading-sm m-auto"></span>`;
-        const res = await localApi(true).post(`/bots/${bot._id}/clear-orders`, {});
+        const res = await localApi(true).post(`/bots/${bot._id}/clear-orders`);
 
         if (updateBot) updateBot(res.data);
         el.innerHTML = defHtml
         return true;
     } catch (err) {
-        handleErrs(err);
+        console.log(err);
         el.innerHTML = defHtml
         return false;
     }
@@ -63,7 +58,7 @@ export const delBot = async (el: any, bot: IObj, updateBot?: any) => {
     try {
         console.log(el, bot);
         el.innerHTML = `<span class="loading loading-dots loading-sm m-auto"></span>`;
-        const res = await localApi(true).post(`/bots/${bot._id}/delete`, {});
+        const res = await localApi(true).post(`/bots/${bot._id}/delete`);
 
         if (updateBot) updateBot(res.data);
         el.innerHTML = defHtml
@@ -168,13 +163,3 @@ export function numToWords(number: number | string){
     return digitsGroup.join(' ');
 }
 export const listToOpt  = (lst: string[]) => lst.map(el=>({label: el.toUpperCase(), value: el})) 
-
-export const showToast = ({msg, err, timeout = 3000} : {err?: boolean; msg: string; timeout?: number}) =>{
-    let div = document.createElement("div");
-    
-    div.classList.add("alert", `alert-${err ? 'error' : 'success' }`, err && 'bg-red-500', err && 'text-white' )
-    div.innerHTML = `<span>${msg}</span>`
-    document.getElementById("tu-toasts").prepend(div);
-
-    setTimeout(()=> div.remove(), timeout)
-}

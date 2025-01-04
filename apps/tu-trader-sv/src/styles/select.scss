@@ -1,7 +1,7 @@
 
-@use 'colors';
-@use 'vars';
-@use 'classes';
+@import './colors';
+@import './vars';
+@import './classes';
 
 $rad: 8px;
 $bg: var(--fallback-b1, oklch(var(--b1)/1));

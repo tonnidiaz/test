@@ -1,19 +1,15 @@
 import { User } from "@cmn/models";
 import { __DEV__ } from "@cmn/utils/consts3";
 import { connectMongo } from "@cmn/utils/funcs4";
-import { clearTerminal, handleErrs } from "@cmn/utils/functions";
 import { captureLogs } from "@cmn/utils/functions2";
 import type { IObj } from "@cmn/utils/interfaces";
-import { error, type Handle, type HandleServerError, type RequestEvent, type ResolveOptions } from "@sveltejs/kit";
+import { error, type Handle, type RequestEvent, type ResolveOptions } from "@sveltejs/kit";
 import jwt from "jsonwebtoken";
-import { isObjectIdOrHexString } from "mongoose";
-clearTerminal()
-const fn = async () => {
 
-    console.log("Run once!!"); 
-    if (!__DEV__)
+const fn = async () => {
+    console.log("Run once!!");
     captureLogs({appName: "tu-trader"})
-    await connectMongo(__DEV__, __DEV__ ? "tb" : "tu-trader");
+    await connectMongo(__DEV__);
 };
 fn();
 
@@ -50,22 +46,12 @@ export const handle: Handle = async ({ resolve, event }) => {
 
     const { pathname, searchParams } = event.url;
     const q = searchParams.get("q");
-    const loginCond = pathname == "/api/auth/login" && q == "token"
-    if (loginCond || (req.method.toLowerCase() == "post" && req.url.includes("/user") )) {
+
+    if (pathname == "/api/auth/login" && q == "token") {
         return authMed(event, resolve);
     }
 
     return resolve(event);
-};
-
-export const handleError: HandleServerError = async ({
-    error,
-    event,
-    status,
-    message,
-}) => {
-    handleErrs(error);
-    return { message: "tu:Something went wrong", status };
 };
 
 /*  */

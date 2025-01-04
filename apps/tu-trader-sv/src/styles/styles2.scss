@@ -1,6 +1,6 @@
-@use "vars";
-@use "colors";
-@use "forms";
+@import "./vars";
+@import "./colors";
+@import "./forms";
 .z-200{
     z-index: 200 !important
 }
@@ -53,21 +53,21 @@
         flex-direction: row !important;
         padding: 0 4px;
         flex-wrap: nowrap;
-        box-shadow: vars.$shadow;
+        box-shadow: $shadow;
 
         position: fixed !important;
         width: calc(100% - 20px) !important;
-        height: vars.$sidenav-w !important;
+        height: $sidenav-w !important;
 
         bottom: 8px !important;
         left: 10px;
         top: unset !important;
         align-items: center !important;
         justify-content: space-around;
-        border: 1px solid colors.$on-bg-tb;
+        border: 1px solid $on-bg-tb;
     }
     main {
-        margin-bottom: vars.$sidenav-w;
+        margin-bottom: $sidenav-w;
     }
 }
 
@@ -99,12 +99,12 @@
     z-index: 10;
     right: 15px;
     bottom: 15px;
-    box-shadow: vars.$shadow;
+    box-shadow: $shadow;
 }
 
 
 #ctx-overlay{
-    z-index: calc(vars.$bottombar-z + 2);
+    z-index: calc($bottombar-z + 1);
     position: fixed;
     padding: 10px;
     //width: 100%; height: 100vw;
@@ -137,16 +137,16 @@ button{
     display: flex;
     justify-content: center;
 }
-.navbar{height: vars.$sidenav-w;
+.navbar{height: $sidenav-w;
 *{align-self: center;}
 }
 
 .navbar, h1, h2, h3, h4, h5, h6, .text-heading {
-    color: colors.$heading-color
+    color: $heading-color
 }
 
 .text-subtitle{
-    color: colors.$fg-color-2
+    color: $fg-color-2
 }
 
 ul, li{
@@ -189,12 +189,12 @@ ul, li{
     display: flex;
     flex-direction: column;
     gap: 5px;
-    z-index: calc(vars.$bottombar-z + 1)
+    z-index: calc($bottombar-z + 1)
 }
 @media screen and (max-width: 767px) {
     .params-area,
     .fab, #floating-actions {
-        bottom: calc(vars.$sidenav-w + 15px) !important;
+        bottom: calc($sidenav-w + 15px) !important;
         margin-bottom: 0;
     }
 }
@@ -267,8 +267,4 @@ td {@apply px-3}
     .params-area {
         max-width: calc(100vw - 20px);
     }
-}
-
-@for $i from 0 through 5{
-    .flex-#{$i} {flex: $i}
 }

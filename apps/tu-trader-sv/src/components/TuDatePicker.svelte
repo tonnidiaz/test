@@ -3,10 +3,10 @@
     let modalOpen = $state(false);
 
     // import "v-calendar/dist/style.css";
+    import CtxMenu from "./CtxMenu.svelte";
     import UInput from "./UInput.svelte";
     import { untrack } from "svelte";
     import { isValidDate } from "@/lib/funcs";
-    import CtxMenu2 from "./CtxMenu2.svelte";
 
     interface IProps {
         value?: { start: string; end: string };
@@ -33,7 +33,7 @@
     });
 </script>
 
-<CtxMenu2 bind:open={modalOpen}>
+<CtxMenu bind:open={modalOpen}>
     {#snippet toggler()}
         <div class="btn btn-primary btn-sm">
             {format(new Date(value.start), "d MMM, yyy, hh:mm")} -
@@ -53,4 +53,4 @@
             <UInput type="datetime-local" bind:value={value.end} />
         </div>
     </div>
-</CtxMenu2>
+</CtxMenu>

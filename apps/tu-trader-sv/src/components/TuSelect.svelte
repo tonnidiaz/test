@@ -1,8 +1,6 @@
 <script lang="ts">
     import type { ISelectItem } from "@/lib/interfaces";
     import { onMount, untrack } from "svelte";
-    import UFormGroup from "./UFormGroup.svelte";
-    import type { HTMLLabelAttributes } from "svelte/elements";
 
     let formRef: HTMLDivElement;
     let dropdownRef: HTMLSelectElement = $state(),
@@ -12,16 +10,15 @@
     let selectedItem = $state<HTMLDivElement>();
     let _options = $state<ISelectItem[]>();
 
-    interface IProps extends HTMLLabelAttributes {
+    interface IProps {
         innerHint?: string;
         options?: ISelectItem[];
         placeholder?: string;
         value: any;
         disabled?: boolean;
-        showLabel?: boolean;
         required?: boolean;
         searchable?: boolean;
-        selectClass?: string
+        class?: string
     }
 
     let {
@@ -30,8 +27,7 @@
         value = $bindable(),
         placeholder,
         disabled, required,
-        class: _class, showLabel,
-        selectClass, ...props
+        class: _class
     }: IProps = $props();
 
     // $effect(()=>{
@@ -337,9 +333,9 @@
     });
     /* -------------End Effects ---------------- */
 </script>
-<UFormGroup label={showLabel ? placeholder : undefined} class={_class} {...props}>
-    <div class="mb-2 hidden">{JSON.stringify(options)}</div>
-<div class={"tu-select " + selectClass}>
+
+<div class="mb-2 hidden">{JSON.stringify(options)}</div>
+<div class={"tu-select " + _class}>
     <section class="section wrapper wrapper-section">
         <div class="container wrapper-column">
              <div   class="tu-select-form" bind:this={formRef}>
@@ -359,8 +355,6 @@
         </div>
     </section>
 </div>
-</UFormGroup>
-
 
 <style>
     .v-hidden {

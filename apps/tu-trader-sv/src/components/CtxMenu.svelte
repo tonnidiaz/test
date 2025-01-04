@@ -25,7 +25,7 @@
         ...props
     }: IProps = $props();
 $effect(()=>{
-    // console.log({menu});
+    console.log({menu});
 })
     const setMenuPos = () => {
         let { x: _x, y: _y } = pos;
@@ -35,8 +35,8 @@ $effect(()=>{
         const { clientHeight, cleintWidth } = menu;
         w = w || cleintWidth//cleintWidth ?? w;
         h = h || clientHeight//clientHeight ?? h;
-        // console.log(menu, open);
-        // console.log({w, h}, {pos: {...pos}});
+        console.log(menu, open);
+        console.log({w, h}, {pos: {...pos}});
 return
         const rightPos = _x + w;
         const bottomPos = _y + h;
