@@ -7,6 +7,6 @@ export default defineConfig({
     //     noExternal: ['fs'], // Mark fs as external for SSR
     //   },
       optimizeDeps: {
-        // exclude: ['nodemailer'], // Prevent pre-bundling fs
+        exclude: ['nodemailer', "mexc-api-sdk"], // Prevent pre-bundling fs
       },
 });
