@@ -180,7 +180,7 @@
                                             
                                         />
                                         <div
-                                            class="flex flex-col gap- items-center"
+                                            class="flex gap-0 items-center"
                                         >
                                             <UButton
                                                 onclick={_=>socket?.emit('strategies')}
@@ -502,10 +502,8 @@ onMount(() => {
     }
 });
 
-$inspect(formState).with((type, val)=>{
-    if (type == 'update'){
-        sessionStorage.setItem(`${location.pathname}__state`, JSON.stringify(val))
-    }
+$effect(()=>{
+    sessionStorage.setItem(`${location.pathname}__state`, JSON.stringify(formState))
 })
 
 </script>

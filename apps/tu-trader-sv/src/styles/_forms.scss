@@ -1,4 +1,5 @@
-@import "./vars";
+@use "vars";
+@use "colors";
 
 $form-w: 350px;
 .auth-form, .formset {
@@ -12,7 +13,7 @@ $form-w: 350px;
     }
 }
 .auth-form{
-     background: $color-card;
+     background: colors.$color-card;
      border-radius: 4px;
      
 }
@@ -49,16 +50,18 @@ $form-w: 350px;
 
 }
 
-input:disabled, textarea:disabled {
-    opacity: .7 !important;
-    border-color: revert !important;
+.input:has(> input[disabled]), .input-disabled, .input:disabled, .input[disabled], .textarea:has(> textarea[disabled]), .textarea-disabled, .textarea:disabled {
+    opacity: .98 !important;
+    border-color: var(--fallback-bc,oklch(var(--bc)/0.1)) !important;
+    cursor: not-allowed;
 }
 
 
 input, textarea, select {
    // color: $color-white-2;// !important;
+   background-color: inherit;
     &::placeholder{
-    opacity: 0.4 !important;
+    opacity: 0.5 !important;
     
 }
 }
@@ -77,4 +80,8 @@ input:-webkit-autofill:active
 
 .label{
     padding: 0 !important;
+}
+
+.input {
+    box-sizing: content-box;
 }

@@ -1,0 +1,101 @@
+@use "colors";
+@use "vars";
+
+
+main,
+.sidebar {
+    position: relative;
+}
+
+main {
+    overflow-y: scroll;
+    flex: 1;
+}
+
+.tu-app {
+    position: relative;
+    top: calc(vars.$sidenav-w);
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+    height: calc(100vh - vars.$sidenav-w);
+    max-height: calc(100vh - vars.$sidenav-w);
+}
+
+.navbar {
+    position: fixed;
+    border-radius: 0px;
+    z-index: vars.$bottombar-z;
+    border-bottom-width: 1px;
+    
+    i{
+        font-size: 17px;
+    }
+}
+
+
+
+.shadow {
+    box-shadow: vars.$shadow;
+}
+.sidebar {
+    width: vars.$sidenav-w;
+    border-radius: 0;
+    padding: 1.2rem 4px;
+    border-right-width: 1px;
+    z-index: vars.$bottombar-z;
+    height: calc(100vh - vars.$sidenav-w);
+    i{
+        font-size: 20px;
+    }
+}
+
+
+
+
+$on-bg-black: #1a1a1a8f;
+.router-link-active{
+    //color: $color-orange;
+    //background-color: $on-bg-black;
+}
+
+body, html, #__next {
+    height: 100%;
+}
+
+
+fieldset{
+    border-radius: 10px; 
+    legend{
+        font-weight: bold !important;
+        //letter-spacing: 2px;
+        width: auto;
+        padding: 5px; 
+        font-size: 20px;
+    }
+    &.fieldset{
+        border-color: colors.$on-bg-tb;
+        border-width: 1px;
+         padding: 20px;
+         &:not(.no-el){box-shadow: 0px 1px 2px rgb(14, 14, 14);}
+     
+     }
+}
+
+a.link{
+    @apply text-primary;
+    text-decoration: none !important;
+}
+
+.sidebar, .navbar, input, textarea, main{
+background-color: colors.$bg-color;
+}  
+
+input, textarea{
+    width: 100%;
+}
+
+.bg-1{
+    background-color: #202020;
+}
+

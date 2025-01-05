@@ -43,7 +43,7 @@ const config = {
         },
     },
     ssr: {
-        noExternal: ["mongodb", "@mapbox/node-pre-gyp", "engine.io-client"],
+        noExternal: ["mongodb", "@mapbox/node-pre-gyp", "engine.io-client", "mexc-api-sdk"],
     },
 };
 
