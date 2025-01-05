@@ -10,7 +10,7 @@ import gate_api from "gate-api";
 import indicatorts from "indicatorts";
 import jsonwebtoken from "jsonwebtoken";
 import * as kucoin_api from "kucoin-api";
-// import mexc_api_sdk from "mexc-api-sdk";
+import mexc_api_sdk from "mexc-api-sdk";
 import mongoose from "mongoose";
 // import node_mexc_apis from "node-mexc-apis";
 import node_schedule from "node-schedule";
@@ -20,7 +20,7 @@ import * as socket_io from "socket.io";
 
 export const meta = import.meta.url;
 const _data = {
-    axios,
+    axios, 
     bignumber_js,
     // binance,
     // binance_api_node,
@@ -32,7 +32,7 @@ const _data = {
     indicatorts,
     jsonwebtoken,
     kucoin_api,
-    // mexc_api_sdk,
+    mexc_api_sdk,
     mongoose,
     // node_mexc_apis,
     node_schedule,
