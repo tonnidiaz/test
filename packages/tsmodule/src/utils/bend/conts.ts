@@ -1,7 +1,7 @@
 import axios from "axios";
 import bignumber_js from "bignumber.js";
-import binance from "binance";
-import binance_api_node from "binance-api-node";
+// import binance from "binance";
+// import binance_api_node from "binance-api-node";
 import bitget_api from "bitget-api";
 import bybit_api from "bybit-api";
 import cors from "cors";
@@ -22,8 +22,8 @@ export const meta = import.meta.url;
 const _data = {
     axios,
     bignumber_js,
-    binance,
-    binance_api_node,
+    // binance,
+    // binance_api_node,
     bitget_api,
     bybit_api,
     cors,
