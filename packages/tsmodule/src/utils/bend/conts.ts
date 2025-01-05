@@ -6,7 +6,6 @@ import bitget_api from "bitget-api";
 import bybit_api from "bybit-api";
 import cors from "cors";
 import dotenv from "dotenv";
-import fs from "fs";
 import gate_api from "gate-api";
 import indicatorts from "indicatorts";
 import jsonwebtoken from "jsonwebtoken";
@@ -29,7 +28,6 @@ const _data = {
     bybit_api,
     cors,
     dotenv,
-    fs,
     gate_api,
     indicatorts,
     jsonwebtoken, kucoin_api, mexc_api_sdk, mongoose, node_mexc_apis, node_schedule, nodemailer, okx_api, socket_io
