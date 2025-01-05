@@ -2,7 +2,7 @@ import axios from "axios";
 import bignumber_js from "bignumber.js";
 // import binance from "binance";
 // import binance_api_node from "binance-api-node";
-// import bitget_api from "bitget-api";
+import bitget_api from "bitget-api";
 import bybit_api from "bybit-api";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -24,7 +24,7 @@ const _data = {
     bignumber_js,
     // binance,
     // binance_api_node,
-    // bitget_api,
+    bitget_api,
     bybit_api,
     cors,
     dotenv,
