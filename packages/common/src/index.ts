@@ -2,10 +2,8 @@ import { realpathSync } from "node:fs";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
-let _filename = typeof __filename == "undefined" ? undefined : __filename
+let _filename = fileURLToPath(import.meta.url)
 
-if (!_filename){
-    _filename = __filename//fileURLToPath(import.meta.url)
-}
+
 export const currentFilePath = dirname(realpathSync(
     _filename) )

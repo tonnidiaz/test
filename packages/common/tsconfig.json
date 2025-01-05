@@ -1,30 +1,29 @@
 {
-  "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    // "module": "commonjs",
-    "declaration": true,
-    "declarationMap": true,
-    "noEmit": false,
-    "baseUrl": ".",
-    "outDir": "./dist",
-        "paths": { 
-        "@cmn/*": ["./src/*"]
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        // "module": "commonjs",
+        "declaration": true,
+        "declarationMap": true,
+        "noEmit": false,
+        "baseUrl": ".",
+        "outDir": "./dist",
+        "paths": {
+            "@cmn/*": ["./src/*"]
+        },
+        "types": ["./global.d.ts"],
+        "target": "ESNext",
+        // "types": ["vite/client"],
+        // From svelte
+        // "lib": [
+        // 		"esnext",
+        // 		"DOM",
+        // 		"DOM.Iterable"
+        // 	],
+        "moduleResolution": "node",
+        "module": "esnext"
+        // "noEmit": true,
+        // "target": "esnext"
     },
-    "types":["./global.d.ts"],
-    // "target": "ESNext",
-    // "types": ["vite/client"],
-    // From svelte
-    // "lib": [
-	// 		"esnext",
-	// 		"DOM",
-	// 		"DOM.Iterable"
-	// 	],
-		// "moduleResolution": "node", 
-		// "module": "esnext",
-		// "noEmit": true,
-		// "target": "esnext"
-  },
-  "include": ["./src/**/*.ts", "**/*.ts", "./global.d.ts"],
-  "exclude": ["dist", "out", ".out", "**/*.spec.ts"]
+    "include": ["./src/**/*.ts", "**/*.ts", "./global.d.ts"],
+    "exclude": ["dist", "out", ".out", "**/*.spec.ts"]
 }
- 

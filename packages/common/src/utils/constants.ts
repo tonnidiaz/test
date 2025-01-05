@@ -6,7 +6,7 @@ import nodeUrl from "node:url";
 
 
 export const getDirName = () => {
-    const _filename =typeof __filename != "undefined" ? __filename : __filename //nodeUrl.fileURLToPath(import.meta.url);
+    const _filename =nodeUrl.fileURLToPath(import.meta.url);
     const __dirname = path.dirname(_filename);
    return __dirname
 }
