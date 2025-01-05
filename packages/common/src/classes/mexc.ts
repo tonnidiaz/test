@@ -5,7 +5,6 @@ import { DEV, MEXC_API_ROOT_URL } from "@cmn/utils/constants";
 import { botLog } from "@cmn/utils/bend/functions";
 import { parseDate } from "@cmn/utils/functions";
 import { IObj, IOrderDetails } from "@cmn/utils/interfaces";
-import { Spot,  } from "mexc-api-sdk"
 import Mexc2 from "node-mexc-apis";
 import { Platform } from "./platforms";
 import axios, { type AxiosInstance, type AxiosResponse } from "axios";
@@ -35,7 +34,7 @@ export class Mexc extends Platform {
     apiSecret: string;
     passphrase: string;
 
-    client: Spot;
+    // client: Spot;
     client2: TSpot;
     axiosClient:  AxiosInstance;
     constructor(bot: IBot, pair?: string[]) {
@@ -44,7 +43,7 @@ export class Mexc extends Platform {
         this.apiSecret = process.env.MEXC_API_SECRET!;
         this.passphrase = process.env.MEXC_PASSPHRASE!;
 
-        this.client = new Spot(this.apiKey, this.apiSecret);
+        // this.client = new Mexc2(this.apiKey, this.apiSecret);
         
         this.client2 = new ((Mexc2 as any).default || Mexc2)({
             apiKey: this.apiKey,
@@ -72,7 +71,7 @@ export class Mexc extends Platform {
     async getBal(ccy?: string) {
         botLog(this.bot, "GETTING BAL...");
         try {
-            const res = await this.client.accountInfo();
+            const res = await this.client2.accountInformation();
             if (!res.canTrade) {
                 console.log(res);
                 return;
@@ -91,15 +90,16 @@ export class Mexc extends Platform {
         try {
 
             const is_market = price == undefined;
-            const res = await this.client.newOrder(
-                this.getSymbol(),
-                side.toUpperCase(),
-                (is_market ? "Market" : "Limit").toUpperCase(),
-                {
+            const res = await this.client2.placeOrder(
+               {symbol: this.getSymbol(),
+                trade_type: side.toUpperCase(),
+                // (
+                
                     quantity: !is_market ? amt.toString() : undefined,
-                    quoteOrderQty: is_market ? amt.toString() : undefined,
+                    // : is_market ? amt.toString() : undefined,
                     price: price?.toString(),
-                    newClientOrderId: clOrderId,
+                    client_order_id: clOrderId,
+                    order_type: (is_market ? "Market" : "Limit").toUpperCase(),
                 }
             );
             if (!res.orderId) {
@@ -124,7 +124,7 @@ export class Mexc extends Platform {
             let data: IOrderDetails | null = null;
 
             botLog(this.bot, "GETTING ORDER...");
-            const res = await this.client.queryOrder(this.getSymbol(), {
+            const res = await this.client2.queryOrder({symbol: this.getSymbol(), 
                 orderId,
             });
 
@@ -150,7 +150,7 @@ export class Mexc extends Platform {
     async getTicker() {
         try {
             botLog(this.bot, "GETTING TICKER...");
-            const res = await this.client.tickerPrice(this.getSymbol());
+            const res = await this.client2.ticker({symbol: this.getSymbol()});
             const ticker = Number(res.price);
             console.log({ ticker });
             return ticker;
@@ -185,12 +185,10 @@ export class Mexc extends Platform {
             symbol = symbol ?? this.getSymbol();
 
             end += interval * 60000;
-            const res = await this.client.klines(
-                this.getSymbol(),
-                getInterval(interval, "mexc"),
-                {
-                    //endTime: end, startTime: (end)  - (limit) * interval * 60000
-                }
+            const res = await this.client2.kline(
+                {symbol: this.getSymbol(),
+                interval: getInterval(interval, "mexc"),}
+                
             );
 
             const data = res;
@@ -213,7 +211,7 @@ export class Mexc extends Platform {
     }
     async cancelOrder({ ordId }: { ordId: string }) {
         try {
-            const res = await this.client.cancelOrder(this.getSymbol(), {
+            const res = await this.client2.cancelOrder({symbol: this.getSymbol(), 
                 orderId: ordId,
             });
             if (!res.symbol) {

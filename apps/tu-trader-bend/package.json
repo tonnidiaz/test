@@ -17,6 +17,7 @@
         "express": "*",
         "fs": "^0.0.1-security",
         "http-errors": "*",
+        "mexc-api-sdk": "^1.0.3",
         "morgan": "*",
         "pug": "*"
     },

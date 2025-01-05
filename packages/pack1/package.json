@@ -9,6 +9,7 @@
     "lint": "echo 'Add lint script here'"
   },
   "dependencies": {
-    "fs": "^0.0.1-security"
+    "fs": "^0.0.1-security",
+    "mexc-api-sdk": "^1.0.3"
   }
 }
