@@ -11,6 +11,6 @@ export default defineConfig({
         include: ["mexc-api-sdk"]
       },
       ssr: {
-        noExternal: ["mexc-api-sdk"], // Ensures the module is bundled for SSR
+        // noExternal: ["mexc-api-sdk"], // Ensures the module is bundled for SSR
       },
 });
