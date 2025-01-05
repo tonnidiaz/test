@@ -1,6 +1,6 @@
 import { json } from "@sveltejs/kit"
-import { meta } from "@ts/utils/bend/conts"
+import { getData, meta } from "@ts/utils/bend/conts"
 
 export const GET = () =>{
-    return json({meta})
+    return json({meta, data: getData()})
 }
